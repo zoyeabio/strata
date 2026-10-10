@@ -1,0 +1,12 @@
+disabled = false
+languageCode = "en"
+languageName = "English"
+weight = 1
+title = "Strata"
+
+[params]
+isoCode = "en"
+rtl = false
+dateFormat = "2006-01-02"
+description = "A Hugo theme for content sites."
+copyright = "© { year } Strata"
