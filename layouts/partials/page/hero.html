@@ -1,0 +1,20 @@
+{{- /*
+  Hero media block: the featured image at the top of an article.
+
+  Input dict
+    img (dict, required) — the result of data/hero-image.html; nothing is
+         printed when img.ok is false
+
+  Called by: _default/single.html
+*/ -}}
+{{- if .img.ok }}
+<figure class="article-hero">
+  {{- partial "media/image.html" (dict
+      "img" .img
+      "alt" .img.alt
+      "sizes" .img.sizes
+      "loading" "eager"
+      "fetchpriority" "high"
+      "class" "article-hero__image") }}
+</figure>
+{{- end }}

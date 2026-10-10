@@ -27,6 +27,12 @@
   {{/* Social cards: own implementation, image goes through the pipeline */}}
   {{ partial "opengraph.html" . }}
 
+  {{/* Hero preload, from the same resolver call the hero <img> uses */}}
+  {{- $hero := partial "data/hero-image.html" . }}
+  {{- if and $hero.ok $hero.srcset }}
+  <link rel="preload" as="image" href="{{ $hero.url }}" imagesrcset="{{ $hero.srcset }}" imagesizes="{{ $hero.sizes }}">
+  {{- end }}
+
   {{/* Appearance applied before first paint to avoid a flash of the wrong theme */}}
   {{ with resources.Get "js/appearance.js" }}
   {{ $appearance := . | fingerprint "sha512" }}

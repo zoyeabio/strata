@@ -7,9 +7,10 @@
   content width capped at 1088px. Keep this table in sync with the grid
   classes; a mismatch silently transfers more image data than needed.
 
-  Roles: grid (list card), row (compact list card), text (article body image)
+  Roles: grid (list card), row (compact list card), text (article body image),
+  hero (article hero image — the hero sits in a 1088px content column)
 
-  Called by: page/card.html, _markup/render-image.html
+  Called by: page/card.html, data/hero-image.html, _markup/render-image.html
 */ -}}
 {{- $presets := dict
   "grid" (dict
@@ -17,5 +18,7 @@
   "row" (dict
     "sizes" "(min-width:640px) 200px, calc(100vw - 48px)")
   "text" (dict
-    "sizes" "(min-width:1024px) 720px, calc(100vw - 48px)") }}
+    "sizes" "(min-width:1024px) 720px, calc(100vw - 48px)")
+  "hero" (dict
+    "sizes" "(min-width:1024px) 1088px, (min-width:853px) 741px, (min-width:640px) 640px, calc(100vw - 48px)") }}
 {{- return (index $presets (. | default "grid")) }}

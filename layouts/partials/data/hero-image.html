@@ -1,0 +1,27 @@
+{{- /*
+  Returns the hero image dict for a regular page: the resolver result plus
+  its `sizes` string. Pages without a hero get a dict with ok=false.
+
+  The result is cached on the page scratch so that head/head.html (which
+  preloads the hero) and page/hero.html render the exact same srcset from a
+  single computation — two independent calls are how preload and <img> drift.
+
+  Called by: head/head.html, _default/single.html
+*/ -}}
+{{- $page := . }}
+{{- $img := $page.Scratch.Get "strataHeroImage" }}
+{{- if not $img }}
+  {{- $img = dict "ok" false }}
+  {{- if and $page.IsPage (ne $page.Params.showHero false) }}
+    {{- with $page.Params.featureimage }}
+      {{- $img = partial "data/image-resource.html" (dict
+          "ref" .
+          "page" $page
+          "role" "hero"
+          "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
+      {{- $img = merge $img (dict "sizes" (partial "data/card-presets.html" "hero").sizes) }}
+    {{- end }}
+  {{- end }}
+  {{- $page.Scratch.Set "strataHeroImage" $img }}
+{{- end }}
+{{- return $img }}

@@ -1,6 +1,27 @@
 {{ define "main" }}
-<article>
-  <h1>{{ .Title }}</h1>
-  {{ .Content }}
+{{- $hero := partial "data/hero-image.html" . }}
+{{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
+<article class="article">
+  {{- if $hero.ok }}
+  {{ partial "page/hero.html" (dict "img" $hero) }}
+  {{- end }}
+  <header class="article__header">
+    <h1>{{ .Title | emojify }}</h1>
+    {{- if or (not .Date.IsZero) .Params.tags }}
+    <p class="article__meta">
+      {{- if not .Date.IsZero }}
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
+      {{- end }}
+      {{- range .Params.tags }}
+      {{- if not $.Date.IsZero }} · {{ end }}
+      <a class="article__tag" href="{{ printf "tags/%s/" (. | urlize) | relURL }}">{{ . }}</a>
+      {{- end }}
+    </p>
+    {{- end }}
+  </header>
+  {{ partial "page/series.html" . }}
+  <div class="article__content">
+    {{ .Content }}
+  </div>
 </article>
 {{ end }}
