@@ -1,0 +1,27 @@
+{{- /*
+  Renders a list of pages as cards.
+
+  Params
+    pages        Page collection (already sorted and paginated by the caller)
+    cardView     bool — "grid" for the card layout, "row" for the compact one
+    showSummary  bool — print the summary under the title
+
+  Widths, columns and spacing belong to CSS, so this partial carries no
+  layout decisions (CSS.md §7). Year grouping and full-width cards from the
+  previous codebase are dropped: no layout option survives as a template
+  branch anymore.
+*/ -}}
+{{- $variant := cond .cardView "grid" "row" }}
+{{- if .pages }}
+<div class="page-collection page-collection--{{ $variant }}">
+  {{- range .pages }}
+  {{ partial "page/card.html" (dict
+    "page" .
+    "variant" $variant
+    "showSummary" $.showSummary
+  ) }}
+  {{- end }}
+</div>
+{{- else }}
+<p class="page-collection__empty">Nothing here yet.</p>
+{{- end }}

@@ -1,0 +1,29 @@
+{{- /*
+  One page card.
+
+  Params
+    page         Page (required)
+    variant      "grid" (default) or "row"; the two only differ in CSS
+    showSummary  bool — print the summary under the title
+
+  A featured image can be added here once the image pipeline exists; see the
+  build log for the step that owns it.
+*/ -}}
+{{- $page := .page }}
+{{- $variant := .variant | default "grid" }}
+{{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
+<article class="card card--{{ $variant }}">
+  <header class="card__header">
+    <h2 class="card__title">
+      <a class="card__link" href="{{ $page.RelPermalink }}">{{ $page.Title | emojify }}</a>
+    </h2>
+    {{- if not $page.Date.IsZero }}
+    <p class="card__date">
+      <time datetime="{{ $page.Date.Format "2006-01-02" }}">{{ $page.Date.Format $dateFormat }}</time>
+    </p>
+    {{- end }}
+  </header>
+  {{- if and .showSummary $page.Summary }}
+  <p class="card__summary">{{ $page.Summary | plainify | truncate 160 }}</p>
+  {{- end }}
+</article>

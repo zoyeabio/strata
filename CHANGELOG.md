@@ -13,9 +13,15 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 - `config/_default/languages.en.toml` — site title, description, date format, RTL flag
 - `layouts/_default/single.html` — title and content
-- `layouts/_default/list.html` — title, content and child page links
+- `layouts/_default/list.html` — title, content, weight ordering, pagination
+  and a card collection
 - `layouts/index.html` — home page title and content; the dead
   `home-{layout}` dispatch is gone
+- `layouts/partials/page/page-collection.html` — renders pages as a grid or a
+  row of cards, with an empty-state message
+- `layouts/partials/page/card.html` — one card with title, date and summary,
+  parameterised by `variant`
+- `layouts/partials/page/pagination.html` — previous, `n / total` and next
 - `layouts/partials/head/head.html` — charset, viewport, title, description,
   robots, canonical, RSS and JSON autodiscovery, fingerprinted appearance script,
   site `customCSS` loading, guarded favicons, `extend-head` site hooks
