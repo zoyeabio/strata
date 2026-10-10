@@ -468,6 +468,54 @@ else
   fail 'every tag and series link points at a built page'
 fi
 
+# 31. shortcode parameter whitelist: content may only use parameters the
+#     theme implements — an unknown parameter is accepted by Hugo and then
+#     silently ignored, which is the failure mode docs/shortcodes.md guards
+if sc_out=$(python3 - "$ROOT" <<'PY'
+import re, sys, pathlib
+root = pathlib.Path(sys.argv[1])
+SUPPORTED = {
+    'figure': {'src', 'alt', 'title', 'caption', 'attr', 'attrlink', 'link',
+               'target', 'rel', 'class', 'width', 'height', 'loading',
+               'quality', 'role'},
+    'content/article': {'link', 'showSummary'},
+    'content/list': {'limit', 'title', 'where', 'value', 'cardView'},
+    'content/icon': set(),
+    'interactive/carousel': {'images', 'captions', 'aspectRatio', 'interval'},
+    'interactive/contact': {'action', 'maxBytes'},
+    'interactive/cta': {'title', 'subtitle', 'buttonText', 'buttonUrl', 'icon'},
+    'interactive/email': {'user', 'domain'},
+    'layout/multi-col': {'columns', 'ratio', 'gap', 'margin', 'align'},
+    'layout/col-left': set(),
+    'layout/col-mid': set(),
+    'layout/col-right': set(),
+}
+bad = []
+count = 0
+pat = re.compile(r'\{\{[<%]\s*(/?)([a-zA-Z0-9/_-]+)([^>]*?)[>%]\}\}', re.S)
+for md in sorted((root / 'test/fixture/content').rglob('*.md')):
+    for m in pat.finditer(md.read_text()):
+        closing, name, args = m.group(1), m.group(2), m.group(3)
+        if closing or name not in SUPPORTED:
+            if not closing:
+                bad.append(f'{md.relative_to(root)}: unknown shortcode {name}')
+            continue
+        count += 1
+        for key in re.findall(r'([A-Za-z][A-Za-z0-9]*)\s*=', args):
+            if key not in SUPPORTED[name]:
+                bad.append(f'{md.relative_to(root)}: {name} unsupported param {key}')
+if bad:
+    for line in bad:
+        print('FAIL', line, file=sys.stderr)
+    sys.exit(1)
+print(f'{count} shortcode calls whitelisted')
+PY
+); then
+  pass "shortcode parameters stay inside the documented subset ($sc_out)"
+else
+  fail 'shortcode parameters stay inside the documented subset'
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

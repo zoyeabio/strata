@@ -296,6 +296,25 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   requires a built page behind it
 - `assets/lib/` (fuse, lite-youtube-embed, zoom — 60KB) deleted: no template
   referenced any of it; search returns when the search feature itself lands
+- `theme.toml` — name, MIT licence, description, tags limited to shipped
+  capabilities, `min_version = 0.142.0`
+- `README.md` rewritten for public readers: verified highlights, the taxonomy
+  contract up front, documentation index, development gates
+- `CONTRIBUTING.md` — ground rules (no external requests, no placeholders,
+  externalised config), the four validators, template layering, CSS rules,
+  commit convention (behaviour changes ship with their assertion)
+- `docs/` — installation (Module setup and the taxonomy contract),
+  configuration (every consumed param, front matter key, site hook, plus
+  the explicit list of accepted-but-unsupported keys), images (storage,
+  resolution order, variant ladder, roles, pass-through rules),
+  typography (measured scale, prose measure, system stacks), customization
+  (four schemes, appearance switches, CSS variables), shortcodes (all
+  twelve with their full parameter tables), product-pages (site-layer
+  split, status not shipped)
+- Smoke assertion 31: shortcode calls in the fixture must stay inside the
+  parameter subset documented in `docs/shortcodes.md` — Hugo silently
+  ignores unknown parameters, the whitelist turns the doc table into an
+  executable contract
 
 ### Removed
 

@@ -22,10 +22,11 @@
   Resolution order: page resource → the reference as written → assets path
   under images/{pageDir}/ (the article's own directory, so a section-flat
   assets/images/{section}/file.png and a per-page assets/images/{section}/{slug}/file.png
-  both resolve) → images/ → static/ → not found (a warning in `hugo server`,
-  silent in production builds). http(s) references are passed through only
-  when site.Params.allowRemoteImages is set; otherwise they are skipped with
-  the same dev-only warning.
+  both resolve) → images/ → static/ → not found: a declared reference that
+  resolves to nothing fails production builds (errorf) and warns in
+  `hugo server`; an empty reference is not an error. http(s) references are
+  passed through only when site.Params.allowRemoteImages is set; otherwise
+  they are skipped with the same dev-only warning.
 
   Variant ladder: [480, 800, 1280, 1920]; every step is capped by the source
   width and by the role cap, then de-duplicated, then a step less than 15%
