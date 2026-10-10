@@ -1,0 +1,34 @@
+{{- /*
+  Shadow of Hugo's built-in figure shortcode: same parameter surface and
+  caption markup, but the image goes through the responsive pipeline
+  (data/image-resource → media/image) instead of being emitted as a single
+  fixed-size file.
+
+  Built-in parameters: src link target rel alt title caption attr attrlink
+  class width height loading. strata extensions: quality (WebP quality
+  override, PLAN §2.2) and role (image role, illustration by default).
+  Missing src is an authoring error.
+
+  Called by: content markdown
+*/ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src -}}
+  {{- errorf "figure shortcode: missing required src parameter (%s)" .Position -}}
+{{- end -}}
+{{- partial "media/figure.html" (dict
+    "src" $src
+    "page" .Page
+    "alt" (.Get "alt")
+    "title" (.Get "title")
+    "caption" (.Get "caption")
+    "attr" (.Get "attr")
+    "attrlink" (.Get "attrlink")
+    "link" (.Get "link")
+    "target" (.Get "target")
+    "rel" (.Get "rel")
+    "class" (.Get "class")
+    "width" (.Get "width")
+    "height" (.Get "height")
+    "loading" (.Get "loading")
+    "quality" (int (default 78 (.Get "quality")))
+    "role" (.Get "role")) -}}

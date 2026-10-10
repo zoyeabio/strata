@@ -3,11 +3,14 @@
 
   Params
     page         (Page, required)
-    variant      (string, optional) — "grid" (default) or "row"; the two only
-                 differ in CSS
+    variant      (string, optional) — "grid" (default), "row" or "inline";
+                 the three only differ in CSS
     showSummary  (bool, optional) — print the summary under the title
     index        (int, optional) — position in the collection; drives the
                  eager/lazy split below
+    eager        (bool, optional) — overrides the eager/lazy decision; the
+                 content/article shortcode passes false (body images are
+                 always lazy per PLAN §2.3.1)
 
   Featured image: front matter featureimage / featureimagealt. The first
   site.Params.eagerCardCount cards (6 by default) load eagerly with normal
@@ -23,6 +26,7 @@
 {{- $eagerCount := site.Params.eagerCardCount | default 6 }}
 {{- $summaryLength := site.Params.cardSummaryLength | default 160 }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
+{{- if isset . "eager" }}{{ $eager = .eager }}{{ end }}
 <article class="card card--{{ $variant }}">
   {{- with $page.Params.featureimage }}
   {{- $img := partial "data/image-resource.html" (dict

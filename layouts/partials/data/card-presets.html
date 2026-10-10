@@ -19,8 +19,9 @@
   cardViewScreenWidth (w-screen 1600px / padding 30) is not parameterised
   here: no target site enables it yet.
 
-  Roles: grid (list card), row (compact list card), text (article body image),
-  hero (article hero image — same container as the grid)
+  Roles: grid (list card), row (compact list card), inline (embedded card
+  from the content/article shortcode — same media box as row), text (article
+  body image), hero (article hero image — same container as the grid)
 
   Called by: page/card.html, data/hero-image.html, _markup/render-image.html
 */ -}}
@@ -59,6 +60,7 @@
 {{- $presets := dict
   "grid" (dict "sizes" $grid)
   "row" (dict "sizes" $rowSizes)
+  "inline" (dict "sizes" $rowSizes)
   "text" (dict "sizes" $text)
   "hero" (dict "sizes" $hero) }}
 {{- return (index $presets (. | default "grid")) }}

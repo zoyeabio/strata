@@ -1,0 +1,38 @@
+{{- /*
+  A call-to-action banner: optional icon, title with subtitle, one button.
+  Colours and spacing are CSS's job (cta component, step 11); the source
+  template's iconColor / bgColor / borderColor utility-class parameters are
+  dropped — no source site used them.
+
+  Parameters
+    title      default "Ready to get started?"
+    subtitle   optional second line
+    buttonText default "Get Started"
+    buttonUrl  default "/contact/"
+    icon       optional name under assets/icons/; when the file is missing
+               the icon is skipped with a dev-only warning (unlike the icon
+               shortcode, a bare CTA is not an authoring error)
+
+  Called by: content markdown
+*/ -}}
+{{- $title := .Get "title" | default "Ready to get started?" -}}
+{{- $subtitle := .Get "subtitle" -}}
+{{- $buttonText := .Get "buttonText" | default "Get Started" -}}
+{{- $buttonUrl := .Get "buttonUrl" | default "/contact/" -}}
+{{- $icon := .Get "icon" -}}
+<div class="cta not-prose">
+  {{- with $icon }}
+  {{- with resources.Get (printf "icons/%s.svg" .) }}
+  <span class="cta__icon">{{- strings.Replace .Content "\n" "" | safeHTML -}}</span>
+  {{- else }}
+    {{- if hugo.IsServer }}{{- warnf "cta: icon %q not found under assets/icons/" $icon }}{{- end }}
+  {{- end }}
+  {{- end }}
+  <div class="cta__body">
+    <span class="cta__title">{{ $title }}</span>
+    {{- with $subtitle }}
+    <span class="cta__subtitle">{{ . }}</span>
+    {{- end }}
+  </div>
+  <a class="cta__button" href="{{ $buttonUrl }}">{{ $buttonText }}</a>
+</div>

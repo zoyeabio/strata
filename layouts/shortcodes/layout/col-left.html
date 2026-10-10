@@ -1,0 +1,7 @@
+{{- /*
+  First column of a layout/multi-col grid. Inner is markdown (source
+  behaviour kept).
+
+  Called by: content markdown, inside layout/multi-col
+*/ -}}
+<div class="mcol mcol--first">{{ .Inner | markdownify }}</div>

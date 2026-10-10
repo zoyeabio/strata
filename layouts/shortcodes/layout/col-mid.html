@@ -1,0 +1,7 @@
+{{- /*
+  Middle column of a layout/multi-col grid (3-column layouts). Inner is
+  markdown (source behaviour kept).
+
+  Called by: content markdown, inside layout/multi-col
+*/ -}}
+<div class="mcol mcol--mid">{{ .Inner | markdownify }}</div>

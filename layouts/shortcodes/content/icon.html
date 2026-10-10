@@ -1,0 +1,15 @@
+{{- /*
+  Inlines an SVG icon from the site's assets/icons/ directory. The theme
+  ships no icon set — each site provides its own — so a missing file is an
+  authoring error that stops the build with the exact position.
+
+  Usage: the first positional parameter is the icon name, e.g. icon "check"
+
+  Called by: content markdown
+*/ -}}
+{{- $name := .Get 0 -}}
+{{- with resources.Get (printf "icons/%s.svg" $name) -}}
+<span class="icon" aria-hidden="true">{{- strings.Replace .Content "\n" "" | safeHTML -}}</span>
+{{- else -}}
+  {{- errorf "icon shortcode: resource %q not found under assets/icons/ (%s)" (printf "%s.svg" $name) .Position -}}
+{{- end -}}

@@ -1,0 +1,50 @@
+{{- /*
+  Embeds another page's card inline in the body, rendering through
+  page/card.html (variant
+  inline) instead of the deleted article/embedded partial.
+
+  Parameters
+    link          (string) — target page path ("/journal/x/"); empty means
+                  the current page; an unknown path warns in hugo server and
+                  renders nothing (the source template crashed on it)
+    showSummary   (bool) — summary visibility; falls back to the target's
+                  front matter, then site.Params.list.showSummary, then
+                  false. Parsed via explicit "true"/"false" comparison so a
+                  string "false" cannot read as truthy
+    compactSummary accepted for source-site compatibility, no effect: the
+                  summary is already truncated below what the old
+                  line-clamp-3 showed (shortcodes.md documents this)
+
+  The embedded card never loads eagerly — body images are lazy per
+  PLAN §2.3.1.
+
+  Called by: content markdown
+*/ -}}
+{{- $target := .Page -}}
+{{- $link := .Get "link" -}}
+{{- if $link -}}
+  {{- with .Site.GetPage $link -}}
+    {{- $target = . -}}
+  {{- else -}}
+    {{- if hugo.IsServer -}}
+      {{- warnf "content/article: no page matches link=%q (%s)" $link $.Position -}}
+    {{- end -}}
+    {{- $target = false -}}
+  {{- end -}}
+{{- end -}}
+{{- if $target -}}
+{{- $show := false -}}
+{{- $raw := printf "%v" (.Get "showSummary") -}}
+{{- if eq $raw "true" -}}
+  {{- $show = true -}}
+{{- else if ne $raw "false" -}}
+  {{- $show = or $target.Params.showSummary site.Params.list.showSummary | default false -}}
+{{- end -}}
+<section class="shortcode-embed">
+  {{- partial "page/card.html" (dict
+      "page" $target
+      "variant" "inline"
+      "showSummary" $show
+      "eager" false) -}}
+</section>
+{{- end -}}

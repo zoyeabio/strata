@@ -1,0 +1,168 @@
+{{- /*
+  Image carousel with previous/next buttons, slide indicators and optional
+  autoplay. Slides now run
+  through the responsive pipeline, which is what PLAN §2.6 asked for — the
+  source markup had no srcset, width or height at all.
+
+  Parameters
+    images      (string, required) — brace-wrapped, comma-separated list of
+                file names or glob patterns: "{gallery/a.webp, b.webp}".
+                Patterns are matched against page resources first, then
+                assets; a leading slash is trimmed before matching (the
+                source template's "/gallery/*" never reached page
+                resources). Unmatched entries fall through to the image
+                resolver, which also carries remote references when
+                site.Params.allowRemoteImages allows them
+    captions    (string, optional) — "{key: caption, ...}" keyed by file
+                name, base name or path; colons inside a caption are kept
+    aspectRatio (string, optional) — "W-H", default "16-9"
+    interval    (int, optional) — autoplay step in ms, default 2000
+
+  Slide images fill their frame with object-cover, so intrinsic width and
+  height come from the pipeline and the aspect ratio comes from the frame.
+  The first slide loads eagerly (it can be the page's LCP), the rest
+  lazily. The inline script initialises only its own instance; two
+  carousels on one page stay independent.
+
+  Called by: content markdown
+*/ -}}
+{{- $id := printf "carousel-%d-%d" .Ordinal now.UnixNano -}}
+{{- $ar := split (default "16-9" (.Get "aspectRatio")) "-" -}}
+{{- $aw := default "16" (index $ar 0) -}}
+{{- $ah := default "9" (index $ar 1) -}}
+{{- $interval := int (default "2000" (.Get "interval")) -}}
+
+{{- /* captions: "{key: value, key: value}" — first colon splits */ -}}
+{{- $captions := dict -}}
+{{- $craw := default "" (.Get "captions") -}}
+{{- $craw = strings.TrimSuffix "}" (strings.TrimPrefix "{" $craw) -}}
+{{- if $craw }}
+{{- range split $craw "," }}
+{{- $pair := split . ":" -}}
+{{- if ge (len $pair) 2 -}}
+{{- $captions = merge $captions (dict (strings.TrimSpace (index $pair 0)) (strings.TrimSpace (delimit (after 1 $pair) ":"))) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* images: glob first, exact reference as fallback */ -}}
+{{- $refs := slice -}}
+{{- $iraw := strings.TrimSuffix "}" (strings.TrimPrefix "{" (default "" (.Get "images"))) -}}
+{{- range split $iraw "," }}
+{{- $p := strings.TrimSpace . -}}
+{{- if $p -}}
+{{- $p = strings.TrimPrefix "/" $p -}}
+{{- $matched := $.Page.Resources.Match $p -}}
+{{- if not $matched }}{{ $matched = resources.Match $p }}{{ end -}}
+{{- if $matched -}}
+{{- range $matched -}}
+{{- $refs = $refs | append (dict "ref" .Name "keys" (slice .Name (path.Base .Name))) -}}
+{{- end -}}
+{{- else -}}
+{{- $refs = $refs | append (dict "ref" $p "keys" (slice $p (path.Base $p))) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- $slides := slice -}}
+{{- range $refs -}}
+{{- $img := partial "data/image-resource.html" (dict "ref" .ref "page" $.Page "role" "illustration") -}}
+{{- if $img.ok -}}
+{{- $caption := "" -}}
+{{- range .keys -}}
+{{- if not $caption }}{{ with index $captions . }}{{ $caption = . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $slides = $slides | append (dict "img" $img "caption" $caption) -}}
+{{- end -}}
+{{- end -}}
+
+{{- if $slides }}
+<div class="carousel not-prose" id="{{ $id }}" role="region" aria-roledescription="carousel" aria-label="Image carousel" tabindex="0" data-carousel data-interval="{{ $interval }}">
+  <div class="carousel__indicators" data-carousel-indicators>
+    {{- range $i, $s := $slides }}
+    <button type="button" data-slide-to="{{ $i }}"{{ if eq $i 0 }} data-carousel-active aria-current="true"{{ end }} aria-label="Slide {{ add $i 1 }}"></button>
+    {{- end }}
+  </div>
+  <div class="carousel__viewport" style="aspect-ratio: {{ $aw }} / {{ $ah }};">
+    <div class="carousel__track" data-carousel-track style="transition: transform 0.6s ease; will-change: transform;">
+      {{- range $i, $s := $slides }}
+      <div class="carousel__slide" data-carousel-slide{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}">
+        <div class="carousel__frame">
+          {{- partial "media/image.html" (dict
+              "img" $s.img
+              "alt" (printf "carousel image %d" (add $i 1))
+              "sizes" (partial "data/card-presets.html" "text").sizes
+              "loading" (cond (eq $i 0) "eager" "lazy")
+              "fetchpriority" (cond (eq $i 0) "" "low")
+              "class" "carousel__image") }}
+        </div>
+        {{- with $s.caption }}
+        <p class="carousel__caption">{{ . | markdownify }}</p>
+        {{- end }}
+      </div>
+      {{- end }}
+    </div>
+  </div>
+  <button class="carousel__btn carousel__btn--prev" type="button" data-carousel-prev aria-label="Previous slide">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+  </button>
+  <button class="carousel__btn carousel__btn--next" type="button" data-carousel-next aria-label="Next slide">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+  </button>
+</div>
+<script>
+(function () {
+  var id = {{ $id }};
+  var root = document.getElementById(id);
+  if (!root || root.getAttribute("data-carousel-ready")) return;
+  root.setAttribute("data-carousel-ready", "");
+  var track = root.querySelector("[data-carousel-track]");
+  var slides = track.children;
+  var dots = root.querySelectorAll("[data-slide-to]");
+  var index = 0;
+  var timer = null;
+  var interval = parseInt(root.getAttribute("data-interval"), 10) || 2000;
+
+  function go(next) {
+    index = (next + slides.length) % slides.length;
+    track.style.transform = "translateX(-" + index * 100 + "%)";
+    for (var i = 0; i < dots.length; i++) {
+      if (i === index) {
+        dots[i].setAttribute("data-carousel-active", "");
+        dots[i].setAttribute("aria-current", "true");
+      } else {
+        dots[i].removeAttribute("data-carousel-active");
+        dots[i].removeAttribute("aria-current");
+      }
+    }
+    for (var j = 0; j < slides.length; j++) {
+      if (j === index) {
+        slides[j].setAttribute("data-carousel-active", "");
+      } else {
+        slides[j].removeAttribute("data-carousel-active");
+      }
+    }
+  }
+
+  function start() {
+    stop();
+    timer = setInterval(function () { go(index + 1); }, interval);
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  root.querySelector("[data-carousel-prev]").addEventListener("click", function () { go(index - 1); });
+  root.querySelector("[data-carousel-next]").addEventListener("click", function () { go(index + 1); });
+  for (var k = 0; k < dots.length; k++) {
+    (function (n) { dots[k].addEventListener("click", function () { go(n); }); })(k);
+  }
+  root.addEventListener("pointerenter", stop);
+  root.addEventListener("pointerleave", start);
+  root.addEventListener("focusin", stop);
+  root.addEventListener("focusout", start);
+  start();
+})();
+</script>
+{{- end -}}

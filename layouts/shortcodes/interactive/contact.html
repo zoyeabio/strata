@@ -1,0 +1,102 @@
+{{- /*
+  Contact form posting to a JSON endpoint (default /api/contact). Ships
+  with a live byte counter for the message field, a honeypot input for
+  naive bots, and a fetch-based submit that reports the outcome inline.
+
+  SECURITY: the endpoint must validate, sanitise and rate-limit on the
+  server; hp_name must be rejected whenever it is filled.
+
+  Parameters
+    action   (string) — form endpoint, default "/api/contact"
+    maxBytes (int)    — message limit shown by the counter, default 1000
+
+  Element ids carry the shortcode's occurrence number, so two forms on one
+  page do not collide — the source template used a single fixed id. The
+  script initialises only its own instance and is idempotent.
+
+  Called by: content markdown
+*/ -}}
+{{- $action := .Get "action" | default "/api/contact" -}}
+{{- $maxBytes := int (default "1000" (.Get "maxBytes")) -}}
+{{- $id := printf "contact-form-%d" .Ordinal -}}
+<form class="contact-form not-prose" id="{{ $id }}" action="{{ $action }}" method="post" data-contact-form>
+  <div class="contact-form__row">
+    <div class="contact-form__field">
+      <label for="{{ $id }}-name">Name *</label>
+      <input type="text" id="{{ $id }}-name" name="name" required autocomplete="name">
+    </div>
+    <div class="contact-form__field">
+      <label for="{{ $id }}-email">Email Address *</label>
+      <input type="email" id="{{ $id }}-email" name="email" required autocomplete="email">
+    </div>
+  </div>
+  <div class="contact-form__field">
+    <label for="{{ $id }}-message">Your brief message *</label>
+    <textarea id="{{ $id }}-message" name="message" rows="5" required></textarea>
+    <p class="contact-form__counter">
+      <span id="{{ $id }}-bytes">0</span> / {{ $maxBytes }} bytes (<span id="{{ $id }}-chars">0</span> characters)
+    </p>
+  </div>
+  <div class="contact-form__actions">
+    <button type="submit">Send Message</button>
+  </div>
+  <p class="contact-form__status" id="{{ $id }}-status" hidden></p>
+  <div class="contact-form__honeypot" aria-hidden="true" style="display:none">
+    <input type="text" name="hp_name" tabindex="-1" autocomplete="off">
+  </div>
+</form>
+<script>
+(function () {
+  var id = {{ $id }};
+  var form = document.getElementById(id);
+  if (!form || form.getAttribute("data-contact-ready")) return;
+  form.setAttribute("data-contact-ready", "");
+  var message = document.getElementById(id + "-message");
+  var byteEl = document.getElementById(id + "-bytes");
+  var charEl = document.getElementById(id + "-chars");
+  var status = document.getElementById(id + "-status");
+  var maxBytes = {{ $maxBytes }};
+
+  function recount() {
+    var text = message.value;
+    byteEl.textContent = new TextEncoder().encode(text).length;
+    charEl.textContent = text.length;
+    message.closest(".contact-form__field").classList.toggle(
+      "contact-form__field--over", Number(byteEl.textContent) > maxBytes);
+  }
+
+  function show(kind, text) {
+    status.hidden = false;
+    status.textContent = text;
+    status.className = "contact-form__status contact-form__status--" + kind;
+  }
+
+  message.addEventListener("input", recount);
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (Number(byteEl.textContent) > maxBytes) {
+      show("error", "Message is too long. Maximum " + maxBytes + " bytes allowed.");
+      return;
+    }
+    show("neutral", "Sending...");
+    var button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    fetch(form.action, { method: "POST", body: new FormData(form) })
+      .then(function (response) { return response.json().then(function (data) { return { ok: response.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok && result.data.success) {
+          show("ok", "Thank you! Your message has been sent successfully.");
+          form.reset();
+          recount();
+        } else {
+          show("error", result.data.error || "Submission failed. Please try again.");
+        }
+      })
+      .catch(function () {
+        show("error", "Oops! Something went wrong. Please try again later.");
+      })
+      .then(function () { button.disabled = false; });
+  });
+})();
+</script>

@@ -1,0 +1,24 @@
+{{- /*
+  A mailto link with the address obfuscated by HTML entities in both the
+  href and the visible text: no JavaScript involved. The source template
+  decoded a base64 payload through the footer script, which left an empty
+  anchor on every page where that script was absent.
+
+  Usage: email user="info" domain="example.com" (both parameters required;
+  a missing one stops the build)
+
+  Called by: content markdown
+*/ -}}
+{{- $user := .Get "user" -}}
+{{- $domain := .Get "domain" -}}
+{{- if and $user $domain -}}
+{{- /*
+  The &#64; separator is literal template text on purpose: html/template
+  escapes any ampersand that comes out of a Go string, which would turn
+  the entity into a literal &#64; in the URL. Entities written directly in
+  the template survive verbatim and are decoded once by the browser.
+*/ -}}
+<a class="email-link" href="mailto:{{ $user }}&#64;{{ $domain }}">{{ $user }}&#64;{{ $domain }}</a>
+{{- else -}}
+  {{- errorf "email shortcode: requires user and domain, e.g. {{< email user=\"info\" domain=\"example.com\" >}} (%s)" .Position -}}
+{{- end -}}

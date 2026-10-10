@@ -1,0 +1,83 @@
+{{- /*
+  Figure backend: wraps a pipeline <img> in a <figure> with the caption
+  block Hugo's built-in figure shortcode produces. The shortcode collects
+  parameters; this partial resolves the reference and renders the markup,
+  so the <img> itself comes out identical to the render hook's (PLAN §2.3
+  figure/render-hook division).
+
+  Input dict (strings unless noted)
+    src      (string, required) — image reference; query and fragment are
+             stripped from relative refs so page resources resolve the way
+             the built-in shortcode's urls.Parse does
+    page     (Page, required) — resolver context
+    alt      (string, optional) — falls back to the plainified caption;
+             empty marks the image decorative
+    title    (string, optional) — rendered as <h4> inside the figcaption
+    caption  (string, optional) — markdown, rendered inside <figcaption>
+    attr     (string, optional) — attribution, markdown, after the caption
+    attrlink (string, optional) — wraps the attribution
+    link     (string, optional) — wraps only the <img>
+    target   (string, optional) — link target attribute
+    rel      (string, optional) — link rel attribute
+    class    (string, optional) — extra classes appended to "figure"
+    width    (string, optional) — width attribute, overrides the intrinsic
+             variant size
+    height   (string, optional) — height attribute, same override
+    loading  (string, optional) — "lazy" (default: body images are lazy per
+             PLAN §2.3.1) or "eager"
+    quality  (int, optional) — WebP quality, default 78
+    role     (string, optional) — image role, "illustration" by default
+
+  Outputs: <figure>…</figure>; nothing when the reference does not resolve
+  (the resolver warns during hugo server, stays silent in production).
+
+  Called by: shortcodes/figure.html
+*/ -}}
+{{- $src := .src -}}
+{{- if and $src (not (or (strings.HasPrefix $src "http://") (strings.HasPrefix $src "https://"))) -}}
+  {{- $src = (urls.Parse $src).Path -}}
+{{- end -}}
+{{- $caption := .caption -}}
+{{- $alt := .alt -}}
+{{- if and (not $alt) $caption -}}
+  {{- $alt = $caption | markdownify | plainify -}}
+{{- end -}}
+{{- $img := partial "data/image-resource.html" (dict
+    "ref" $src
+    "page" .page
+    "role" (.role | default "illustration")
+    "alt" $alt
+    "quality" .quality) -}}
+{{- if $img.ok -}}
+{{- $sizes := (partial "data/card-presets.html" "text").sizes -}}
+<figure class="figure{{ with .class }} {{ . }}{{ end }}">
+  {{- if .link }}
+  <a href="{{ .link }}"{{ with .target }} target="{{ . }}"{{ end }}{{ with .rel }} rel="{{ . }}"{{ end }}>
+  {{- end }}
+  {{- partial "media/image.html" (dict
+      "img" $img
+      "alt" $alt
+      "sizes" $sizes
+      "loading" (.loading | default "lazy")
+      "width" .width
+      "height" .height) }}
+  {{- if .link }}
+  </a>
+  {{- end }}
+  {{- if or .title $caption .attr }}
+  <figcaption>
+    {{- with .title }}
+    <h4>{{ . }}</h4>
+    {{- end -}}
+    {{- if or $caption .attr }}
+    <p>
+      {{- $caption | markdownify -}}
+      {{- with .attrlink }}<a href="{{ . }}">{{ end -}}
+      {{- .attr | markdownify -}}
+      {{- if .attrlink }}</a>{{ end }}
+    </p>
+    {{- end }}
+  </figcaption>
+  {{- end }}
+</figure>
+{{- end -}}

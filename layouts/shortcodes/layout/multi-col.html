@@ -1,0 +1,45 @@
+{{- /*
+  Multi-column grid wrapper: column wrappers (layout/col-*) supply the
+  children, this one supplies the grid. CSS variables carry the computed
+  template and spacing; the grid itself is styled by the mgrid component in
+  assets/css (step 11).
+
+  Parameters
+    columns (string) — "2" | "3" | "4", default "2"; anything else falls
+            back to "2" (source behaviour kept)
+    ratio   (string) — "left:right" track weights for 2 columns, default
+            "1:1"; ignored for 3 and 4 columns
+    gap     (string) — grid gap, default "2rem"
+    margin  (string) — outer margin, default "3rem 0"
+    align   (string) — "top" | "center" | "bottom" inside each column,
+            default "top"
+
+  Class names follow CSS.md §7.1: the source's "zmc" prefix and duplicated
+  col-* classes are gone — container "mgrid", columns "mcol" with position
+  modifiers.
+
+  Inner is trusted HTML (nested shortcodes and iframes are real content).
+
+  Called by: content markdown
+*/ -}}
+{{- $columns := .Get "columns" | default "2" -}}
+{{- if not (in (slice "2" "3" "4") $columns) }}{{ $columns = "2" }}{{ end -}}
+{{- $ratio := .Get "ratio" | default "1:1" -}}
+{{- $gap := .Get "gap" | default "2rem" -}}
+{{- $margin := .Get "margin" | default "3rem 0" -}}
+{{- $align := .Get "align" | default "top" -}}
+{{- $parts := split $ratio ":" -}}
+{{- $left := index $parts 0 | default "1" -}}
+{{- $right := index $parts 1 | default "1" -}}
+{{- $alignValue := index (dict "top" "flex-start" "center" "center" "bottom" "flex-end") $align | default "flex-start" -}}
+{{- $template := "1fr 1fr" -}}
+{{- if eq $columns "2" -}}
+  {{- $template = printf "%sfr %sfr" $left $right -}}
+{{- else if eq $columns "3" -}}
+  {{- $template = "1fr 1fr 1fr" -}}
+{{- else if eq $columns "4" -}}
+  {{- $template = "1fr 1fr 1fr 1fr" -}}
+{{- end -}}
+<div class="mgrid mgrid--cols-{{ $columns }}" style="--mgrid-template: {{ $template }}; --mgrid-gap: {{ $gap }}; --mgrid-margin: {{ $margin }}; --mgrid-align: {{ $alignValue }};">
+  {{- .Inner | safeHTML }}
+</div>

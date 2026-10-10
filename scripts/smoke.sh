@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Builds test/fixture and asserts the theme contract against the rendered
 # HTML: image resolver and ladder, sizes invariants, head tags, taxonomy,
-# series, remote gating and production silence. Every assertion is a
-# regression gate; the script exits non-zero if any of them fails.
+# series, remote gating, shortcodes and production silence. Every assertion
+# is a regression gate; the script exits non-zero if any of them fails.
 #
 # Usage: scripts/smoke.sh
 set -euo pipefail
@@ -202,6 +202,93 @@ else
   printf '%s\n' "$sizes_out"
   FAILURES=$((FAILURES + 1))
 fi
+
+# 19. shortcodes: figure goes through the pipeline with the built-in's
+#     caption structure, and quality= produces its own variant set
+assert 'section-a/shortcodes/index.html' '<figure class="figure">' \
+  'figure renders the base figure element'
+assert 'section-a/shortcodes/index.html' '<figure class="figure extra">' \
+  'figure appends the user class'
+assert 'section-a/shortcodes/index.html' 'alt="A flat photo"' \
+  'figure falls back to the plainified caption for alt'
+assert 'section-a/shortcodes/index.html' '<figcaption>' 'figure emits a figcaption'
+assert 'section-a/shortcodes/index.html' '<h4>With a title</h4>' \
+  'figure renders the title as an h4 inside the figcaption'
+assert 'section-a/shortcodes/index.html' '<a href="/section-a/flat/" target="_blank" rel="noopener">' \
+  'figure wraps the image in the requested link'
+assert 'section-a/shortcodes/index.html' 'width="400" height="300"' \
+  'figure honours explicit width/height over the intrinsic size'
+count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:853px\) 720px' 5 \
+  'three figures and two slides carry the text sizes'
+count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 5 \
+  'four list cards plus the first slide load eagerly'
+if qual_out=$(python3 - "$OUT" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+html = (Path(sys.argv[1]) / "section-a/shortcodes/index.html").read_text()
+urls = set(re.findall(r'(photo-flat_hu_[a-f0-9]+\.webp) 1280w', html))
+if len(urls) == 2:
+    print("ok   figure quality= writes its own variant set")
+    sys.exit(0)
+print(f"FAIL figure quality= writes its own variant set (got {sorted(urls)})")
+sys.exit(1)
+PY
+); then
+  printf '%s\n' "$qual_out"
+else
+  printf '%s\n' "$qual_out"
+  FAILURES=$((FAILURES + 1))
+fi
+
+# 20. content shortcodes: embedded card, both list branches, icon
+count_assert 'section-a/shortcodes/index.html' 'card card--inline' 1 \
+  'content/article embeds an inline card'
+assert 'section-a/shortcodes/index.html' 'card__summary">Flat body' \
+  'the embedded card shows its summary when showSummary=true'
+assert 'section-a/shortcodes/index.html' 'shortcode-list--grid' \
+  'cardView=true selects the grid branch'
+count_assert 'section-a/shortcodes/index.html' 'card card--grid' 2 \
+  'the grid list renders two cards'
+assert 'section-a/shortcodes/index.html' 'shortcode-list--rows' \
+  'cardView=false selects the row branch even as a string'
+count_assert 'section-a/shortcodes/index.html' 'card card--row' 2 \
+  'the row list renders two cards'
+assert 'section-a/shortcodes/index.html' '<span class="icon" aria-hidden="true"><svg' \
+  'icon inlines the svg from assets/icons'
+
+# 21. interactive shortcodes: email, cta, contact form, carousel
+assert 'section-a/shortcodes/index.html' 'href="mailto:info&#64;example.com"' \
+  'email link is entity-obfuscated and needs no script'
+assert 'section-a/shortcodes/index.html' '<div class="cta not-prose">' \
+  'cta renders the banner wrapper'
+assert 'section-a/shortcodes/index.html' 'class="cta__button" href="/contact/"' \
+  'cta renders the button with its target'
+assert 'section-a/shortcodes/index.html' 'action="/api/contact"' \
+  'contact form posts to the default endpoint'
+assert 'section-a/shortcodes/index.html' 'name="hp_name"' \
+  'contact form keeps the honeypot'
+assert 'section-a/shortcodes/index.html' 'var id = "contact-form-' \
+  'the contact script targets its own instance id'
+assert 'section-a/shortcodes/index.html' 'data-interval="1500"' \
+  'carousel carries the configured interval'
+assert 'section-a/shortcodes/index.html' 'aspect-ratio: 16 / 9' \
+  'carousel keeps the requested aspect ratio'
+count_assert 'section-a/shortcodes/index.html' 'data-slide-to="[0-9]"' 2 \
+  'carousel renders two indicator buttons'
+assert 'section-a/shortcodes/index.html' 'class="carousel__caption">Inline image' \
+  'carousel captions match by file name'
+
+# 22. layout shortcodes: computed template and single class set
+assert 'section-a/shortcodes/index.html' 'mgrid mgrid--cols-2' \
+  'multi-col renders the container with its column modifier'
+assert 'section-a/shortcodes/index.html' 'style="[^"]*mgrid-template: 2fr 1fr' \
+  'multi-col honours the ratio parameter'
+assert 'section-a/shortcodes/index.html' 'class="mcol mcol--first"' \
+  'col-left renders the first-column class set'
+assert 'section-a/shortcodes/index.html' 'class="mcol mcol--last"' \
+  'col-right renders the last-column class set'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

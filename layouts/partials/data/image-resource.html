@@ -8,6 +8,8 @@
     role  (string, optional) — "card" | "illustration" | "hero" | "og";
           caps the widest variant
     alt   (string, optional) — empty string means decorative
+    quality (int, optional) — WebP quality, defaults to the site-wide 78;
+          the figure shortcode's quality parameter passes it through
 
   Output dict
     ok     (bool) — false when nothing resolves; the caller renders nothing
@@ -47,7 +49,7 @@
 {{- $role := .role | default "illustration" }}
 {{- $caps := dict "card" 800 "illustration" 1280 "hero" 1920 "og" 1920 }}
 {{- $cap := index $caps $role | default 1280 }}
-{{- $quality := 78 }}
+{{- $quality := .quality | default 78 }}
 {{- $disable := site.Params.disableImageOptimization | default false }}
 
 {{- $res := "" }}

@@ -73,6 +73,43 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   hero preload equality, taxonomy and 404 pages (18 assertions, non-zero exit
   on failure)
 
+- `layouts/shortcodes/figure.html` + `layouts/partials/media/figure.html` —
+  shadow of Hugo's built-in figure shortcode with the full built-in parameter
+  surface (src, link, target, rel, alt, title, caption, attr, attrlink, class,
+  width, height, loading) plus `quality` and `role`; caption structure matches
+  the built-in (`title` as `<h4>`, `attr`/`attrlink` in a paragraph), alt falls
+  back to the plainified caption, and the `<img>` goes through the shared
+  pipeline like the markdown render hook's
+- `layouts/shortcodes/content/article.html` — embeds another page's card
+  inline (`page/card.html`, variant `inline`, always lazy); unknown links warn
+  in `hugo server` and render nothing instead of failing the build;
+  `showSummary` resolves shortcode → page front matter →
+  `site.Params.list.showSummary`
+- `layouts/shortcodes/content/list.html` — recent-pages list rendered through
+  `page/card.html` (grid or row); fixes the broken partial reference that made
+  `cardView=true` fail the build, and selects the branch by explicit
+  `"true"` comparison so `cardView=false` cannot read as truthy
+- `layouts/shortcodes/content/icon.html` — inlines an SVG from the site's
+  `assets/icons/` (the theme ships no icon set; a missing file stops the build
+  with its position)
+- `layouts/shortcodes/interactive/email.html` — entity-obfuscated `mailto`
+  link with no JavaScript and no footer script to depend on
+- `layouts/shortcodes/interactive/cta.html` — CTA banner with optional icon
+  (skipped with a dev warning when absent); colour utility parameters dropped —
+  styling belongs to CSS
+- `layouts/shortcodes/interactive/contact.html` — contact form with honeypot,
+  live byte counter and fetch submit; element ids are scoped per instance so
+  two forms on one page do not collide
+- `layouts/shortcodes/interactive/carousel.html` — carousel whose slides run
+  through the responsive pipeline (srcset/width/height, first slide eager),
+  glob patterns matched against page resources then assets (leading slash
+  trimmed), captions keyed by file name, self-initialising inline script
+- `layouts/shortcodes/layout/multi-col.html` + `col-left`/`col-mid`/`col-right`
+  — column grid with computed `--mgrid-*` CSS variables and a single class set
+  (`mgrid` container, `mcol` with position modifiers)
+- `test/fixture/content/section-a/shortcodes.md` — one page rendering all
+  eleven shortcodes for the smoke assertions
+
 ### Changed
 
 - `layouts/_default/baseof.html` — document shell with `lang`, `dir` and
@@ -127,6 +164,19 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   no bare `100vw` fallback)
 - `test/fixture/` — covers the grid card view, the `series` taxonomy, an
   animated WebP, a GIF and a remote image reference
+
+- `layouts/partials/data/card-presets.html` — an `inline` preset (same media
+  box as `row`) for cards embedded by the content/article shortcode
+- `layouts/partials/data/image-resource.html` — accepts a `quality` input
+  (default stays 78) for the figure shortcode's quality parameter
+- `layouts/partials/media/image.html` — accepts `width`/`height` overrides so
+  explicit figure dimensions win over the intrinsic variant size
+- `layouts/partials/page/card.html` — accepts an `eager` override so embedded
+  body cards stay lazy regardless of their collection index
+- `scripts/smoke.sh` — 60 assertions (from 31): the figure surface (including
+  a python check that `quality=` writes its own variant set), both list
+  branches, icon/email/cta/contact/carousel output and the layout class set
+- `test/fixture/` — a shortcodes showcase page and a site-level icon asset
 
 ### Removed
 

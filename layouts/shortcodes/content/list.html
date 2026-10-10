@@ -1,0 +1,43 @@
+{{- /*
+  Lists recent regular pages as cards inside an article. PLAN B25: the
+  previous implementation referenced
+  article-link/card.html, a partial that does not exist, so cardView=true
+  failed the build; this one renders through page/card.html.
+
+  Parameters
+    limit    (int)    — how many pages to consider, default 1
+    title    (string) — heading above the list; default is the i18n key
+             "shortcode.recent_articles" with an English fallback (i18n
+             files arrive with step 9.5)
+    where    (string) — page field to filter on (e.g. "Type")
+    value    (any)    — the value the field must equal
+    cardView (bool)   — true renders grid cards, false or absent renders
+             row cards; compared against an explicit "true" so a string
+             "false" selects the row branch (the source template's truthy
+             check sent it to the grid branch)
+
+  The page containing the shortcode never appears in its own list.
+
+  Called by: content markdown
+*/ -}}
+{{- $limit := int (default "1" (.Get "limit")) -}}
+{{- $title := .Get "title" | default (i18n "shortcode.recent_articles") | default "Recent articles" -}}
+{{- $where := .Get "where" -}}
+{{- $value := .Get "value" -}}
+{{- $cardView := eq (printf "%v" (.Get "cardView")) "true" -}}
+{{- $variant := cond $cardView "grid" "row" -}}
+{{- $pages := .Site.RegularPages -}}
+{{- if $where }}{{- $pages = where $pages $where $value -}}{{- end -}}
+{{- $parent := .Page.RelPermalink -}}
+<h2 class="shortcode-list__title">{{ $title }}</h2>
+<section class="shortcode-list {{ if $cardView }}shortcode-list--grid{{ else }}shortcode-list--rows{{ end }}">
+  {{- range $i, $p := first $limit $pages }}
+    {{- if ne $p.RelPermalink $parent }}
+    {{- partial "page/card.html" (dict
+        "page" $p
+        "variant" $variant
+        "showSummary" false
+        "index" $i) }}
+    {{- end }}
+  {{- end }}
+</section>

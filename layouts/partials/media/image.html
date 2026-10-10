@@ -10,16 +10,19 @@
     loading       (string, optional) — "lazy" (default) or "eager"
     fetchpriority (string, optional) — "high", "auto" or "low"; omitted when empty
     class         (string, optional) — CSS classes for the element
+    width         (int, optional) — overrides the intrinsic variant width
+    height        (int, optional) — overrides the intrinsic variant height
 
-  Called by: page/card.html, page/hero.html, _markup/render-image.html
+  Called by: page/card.html, page/hero.html, media/figure.html,
+             _markup/render-image.html
 */ -}}
 {{- $img := .img }}
 {{- if and $img $img.ok }}
 <img src="{{ $img.url }}"
   {{- if $img.srcset }} srcset="{{ $img.srcset }}"{{ end }}
   {{- if and $img.srcset .sizes }} sizes="{{ .sizes }}"{{ end }}
-  {{- if $img.width }} width="{{ $img.width }}"{{ end }}
-  {{- if $img.height }} height="{{ $img.height }}"{{ end }}
+  {{- if .width }} width="{{ .width }}"{{ else if $img.width }} width="{{ $img.width }}"{{ end }}
+  {{- if .height }} height="{{ .height }}"{{ else if $img.height }} height="{{ $img.height }}"{{ end }}
   {{- if .class }} class="{{ .class }}"{{ end }}
   alt="{{ if isset . "alt" }}{{ .alt }}{{ else }}{{ $img.alt }}{{ end }}"
   loading="{{ .loading | default "lazy" }}"
