@@ -1,0 +1,146 @@
+.page-collection {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .page-collection--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 853px) {
+  .page-collection--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.page-collection--row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-collection__empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding-block: 24px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--page-bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.card__media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card__image {
+  transform: scale(1.03);
+}
+
+.card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 16px;
+}
+
+.card:has(.card__summary) .card__header {
+  padding-bottom: 6px;
+}
+
+.card__title {
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.card__link {
+  color: var(--site-text-strong);
+  text-decoration: none;
+}
+
+.card__link:hover {
+  color: var(--site-link);
+  text-decoration: none;
+}
+
+.card__date {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card__summary {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  padding: 0 16px 16px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.card--row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.card--row .card__media,
+.card--inline .card__media {
+  aspect-ratio: 16 / 9;
+}
+
+.card--inline {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .card--row,
+  .card--inline {
+    grid-template-columns: 200px 1fr;
+    column-gap: 16px;
+    align-items: start;
+  }
+
+  .card--row .card__media,
+  .card--inline .card__media {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .card--row .card__header,
+  .card--inline .card__header {
+    grid-column: 2;
+    padding: 0 16px 0 0;
+  }
+
+  .card--row .card__summary,
+  .card--inline .card__summary {
+    grid-column: 2;
+    padding: 0 16px 0 0;
+  }
+}

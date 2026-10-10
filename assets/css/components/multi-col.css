@@ -1,0 +1,17 @@
+.mgrid {
+  display: grid;
+  grid-template-columns: var(--mgrid-template, 1fr 1fr);
+  gap: var(--mgrid-gap, 2rem);
+  margin: var(--mgrid-margin, 3rem 0);
+  align-items: var(--mgrid-align, flex-start);
+}
+
+@media (max-width: 639px) {
+  .mgrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mcol {
+  min-width: 0;
+}

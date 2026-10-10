@@ -5,7 +5,7 @@
   </header>
 {{- end }}
 {{- with .Content }}
-  <div class="page-content">{{ . }}</div>
+  <div class="page-content prose">{{ . }}</div>
 {{- end }}
   {{- $listParams := site.Params.list | default dict }}
   {{- $sorted := .Pages }}

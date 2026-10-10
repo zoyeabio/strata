@@ -1,0 +1,40 @@
+.article__header {
+  max-width: 720px;
+  margin: 40px auto 0;
+}
+
+.article__header h1 {
+  font-size: 2.125rem;
+  line-height: 1.2;
+}
+
+.article__meta {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.article__tag {
+  color: var(--site-link);
+}
+
+.article__content {
+  margin-block: 24px;
+}
+
+.article__content.prose {
+  margin-inline: auto;
+}
+
+.article-hero {
+  margin-block: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.article-hero__image {
+  width: 100%;
+  height: auto;
+  display: block;
+}

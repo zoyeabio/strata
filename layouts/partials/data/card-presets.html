@@ -9,12 +9,13 @@
 
   Parameters mirror the container of the grid in page/page-collection.html
   and the hero container: per-side padding 24 / 56 / 96 / 128 below 640 /
-  640–852 / 853–1023 / 1024 and up (baseof `px-6 sm:px-14 md:px-24 lg:px-32`,
-  screens md 853 / lg 1024), container cap 1280 above, gap 16, columns 1 / 2
+  640–852 / 853–1023 / 1024 and up (framework padding ladder in
+  assets/css/base/reset.css: --site-gutter 24/56/96/128, breakpoints
+  640 / 853 / 1024), container cap 1280 above, gap 16, columns 1 / 2
   / 3 (3 from the 853px md breakpoint). A rung that does not equal the
   rendered ladder moves the pick across a candidate step (480 / 800: up to
   1.7× bytes), so each rung must match the CSS; step 11 asserts sizes against
-  the CSS (PLAN 478) and re-derives them when §3.4 tightens the padding.
+  the CSS (PLAN 478) and re-derives them when the ladder changes.
 
   cardViewScreenWidth (w-screen 1600px / padding 30) is not parameterised
   here: no target site enables it yet.
@@ -27,10 +28,10 @@
 */ -}}
 {{- $gap := 16 -}}
 {{- $gap2 := mul $gap 2 -}}
-{{- $padBase := 48 -}}  {{/* px-6 ×2, below 640 */}}
-{{- $padSm := 112 -}}   {{/* sm:px-14 ×2, 640–852 */}}
-{{- $padMd := 192 -}}   {{/* md:px-24 ×2, 853–1023 */}}
-{{- $padLg := 256 -}}   {{/* lg:px-32 ×2, 1024 and up */}}
+{{- $padBase := 48 -}}  {{/* 24 per side, below 640 */}}
+{{- $padSm := 112 -}}   {{/* 56 per side, 640–852 */}}
+{{- $padMd := 192 -}}   {{/* 96 per side, 853–1023 */}}
+{{- $padLg := 256 -}}   {{/* 128 per side, 1024 and up */}}
 {{- $container := 1280 -}}
 {{- $cap := sub $container $padLg -}}
 {{- $prose := 720 -}}   {{/* PLAN §2.3: body copy is at most 720 wide */}}

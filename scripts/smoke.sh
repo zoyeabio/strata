@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Builds test/fixture and asserts the theme contract against the rendered
 # HTML: image resolver and ladder, sizes invariants, head tags, taxonomy,
-# series, remote gating, shortcodes, production silence and build
-# reproducibility. Every assertion is a regression gate; the script exits
-# non-zero if any of them fails.
+# series, remote gating, shortcodes, production silence, stylesheet wiring
+# (link count, fingerprint, compiled-CSS freshness, sizes-ladder parity) and
+# build reproducibility. Every assertion is a regression gate; the script
+# exits non-zero if any of them fails.
 #
 # Usage: scripts/smoke.sh
 set -euo pipefail
@@ -304,6 +305,46 @@ else
   fail 'two builds are byte-identical'
   awk 'NR<=20{print "  " $0}' "$WORK/repro.diff" >&2
 fi
+
+# 24. committed compiled CSS is in sync with its sources: a stale
+#     assets/css/compiled/main.css would ship styles that no longer match
+#     the templates, and no HTML assertion would notice
+TW="$ROOT/node_modules/.bin/tailwindcss"
+if [ -x "$TW" ]; then
+  "$TW" --input "$ROOT/assets/css/main.css" --output "$WORK/main.fresh.css" >/dev/null 2>&1
+  if cmp -s "$ROOT/assets/css/compiled/main.css" "$WORK/main.fresh.css"; then
+    pass 'compiled CSS matches a fresh build of the sources'
+  else
+    fail 'compiled CSS is stale — run npm run build:css and commit the result'
+  fi
+else
+  fail 'node_modules/.bin/tailwindcss missing — run npm install in the theme'
+fi
+
+# 25. one stylesheet link per page: scheme and bundle travel as a single
+#     minified, fingerprinted resource (fixture sets no customCSS)
+count_assert 'section-a/flat/index.html' 'rel="stylesheet"' 1 \
+  'exactly one stylesheet link'
+assert 'section-a/flat/index.html' 'rel="stylesheet"[^>]*integrity="sha512-' \
+  'stylesheet is fingerprinted'
+assert 'index.html' 'rel="stylesheet"' 'home page links the stylesheet'
+
+# 26. sizes ladder matches the CSS (PLAN 478): every rung the presets emit
+#     must correspond to a real container width in the stylesheet
+css_assert() { # css_assert <regex> <label>
+  local f
+  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+  if [ -n "$f" ] && grep -qE -e "$1" "$f"; then pass "$2"; else fail "$2"; fi
+}
+css_assert 'max-width:720px' 'prose caps at 720px (text preset)'
+css_assert 'width:200px' 'row thumb is fixed at 200px (row/inline preset)'
+css_assert 'repeat\(3,minmax\(0,1fr\)\)' 'three columns from 853px (grid preset)'
+css_assert 'repeat\(2,minmax\(0,1fr\)\)' 'two columns from 640px (grid preset)'
+css_assert '@media\(min-width:853px\)\{:root\{--site-gutter:96px' \
+  'gutter rung 96px sits at the 853px breakpoint'
+css_assert ':root\{--site-gutter:24px;--site-content:1024px\}' \
+  'base gutter 24px and content cap 1024px'
+css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

@@ -2,5 +2,7 @@
 {{- with .Title }}
   <h1>{{ . | emojify }}</h1>
 {{- end }}
-  {{ .Content }}
+{{- with .Content }}
+  <div class="page-content prose">{{ . }}</div>
+{{- end }}
 {{ end }}

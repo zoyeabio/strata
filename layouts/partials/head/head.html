@@ -39,7 +39,21 @@
   <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
   {{ end }}
 
-  {{/* Site styles, applied in order, after the theme's own stylesheet (see step 10) */}}
+  {{/* Theme stylesheet: the active colour scheme concatenated ahead of the
+       prebuilt bundle, minified and fingerprinted as one resource */}}
+  {{- $schemeName := site.Params.colorScheme | default "strata-default" | lower }}
+  {{- $scheme := resources.Get (printf "css/schemes/%s.css" $schemeName) }}
+  {{- if not $scheme }}
+    {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}
+  {{- end }}
+  {{- $compiled := resources.Get "css/compiled/main.css" }}
+  {{- if not $compiled }}
+    {{- errorf "css/compiled/main.css missing — run \"npm run build:css\" in the theme checkout" }}
+  {{- end }}
+  {{- $theme := slice $scheme $compiled | resources.Concat "css/theme.css" | minify | fingerprint "sha512" }}
+  <link rel="stylesheet" href="{{ $theme.RelPermalink }}" integrity="{{ $theme.Data.Integrity }}">
+
+  {{/* Site styles, applied after the theme's own stylesheet */}}
   {{ range site.Params.customCSS }}
   {{ with resources.Get . }}
   {{ $custom := . | fingerprint "sha512" }}

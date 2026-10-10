@@ -190,6 +190,43 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   truncates integer division)
 - `scripts/smoke.sh` — 61 assertions (from 60): two independent fixture
   builds must be byte-identical
+- `package.json` — npm build chain for the stylesheet: Tailwind CLI,
+  `@tailwindcss/typography`, `@tailwindcss/forms` and `tailwindcss` itself
+  (`tailwind-scrollbar` deferred until a scrollbar consumer exists);
+  `build:css` writes the committed `assets/css/compiled/main.css`
+- `assets/css/main.css` — Tailwind v4 entry: `@source inline()` allowlists the
+  nine utility classes the templates use (comment text can no longer emit dead
+  utilities), `@theme` pins the system font stacks and moves the breakpoints
+  to the 640 / 853 / 1024 / 1280 ladder, and the `strata-base`,
+  `strata-components`, `utilities`, `strata-overrides` layer order is declared
+  once
+- `assets/css/base/` — `palette.css` (neutral surfaces, text and state tokens
+  with a full dark inversion plus `color-scheme`), `reset.css` (the framework
+  padding container `--site-gutter` 24/56/96/128 capped by `--site-content`
+  1024 on header/main/footer, body typography, links, `code`/`pre`/`table`),
+  `typography.css` (heading scale with `text-wrap: balance`), `prose.css`
+  (17px body at 1.7 line height, 18px from 1280px, 720px measure, mapped
+  `--tw-prose-*` tokens) and `a11y.css` (focus ring, reduced motion)
+- `assets/css/components/` — site header/footer, page header/pagination/404,
+  cards and collections (1/2/3-column grid, 200px row thumb, line-clamped
+  summary), article and hero, series list, taxonomy term cards and text list,
+  carousel (indicator strip, 44px controls, caption overlay), contact form,
+  CTA banner, figure captions, multi-column grid and shortcode embeds
+- `assets/css/schemes/` — four colour schemes (`strata-default` blue,
+  `strata-slate`, `strata-forest`, `strata-ocean`), each defining the seven
+  `--site-*` variables for light and dark
+- `layouts/partials/head/head.html` — loads the active scheme (from
+  `params.colorScheme`, default `strata-default`, `errorf` on a missing file)
+  concatenated ahead of the compiled bundle, minified and fingerprinted as
+  one stylesheet
+- `layouts/_default/single.html`, `list.html`, `layouts/index.html` — body
+  containers carry the `prose` class so long-form text gets the typography
+  treatment
+- `scripts/smoke.sh` — 74 assertions (from 61): committed CSS must match a
+  fresh `tailwindcss` build, exactly one fingerprinted stylesheet link per
+  page, and the sizes-ladder rungs (720px measure, 200px row thumb, 2/3-column
+  grids, gutter breakpoints, content cap) must exist in the shipped CSS
+  (PLAN 478)
 
 ### Removed
 
