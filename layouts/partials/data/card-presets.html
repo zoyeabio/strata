@@ -18,7 +18,9 @@
   that does not equal the rendered ladder moves the pick across a candidate
   step (480 / 800: up to 1.7× bytes), so each rung must match the CSS; step
   11 asserts sizes against the CSS (PLAN 478) and re-derives them when the
-  ladder changes.
+  ladder changes. The text preset's 832 and 912 rungs are where the viewport
+  calc() crosses the 720px prose cap on the low (640–852, pad 112) and high
+  (853–1023, pad 192) side respectively.
 
   cardViewScreenWidth (w-screen 1600px / padding 30) is not parameterised
   here: no target site enables it yet.
@@ -52,7 +54,8 @@
     (printf "calc(100vw - %dpx)" $padBase)
   ) ", " -}}
 {{- $text := delimit (slice
-    (printf "(min-width:853px) %dpx" $prose)
+    (printf "(min-width:%dpx) %dpx" (add $prose $padMd) $prose)
+    (printf "(min-width:853px) calc(100vw - %dpx)" $padMd)
     (printf "(min-width:832px) %dpx" $prose)
     (printf "(min-width:640px) calc(100vw - %dpx)" $padSm)
     (printf "calc(100vw - %dpx)" $padBase)

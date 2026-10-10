@@ -3,7 +3,7 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
-@source inline("flex justify-between items-center gap-x-3 gap-x-6 sr-only prose not-prose");
+@source inline("sr-only prose not-prose");
 
 @theme {
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -16,7 +16,7 @@
   --breakpoint-2xl: 1536px;
 }
 
-@layer strata-base, strata-components, utilities, strata-overrides;
+@layer strata-base, strata-components, strata-overrides;
 
 @import "./base/palette.css" layer(strata-base);
 @import "./base/reset.css" layer(strata-base);

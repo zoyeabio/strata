@@ -3,10 +3,17 @@
   background: var(--page-bg);
   padding-block: 12px;
   min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .site-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: var(--site-text-strong);
   text-decoration: none;
   min-height: 44px;

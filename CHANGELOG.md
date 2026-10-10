@@ -242,6 +242,19 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   rung (calc crosses the 720px prose cap at 832), smoke covers the missing
   56px/1024px gutter rungs, and `single.html` wraps its content in
   `with .Content` like the other entry templates
+- Review pass — typography: the layer declaration drops the `utilities` name
+  (Tailwind's earlier statement already fixed its position; naming it again
+  suggested a false order), smoke gained three assertions that pin the real
+  cascade — strata layers registered after Tailwind's, `pre` carrying mono
+  13px, `.prose` carrying 720px rather than the plugin's 65ch — the term
+  list takes the plan's terms-page rhythm (line-height 1.85, 16px from
+  1280px), and both count badges settle on the plan's 12px chip size
+- Review pass — follow-up: the text preset's high side gains the
+  `(min-width:912px) 720px` rung with a calc below it (853–911 sits under
+  the prose cap), the header and brand flex layout moves from utility
+  classes into `site.css` (the allowlist is down to `sr-only prose
+  not-prose`), and the layer-order assertion now parses every `@layer`
+  statement per the spec instead of pattern-matching two of them
 
 ### Removed
 

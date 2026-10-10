@@ -79,7 +79,7 @@
 }
 
 .term-card__count {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -87,7 +87,13 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  line-height: 1.7;
+  line-height: 1.85;
+}
+
+@media (min-width: 1280px) {
+  .term-text {
+    font-size: 16px;
+  }
 }
 
 .term-text__link {

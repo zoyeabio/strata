@@ -23,8 +23,8 @@
 {{- end }}
 {{- $disableText := site.Params.disableTextInHeader | default false }}
 {{- $showTitle := or (not $hasLogo) (not $disableText) -}}
-<header class="site-header flex items-center justify-between gap-x-6">
-  <a class="site-brand flex items-center gap-x-3" href="{{ site.Home.RelPermalink }}">
+<header class="site-header">
+  <a class="site-brand" href="{{ site.Home.RelPermalink }}">
     {{- with $logo }}
     {{- if eq .MediaType.SubType "svg" }}
     <span class="site-brand__logo">{{ .Content | safeHTML }}</span>

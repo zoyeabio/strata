@@ -220,7 +220,7 @@ assert 'section-a/shortcodes/index.html' '<a href="/section-a/flat/" target="_bl
   'figure wraps the image in the requested link'
 assert 'section-a/shortcodes/index.html' 'width="400" height="300"' \
   'figure honours explicit width/height over the intrinsic size'
-count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:853px\) 720px' 5 \
+count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 5 \
   'three figures and two slides carry the text sizes'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 5 \
   'four list cards plus the first slide load eagerly'
@@ -353,7 +353,8 @@ count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 5 \
 # 27. every class token the templates emit is defined in the shipped CSS
 #     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
 #     so concatenations like card--{{ $variant }} contribute a prefix that
-#     must still match at least one rule)
+#     must still match at least one rule). Author-supplied class parameters
+#     that pass through a shortcode untouched are out of scope by design.
 if classes_out=$(python3 - "$ROOT" <<'PY'
 import re, sys, pathlib
 root = pathlib.Path(sys.argv[1])
@@ -395,6 +396,44 @@ else
   printf '%s\n' "$classes_out" >&2
   fail 'every template class token is defined in the shipped CSS'
 fi
+
+# 28. cascade layer order: parse every @layer statement per the CSS spec
+#     (first appearance fixes the position) and assert the strata layers sit
+#     after utilities — a reordering flips the typography plugin's defaults
+#     above strata-base (pre loses its mono font, .prose falls back to 65ch)
+if layer_out=$(python3 - "$OUT" <<'PY'
+import re, sys, pathlib
+out = pathlib.Path(sys.argv[1])
+bundle = next(out.glob('css/theme*.css'), None)
+text = bundle.read_text() if bundle else ''
+order = []
+for m in re.finditer(r'@layer\s+([^;{]+);', text):
+    for name in m.group(1).split(','):
+        name = name.strip()
+        if name and name not in order:
+            order.append(name)
+if 'utilities' in order and all(
+    order.index(n) > order.index('utilities')
+    for n in order if n.startswith('strata-')
+):
+    print(' < '.join(order))
+    sys.exit(0)
+print('FAIL', file=sys.stderr)
+sys.exit(1)
+PY
+); then
+  pass "strata layers registered after utilities ($layer_out)"
+else
+  fail 'strata layers registered after utilities'
+fi
+
+# 29. values that must WIN the cascade, not merely exist: the typography
+#     plugin also styles pre in the utilities layer; only cascade order
+#     (assertion 28) keeps the strata rule effective, this pins the values
+css_assert 'pre\{font-family:var\(--font-mono\);font-size:13px' \
+  'pre rule carries mono 13px (strata-base over utilities)'
+css_assert 'prose\{[^}]*max-width:720px' \
+  '.prose rule carries 720px, not the plugin 65ch'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
