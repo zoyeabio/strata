@@ -36,6 +36,23 @@ FAILURES=0
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
+# The theme's taxonomy contract: the header tag links and the series nav
+# read the "tags" and "series" taxonomies. Hugo does not inherit a theme's
+# [taxonomies], so the host site must declare them; a missing one does not
+# fail the build, it just silently drops tag links or series navigation.
+cfg="$(HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \
+  HUGO_CACHEDIR="$WORK/cache" hugo config --source "$SITE" 2>/dev/null \
+  | tr -d "'" | awk '/^\[taxonomies\]/{f=1;next} /^\[/{f=0} f' | sed 's/^[[:space:]]*//')"
+missing_tax=""
+for pair in "series = series" "tag = tags"; do
+  printf '%s\n' "$cfg" | grep -qx "$pair" || missing_tax="$missing_tax ${pair%% =*}"
+done
+if [ -z "$missing_tax" ]; then
+  pass 'site declares the tag and series taxonomies'
+else
+  fail "site is missing [taxonomies]$missing_tax — tag links or series nav will vanish silently"
+fi
+
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode site; then
   pass 'check-build site mode'
 else

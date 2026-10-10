@@ -3,30 +3,26 @@
   date, with the current page marked as such. Rendered above the article body
   so a reader can see where this piece sits in the sequence.
 
-  The label text is plain English for now; it moves to i18n/en.yaml with the
-  rest of the theme's strings.
+  GetTerms resolves the series through the site's taxonomy configuration, so
+  the taxonomy key and URL segment stay site-owned; a page whose series has
+  no term page yet renders nothing (no dead link).
 
   Called by: _default/single.html
 */ -}}
 {{- $cur := . }}
-{{- with .Params.series }}
-  {{- $name := index . 0 }}
-  {{- range $term, $pages := site.Taxonomies.series }}
-    {{- if eq $term (strings.ToLower $name) }}
-    <nav class="series" aria-label="Series">
-      <p class="series__title">{{ $name }}</p>
-      <ol class="series__list">
-        {{- range sort $pages "Weight" }}
-        <li class="series__item">
-          {{- if eq .Permalink $cur.Permalink }}
-          <span class="series__current" aria-current="page">{{ .Title }}</span>
-          {{- else }}
-          <a class="series__link" href="{{ .RelPermalink }}">{{ .Title }}</a>
-          {{- end }}
-        </li>
-        {{- end }}
-      </ol>
-    </nav>
+{{- range (.GetTerms "series") }}
+<nav class="series" aria-label="Series">
+  <p class="series__title">{{ .LinkTitle }}</p>
+  <ol class="series__list">
+    {{- range sort .Pages "Weight" }}
+    <li class="series__item">
+      {{- if eq .Permalink $cur.Permalink }}
+      <span class="series__current" aria-current="page">{{ .Title }}</span>
+      {{- else }}
+      <a class="series__link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+      {{- end }}
+    </li>
     {{- end }}
-  {{- end }}
+  </ol>
+</nav>
 {{- end }}

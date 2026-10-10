@@ -1,20 +1,21 @@
 {{ define "main" }}
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
+{{- $terms := .GetTerms "tags" }}
 <article>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
   {{- end }}
   <header class="article__header">
     <h1>{{ .Title | emojify }}</h1>
-    {{- if or (not .Date.IsZero) .Params.tags }}
+    {{- if or (not .Date.IsZero) $terms }}
     <p class="article__meta">
       {{- if not .Date.IsZero }}
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
       {{- end }}
-      {{- range .Params.tags }}
+      {{- range $terms }}
       {{- if not $.Date.IsZero }} · {{ end }}
-      <a class="article__tag" href="{{ printf "tags/%s/" (. | urlize) | relURL }}">{{ . }}</a>
+      <a class="article__tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
       {{- end }}
     </p>
     {{- end }}

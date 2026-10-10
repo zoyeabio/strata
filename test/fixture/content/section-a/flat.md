@@ -1,5 +1,5 @@
 ---
-tags: ["alpha", "beta"]
+tags: ["alpha", "beta", "Sci & Tech"]
 title: "Flat section image"
 date: 2026-01-03
 weight: 30

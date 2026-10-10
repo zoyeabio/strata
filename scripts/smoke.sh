@@ -109,7 +109,7 @@ fi
 
 # 9. taxonomy overview lists every term with its count (text mode by default)
 assert 'tags/index.html' 'term-text__link' 'taxonomy overview renders term links'
-count_assert 'tags/index.html' 'term-text__count' 2 'both terms show a count'
+count_assert 'tags/index.html' 'term-text__count' 3 'all three terms show a count'
 
 # 10. a term page lists the tagged articles
 count_assert 'tags/alpha/index.html' 'card card--' 2 'term alpha lists two article cards'
@@ -434,6 +434,39 @@ css_assert 'pre\{font-family:var\(--font-mono\);font-size:13px' \
   'pre rule carries mono 13px (strata-base over utilities)'
 css_assert 'prose\{[^}]*max-width:720px' \
   '.prose rule carries 720px, not the plugin 65ch'
+
+# 30. taxonomy links are real pages: tags resolve through GetTerms, so the
+#     href must equal the term's own URL even for punctuation ("Sci & Tech"
+#     slugs to sci--tech, not what naive string concat would produce), and
+#     the series nav must never point at a page that was not built
+if tax_out=$(python3 - "$OUT" <<'PY'
+import sys, pathlib, re, urllib.parse
+out = pathlib.Path(sys.argv[1])
+missing = []
+checked = 0
+for page in out.rglob('*.html'):
+    text = page.read_text(errors='ignore')
+    for m in re.finditer(r'class="article__tag" href="([^"]+)"', text):
+        href = urllib.parse.urlparse(m.group(1)).path
+        checked += 1
+        if not (out / href.lstrip('/') / 'index.html').exists():
+            missing.append(f'{page.relative_to(out)}: tag {href}')
+    for m in re.finditer(r'class="series__link" href="([^"]+)"', text):
+        href = urllib.parse.urlparse(m.group(1)).path
+        checked += 1
+        if not (out / href.lstrip('/') / 'index.html').exists():
+            missing.append(f'{page.relative_to(out)}: series {href}')
+if missing:
+    for line in missing:
+        print('FAIL', line, file=sys.stderr)
+    sys.exit(1)
+print(f'{checked} taxonomy links')
+PY
+); then
+  pass "every tag and series link points at a built page ($tax_out)"
+else
+  fail 'every tag and series link points at a built page'
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

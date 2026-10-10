@@ -283,6 +283,19 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - `test/fixture/content/section-a/missing.md` — now a draft, so the default
   build stays clean while `validate-theme.sh` proves the production error
   path
+- Taxonomy contract review pass — the article tag links resolve through
+  `GetTerms` (href equals the term's own URL, punctuation and all, and a
+  tag without a built term page renders no link instead of a dead one), the
+  series navigation resolves through `GetTerms "series"` and reads the term
+  page's own list (the taxonomy key and the `strings.ToLower` match against
+  front matter are gone), `validate-site.sh` asserts the host site declares
+  the `tag` and `series` taxonomies (Hugo does not inherit a theme's
+  `[taxonomies]`, so the contract is enforced at validation time rather than
+  declared in a theme `hugo.toml` that would not be read), and smoke
+  assertion 30 walks every tag and series link in the fixture output and
+  requires a built page behind it
+- `assets/lib/` (fuse, lite-youtube-embed, zoom — 60KB) deleted: no template
+  referenced any of it; search returns when the search feature itself lands
 
 ### Removed
 
