@@ -17,7 +17,7 @@
 {{- if and $img $img.ok }}
 <img src="{{ $img.url }}"
   {{- if $img.srcset }} srcset="{{ $img.srcset }}"{{ end }}
-  {{- with .sizes }} sizes="{{ . }}"{{ end }}
+  {{- if and $img.srcset .sizes }} sizes="{{ .sizes }}"{{ end }}
   {{- if $img.width }} width="{{ $img.width }}"{{ end }}
   {{- if $img.height }} height="{{ $img.height }}"{{ end }}
   {{- if .class }} class="{{ .class }}"{{ end }}

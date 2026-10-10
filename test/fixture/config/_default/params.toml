@@ -1,1 +1,4 @@
 eagerCardCount = 2
+
+[list]
+  cardView = true

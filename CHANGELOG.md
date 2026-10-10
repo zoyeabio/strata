@@ -113,6 +113,20 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - `layouts/partials/page/card.html` — no empty `card__media` wrapper when the
   featured image fails to resolve; summary length is configurable via
   `site.Params.cardSummaryLength` (default 160)
+- `layouts/partials/data/card-presets.html` — every `sizes` string is now
+  computed from one parameter block (gap, padding ladder, container cap,
+  prose width): viewport-dependent ranges use `calc()` so the declared width
+  is exact at every breakpoint; the grid ladder no longer subtracts the gap
+  twice, and the hero no longer declares 1088px from a 1024px viewport
+- `layouts/partials/media/image.html` — a standalone `sizes` attribute is no
+  longer emitted when there is no `srcset` to describe
+- `scripts/smoke.sh` — 31 assertions (from 18): preload `imagesizes` equality,
+  the computed grid formula, animated-WebP and GIF passthrough, the remote
+  image in both states, series navigation, silent production builds, and
+  whole-site `sizes` invariants (a fixed width always fits its `min-width`,
+  no bare `100vw` fallback)
+- `test/fixture/` — covers the grid card view, the `series` taxonomy, an
+  animated WebP, a GIF and a remote image reference
 
 ### Removed
 

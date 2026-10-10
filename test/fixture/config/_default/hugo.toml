@@ -3,3 +3,7 @@
 
   [[module.imports]]
     path = "github.com/zoyeabio/strata"
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
