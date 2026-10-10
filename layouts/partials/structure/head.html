@@ -1,0 +1,53 @@
+{{/*
+  Head.
+
+  Site-agnostic: no external fonts, no third-party requests, no tracking.
+  Optional site hooks: partials/favicons.html,
+  partials/extend-head.html, partials/extend-head-uncached.html
+*/}}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{ with site.LanguageCode }}
+  <meta http-equiv="content-language" content="{{ . }}">
+  {{ end }}
+
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title | emojify }} · {{ site.Title | emojify }}{{ end }}</title>
+
+  {{ $desc := .Params.description | default .Params.summary | default site.Params.description | default (printf "%s — %s" .Title site.Title) }}
+  <meta name="description" content="{{ $desc }}">
+  {{ with or site.Params.robots .Params.robots }}
+  <meta name="robots" content="{{ . }}">
+  {{ end }}
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{ range .AlternativeOutputFormats }}
+  <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .RelPermalink }}" title="{{ site.Title }}">
+  {{ end }}
+
+  {{/* Appearance applied before first paint to avoid a flash of the wrong theme */}}
+  {{ with resources.Get "js/appearance.js" }}
+  {{ $appearance := . | fingerprint "sha512" }}
+  <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
+  {{ end }}
+
+  {{/* Site styles, applied in order, after the theme's own stylesheet (see step 10) */}}
+  {{ range site.Params.customCSS }}
+  {{ with resources.Get . }}
+  {{ $custom := . | fingerprint "sha512" }}
+  <link rel="stylesheet" href="{{ $custom.RelPermalink }}" integrity="{{ $custom.Data.Integrity }}">
+  {{ end }}
+  {{ end }}
+
+  {{ if templates.Exists "partials/favicons.html" }}
+  {{ partialCached "favicons.html" .Site }}
+  {{ else if fileExists "static/favicon.ico" }}
+  <link rel="icon" href="{{ "favicon.ico" | relURL }}">
+  {{ end }}
+
+  {{ if templates.Exists "partials/extend-head.html" }}
+  {{ partialCached "extend-head.html" .Site }}
+  {{ end }}
+  {{ if templates.Exists "partials/extend-head-uncached.html" }}
+  {{ partial "extend-head-uncached.html" . }}
+  {{ end }}
+</head>
