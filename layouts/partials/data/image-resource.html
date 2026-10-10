@@ -1,37 +1,52 @@
 {{- /*
-  Image resolver. Returns a dict and outputs no HTML (ARCHITECTURE.md §3.3,
-  PLAN.md §2.6).
+  Resolves one image reference into responsive WebP variants. Returns a dict,
+  never HTML.
 
   Input dict
-    ref    string — front matter value or markdown destination
-    page   Page — used for page bundle lookups and section/slug fallbacks
-    role   "card" (cap 800) | "illustration" (cap 1280) | "hero" (cap 1920) | "og"
+    ref   (string, required) — front matter value or markdown destination
+    page  (Page, optional) — page bundle lookups and section fallbacks
+    role  (string, optional) — "card" | "illustration" | "hero" | "og";
+          caps the widest variant and picks the encode quality
+    alt   (string, optional) — empty string means decorative
 
   Output dict
-    ok     bool
-    url    string — largest usable variant, or the untouched resource
-    srcset string — "" when a single file is enough
-    sizes  string — passed through from the caller
-    width, height int — 0 when unknown (svg)
-    alt    string
+    ok     (bool) — false when nothing resolves; the caller renders nothing
+    url    (string) — the largest variant, or the untouched original file
+    srcset (string) — "" when one file is enough
+    width  (int) — 0 when unknown (svg, passthrough)
+    height (int) — 0 when unknown (svg, passthrough)
+    alt    (string) — echoed from the input
 
-  Ladder: [480 800 1280 1920], each step capped by source width and by the
-  role cap, then de-duplicated, then the step whose gap to its predecessor is
-  under 15% is dropped, then the source width step is restored.
+  Resolution order: page resource → the reference as written → assets path
+  under images/{section}/{pageDir}/ → images/{section}/ → images/ → static/ →
+  not found (a warning in `hugo server`, silent in production builds).
+
+  Variant ladder: [480, 800, 1280, 1920]; every step is capped by the source
+  width and by the role cap, then de-duplicated, then a step less than 15%
+  wider than its kept predecessor is dropped, then the source width step is
+  restored. SVG, GIF and animated WebP bypass processing entirely — the
+  imaging pipeline would fail on SVG and flatten animations to frame one.
+
+  site.Params.disableImageOptimization = true hands back the original file
+  for every role, generating no variants at all.
+
+  Called by: page/card.html, opengraph.html, _markup/render-image.html
 */ -}}
-{{- $ref := trim (printf "%v" .ref) " /" }}
+{{- $raw := printf "%v" .ref }}
+{{- if eq $raw "<nil>" }}{{ $raw = "" }}{{ end }}
+{{- $ref := trim $raw " /" }}
 {{- $page := .page }}
 {{- $role := .role | default "illustration" }}
 {{- $caps := dict "card" 800 "illustration" 1280 "hero" 1920 "og" 1920 }}
 {{- $qualities := dict "card" 78 "illustration" 88 "hero" 78 "og" 82 }}
 {{- $cap := index $caps $role | default 1280 }}
 {{- $quality := index $qualities $role | default 78 }}
+{{- $disable := site.Params.disableImageOptimization | default false }}
 
 {{- $res := "" }}
 {{- if $ref }}
 {{- with $page }}{{ with .Resources.Get $ref }}{{ $res = . }}{{ end }}{{ end }}
 {{- if not $res }}{{ with resources.Get $ref }}{{ $res = . }}{{ end }}{{ end }}
-{{- end }}
 {{- if not $res }}
   {{- $section := "" }}
   {{- $pageDir := "" }}
@@ -45,55 +60,64 @@
       (printf "images/%s" $ref) }}
   {{- range $candidates }}{{ if not $res }}{{ with resources.Get . }}{{ $res = . }}{{ end }}{{ end }}{{ end }}
 {{- end }}
+{{- end }}
 {{- if not $res }}
-  {{- if and $page (fileExists (printf "static/%s" $ref)) }}
-    {{- $res = dict "RelPermalink" (relURL $ref) "ResourceType" "file" "MediaType" (dict "SubType" "png") }}
+  {{- if fileExists (printf "static/%s" $ref) }}
+    {{- $res = dict "RelPermalink" (relURL $ref) "ResourceType" "file" }}
   {{- end }}
 {{- end }}
 
 {{- $result := dict "ok" false "url" "" "srcset" "" "width" 0 "height" 0 }}
 {{- if $res }}
-{{- if eq $res.ResourceType "image" }}
-  {{- $subtype := $res.MediaType.SubType }}
-  {{- if or (eq $subtype "svg") (eq $subtype "gif") }}
-    {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
-  {{- else if eq $role "og" }}
-    {{- $social := $res.Fill (printf "1200x630 jpeg q%d" $quality) }}
-    {{- $result = dict "ok" true "url" $social.RelPermalink "srcset" "" "width" $social.Width "height" $social.Height }}
-  {{- else }}
-    {{- $sourceWidth := $res.Width }}
-    {{- $max := int (math.Min $sourceWidth $cap) }}
-    {{- $steps := slice }}
-    {{- range slice 480 800 1280 1920 }}
-      {{- $step := int (math.Min . $max) }}
-      {{- if not (in $steps $step) }}{{ $steps = $steps | append $step }}{{ end }}
+  {{- if and (eq $res.ResourceType "image") (not $disable) }}
+    {{- $subtype := $res.MediaType.SubType }}
+    {{- $animated := false }}
+    {{- if eq $subtype "webp" }}
+      {{- $path := printf "assets/%s" $res.Name }}
+      {{- if fileExists $path }}{{ $animated = strings.Contains (readFile $path) "ANIM" }}{{ end }}
     {{- end }}
-    {{- $kept := slice }}
-    {{- range $steps }}
-      {{- if eq (len $kept) 0 }}
-        {{- $kept = $kept | append . }}
-      {{- else }}
-        {{- $prev := index $kept (sub (len $kept) 1) }}
-        {{- if gt (mul (sub . $prev) 100) (mul $prev 15) }}
+    {{- if or (eq $subtype "svg") (eq $subtype "gif") $animated }}
+      {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
+    {{- else if eq $role "og" }}
+      {{- $social := $res.Fill (printf "1200x630 jpeg q%d" $quality) }}
+      {{- $result = dict "ok" true "url" $social.RelPermalink "srcset" "" "width" $social.Width "height" $social.Height }}
+    {{- else }}
+      {{- $sourceWidth := $res.Width }}
+      {{- $max := int (math.Min $sourceWidth $cap) }}
+      {{- $steps := slice }}
+      {{- range slice 480 800 1280 1920 }}
+        {{- $step := int (math.Min . $max) }}
+        {{- if not (in $steps $step) }}{{ $steps = $steps | append $step }}{{ end }}
+      {{- end }}
+      {{- $kept := slice }}
+      {{- range $steps }}
+        {{- if eq (len $kept) 0 }}
           {{- $kept = $kept | append . }}
         {{- else }}
-          {{- $kept = first (sub (len $kept) 1) $kept | append . }}
+          {{- $prev := index $kept (sub (len $kept) 1) }}
+          {{- if gt (mul (sub . $prev) 100) (mul $prev 15) }}
+            {{- $kept = $kept | append . }}
+          {{- else }}
+            {{- $kept = first (sub (len $kept) 1) $kept | append . }}
+          {{- end }}
         {{- end }}
       {{- end }}
+      {{- if not (in $kept $max) }}{{ $kept = $kept | append $max }}{{ end }}
+      {{- $parts := slice }}
+      {{- $last := "" }}
+      {{- range $kept }}
+        {{- $variant := $res.Resize (printf "%dx webp q%d" . $quality) }}
+        {{- $parts = $parts | append (printf "%s %dw" $variant.RelPermalink .) }}
+        {{- $last = $variant }}
+      {{- end }}
+      {{- $result = dict "ok" true "url" $last.RelPermalink "srcset" (delimit $parts ", ") "width" $last.Width "height" $last.Height }}
     {{- end }}
-    {{- if not (in $kept $max) }}{{ $kept = $kept | append $max }}{{ end }}
-    {{- $parts := slice }}
-    {{- $last := "" }}
-    {{- range $kept }}
-      {{- $variant := $res.Resize (printf "%dx webp q%d" . $quality) }}
-      {{- $parts = $parts | append (printf "%s %dw" $variant.RelPermalink .) }}
-      {{- $last = $variant }}
-    {{- end }}
-    {{- $result = dict "ok" true "url" $last.RelPermalink "srcset" (delimit $parts ", ") "width" $last.Width "height" $last.Height }}
+  {{- else }}
+    {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
   {{- end }}
-{{- else if eq (printf "%v" (index $res "ResourceType")) "file" }}
-  {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
-{{- end }}
+{{- else if hugo.IsServer }}
+  {{- $where := "" }}{{ with $page }}{{ $where = .RelPermalink }}{{ end }}
+  {{- warnf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
 {{- end }}
 
 {{- return (merge $result (dict "alt" (.alt | default ""))) }}

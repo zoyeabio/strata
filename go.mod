@@ -1,3 +1,3 @@
-module github.com/strata-theme/strata
+module github.com/zoyeabio/strata
 
 go 1.22

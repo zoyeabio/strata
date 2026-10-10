@@ -1,13 +1,16 @@
 {{- /*
-  Responsive <img> emitter. Consumes data/image-resource.html (PLAN.md §2.6).
+  Emits a responsive <img> from the dict returned by data/image-resource.html.
 
   Input dict
-    img          — result dict from data/image-resource.html
-    alt          — string; empty means decorative
-    sizes        — string; required whenever srcset is emitted
-    loading      — "lazy" (default) | "eager"
-    fetchpriority — "high" | "auto" | "low" (default omitted)
-    class        — CSS class list
+    img           (dict, required) — resolver result; nothing is printed when
+                    img.ok is false
+    alt           (string, optional) — overrides img.alt
+    sizes         (string, optional) — required whenever srcset is non-empty
+    loading       (string, optional) — "lazy" (default) or "eager"
+    fetchpriority (string, optional) — "high", "auto" or "low"; omitted when empty
+    class         (string, optional) — CSS classes for the element
+
+  Called by: page/card.html, _markup/render-image.html
 */ -}}
 {{- $img := .img }}
 {{- if and $img $img.ok }}

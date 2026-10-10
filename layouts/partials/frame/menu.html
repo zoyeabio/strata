@@ -1,8 +1,12 @@
 {{- /*
   Main navigation.
 
-  One markup tree for every breakpoint; desktop and mobile differ in CSS only
-  (ARCHITECTURE.md §3.5.1).
+  One markup tree for every breakpoint; desktop and mobile differ in CSS only,
+  so there is no second menu to keep in sync. The active item is marked with
+  aria-current: section roots through HasMenuCurrent, exact pages through
+  IsMenuCurrent.
+
+  Called by: frame/header.html
 */ -}}
 {{- with site.Menus.main }}
 <nav id="site-navigation" class="site-nav" aria-label="Main">

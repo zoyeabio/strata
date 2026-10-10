@@ -1,13 +1,15 @@
 {{- /*
-  Image sizes presets. Single source of truth for srcset `sizes` values
-  (PLAN.md §2.3): column widths are derived from the container width, the
-  gap and the column count of layouts/partials/page/page-collection.html —
-  never hand-tuned at the call site.
+  Returns the srcset `sizes` string for one media role.
 
-  Keys: grid (list grid), row (compact list), text (article body image)
+  Single source of truth for `sizes`: the column widths below are the layout
+  the grid in page/page-collection.html is built for — a three-column grid
+  from 853px up, two columns from 640px, one column below that, gap 16px,
+  content width capped at 1088px. Keep this table in sync with the grid
+  classes; a mismatch silently transfers more image data than needed.
 
-  Recompute every key when baseof.html padding, the grid gap or the column
-  count change; PLAN.md §2.3 holds the derivation table.
+  Roles: grid (list card), row (compact list card), text (article body image)
+
+  Called by: page/card.html, _markup/render-image.html
 */ -}}
 {{- $presets := dict
   "grid" (dict

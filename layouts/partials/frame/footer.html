@@ -2,11 +2,14 @@
   Site footer: identity, footer navigation and the copyright line.
 
   The rich blocks — company info, quick links, legal, social — plus the
-  appearance switcher and scroll-to-top are deferred; see the build log.
+  appearance switcher and scroll-to-top are not built yet; they arrive with
+  their own steps.
 
-  The site profile this needs stays inline until a second consumer shows up
-  (schema, RSS, meta), then it moves to partials/data/site.html per
-  ARCHITECTURE.md §3.2.
+  The site profile this needs stays inline until a second consumer appears
+  (schema, RSS, meta tags), at which point it moves to partials/data/site.html
+  so the values are not written twice.
+
+  Called by: _default/baseof.html
 */ -}}
 {{- $copyright := printf "© %d %s" now.Year site.Title }}
 {{- with site.Params.copyright }}

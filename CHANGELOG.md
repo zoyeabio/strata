@@ -66,6 +66,13 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   in the collection so the eager/lazy split can be applied
 - `layouts/partials/head/head.html` — emits social card tags through
   `partials/opengraph.html`
+- `layouts/partials/data/image-resource.html` — passes animated WebP through
+  untouched (ANIM chunk probe), honours `site.Params.disableImageOptimization`
+  to emit original files only, and warns about unresolved references in
+  `hugo server` builds; production builds stay silent
+- File-header comments across the theme no longer cite planning documents that
+  are not part of the repository; each partial now names its callers
+- Module path is `github.com/zoyeabio/strata`
 
 ### Removed
 

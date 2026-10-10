@@ -1,7 +1,10 @@
 {{- /*
-  Markdown image render hook — puts inline ![](x) on the responsive pipeline
-  (PLAN.md §2.2.1). Context: goldmark.imageLinkContext — .Destination .Title
-  .Text .Page. Produces a bare <img>, never a <figure>.
+  Markdown image render hook: inline ![](x) joins the responsive pipeline
+  instead of falling through to Goldmark's plain <img>. Context is
+  goldmark.imageLinkContext — .Destination .Title .Text .Page. Produces a bare
+  <img>; figures are a separate concern (shortcodes).
+
+  Called by: Goldmark, for every image in markdown content
 */ -}}
 {{- $alt := .Text | default .Title }}
 {{- $img := partial "data/image-resource.html" (dict
