@@ -14,11 +14,12 @@
 {{- $variant := cond .cardView "grid" "row" }}
 {{- if .pages }}
 <div class="page-collection page-collection--{{ $variant }}">
-  {{- range .pages }}
+  {{- range $i, $page := .pages }}
   {{ partial "page/card.html" (dict
-    "page" .
+    "page" $page
     "variant" $variant
     "showSummary" $.showSummary
+    "index" $i
   ) }}
   {{- end }}
 </div>

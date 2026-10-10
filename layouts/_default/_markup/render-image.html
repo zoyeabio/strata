@@ -1,0 +1,17 @@
+{{- /*
+  Markdown image render hook — puts inline ![](x) on the responsive pipeline
+  (PLAN.md §2.2.1). Context: goldmark.imageLinkContext — .Destination .Title
+  .Text .Page. Produces a bare <img>, never a <figure>.
+*/ -}}
+{{- $alt := .Text | default .Title }}
+{{- $img := partial "data/image-resource.html" (dict
+    "ref" .Destination
+    "page" .Page
+    "role" "illustration"
+    "alt" $alt) }}
+{{- $sizes := (partial "data/card-presets.html" "text").sizes }}
+{{- partial "media/image.html" (dict
+    "img" $img
+    "alt" $alt
+    "sizes" $sizes
+    "loading" "lazy") }}

@@ -1,0 +1,56 @@
+{{- /*
+  Open Graph + Twitter Cards. Replaces the Hugo internals so the social image
+  comes out of the responsive image pipeline at a fixed 1200x630 JPEG
+  (PLAN.md §707). Internal templates are intentionally not used.
+
+  Image selection order: params.images[0] → featureimage → a page resource
+  whose name contains feature, cover or thumbnail → site.Params.defaultSocialImage.
+*/ -}}
+{{- $page := . }}
+{{- $title := $page.Title }}
+{{- $description := $page.Params.description | default $page.Description | default site.Params.description | default site.Title }}
+{{- $url := $page.Permalink }}
+{{- $ref := "" }}
+{{- with $page.Params.images }}{{ $ref = index . 0 }}{{ end }}
+{{- if not $ref }}{{ $ref = $page.Params.featureimage }}{{ end }}
+{{- if not $ref }}
+  {{- range $page.Resources }}
+    {{- if and (not $ref) (or (in .Name "feature") (in .Name "cover") (in .Name "thumbnail")) }}
+      {{- $ref = .Name }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if not $ref }}{{ $ref = site.Params.defaultSocialImage }}{{ end }}
+{{- $img := partial "data/image-resource.html" (dict
+    "ref" $ref
+    "page" $page
+    "role" "og"
+    "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $title))) }}
+{{- $isArticle := and (eq $page.Kind "page") (not $page.Date.IsZero) }}
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:type" content="{{ cond $isArticle "article" "website" }}">
+<meta property="og:url" content="{{ $url }}">
+<meta property="og:description" content="{{ $description }}">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:locale" content="{{ site.Language.LanguageCode | default "en" }}">
+{{- if not $page.PublishDate.IsZero }}
+<meta property="article:published_time" content="{{ $page.PublishDate.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end }}
+{{- if not $page.Lastmod.IsZero }}
+<meta property="article:modified_time" content="{{ $page.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end }}
+{{- if $img.ok }}
+<meta property="og:image" content="{{ $img.url | absURL }}">
+{{- if $img.width }}
+<meta property="og:image:width" content="{{ $img.width }}">
+<meta property="og:image:height" content="{{ $img.height }}">
+{{- end }}
+<meta property="og:image:alt" content="{{ $img.alt }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $title }}">
+<meta name="twitter:description" content="{{ $description }}">
+<meta name="twitter:image" content="{{ $img.url | absURL }}">
+<meta name="twitter:image:alt" content="{{ $img.alt }}">
+{{- else }}
+<meta name="twitter:card" content="summary">
+{{- end }}

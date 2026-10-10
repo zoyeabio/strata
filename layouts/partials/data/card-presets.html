@@ -1,0 +1,19 @@
+{{- /*
+  Image sizes presets. Single source of truth for srcset `sizes` values
+  (PLAN.md §2.3): column widths are derived from the container width, the
+  gap and the column count of layouts/partials/page/page-collection.html —
+  never hand-tuned at the call site.
+
+  Keys: grid (list grid), row (compact list), text (article body image)
+
+  Recompute every key when baseof.html padding, the grid gap or the column
+  count change; PLAN.md §2.3 holds the derivation table.
+*/ -}}
+{{- $presets := dict
+  "grid" (dict
+    "sizes" "(min-width:1280px) 341px, (min-width:1024px) 256px, (min-width:853px) 236px, (min-width:640px) 256px, calc(100vw - 48px)")
+  "row" (dict
+    "sizes" "(min-width:640px) 200px, calc(100vw - 48px)")
+  "text" (dict
+    "sizes" "(min-width:1024px) 720px, calc(100vw - 48px)") }}
+{{- return (index $presets (. | default "grid")) }}

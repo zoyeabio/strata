@@ -24,6 +24,9 @@
   <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .RelPermalink }}" title="{{ site.Title }}">
   {{ end }}
 
+  {{/* Social cards: own implementation, image goes through the pipeline */}}
+  {{ partial "opengraph.html" . }}
+
   {{/* Appearance applied before first paint to avoid a flash of the wrong theme */}}
   {{ with resources.Get "js/appearance.js" }}
   {{ $appearance := . | fingerprint "sha512" }}

@@ -1,0 +1,24 @@
+{{- /*
+  Responsive <img> emitter. Consumes data/image-resource.html (PLAN.md §2.6).
+
+  Input dict
+    img          — result dict from data/image-resource.html
+    alt          — string; empty means decorative
+    sizes        — string; required whenever srcset is emitted
+    loading      — "lazy" (default) | "eager"
+    fetchpriority — "high" | "auto" | "low" (default omitted)
+    class        — CSS class list
+*/ -}}
+{{- $img := .img }}
+{{- if and $img $img.ok }}
+<img src="{{ $img.url }}"
+  {{- if $img.srcset }} srcset="{{ $img.srcset }}"{{ end }}
+  {{- with .sizes }} sizes="{{ . }}"{{ end }}
+  {{- if $img.width }} width="{{ $img.width }}"{{ end }}
+  {{- if $img.height }} height="{{ $img.height }}"{{ end }}
+  {{- if .class }} class="{{ .class }}"{{ end }}
+  alt="{{ .alt | default $img.alt }}"
+  loading="{{ .loading | default "lazy" }}"
+  decoding="async"
+  {{- with .fetchpriority }} fetchpriority="{{ . }}"{{ end }}>
+{{- end }}

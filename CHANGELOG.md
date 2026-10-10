@@ -36,6 +36,19 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   first paint, toggling `class="dark"` on the document root
 - `README.md`, `CHANGELOG.md`
 - Tooling: `scripts/audit-partials.sh`, `scripts/diff-build.sh`
+- `layouts/partials/data/image-resource.html` — resolves an image reference
+  (page bundle, asset path, `images/{section}/…`, `static/` fallback) and
+  returns responsive variants from one shared ladder, capped by the image role
+  (`card` 800, `illustration` 1280, `og` 1200x630) with role-derived WebP quality
+- `layouts/partials/media/image.html` — the `<img>` emitter: `srcset`, `sizes`,
+  intrinsic `width`/`height`, `loading`, `decoding`, `fetchpriority`
+- `layouts/partials/data/card-presets.html` — the single source of truth for
+  `sizes` per card variant and for body images
+- `layouts/_default/_markup/render-image.html` — inline markdown images join the
+  same pipeline, loading lazily
+- `layouts/partials/opengraph.html` — Open Graph and Twitter card tags without
+  the Hugo internal templates, so `og:image` is a 1200x630 JPEG produced by the
+  pipeline with an `alt` fallback of `Featured image for {title}`
 
 ### Changed
 
@@ -45,6 +58,14 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   `partials/frame/footer.html`
 - Head, header, footer, home, list, article and shortcode templates are
   scheduled for sequential rebuild; see the build plan for the order.
+- `layouts/partials/page/card.html` — renders `featureimage` with
+  `featureimagealt` (defaulting to `Featured image for {title}`); the first
+  `site.Params.eagerCardCount` cards (6 by default) load eagerly, the rest
+  lazily with `fetchpriority="low"`
+- `layouts/partials/page/page-collection.html` — passes each card its position
+  in the collection so the eager/lazy split can be applied
+- `layouts/partials/head/head.html` — emits social card tags through
+  `partials/opengraph.html`
 
 ### Removed
 

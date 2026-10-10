@@ -5,14 +5,34 @@
     page         Page (required)
     variant      "grid" (default) or "row"; the two only differ in CSS
     showSummary  bool — print the summary under the title
+    index        int — position in the collection, drives eager loading
 
-  A featured image can be added here once the image pipeline exists; see the
-  build log for the step that owns it.
+  Featured image: front matter featureimage / featureimagealt (site contract,
+  PLAN.md §2.5.3). The first site.Params.eagerCardCount cards load eagerly,
+  the rest lazily (PLAN.md §2.3.1).
 */ -}}
 {{- $page := .page }}
 {{- $variant := .variant | default "grid" }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
+{{- $eagerCount := site.Params.eagerCardCount | default 6 }}
+{{- $eager := lt (.index | default 0) $eagerCount }}
 <article class="card card--{{ $variant }}">
+  {{- with $page.Params.featureimage }}
+  {{- $img := partial "data/image-resource.html" (dict
+      "ref" .
+      "page" $page
+      "role" "card"
+      "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
+  <div class="card__media">
+    {{- partial "media/image.html" (dict
+        "img" $img
+        "alt" $img.alt
+        "sizes" (partial "data/card-presets.html" $variant).sizes
+        "loading" (cond $eager "eager" "lazy")
+        "fetchpriority" (cond $eager "" "low")
+        "class" "card__image") }}
+  </div>
+  {{- end }}
   <header class="card__header">
     <h2 class="card__title">
       <a class="card__link" href="{{ $page.RelPermalink }}">{{ $page.Title | emojify }}</a>
