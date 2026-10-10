@@ -38,8 +38,10 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Tooling: `scripts/audit-partials.sh`, `scripts/diff-build.sh`
 - `layouts/partials/data/image-resource.html` — resolves an image reference
   (page bundle, asset path, `images/{section}/…`, `static/` fallback) and
-  returns responsive variants from one shared ladder, capped by the image role
-  (`card` 800, `illustration` 1280, `og` 1200x630) with role-derived WebP quality
+  returns responsive variants from one shared ladder capped at four widths
+  (480, 800, 1280, 1920 — further capped by the image role: `card` 800,
+  `illustration` 1280, `og` 1200x630), encoded once at WebP q78 so the same
+  width is never written twice
 - `layouts/partials/media/image.html` — the `<img>` emitter: `srcset`, `sizes`,
   intrinsic `width`/`height`, `loading`, `decoding`, `fetchpriority`
 - `layouts/partials/data/card-presets.html` — the single source of truth for

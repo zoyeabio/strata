@@ -6,7 +6,7 @@
     ref   (string, required) — front matter value or markdown destination
     page  (Page, optional) — page bundle lookups and section fallbacks
     role  (string, optional) — "card" | "illustration" | "hero" | "og";
-          caps the widest variant and picks the encode quality
+          caps the widest variant
     alt   (string, optional) — empty string means decorative
 
   Output dict
@@ -23,9 +23,13 @@
 
   Variant ladder: [480, 800, 1280, 1920]; every step is capped by the source
   width and by the role cap, then de-duplicated, then a step less than 15%
-  wider than its kept predecessor is dropped, then the source width step is
-  restored. SVG, GIF and animated WebP bypass processing entirely — the
-  imaging pipeline would fail on SVG and flatten animations to frame one.
+  wider than its kept predecessor is dropped. The result is never more than
+  four files per image and never two near-identical widths — the largest
+  variant may sit a little below the source width, which is accepted in
+  exchange for the smaller payload. Everything is encoded WebP q78 so the
+  same width is never written twice at two qualities. SVG, GIF and animated
+  WebP bypass processing entirely — the imaging pipeline would fail on SVG
+  and flatten animations to frame one.
 
   site.Params.disableImageOptimization = true hands back the original file
   for every role, generating no variants at all.
@@ -38,9 +42,8 @@
 {{- $page := .page }}
 {{- $role := .role | default "illustration" }}
 {{- $caps := dict "card" 800 "illustration" 1280 "hero" 1920 "og" 1920 }}
-{{- $qualities := dict "card" 78 "illustration" 88 "hero" 78 "og" 82 }}
 {{- $cap := index $caps $role | default 1280 }}
-{{- $quality := index $qualities $role | default 78 }}
+{{- $quality := 78 }}
 {{- $disable := site.Params.disableImageOptimization | default false }}
 
 {{- $res := "" }}
@@ -97,12 +100,9 @@
           {{- $prev := index $kept (sub (len $kept) 1) }}
           {{- if gt (mul (sub . $prev) 100) (mul $prev 15) }}
             {{- $kept = $kept | append . }}
-          {{- else }}
-            {{- $kept = first (sub (len $kept) 1) $kept | append . }}
           {{- end }}
         {{- end }}
       {{- end }}
-      {{- if not (in $kept $max) }}{{ $kept = $kept | append $max }}{{ end }}
       {{- $parts := slice }}
       {{- $last := "" }}
       {{- range $kept }}
