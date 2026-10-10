@@ -598,9 +598,6 @@
   .gap-x-3 {
     column-gap: calc(var(--spacing) * 3);
   }
-  .gap-x-5 {
-    column-gap: calc(var(--spacing) * 5);
-  }
   .gap-x-6 {
     column-gap: calc(var(--spacing) * 6);
   }
@@ -859,6 +856,11 @@
     height: 28px;
     width: auto;
   }
+  .site-nav__list {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+  }
   .site-nav__link {
     display: inline-flex;
     align-items: center;
@@ -892,6 +894,11 @@
     font-size: 14px;
     color: var(--text-muted);
     max-width: 480px;
+  }
+  .site-footer__list {
+    display: flex;
+    gap: 20px;
+    list-style: none;
   }
   .site-footer__link {
     display: inline-flex;
@@ -1431,6 +1438,9 @@
   .contact-form__actions button:disabled {
     opacity: 0.6;
     cursor: default;
+  }
+  .contact-form__honeypot {
+    display: none;
   }
   .contact-form__status {
     font-size: 14px;

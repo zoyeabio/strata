@@ -2,9 +2,9 @@
 # Builds test/fixture and asserts the theme contract against the rendered
 # HTML: image resolver and ladder, sizes invariants, head tags, taxonomy,
 # series, remote gating, shortcodes, production silence, stylesheet wiring
-# (link count, fingerprint, compiled-CSS freshness, sizes-ladder parity) and
-# build reproducibility. Every assertion is a regression gate; the script
-# exits non-zero if any of them fails.
+# (link count, fingerprint, compiled-CSS freshness, sizes-ladder parity,
+# template class-token coverage), and build reproducibility. Every assertion
+# is a regression gate; the script exits non-zero if any of them fails.
 #
 # Usage: scripts/smoke.sh
 set -euo pipefail
@@ -253,8 +253,8 @@ assert 'section-a/shortcodes/index.html' 'shortcode-list--grid' \
   'cardView=true selects the grid branch'
 count_assert 'section-a/shortcodes/index.html' 'card card--grid' 2 \
   'the grid list renders two cards'
-assert 'section-a/shortcodes/index.html' 'shortcode-list--rows' \
-  'cardView=false selects the row branch even as a string'
+assert 'section-a/shortcodes/index.html' 'class="shortcode-list">' \
+  'cardView=false selects the row branch (base class only)'
 count_assert 'section-a/shortcodes/index.html' 'card card--row' 2 \
   'the row list renders two cards'
 assert 'section-a/shortcodes/index.html' '<span class="icon" aria-hidden="true"><svg' \
@@ -283,14 +283,12 @@ assert 'section-a/shortcodes/index.html' 'class="carousel__caption">Inline image
   'carousel captions match by file name'
 
 # 22. layout shortcodes: computed template and single class set
-assert 'section-a/shortcodes/index.html' 'mgrid mgrid--cols-2' \
-  'multi-col renders the container with its column modifier'
+assert 'section-a/shortcodes/index.html' 'class="mgrid"' \
+  'multi-col renders the container'
 assert 'section-a/shortcodes/index.html' 'style="[^"]*mgrid-template: 2fr 1fr' \
   'multi-col honours the ratio parameter'
-assert 'section-a/shortcodes/index.html' 'class="mcol mcol--first"' \
-  'col-left renders the first-column class set'
-assert 'section-a/shortcodes/index.html' 'class="mcol mcol--last"' \
-  'col-right renders the last-column class set'
+count_assert 'section-a/shortcodes/index.html' 'class="mcol"' 2 \
+  'columns render the mcol class set'
 
 # 23. build reproducibility: two independent builds of the same tree are
 #     byte-identical, so no template may leak now/rand/unsorted iteration
@@ -344,7 +342,59 @@ css_assert '@media\(min-width:853px\)\{:root\{--site-gutter:96px' \
   'gutter rung 96px sits at the 853px breakpoint'
 css_assert ':root\{--site-gutter:24px;--site-content:1024px\}' \
   'base gutter 24px and content cap 1024px'
+css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
+  'gutter rung 56px sits at the 640px breakpoint'
+css_assert '@media\(min-width:1024px\)\{:root\{--site-gutter:128px' \
+  'gutter rung 128px sits at the 1024px breakpoint'
 css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
+count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 5 \
+  'text preset adds the 832px rung on every body image'
+
+# 27. every class token the templates emit is defined in the shipped CSS
+#     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
+#     so concatenations like card--{{ $variant }} contribute a prefix that
+#     must still match at least one rule)
+if classes_out=$(python3 - "$ROOT" <<'PY'
+import re, sys, pathlib
+root = pathlib.Path(sys.argv[1])
+bundle = root / 'assets/css/compiled/main.css'
+if not bundle.exists():
+    print('FAIL compiled CSS missing')
+    sys.exit(1)
+css = bundle.read_text()
+for p in sorted((root / 'assets/css/schemes').glob('*.css')):
+    css += p.read_text()
+tokens, prefixes = set(), set()
+for p in (root / 'layouts').rglob('*.html'):
+    for m in re.finditer(r'class="([^"]*)"', p.read_text()):
+        cleaned = re.sub(r'\{\{.*?\}\}', ' ', m.group(1))
+        for tok in cleaned.split():
+            if tok.endswith('-'):
+                prefixes.add(tok)
+            else:
+                tokens.add(tok)
+missing, bad_prefix = [], []
+for tok in sorted(tokens):
+    esc = re.escape(tok)
+    if not re.search(r'\.' + esc + r'(?![\w-])|\[class~="' + esc + r'"\]', css):
+        missing.append(tok)
+for pre in sorted(prefixes):
+    if not re.search(r'\.' + re.escape(pre) + r'[\w-]+(?![\w-])', css):
+        bad_prefix.append(pre)
+if missing or bad_prefix:
+    for t in missing:
+        print(f'FAIL class token "{t}" has no CSS rule')
+    for t in bad_prefix:
+        print(f'FAIL dynamic prefix "{t}*" matches no CSS rule')
+    sys.exit(1)
+print(f'all {len(tokens)} class tokens and {len(prefixes)} dynamic prefixes are styled')
+PY
+); then
+  pass "class coverage: $classes_out"
+else
+  printf '%s\n' "$classes_out" >&2
+  fail 'every template class token is defined in the shipped CSS'
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

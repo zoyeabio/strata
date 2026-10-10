@@ -3,7 +3,7 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
-@source inline("flex justify-between items-center gap-x-3 gap-x-5 gap-x-6 sr-only prose not-prose");
+@source inline("flex justify-between items-center gap-x-3 gap-x-6 sr-only prose not-prose");
 
 @theme {
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,

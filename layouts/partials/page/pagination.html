@@ -6,13 +6,13 @@
 {{- if gt .TotalPages 1 }}
 <nav class="pagination" aria-label="Pagination">
   {{- with .Prev }}
-  <a class="pagination__link pagination__link--prev" href="{{ .URL }}" rel="prev">← Previous</a>
+  <a class="pagination__link" href="{{ .URL }}" rel="prev">← Previous</a>
   {{- end }}
   {{- if or .Prev .Next }}
   <span class="pagination__status">{{ .PageNumber }} / {{ .TotalPages }}</span>
   {{- end }}
   {{- with .Next }}
-  <a class="pagination__link pagination__link--next" href="{{ .URL }}" rel="next">Next →</a>
+  <a class="pagination__link" href="{{ .URL }}" rel="next">Next →</a>
   {{- end }}
 </nav>
 {{- end }}

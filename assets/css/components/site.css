@@ -28,6 +28,12 @@
   width: auto;
 }
 
+.site-nav__list {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+}
+
 .site-nav__link {
   display: inline-flex;
   align-items: center;
@@ -66,6 +72,12 @@
   font-size: 14px;
   color: var(--text-muted);
   max-width: 480px;
+}
+
+.site-footer__list {
+  display: flex;
+  gap: 20px;
+  list-style: none;
 }
 
 .site-footer__link {

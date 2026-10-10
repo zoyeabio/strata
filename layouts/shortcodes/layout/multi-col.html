@@ -15,8 +15,7 @@
             default "top"
 
   Class names follow CSS.md §7.1: the source's "zmc" prefix and duplicated
-  col-* classes are gone — container "mgrid", columns "mcol" with position
-  modifiers.
+  col-* classes are gone — container "mgrid", columns "mcol".
 
   Inner is trusted HTML (nested shortcodes and iframes are real content).
 
@@ -40,6 +39,6 @@
 {{- else if eq $columns "4" -}}
   {{- $template = "1fr 1fr 1fr 1fr" -}}
 {{- end -}}
-<div class="mgrid mgrid--cols-{{ $columns }}" style="--mgrid-template: {{ $template }}; --mgrid-gap: {{ $gap }}; --mgrid-margin: {{ $margin }}; --mgrid-align: {{ $alignValue }};">
+<div class="mgrid" style="--mgrid-template: {{ $template }}; --mgrid-gap: {{ $gap }}; --mgrid-margin: {{ $margin }}; --mgrid-align: {{ $alignValue }};">
   {{- .Inner | safeHTML }}
 </div>

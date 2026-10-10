@@ -88,6 +88,10 @@
   cursor: default;
 }
 
+.contact-form__honeypot {
+  display: none;
+}
+
 .contact-form__status {
   font-size: 14px;
 }

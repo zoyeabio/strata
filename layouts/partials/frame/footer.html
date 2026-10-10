@@ -16,17 +16,17 @@
 {{- $copyright = replace . "{ year }" (printf "%d" now.Year) }}
 {{- end }}
 <footer class="site-footer">
-  <div class="site-footer__brand">
+  <div>
     <a class="site-footer__title" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
     {{- with site.Params.description }}
     <p class="site-footer__tagline">{{ . }}</p>
     {{- end }}
   </div>
   {{- with site.Menus.footer }}
-  <nav class="site-footer__nav" aria-label="Footer">
-    <ul class="site-footer__list flex gap-x-5">
+  <nav aria-label="Footer">
+    <ul class="site-footer__list">
       {{- range . }}
-      <li class="site-footer__item">
+      <li>
         <a class="site-footer__link" href="{{ .URL }}"
           {{- if or ($.IsMenuCurrent "footer" .) ($.HasMenuCurrent "footer" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
       </li>

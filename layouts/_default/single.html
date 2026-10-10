@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
-<article class="article">
+<article>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
   {{- end }}
@@ -20,8 +20,10 @@
     {{- end }}
   </header>
   {{ partial "page/series.html" . }}
+  {{ with .Content }}
   <div class="article__content prose">
-    {{ .Content }}
+    {{ . }}
   </div>
+  {{ end }}
 </article>
 {{ end }}

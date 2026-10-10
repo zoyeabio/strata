@@ -12,10 +12,13 @@
   640–852 / 853–1023 / 1024 and up (framework padding ladder in
   assets/css/base/reset.css: --site-gutter 24/56/96/128, breakpoints
   640 / 853 / 1024), container cap 1280 above, gap 16, columns 1 / 2
-  / 3 (3 from the 853px md breakpoint). A rung that does not equal the
-  rendered ladder moves the pick across a candidate step (480 / 800: up to
-  1.7× bytes), so each rung must match the CSS; step 11 asserts sizes against
-  the CSS (PLAN 478) and re-derives them when the ladder changes.
+  / 3 (3 from the 853px md breakpoint). The content cap ($cap) must equal
+  --site-content in base/reset.css (both 1024); $container = content + 2×lg
+  padding is only the viewport where the container stops growing. A rung
+  that does not equal the rendered ladder moves the pick across a candidate
+  step (480 / 800: up to 1.7× bytes), so each rung must match the CSS; step
+  11 asserts sizes against the CSS (PLAN 478) and re-derives them when the
+  ladder changes.
 
   cardViewScreenWidth (w-screen 1600px / padding 30) is not parameterised
   here: no target site enables it yet.
@@ -50,6 +53,7 @@
   ) ", " -}}
 {{- $text := delimit (slice
     (printf "(min-width:853px) %dpx" $prose)
+    (printf "(min-width:832px) %dpx" $prose)
     (printf "(min-width:640px) calc(100vw - %dpx)" $padSm)
     (printf "calc(100vw - %dpx)" $padBase)
   ) ", " -}}

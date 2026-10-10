@@ -7,7 +7,7 @@
 {{- end }}
 {{- $taxParams := site.Params.taxonomy | default dict }}
 {{- if $taxParams.cardView }}
-<div class="term-collection term-collection--grid">
+<div class="term-collection--grid">
   {{- range $i, $entry := .Data.Terms }}
   {{ partial "page/term-card.html" (dict
       "entry" $entry
@@ -16,7 +16,7 @@
   {{- end }}
 </div>
 {{- else }}
-<div class="term-collection term-collection--text">
+<div class="term-collection--text">
   {{- range $entry := .Data.Terms }}
   {{ partial "page/term-text.html" (dict
       "entry" $entry

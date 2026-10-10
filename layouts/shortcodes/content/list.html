@@ -30,7 +30,7 @@
 {{- if $where }}{{- $pages = where $pages $where $value -}}{{- end -}}
 {{- $parent := .Page.RelPermalink -}}
 <h2 class="shortcode-list__title">{{ $title }}</h2>
-<section class="shortcode-list {{ if $cardView }}shortcode-list--grid{{ else }}shortcode-list--rows{{ end }}">
+<section class="shortcode-list{{ if $cardView }} shortcode-list--grid{{ end }}">
   {{- range $i, $p := first $limit $pages }}
     {{- if ne $p.RelPermalink $parent }}
     {{- partial "page/card.html" (dict

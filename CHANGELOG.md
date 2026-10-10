@@ -227,6 +227,21 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   page, and the sizes-ladder rungs (720px measure, 200px row thumb, 2/3-column
   grids, gutter breakpoints, content cap) must exist in the shipped CSS
   (PLAN 478)
+- Review pass — class-token coverage: smoke grew to 77 assertions; every
+  class token the templates emit must be defined in the shipped CSS (both
+  `.token` and `[class~="token"]` forms, dynamic `{{ }}` names contribute a
+  prefix that must match). Inert tokens were resolved: menu/footer wrapper
+  classes dropped or styled in place of utility classes, `pagination__link`
+  position modifiers gone, `mcol--first/mid/last` and `mgrid--cols-*`
+  modifiers gone, the honeypot's inline `display:none` moved to
+  `contact-form.css`, the bare `article`/`term-collection` wrappers and the
+  redundant `shortcode-list--rows` modifier deleted; the `gap-x-5` utility
+  left the allowlist
+- Review pass — sizes/CSS coupling: the card-presets comment pins the content
+  cap to `--site-content`, the text preset gains the `(min-width:832px) 720px`
+  rung (calc crosses the 720px prose cap at 832), smoke covers the missing
+  56px/1024px gutter rungs, and `single.html` wraps its content in
+  `with .Content` like the other entry templates
 
 ### Removed
 

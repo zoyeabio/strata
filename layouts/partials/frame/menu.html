@@ -9,10 +9,10 @@
   Called by: frame/header.html
 */ -}}
 {{- with site.Menus.main }}
-<nav id="site-navigation" class="site-nav" aria-label="Main">
-  <ul class="site-nav__list flex gap-x-5">
+<nav id="site-navigation" aria-label="Main">
+  <ul class="site-nav__list">
     {{- range . }}
-    <li class="site-nav__item">
+    <li>
       <a class="site-nav__link" href="{{ .URL }}"
         {{- if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
     </li>
