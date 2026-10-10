@@ -1,0 +1,6 @@
+{{ define "main" }}
+{{- with .Title }}
+  <h1>{{ . | emojify }}</h1>
+{{- end }}
+  {{ .Content }}
+{{ end }}
