@@ -4,9 +4,10 @@
   dir="{{ if site.Params.rtl }}rtl{{ else }}ltr{{ end }}"
   data-default-appearance="{{ site.Params.defaultAppearance | default "light" }}"
   data-auto-appearance="{{ site.Params.autoSwitchAppearance | default "true" }}">
-  {{ partial "structure/head.html" . }}
+  {{ partial "head/head.html" . }}
 <body>
-  <main>
+  {{ partial "frame/header.html" . }}
+  <main id="main-content">
     {{ block "main" . }}{{ end }}
   </main>
 </body>

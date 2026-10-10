@@ -14,9 +14,13 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - `config/_default/languages.en.toml` — site title, description, date format, RTL flag
 - `layouts/_default/single.html` — title and content
 - `layouts/_default/list.html` — title, content and child page links
-- `layouts/partials/structure/head.html` — charset, viewport, title, description,
+- `layouts/partials/head/head.html` — charset, viewport, title, description,
   robots, canonical, RSS and JSON autodiscovery, fingerprinted appearance script,
   site `customCSS` loading, guarded favicons, `extend-head` site hooks
+- `layouts/partials/frame/header.html` — brand from `site.Params.logo` with a
+  plain-text title that never disappears when no logo is configured
+- `layouts/partials/frame/menu.html` — one navigation tree for every breakpoint,
+  marking the active item with `aria-current`
 - `assets/js/appearance.js` — applies the stored or system colour scheme before
   first paint, toggling `class="dark"` on the document root
 - `README.md`, `CHANGELOG.md`
@@ -25,7 +29,8 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 ### Changed
 
 - `layouts/_default/baseof.html` — document shell with `lang`, `dir` and
-  appearance attributes; head delegates to `partials/structure/head.html`
+  appearance attributes; the head delegates to `partials/head/head.html` and
+  the body opens with `partials/frame/header.html`
 - Head, header, footer, home, list, article and shortcode templates are
   scheduled for sequential rebuild; see the build plan for the order.
 

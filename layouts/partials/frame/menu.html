@@ -1,0 +1,18 @@
+{{- /*
+  Main navigation.
+
+  One markup tree for every breakpoint; desktop and mobile differ in CSS only
+  (ARCHITECTURE.md §3.5.1).
+*/ -}}
+{{- with site.Menus.main }}
+<nav id="site-navigation" class="site-nav" aria-label="Main">
+  <ul class="site-nav__list flex gap-x-5">
+    {{- range . }}
+    <li class="site-nav__item">
+      <a class="site-nav__link" href="{{ .URL }}"
+        {{- if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
+    </li>
+    {{- end }}
+  </ul>
+</nav>
+{{- end }}

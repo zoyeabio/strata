@@ -1,0 +1,39 @@
+{{- /*
+  Site header: brand plus main navigation.
+
+  Brand rules
+    - A resolvable `site.Params.logo` (an asset path) is rendered instead of
+      the plain text title.
+    - `disableTextInHeader` only hides the text when a logo is present. Without
+      a logo the title always renders, so a site that forgets the logo never
+      ends up with an empty header.
+
+  The `header.layout` shell (smart / standard) is not wired up yet; see the
+  build log.
+*/ -}}
+{{- $logo := "" }}
+{{- $hasLogo := false }}
+{{- with site.Params.logo }}
+{{- with resources.Get . }}
+{{- $logo = . }}
+{{- $hasLogo = true }}
+{{- end }}
+{{- end }}
+{{- $disableText := site.Params.disableTextInHeader | default false }}
+{{- $showTitle := or (not $hasLogo) (not $disableText) -}}
+<header class="site-header flex items-center justify-between gap-x-6">
+  <a class="site-brand flex items-center gap-x-3" href="{{ site.Home.RelPermalink }}">
+    {{- with $logo }}
+    {{- if eq .MediaType.SubType "svg" }}
+    <span class="site-brand__logo">{{ .Content | safeHTML }}</span>
+    {{- else }}
+    <img class="site-brand__logo" src="{{ .RelPermalink }}" alt="">
+    {{- end }}
+    <span class="sr-only">{{ site.Title }}</span>
+    {{- end }}
+    {{- if $showTitle }}
+    <span class="site-brand__title">{{ site.Title }}</span>
+    {{- end }}
+  </a>
+  {{ partial "frame/menu.html" . }}
+</header>
