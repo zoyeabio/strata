@@ -18,8 +18,12 @@
     alt    (string) — echoed from the input
 
   Resolution order: page resource → the reference as written → assets path
-  under images/{section}/{pageDir}/ → images/{section}/ → images/ → static/ →
-  not found (a warning in `hugo server`, silent in production builds).
+  under images/{pageDir}/ (the article's own directory, so a section-flat
+  assets/images/{section}/file.png and a per-page assets/images/{section}/{slug}/file.png
+  both resolve) → images/ → static/ → not found (a warning in `hugo server`,
+  silent in production builds). http(s) references are passed through only
+  when site.Params.allowRemoteImages is set; otherwise they are skipped with
+  the same dev-only warning.
 
   Variant ladder: [480, 800, 1280, 1920]; every step is capped by the source
   width and by the role cap, then de-duplicated, then a step less than 15%
@@ -47,37 +51,42 @@
 {{- $disable := site.Params.disableImageOptimization | default false }}
 
 {{- $res := "" }}
-{{- if $ref }}
+{{- $remote := false }}
+{{- if and $ref (or (strings.HasPrefix $ref "http://") (strings.HasPrefix $ref "https://")) }}
+  {{- $remote = true }}
+{{- else if $ref }}
 {{- with $page }}{{ with .Resources.Get $ref }}{{ $res = . }}{{ end }}{{ end }}
 {{- if not $res }}{{ with resources.Get $ref }}{{ $res = . }}{{ end }}{{ end }}
 {{- if not $res }}
-  {{- $section := "" }}
   {{- $pageDir := "" }}
-  {{- with $page }}{{ with .File }}
-    {{- $pageDir = path.Dir .Path }}
-    {{- $section = index (split $pageDir "/") 0 }}
-  {{- end }}{{ end }}
-  {{- $candidates := slice
-      (printf "images/%s/%s/%s" $section $pageDir $ref)
-      (printf "images/%s/%s" $section $ref)
-      (printf "images/%s" $ref) }}
+  {{- with $page }}{{ with .File }}{{ $pageDir = path.Dir .Path }}{{ end }}{{ end }}
+  {{- $candidates := slice }}
+  {{- if $pageDir }}{{ $candidates = $candidates | append (printf "images/%s/%s" $pageDir $ref) }}{{ end }}
+  {{- $candidates = $candidates | append (printf "images/%s" $ref) }}
   {{- range $candidates }}{{ if not $res }}{{ with resources.Get . }}{{ $res = . }}{{ end }}{{ end }}{{ end }}
 {{- end }}
 {{- end }}
-{{- if not $res }}
+{{- if and (not $res) (not $remote) }}
   {{- if fileExists (printf "static/%s" $ref) }}
     {{- $res = dict "RelPermalink" (relURL $ref) "ResourceType" "file" }}
   {{- end }}
 {{- end }}
 
 {{- $result := dict "ok" false "url" "" "srcset" "" "width" 0 "height" 0 }}
-{{- if $res }}
+{{- if $remote }}
+  {{- if site.Params.allowRemoteImages }}
+    {{- $result = dict "ok" true "url" $ref "srcset" "" "width" 0 "height" 0 }}
+  {{- else if hugo.IsServer }}
+    {{- warnf "strata: remote image skipped, set site.Params.allowRemoteImages to allow it (ref=%q role=%q)" $ref $role }}
+  {{- end }}
+{{- else if $res }}
   {{- if and (eq $res.ResourceType "image") (not $disable) }}
     {{- $subtype := $res.MediaType.SubType }}
     {{- $animated := false }}
     {{- if eq $subtype "webp" }}
-      {{- $path := printf "assets/%s" $res.Name }}
-      {{- if fileExists $path }}{{ $animated = strings.Contains (readFile $path) "ANIM" }}{{ end }}
+      {{- $sniff := slice (printf "assets/%s" $res.Name) }}
+      {{- with $page }}{{ with .File }}{{ $sniff = $sniff | append (printf "content/%s/%s" (path.Dir .Path) $res.Name) }}{{ end }}{{ end }}
+      {{- range $sniff }}{{ if not $animated }}{{ if fileExists . }}{{ $animated = strings.Contains (readFile .) "ANIM" }}{{ end }}{{ end }}{{ end }}
     {{- end }}
     {{- if or (eq $subtype "svg") (eq $subtype "gif") $animated }}
       {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}

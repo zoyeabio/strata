@@ -4,13 +4,14 @@
   Input dict
     img           (dict, required) — resolver result; nothing is printed when
                     img.ok is false
-    alt           (string, optional) — overrides img.alt
+    alt           (string, optional) — present in the dict (even empty) it
+                    overrides img.alt; an empty string marks a decorative image
     sizes         (string, optional) — required whenever srcset is non-empty
     loading       (string, optional) — "lazy" (default) or "eager"
     fetchpriority (string, optional) — "high", "auto" or "low"; omitted when empty
     class         (string, optional) — CSS classes for the element
 
-  Called by: page/card.html, _markup/render-image.html
+  Called by: page/card.html, page/hero.html, _markup/render-image.html
 */ -}}
 {{- $img := .img }}
 {{- if and $img $img.ok }}
@@ -20,7 +21,7 @@
   {{- if $img.width }} width="{{ $img.width }}"{{ end }}
   {{- if $img.height }} height="{{ $img.height }}"{{ end }}
   {{- if .class }} class="{{ .class }}"{{ end }}
-  alt="{{ .alt | default $img.alt }}"
+  alt="{{ if isset . "alt" }}{{ .alt }}{{ else }}{{ $img.alt }}{{ end }}"
   loading="{{ .loading | default "lazy" }}"
   decoding="async"
   {{- with .fetchpriority }} fetchpriority="{{ . }}"{{ end }}>

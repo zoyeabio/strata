@@ -51,6 +51,16 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - `layouts/partials/opengraph.html` — Open Graph and Twitter card tags without
   the Hugo internal templates, so `og:image` is a 1200x630 JPEG produced by the
   pipeline with an `alt` fallback of `Featured image for {title}`
+- `layouts/partials/data/hero-image.html` — resolves the article hero image once
+  per page (cached in page scratch), so the head preload and the hero `<img>`
+  share one computation
+- `layouts/partials/page/hero.html` — article hero figure: eager loading with
+  `fetchpriority="high"`
+- `layouts/partials/page/series.html` — series name and weight-sorted article
+  list, marking the current page with `aria-current="page"`
+- `test/fixture/` + `scripts/smoke.sh` — a minimal module site and a build
+  assertion script: resolver paths, srcset ladder, og tags, eager/lazy split,
+  hero preload equality (12 assertions, non-zero exit on failure)
 
 ### Changed
 
@@ -75,6 +85,23 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - File-header comments across the theme no longer cite planning documents that
   are not part of the repository; each partial now names its callers
 - Module path is `github.com/zoyeabio/strata`
+- `layouts/_default/single.html` — hero image, title, date and tag metadata,
+  series navigation and content
+- `layouts/partials/data/card-presets.html` — `hero` sizes preset for the
+  article hero image
+- `layouts/partials/head/head.html` — article pages preload the hero image
+  (`imagesrcset`/`imagesizes` match the hero `<img>`)
+- `layouts/partials/data/image-resource.html` — candidate paths fixed to
+  `images/{pageDir}/…` then `images/…` (section-flat and per-page-directory
+  assets both resolve; nested content directories keep their intermediate
+  path); `http(s)` references pass through only when
+  `site.Params.allowRemoteImages` is set; the animated-WebP probe also checks
+  `content/{pageDir}/` for page bundles
+- `layouts/partials/media/image.html` — an explicit `alt=""` (decorative image)
+  is no longer replaced by the default alt text
+- `layouts/partials/page/card.html` — no empty `card__media` wrapper when the
+  featured image fails to resolve; summary length is configurable via
+  `site.Params.cardSummaryLength` (default 160)
 
 ### Removed
 

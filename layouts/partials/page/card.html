@@ -21,6 +21,7 @@
 {{- $variant := .variant | default "grid" }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
 {{- $eagerCount := site.Params.eagerCardCount | default 6 }}
+{{- $summaryLength := site.Params.cardSummaryLength | default 160 }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 <article class="card card--{{ $variant }}">
   {{- with $page.Params.featureimage }}
@@ -29,6 +30,7 @@
       "page" $page
       "role" "card"
       "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
+  {{- if $img.ok }}
   <div class="card__media">
     {{- partial "media/image.html" (dict
         "img" $img
@@ -38,6 +40,7 @@
         "fetchpriority" (cond $eager "" "low")
         "class" "card__image") }}
   </div>
+  {{- end }}
   {{- end }}
   <header class="card__header">
     <h2 class="card__title">
@@ -50,6 +53,6 @@
     {{- end }}
   </header>
   {{- if and .showSummary $page.Summary }}
-  <p class="card__summary">{{ $page.Summary | plainify | truncate 160 }}</p>
+  <p class="card__summary">{{ $page.Summary | plainify | truncate $summaryLength }}</p>
   {{- end }}
 </article>
