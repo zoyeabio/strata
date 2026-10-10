@@ -58,9 +58,20 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   `fetchpriority="high"`
 - `layouts/partials/page/series.html` — series name and weight-sorted article
   list, marking the current page with `aria-current="page"`
+- `layouts/404.html` — not-found page linking the first navigation menu item
+  and the home page, with no hardcoded paths
+- `layouts/_default/terms.html` — taxonomy overview that switches between a
+  card grid and a plain list via `site.Params.taxonomy.cardView`
+- `layouts/_default/term.html` — term page with article count, description,
+  paged card collection and pagination
+- `layouts/partials/page/term-card.html` — term card with an image served by
+  the shared role=card pipeline and the same eager split as cards
+- `layouts/partials/page/term-text.html` — plain term row for the non-card
+  view
 - `test/fixture/` + `scripts/smoke.sh` — a minimal module site and a build
   assertion script: resolver paths, srcset ladder, og tags, eager/lazy split,
-  hero preload equality (12 assertions, non-zero exit on failure)
+  hero preload equality, taxonomy and 404 pages (18 assertions, non-zero exit
+  on failure)
 
 ### Changed
 

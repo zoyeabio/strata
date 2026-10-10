@@ -1,0 +1,19 @@
+{{- /*
+  One taxonomy term as an inline text item: title link and optional count.
+
+  Params
+    entry          (taxonomy entry, required) — .Data.Terms item, carries
+                   .Page (the term page) and .Count (number of articles)
+    showTermCount  (bool, optional) — print the article count (default true)
+
+  The text alternative to term-card.html; which one the taxonomy overview
+  uses is decided by site.Params.taxonomy.cardView.
+
+  Called by: _default/terms.html
+*/ -}}
+<p class="term-text">
+  <a class="term-text__link" href="{{ .entry.Page.RelPermalink }}">{{ .entry.Page.Title | emojify }}</a>
+  {{- if .showTermCount }}
+  <span class="term-text__count">{{ .entry.Count }}</span>
+  {{- end }}
+</p>

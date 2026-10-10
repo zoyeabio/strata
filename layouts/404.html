@@ -1,0 +1,15 @@
+{{ define "main" }}
+<div class="not-found">
+  <p class="not-found__code">404</p>
+  <h1 class="not-found__title">Page not found</h1>
+  <p class="not-found__hint">The page may have been moved or deleted.</p>
+  <p class="not-found__actions">
+    <a class="not-found__link" href="{{ "/" | relURL }}">Back to home</a>
+    {{- with site.Menus.main }}
+    {{- with index . 0 }}
+    <a class="not-found__link" href="{{ .URL }}">{{ .Name }}</a>
+    {{- end }}
+    {{- end }}
+  </p>
+</div>
+{{ end }}

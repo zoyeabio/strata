@@ -1,0 +1,21 @@
+{{ define "main" }}
+{{- $termParams := site.Params.term | default dict }}
+<header class="page-header">
+  <h1>{{ .Title | emojify }}</h1>
+  <p class="page-header__meta">{{ len .Pages }} articles</p>
+</header>
+{{- with .Content }}
+<div class="page-content prose">{{ . }}</div>
+{{- end }}
+{{- $sorted := .Pages }}
+{{- if .Params.orderByWeight | default $termParams.orderByWeight }}
+{{- $sorted = .Pages.ByWeight }}
+{{- end }}
+{{- $pager := .Paginate $sorted }}
+{{ partial "page/page-collection.html" (dict
+    "pages" $pager.Pages
+    "cardView" (.Params.cardView | default $termParams.cardView)
+    "showSummary" (.Params.showSummary | default $termParams.showSummary)
+) }}
+{{ partial "page/pagination.html" $pager }}
+{{ end }}

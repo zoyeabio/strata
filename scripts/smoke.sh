@@ -84,6 +84,18 @@ if a != b:
 print("ok   hero preload srcset matches the hero img srcset")
 PY
 
+# 9. taxonomy overview lists every term with its count (text mode by default)
+assert 'tags/index.html' 'term-text__link' 'taxonomy overview renders term links'
+count_assert 'tags/index.html' 'term-text__count' 2 'both terms show a count'
+
+# 10. a term page lists the tagged articles
+count_assert 'tags/alpha/index.html' 'card card--' 2 'term alpha lists two article cards'
+assert 'tags/beta/index.html' 'card card--' 'term beta lists its article cards'
+
+# 11. the 404 page links home and to the first menu item, never a hardcoded path
+assert '404.html' 'not-found__code' '404 page renders'
+assert '404.html' 'href="/"' '404 links home'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

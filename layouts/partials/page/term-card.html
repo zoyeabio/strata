@@ -1,0 +1,48 @@
+{{- /*
+  One taxonomy term card: optional term image, title link and article count.
+
+  Params
+    entry          (taxonomy entry, required) — .Data.Terms item, carries
+                   .Page (the term page) and .Count (number of articles)
+    index          (int, optional) — position in the collection; drives the
+                   eager/lazy split the same way page cards do
+    showTermCount  (bool, optional) — print the article count (default true)
+
+  The image is the term page's own featureimage, resolved through the shared
+  pipeline with the card role; a term without an image renders title and
+  count only. The count badge is plain markup — where it sits on the card
+  belongs to CSS.
+
+  Called by: _default/terms.html
+*/ -}}
+{{- $page := .entry.Page }}
+{{- $eagerCount := site.Params.eagerCardCount | default 6 }}
+{{- $eager := lt (.index | default 0) $eagerCount }}
+<article class="term-card">
+  {{- with $page.Params.featureimage }}
+  {{- $img := partial "data/image-resource.html" (dict
+      "ref" .
+      "page" $page
+      "role" "card"
+      "alt" $page.Title) }}
+  {{- if $img.ok }}
+  <div class="term-card__media">
+    {{- partial "media/image.html" (dict
+        "img" $img
+        "alt" $img.alt
+        "sizes" (partial "data/card-presets.html" "grid").sizes
+        "loading" (cond $eager "eager" "lazy")
+        "fetchpriority" (cond $eager "" "low")
+        "class" "term-card__image") }}
+  </div>
+  {{- end }}
+  {{- end }}
+  <div class="term-card__body">
+    <h2 class="term-card__title">
+      <a class="term-card__link" href="{{ $page.RelPermalink }}">{{ $page.Title | emojify }}</a>
+    </h2>
+    {{- if .showTermCount }}
+    <p class="term-card__count">{{ .entry.Count }}</p>
+    {{- end }}
+  </div>
+</article>
