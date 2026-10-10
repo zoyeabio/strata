@@ -1,0 +1,22 @@
+{{- /*
+  Partial: data/og-image-ref.html
+  Role:     Resolve the image reference shared by Open Graph and JSON-LD
+            (params.images[0] → featureimage → a page resource whose name
+            contains feature, cover or thumbnail → site.Params.defaultSocialImage)
+  Params:   page (Page, required)
+  Outputs:  string (asset ref or URL, may be empty)
+  Called by: opengraph.html, head/schema.html
+*/ -}}
+{{- $page := . }}
+{{- $ref := "" }}
+{{- with $page.Params.images }}{{ $ref = index . 0 }}{{ end }}
+{{- with $page.Params.featureimage }}{{ $ref = . }}{{ end }}
+{{- if not $ref }}
+  {{- range $page.Resources }}
+    {{- if and (not $ref) (or (in .Name "feature") (in .Name "cover") (in .Name "thumbnail")) }}
+      {{- $ref = .Name }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- with site.Params.defaultSocialImage }}{{ if not $ref }}{{ $ref = . }}{{ end }}{{ end }}
+{{- return $ref }}

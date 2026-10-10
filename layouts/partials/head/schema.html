@@ -1,0 +1,61 @@
+{{- /*
+  Partial: head/schema.html
+  Role:     JSON-LD graph: WebSite (home), WebPage (every rendered page),
+            Article (dated content — the same condition as og:type=article).
+            The Product type stays behind site.Params.schema.enableProduct
+            and arrives with the site-layer product template.
+  Params:   page (Page, required)
+  Outputs:  <script type="application/ld+json"> with a @graph
+  Called by: head/head.html
+*/ -}}
+{{- $page := . }}
+{{- if ne $page.Kind "404" }}
+{{- $isHome := eq $page.Kind "home" }}
+{{- $isArticle := and (eq $page.Kind "page") (not $page.Date.IsZero) }}
+{{- $lang := site.Language.LanguageCode | default "en" }}
+{{- $websiteID := printf "%s#website" site.Home.Permalink }}
+{{- $graph := slice }}
+{{- if $isHome }}
+{{- $graph = append (dict
+    "@context" "https://schema.org"
+    "@type" "WebSite"
+    "@id" $websiteID
+    "name" site.Title
+    "url" site.Home.Permalink
+    "inLanguage" $lang) $graph }}
+{{- end }}
+{{- $graph = append (dict
+    "@context" "https://schema.org"
+    "@type" "WebPage"
+    "@id" (printf "%s#webpage" $page.Permalink)
+    "url" $page.Permalink
+    "name" $page.Title
+    "isPartOf" (dict "@id" $websiteID)
+    "inLanguage" $lang) $graph }}
+{{- if $isArticle }}
+{{- $img := partial "data/image-resource.html" (dict
+    "ref" (partial "data/og-image-ref.html" $page)
+    "page" $page
+    "role" "og"
+    "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
+{{- $article := dict
+    "@context" "https://schema.org"
+    "@type" "Article"
+    "@id" (printf "%s#article" $page.Permalink)
+    "headline" $page.Title
+    "url" $page.Permalink
+    "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
+    "publisher" (dict "@type" "Organization" "name" site.Title "url" site.Home.Permalink) }}
+{{- if not $page.PublishDate.IsZero }}
+{{- $article = merge $article (dict "datePublished" ($page.PublishDate.Format "2006-01-02T15:04:05Z07:00")) }}
+{{- end }}
+{{- if not $page.Lastmod.IsZero }}
+{{- $article = merge $article (dict "dateModified" ($page.Lastmod.Format "2006-01-02T15:04:05Z07:00")) }}
+{{- end }}
+{{- if $img.ok }}
+{{- $article = merge $article (dict "image" (slice ($img.url | absURL))) }}
+{{- end }}
+{{- $graph = append $article $graph }}
+{{- end }}
+<script type="application/ld+json">{{ $graph | jsonify | safeJS }}</script>
+{{- end }}

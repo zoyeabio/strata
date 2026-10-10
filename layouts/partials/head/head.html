@@ -26,6 +26,7 @@
 
   {{/* Social cards: own implementation, image goes through the pipeline */}}
   {{ partial "opengraph.html" . }}
+  {{ partial "head/schema.html" . }}
 
   {{/* Hero preload, from the same resolver call the hero <img> uses */}}
   {{- $hero := partial "data/hero-image.html" . }}

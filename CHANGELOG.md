@@ -255,6 +255,34 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   classes into `site.css` (the allowlist is down to `sr-only prose
   not-prose`), and the layer-order assertion now parses every `@layer`
   statement per the spec instead of pattern-matching two of them
+- `layouts/partials/head/schema.html` — JSON-LD graph: WebSite on the home
+  page, WebPage on every rendered page and Article on dated content, with
+  the social image reused from the Open Graph pipeline (the reference
+  selection moved into `data/og-image-ref.html` so the two cannot drift);
+  Product stays behind `schema.enableProduct` until the site-layer product
+  template arrives
+- `layouts/partials/data/image-resource.html` — a declared but unresolvable
+  image now fails the production build (`errorf`) instead of being skipped
+  silently (PLAN §2.7); the development server still only warns, and a page
+  with no image declared is not an error
+- `layouts/partials/page/card.html` — the `extend-article-link.html`
+  site hook is back at the card tail (ARCH §3.5.2)
+- `scripts/check-build.sh` — shared output rules for the validators:
+  referenced images exist, pipeline images carry `srcset` and a real `alt`,
+  preload candidates are a subset of the page `srcset`, no orphan images
+  (all text products scanned, srcsets expanded, favicons exempt), per-page
+  image payload under 600KB, self-referential canonical (page 1
+  pagination tolerated), the JSON-LD graph matches the page kinds, no dead
+  links, no leaked dev placeholders, no `.DS_Store`
+- `scripts/validate-theme.sh` — silent production build of the fixture plus
+  `check-build.sh` theme mode; a draft page with an unresolvable image must
+  fail the production build
+- `scripts/validate-site.sh` — production build of any site against this
+  theme checkout through `HUGO_MODULE_REPLACEMENTS` (the site tree is never
+  written to) plus `check-build.sh` site mode; verified against strata-demo
+- `test/fixture/content/section-a/missing.md` — now a draft, so the default
+  build stays clean while `validate-theme.sh` proves the production error
+  path
 
 ### Removed
 

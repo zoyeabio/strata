@@ -126,9 +126,13 @@
   {{- else }}
     {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
   {{- end }}
-{{- else if hugo.IsServer }}
+{{- else if $ref }}
   {{- $where := "" }}{{ with $page }}{{ $where = .RelPermalink }}{{ end }}
-  {{- warnf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
+  {{- if hugo.IsProduction }}
+    {{- errorf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
+  {{- else if hugo.IsServer }}
+    {{- warnf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
+  {{- end }}
 {{- end }}
 
 {{- return (merge $result (dict "alt" (.alt | default ""))) }}

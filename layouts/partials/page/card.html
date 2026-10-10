@@ -59,4 +59,7 @@
   {{- if and .showSummary $page.Summary }}
   <p class="card__summary">{{ $page.Summary | plainify | truncate $summaryLength }}</p>
   {{- end }}
+  {{- if templates.Exists "partials/extend-article-link.html" }}
+  {{ partial "extend-article-link.html" $page }}
+  {{- end }}
 </article>
