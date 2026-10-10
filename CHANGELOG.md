@@ -177,6 +177,19 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   a python check that `quality=` writes its own variant set), both list
   branches, icon/email/cta/contact/carousel output and the layout class set
 - `test/fixture/` — a shortcodes showcase page and a site-level icon asset
+- `layouts/shortcodes/interactive/carousel.html` — the instance id is the
+  ordinal alone; the wall-clock suffix is gone, so two builds of the same
+  tree produce byte-identical pages
+- `scripts/diff-build.sh` — hash normalization requires a hex run to contain
+  `[a-f]`: pure-digit runs (timestamps, phone numbers) stay visible to the
+  zero-diff gate, lettered hashes still normalize
+- `layouts/partials/data/card-presets.html` — the sizes ladder rungs equal
+  the rendered padding (24 / 56 / 96 / 128 per side below 640 / 640–852 /
+  853–1023 / 1024 and up), the hero gains the 853 rung, the container cap
+  becomes 1024 and the 1280 rung rounds up in floating point (`math.Div`
+  truncates integer division)
+- `scripts/smoke.sh` — 61 assertions (from 60): two independent fixture
+  builds must be byte-identical
 
 ### Removed
 

@@ -58,7 +58,9 @@ STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 TAB="$(printf '\t')"
 
-# 8 位以上小写 hex（awk 不支持 {8,} 区间量词，重复写开）
+# 9 位以上小写 hex，且至少含一个 [a-f]：纯数字 9 位+ 是时间戳、电话号码、
+# 毫秒数这类真值，不许归一（真哈希漏判字母的概率 (10/16)^16 ≈ 0.02%，
+# 最坏只是 diff 多一行噪音）。awk 不支持 {8,} 区间量词，重复写开。
 HEXRE='[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*'
 
 # ---------------------------------------------------------------------------
@@ -71,9 +73,14 @@ BEGIN {
   FS = "\t"
   H = "[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*"
 }
-function unhex(s,    out) {
+function unhex(s,    out, m) {
   out = ""
-  while (match(s, H)) { out = out substr(s, 1, RSTART - 1) "<hash>"; s = substr(s, RSTART + RLENGTH) }
+  while (match(s, H)) {
+    m = substr(s, RSTART, RLENGTH)
+    if (m ~ /[a-f]/) out = out substr(s, 1, RSTART - 1) "<hash>"
+    else out = out substr(s, 1, RSTART - 1) m
+    s = substr(s, RSTART + RLENGTH)
+  }
   return out s
 }
 function emit(s) {
@@ -127,9 +134,14 @@ AWKEOF
 # HTML：去注释、去 script/style 整块 → 输出骨架流 "txt:..." / "t:name c=.. i=.. u=.."
 cat >"$STAGE/canon_html.awk" <<'AWKEOF'
 BEGIN { H = "[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*" }
-function unhex(s,    out) {
+function unhex(s,    out, m) {
   out = ""
-  while (match(s, H)) { out = out substr(s, 1, RSTART - 1) "<hash>"; s = substr(s, RSTART + RLENGTH) }
+  while (match(s, H)) {
+    m = substr(s, RSTART, RLENGTH)
+    if (m ~ /[a-f]/) out = out substr(s, 1, RSTART - 1) "<hash>"
+    else out = out substr(s, 1, RSTART - 1) m
+    s = substr(s, RSTART + RLENGTH)
+  }
   return out s
 }
 function norm(s) {
@@ -292,7 +304,12 @@ for side in b a; do
   while IFS= read -r raw; do
     key=$(printf '%s' "$raw" | awk -v H="$HEXRE" \
       'BEGIN{out=""} {
-        while (match($0, H)) { out = out substr($0, 1, RSTART-1) "<hash>"; $0 = substr($0, RSTART+RLENGTH) }
+        while (match($0, H)) {
+          m = substr($0, RSTART, RLENGTH)
+          if (m ~ /[a-f]/) out = out substr($0, 1, RSTART-1) "<hash>"
+          else out = out substr($0, 1, RSTART-1) m
+          $0 = substr($0, RSTART+RLENGTH)
+        }
         print out $0
       }')
     awk -f "$STAGE/canon_css.awk" -v KEY="$key" "$root/$raw" >>"$STAGE/css-rows-$side.tsv"

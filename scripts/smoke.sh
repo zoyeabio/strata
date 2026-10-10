@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Builds test/fixture and asserts the theme contract against the rendered
 # HTML: image resolver and ladder, sizes invariants, head tags, taxonomy,
-# series, remote gating, shortcodes and production silence. Every assertion
-# is a regression gate; the script exits non-zero if any of them fails.
+# series, remote gating, shortcodes, production silence and build
+# reproducibility. Every assertion is a regression gate; the script exits
+# non-zero if any of them fails.
 #
 # Usage: scripts/smoke.sh
 set -euo pipefail
@@ -289,6 +290,20 @@ assert 'section-a/shortcodes/index.html' 'class="mcol mcol--first"' \
   'col-left renders the first-column class set'
 assert 'section-a/shortcodes/index.html' 'class="mcol mcol--last"' \
   'col-right renders the last-column class set'
+
+# 23. build reproducibility: two independent builds of the same tree are
+#     byte-identical, so no template may leak now/rand/unsorted iteration
+#     into the output — a swapping id or timestamp slips past every content
+#     assertion above and would blind the diff-build gate to real changes
+OUT_REPRO="$WORK/public-repro"
+hugo --source "$ROOT/test/fixture" --destination "$OUT_REPRO" --quiet \
+  2>"$WORK/build-repro.stderr"
+if diff -r -q "$OUT" "$OUT_REPRO" >"$WORK/repro.diff" 2>&1; then
+  pass 'two builds are byte-identical'
+else
+  fail 'two builds are byte-identical'
+  awk 'NR<=20{print "  " $0}' "$WORK/repro.diff" >&2
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

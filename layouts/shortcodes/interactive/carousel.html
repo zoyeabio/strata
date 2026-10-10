@@ -26,7 +26,7 @@
 
   Called by: content markdown
 */ -}}
-{{- $id := printf "carousel-%d-%d" .Ordinal now.UnixNano -}}
+{{- $id := printf "carousel-%d" .Ordinal -}}
 {{- $ar := split (default "16-9" (.Get "aspectRatio")) "-" -}}
 {{- $aw := default "16" (index $ar 0) -}}
 {{- $ah := default "9" (index $ar 1) -}}
