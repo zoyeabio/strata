@@ -21,6 +21,9 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   plain-text title that never disappears when no logo is configured
 - `layouts/partials/frame/menu.html` — one navigation tree for every breakpoint,
   marking the active item with `aria-current`
+- `layouts/partials/frame/footer.html` — site identity, footer navigation and a
+  copyright line that resolves the `{ year }` placeholder, falling back to
+  `© {year} {site title}` when no copyright is configured
 - `assets/js/appearance.js` — applies the stored or system colour scheme before
   first paint, toggling `class="dark"` on the document root
 - `README.md`, `CHANGELOG.md`
@@ -29,8 +32,9 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 ### Changed
 
 - `layouts/_default/baseof.html` — document shell with `lang`, `dir` and
-  appearance attributes; the head delegates to `partials/head/head.html` and
-  the body opens with `partials/frame/header.html`
+  appearance attributes; the head delegates to `partials/head/head.html`, the
+  body opens with `partials/frame/header.html` and closes with
+  `partials/frame/footer.html`
 - Head, header, footer, home, list, article and shortcode templates are
   scheduled for sequential rebuild; see the build plan for the order.
 
