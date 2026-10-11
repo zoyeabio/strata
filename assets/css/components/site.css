@@ -294,6 +294,7 @@
 
 .site-footer__link[aria-current="page"] {
   color: var(--site-link);
+  font-weight: 600;
 }
 
 .site-footer__copyright {

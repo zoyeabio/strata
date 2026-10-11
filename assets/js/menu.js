@@ -1,6 +1,8 @@
 /* Main navigation disclosure: toggles the mobile panel, closes on
    Escape with focus back on the button, and resets when crossing to the
-   desktop layout. Submenu chevron buttons toggle their sibling block
+   desktop layout. On open the panel cap is measured from the live header
+   bottom, so a wrapped (multi-line) header never pushes it past the
+   viewport. Submenu chevron buttons toggle their sibling block
    in the same script. Loaded deferred from the menu partial whenever
    a main menu exists. */
 (function () {
@@ -11,6 +13,12 @@
   function set(open) {
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     panel.classList.toggle("is-open", open);
+    if (open) {
+      panel.style.maxHeight =
+        Math.max(0, window.innerHeight - panel.getBoundingClientRect().top) + "px";
+    } else {
+      panel.style.maxHeight = "";
+    }
   }
 
   btn.addEventListener("click", function () {

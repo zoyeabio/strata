@@ -613,6 +613,8 @@ assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel
 assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
 assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
 css_assert 'site-header\{--header-bar:68px;position:relative' 'standard header anchors the mobile panel'
+css_assert 'site-nav__link\[aria-current=page\]\{[^}]*font-weight:600' 'active nav item has a non-color cue'
+css_assert 'site-footer__link\[aria-current=page\]\{[^}]*font-weight:600' 'active footer item has a non-color cue'
 # 45b. the 853px breakpoint is written twice (CSS collapse, JS reset):
 #     drift once and the panel sticks open on desktop or never opens
 if grep -q 'min-width: 853px' "$ROOT/assets/js/menu.js" &&
@@ -630,6 +632,14 @@ if grep -q '"Escape"' "$ROOT/assets/js/menu.js" &&
 else
   fail 'menu closes on Escape with focus back on the button'
 fi
+# 45d. the panel cap is measured, not assumed: a wrapped header would
+#      otherwise push a tall panel past the viewport (same pattern)
+if grep -q 'panel\.style\.maxHeight' "$ROOT/assets/js/menu.js" &&
+   grep -q 'getBoundingClientRect().top' "$ROOT/assets/js/menu.js"; then
+  pass 'menu caps the panel from the live header bottom'
+else
+  fail 'menu caps the panel from the live header bottom'
+fi
 
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
@@ -641,6 +651,15 @@ if grep -q 'header\.inert *= *true' "$ROOT/assets/js/smart-header.js" &&
   pass 'smart header toggles inert with visibility'
 else
   fail 'smart header toggles inert with visibility'
+fi
+# 43b. smart init is behaviour too: a reload already scrolled down must
+#      start hidden (this exact init once shipped as a no-op the old
+#      gate could not see — same pattern as #43)
+if grep -q 'window\.scrollY >= 100' "$ROOT/assets/js/smart-header.js" &&
+   grep -q 'header\.inert *= *true' "$ROOT/assets/js/smart-header.js"; then
+  pass 'smart header hides on load when already scrolled'
+else
+  fail 'smart header hides on load when already scrolled'
 fi
 
 # 39. scheme contrast: every colour scheme keeps white-on-accent/strong
