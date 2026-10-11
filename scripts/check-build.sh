@@ -320,6 +320,31 @@ if social_bad:
 else:
     ok('social tags match the page kind')
 
+# R12 structural tags balance on every page: a stray closer from a
+#    conditional wrapper (or a missing one) shows up as open/close mismatch
+STRUCT_TAGS = ('div', 'ul', 'ol', 'dl', 'nav', 'footer', 'header', 'main',
+               'section', 'article', 'figure', 'figcaption', 'button', 'a',
+               'p', 'li', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr',
+               'td', 'th', 'form', 'label', 'textarea', 'select', 'blockquote',
+               'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dt', 'dd')
+bal_bad = []
+for t in htmls:
+    text = t.read_text(errors='ignore')
+    if 'http-equiv="refresh"' in text:
+        continue
+    rel = t.relative_to(pub)
+    clean = re.sub(r'<!--.*?-->', '', text, flags=re.S)
+    clean = re.sub(r'<(script|style)\b.*?</\1>', '', clean, flags=re.S | re.I)
+    for tag in STRUCT_TAGS:
+        opens = len(re.findall(rf'<{tag}[\s>]', clean, re.I))
+        closes = len(re.findall(rf'</{tag}\s*>', clean, re.I))
+        if opens != closes:
+            bal_bad.append(f'{rel}: <{tag}> {opens} opens vs {closes} closes')
+if bal_bad:
+    bad('structural tags balance', '\n'.join(f'  {b}' for b in bal_bad))
+else:
+    ok('structural tags balance')
+
 sys.exit(1 if problems else 0)
 PY
 ); then

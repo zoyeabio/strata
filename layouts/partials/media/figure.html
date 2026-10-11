@@ -52,7 +52,8 @@
 {{- $sizes := (partial "data/card-presets.html" "text").sizes -}}
 <figure class="figure{{ with .class }} {{ . }}{{ end }}">
   {{- if .link }}
-  <a href="{{ .link }}"{{ with .target }} target="{{ . }}"{{ end }}{{ with .rel }} rel="{{ . }}"{{ end }}>
+  {{- $blank := eq (.target | default "") "_blank" }}
+  <a href="{{ .link }}"{{ with .target }} target="{{ . }}"{{ end }}{{ with .rel }} rel="{{ . }}"{{ else }}{{ if $blank }} rel="noopener"{{ end }}{{ end }}>
   {{- end }}
   {{- partial "media/image.html" (dict
       "img" $img
