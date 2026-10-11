@@ -2,7 +2,10 @@
    then wire the header [data-appearance-toggle] button if present. The
    button cycles auto -> dark -> light; auto follows the OS preference
    (or the site default) and stores nothing, so the manual choice never
-   locks out the system setting for good.
+   locks out the system setting for good. The label is the accessible
+   name and carries the current mode, so the button stays aria-pressed
+   free: it cycles three states, and aria-pressed would announce
+   "dark active" while the label says "Auto".
    Loaded in head on every page. */
 (function () {
   var root = document.documentElement;
@@ -39,7 +42,6 @@
     root.classList.toggle("dark", e === "dark");
     var btn = document.querySelector("[data-appearance-toggle]");
     if (btn) {
-      btn.setAttribute("aria-pressed", e === "dark" ? "true" : "false");
       btn.textContent = m.charAt(0).toUpperCase() + m.slice(1);
     }
   }

@@ -54,6 +54,45 @@ else
   fail "site is missing [taxonomies] values:$missing_tax — tag links or series nav will vanish silently"
 fi
 
+# A site's own data/sharing.json merges over the theme's, and Hugo's printf
+# does not error on a share URL with the wrong verb count: it appends
+# %!N(EXTRA ...) into the link and the button silently stops working. The
+# theme's own defaults are checked in validate-theme.sh; this is where a site
+# override can land, so the merged pair is checked here. The merge for this
+# shape is a flat per-name replace, which is how Hugo merges data files.
+if sharing_out=$(python3 - "$ROOT" "$SITE" <<'PY'
+import json
+import pathlib
+import re
+import sys
+
+theme_root = pathlib.Path(sys.argv[1])
+site_root = pathlib.Path(sys.argv[2])
+data = {}
+for p in (theme_root / "data/sharing.json", site_root / "data/sharing.json"):
+    if p.exists():
+        data.update(json.loads(p.read_text()))
+
+bad = []
+for name, svc in sorted(data.items()):
+    if not isinstance(svc, dict) or "url" not in svc:
+        bad.append("%s: no url" % name)
+        continue
+    verbs = re.findall(r'%\[\d+\][a-z]|%[a-z]', svc["url"])
+    if len(verbs) != 2:
+        bad.append("%s: %d verb(s) %s, want 2 — %r" % (name, len(verbs), verbs, svc["url"]))
+if bad:
+    for line in bad:
+        print("FAIL " + line, file=sys.stderr)
+    sys.exit(1)
+print("%d share templates, 2 verbs each" % len(data))
+PY
+); then
+  pass "share URL templates consume both arguments ($sharing_out)"
+else
+  fail 'share URL templates consume both arguments'
+fi
+
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode site; then
   pass 'check-build site mode'
 else

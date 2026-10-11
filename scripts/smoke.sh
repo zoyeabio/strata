@@ -540,6 +540,8 @@ assert 'index.html' 'Testville' 'footer address second line renders'
 assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
 assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
 assert 'index.html' 'site-header__toggle" data-appearance-toggle' 'switcher sits in the header'
+assert_not 'index.html' 'data-appearance-toggle aria-pressed' \
+  'three-state appearance toggle carries no boolean state'
 assert 'index.html' 'class="back-to-top" data-scroll-top' 'scroll-to-top floats at the viewport corner'
 assert 'index.html' 'aria-label="Back to top"' 'scroll-to-top is labelled'
 assert 'index.html' 'site-footer__bottom' 'rich footer bottom travels as one bar'
@@ -835,6 +837,7 @@ fi
 # 40. keyboard and assistive-tech paths: skip link, carousel arrows and
 #     reduced-motion guards, contact live region and invalid flag
 assert 'index.html' 'class="skip-link" href="#main-content"' 'skip link targets the main block'
+assert 'index.html' '<main id="main-content" tabindex="-1">' 'skip link lands on a focusable main'
 assert 'section-a/shortcodes/index.html' 'ArrowLeft' 'carousel handles arrow keys'
 assert 'section-a/shortcodes/index.html' 'prefers-reduced-motion' 'carousel honours reduced motion'
 assert 'section-a/shortcodes/index.html' 'role="status"' 'contact status is a live region'

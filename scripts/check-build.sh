@@ -400,6 +400,13 @@ else:
 
 # R13 articles carry bodies: an article page (og:type=article) whose content
 #    block holds zero words is a migration accident, not a page
+# Void tags fire handle_starttag but never handle_endtag. Counting them in the
+# depth counter leaks it past the content block, so the footer would be counted
+# as article body and this rule would never fire on any page with an image.
+VOID = frozenset(("area", "base", "br", "col", "embed", "hr", "img", "input",
+                  "link", "meta", "param", "source", "track", "wbr"))
+
+
 class BodyWords(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -407,6 +414,8 @@ class BodyWords(HTMLParser):
         self.words = 0
 
     def handle_starttag(self, tag, attrs):
+        if tag in VOID:
+            return
         if self.depth:
             self.depth += 1
         elif tag == 'div' and any(k == 'class' and 'article__content' in (v or '')
@@ -414,7 +423,7 @@ class BodyWords(HTMLParser):
             self.depth = 1
 
     def handle_endtag(self, tag):
-        if self.depth:
+        if tag not in VOID and self.depth:
             self.depth -= 1
 
     def handle_data(self, data):
