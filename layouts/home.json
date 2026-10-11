@@ -1,0 +1,30 @@
+{{- /*
+  Home JSON output: the client-side search index.
+
+  Entries mirror the article rule in _default/single.html — sections in
+  site.Params.mainSections (compared case-insensitively), or every regular
+  page when mainSections is absent. Slim by design: title, url, date,
+  summary and the first contentLength characters of plain text (2000 by
+  default, site.Params.search.contentLength overrides). No image fields — result items render text-only.
+
+  A site opts in with [outputs] home = ["HTML", "RSS", "JSON"] plus
+  enableSearch = true; check-build fails a search button with no index.
+*/ -}}
+{{- $sections := apply (site.Params.mainSections | default slice) "lower" "." -}}
+{{- $cap := site.Params.search.contentLength | default 2000 -}}
+{{- $entries := slice -}}
+{{- range site.RegularPages -}}
+  {{- $include := true -}}
+  {{- if $sections }}{{ $include = in $sections (lower .Section) }}{{ end -}}
+  {{- if $include -}}
+    {{- $date := "" -}}
+    {{- if not .Date.IsZero }}{{ $date = .Date.Format "2006-01-02" }}{{ end -}}
+    {{- $entries = $entries | append (dict
+      "title" .Title
+      "url" .RelPermalink
+      "date" $date
+      "summary" (.Summary | plainify)
+      "content" (substr (.Plain | plainify) 0 $cap)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $entries | jsonify -}}

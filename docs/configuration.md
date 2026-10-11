@@ -134,11 +134,31 @@ accident:
 
 - page front matter `compactSummary` — silently ignored by every
   template; the fixture smoke gate fails on it so it never sneaks back in
-- `enableSearch` — search is not built yet
 - `backgroundImageWidth` — superseded by the pipeline's own widths
 
 ## Not implemented (planned)
 
-Search (`index.json`), related-content block, table of contents, syntax
+Related-content block, table of contents, syntax
 highlighting CSS, i18n string catalogue, product pages. See the project
 roadmap.
+
+## Search (`enableSearch`)
+
+Two keys opt in, both required:
+
+```toml
+enableSearch = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+```
+`layouts/home.json` emits the index: article pages only (the
+`mainSections` rule from `single.html`), each with `title`, `url`,
+`date`, `summary` and the first `search.contentLength` characters of
+plain text (2000 by default) — no image
+fields, result items are text-only. `assets/js/search.js` fetches it on
+first open and scores in-page: every query token must occur somewhere,
+title hits weigh 3, summary 2, body 1, top ten render. The header button
+opens a dropdown panel (the disclosure contract from the mobile menu:
+`aria-expanded` sync, Escape closes with focus back, the two panels close
+each other). A search button with no `index.json` fails check-build.

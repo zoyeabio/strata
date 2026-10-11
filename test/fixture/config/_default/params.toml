@@ -1,6 +1,7 @@
 eagerCardCount = 2
 mainSections = ["section-a"]
 twitterSite = "@fixturetest"
+enableSearch = true
 
 [header]
   layout = "smart"

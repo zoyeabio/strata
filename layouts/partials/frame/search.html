@@ -1,0 +1,29 @@
+{{- /*
+  Header search: a disclosure button plus a dropdown panel with a labeled
+  input, a polite live status line and a results list. Rendered only when
+  site.Params.enableSearch is true — the site also needs [outputs]
+  home = ["HTML", "RSS", "JSON"] so the index exists (check-build enforces
+  the pairing). Status strings travel as data attributes so no site copy
+  lives in the script.
+
+  Called by: frame/header.html, after frame/menu.html (the later dropdown
+  paints above the nav panel when both are open; each script closes the
+  other on open).
+*/ -}}
+{{- if site.Params.enableSearch }}
+{{- $searchJS := resources.Get "js/search.js" | fingerprint "sha512" }}
+<button type="button" class="site-header__search" data-search-toggle aria-expanded="false" aria-controls="site-search" aria-label="Search">
+  <span class="site-search__icon" aria-hidden="true"></span>
+</button>
+<div class="site-search" id="site-search" data-search-panel data-search-index="{{ "index.json" | relURL }}">
+  <label class="sr-only" for="site-search-input">Search articles</label>
+  <input class="site-search__input" id="site-search-input" data-search-input type="search" autocomplete="off" placeholder="Type to search">
+  <p class="site-search__status" data-search-status role="status" aria-live="polite"
+    data-search-loading="Loading the search index…"
+    data-search-unavailable="Search is unavailable."
+    data-search-empty="No results."
+    data-search-count="results"></p>
+  <ul class="site-search__results" data-search-results></ul>
+</div>
+<script src="{{ $searchJS.RelPermalink }}" integrity="{{ $searchJS.Data.Integrity }}" defer></script>
+{{- end }}

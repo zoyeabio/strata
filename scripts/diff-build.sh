@@ -11,7 +11,7 @@
 #                     alpha.0b 起用它声明本次预期改动范围，范围外差异即失败。
 #   --make-baseline   比对后把报告留档到 scripts/baseline/diff-build.baseline.txt。
 #
-# 三张比对表（口径见 PLAN.md §10「语义等价比对」）：
+# 三张比对表：
 #   1. 页面集合   public/**/*.html 相对路径，必须完全一致
 #   2. 渲染结构   去哈希后的 DOM 骨架：标签序列 + class + id + href/src + 文本
 #   3. CSS 规则   深度 0 规则块集合（选择器 + 声明），忽略注释/空白/哈希/文件内顺序

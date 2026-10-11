@@ -11,8 +11,6 @@
 #   ORPHAN   —— 无任何字面量调用方的 partial（alpha.0a 门槛：必须为空）
 #   DYNAMIC  —— `partial $var` 动态分发，静态不可解析，需人工确认
 #   HOOK     —— templates.Exists 站点层钩子，主题不提供是设计使然（提示，非问题）
-#
-# 口径说明见 ARCHITECTURE.md §3.5。
 
 set -euo pipefail
 

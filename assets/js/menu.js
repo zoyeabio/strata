@@ -3,7 +3,9 @@
    desktop layout. On open the panel cap is measured from the live header
    bottom, so a wrapped (multi-line) header never pushes it past the
    viewport. Submenu chevron buttons toggle their sibling block
-   in the same script. Loaded deferred from the menu partial whenever
+   in the same script. Opening the nav closes the search panel so the
+   two dropdowns never stack (search.js returns the courtesy).
+   Loaded deferred from the menu partial whenever
    a main menu exists. */
 (function () {
   var btn = document.querySelector("[data-nav-toggle]");
@@ -16,6 +18,12 @@
     if (open) {
       panel.style.maxHeight =
         Math.max(0, window.innerHeight - panel.getBoundingClientRect().top) + "px";
+      var searchBtn = document.querySelector("[data-search-toggle]");
+      var searchPanel = document.querySelector("[data-search-panel]");
+      if (searchBtn && searchPanel) {
+        searchBtn.setAttribute("aria-expanded", "false");
+        searchPanel.classList.remove("is-open");
+      }
     } else {
       panel.style.maxHeight = "";
     }

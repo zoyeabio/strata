@@ -389,4 +389,123 @@
   color: var(--site-link);
   border-color: var(--site-link);
 }
+
+.site-header__search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.site-header__search:hover {
+  color: var(--site-link);
+  border-color: var(--site-link);
+}
+
+.site-search__icon {
+  position: relative;
+  display: block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.site-search__icon::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -7px;
+  bottom: -5px;
+  width: 8px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+[dir="rtl"] .site-search__icon::after {
+  transform: rotate(-45deg);
+  transform-origin: right center;
+}
+
+.site-search {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--page-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 16px var(--site-gutter, 24px) 20px;
+}
+
+.site-search.is-open {
+  display: block;
+}
+
+.site-search__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.site-search__input:focus-visible {
+  outline: 2px solid var(--site-link);
+  outline-offset: 2px;
+}
+
+.site-search__status {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  min-height: 20px;
+}
+
+.site-search__results {
+  list-style: none;
+  margin-top: 4px;
+  max-height: min(50vh, 400px);
+  overflow-y: auto;
+}
+
+.site-search__results li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.site-search__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.site-search__link:hover {
+  color: var(--site-link);
+}
+
+.site-search__meta {
+  margin-inline-start: auto;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
 }

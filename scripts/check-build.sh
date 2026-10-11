@@ -449,6 +449,16 @@ if robots.is_file() and 'Sitemap:' in robots.read_text(errors='ignore'):
 else:
     bad('robots declares the sitemap', '  no Sitemap: line in robots.txt')
 
+# R15 search ships as a pair: a header button without its index (the site
+#    needs [outputs] home = ["HTML", "RSS", "JSON"]) is a silent dead button
+home = (pub / 'index.html').read_text(errors='ignore') if (pub / 'index.html').is_file() else ''
+if 'data-search-toggle' in home and not (pub / 'index.json').is_file():
+    bad('search button ships with its index', '  enableSearch is on but no index.json: add "JSON" to [outputs] home')
+elif 'data-search-toggle' not in home and (pub / 'index.json').is_file():
+    bad('search button ships with its index', '  index.json ships with no button: set enableSearch = true or drop "JSON" from [outputs] home')
+else:
+    ok('search button ships with its index')
+
 sys.exit(1 if problems else 0)
 PY
 ); then

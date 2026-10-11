@@ -640,6 +640,53 @@ if grep -q 'panel\.style\.maxHeight' "$ROOT/assets/js/menu.js" &&
 else
   fail 'menu caps the panel from the live header bottom'
 fi
+# 46. search: header button plus dropdown panel, JSON index of articles
+#     only, slim entries, behaviour asserted at the source (#43 pattern)
+assert 'index.html' 'data-search-toggle aria-expanded="false"' 'search button starts collapsed'
+assert 'index.html' 'aria-controls="site-search"' 'search button names its panel'
+assert 'index.html' 'id="site-search" data-search-panel' 'search panel carries the named id'
+assert 'index.html' 'data-search-index="[^"]*index\.json"' 'panel points at the index'
+assert 'index.html' 'search\.[0-9a-f]+\.js' 'search script loads'
+if python3 - "$OUT" <<'PY'
+import json, pathlib, sys
+entries = json.loads((pathlib.Path(sys.argv[1]) / 'index.json').read_text())
+assert isinstance(entries, list) and entries, 'empty index'
+for e in entries:
+    assert set(e) == {'title', 'url', 'date', 'summary', 'content'}, e.keys()
+    assert e['title'] and e['url'], 'blank title or url'
+    assert len(e['content']) <= 2000, 'content exceeds the slim cap'
+    assert e['url'].startswith('/section-a/'), 'non-article leaked in'
+PY
+then
+  pass 'search index holds slim article entries only'
+else
+  fail 'search index holds slim article entries only'
+fi
+if grep -q '3 \* inTitle + 2 \* inSummary + inContent' "$ROOT/assets/js/search.js" &&
+   grep -q '"Escape"' "$ROOT/assets/js/search.js" &&
+   grep -q 'data-nav-panel' "$ROOT/assets/js/search.js" &&
+   grep -q 'data-search-panel' "$ROOT/assets/js/menu.js" &&
+   grep -q 'list.addEventListener("click"' "$ROOT/assets/js/search.js"; then
+  pass 'search scores, escapes and shares the panel contract'
+else
+  fail 'search scores, escapes and shares the panel contract'
+fi
+css_assert 'article__header h1,.page-header h1\{font-size:2.125rem' 'page titles share one size rule'
+# 33c. the home title left the naked-h1 era: it renders inside .page-header
+#      like every other page title (same size, same top air)
+if python3 - "$OUT" <<'PY'
+import pathlib, sys
+html = (pathlib.Path(sys.argv[1]) / 'index.html').read_text()
+hi = html.find('<header class="page-header">')
+ti = html.find('<h1>', hi)
+ci = html.find('</header>', hi)
+assert hi != -1 and hi < ti < ci, 'home h1 outside the header'
+PY
+then
+  pass 'home title sits inside the page header'
+else
+  fail 'home title sits inside the page header'
+fi
 
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
