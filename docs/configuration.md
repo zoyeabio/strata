@@ -17,7 +17,6 @@ listed here; anything else is ignored.
 | `robots` | — | Default `<meta name="robots">` (page-level `robots` wins) |
 | `dateFormat` | `"2006-01-02"` | Go time format for card and article dates |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
-| `cardSummaryLength` | `160` | Truncate length for card summaries |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |
 | `customCSS` | `[]` | Asset paths loaded after the theme stylesheet (fingerprinted) |
 | `rtl` | `false` | Sets `<html dir="rtl">` |

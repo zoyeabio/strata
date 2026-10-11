@@ -20,6 +20,12 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   site config (both documented in README and the scaffold, which neither
   can inherit from the theme). Verified byte-equivalent output on the demo
   and probiointel sites.
+- Card preset parameter renamed `variant` → `preset`, matching ARCH §6.1
+  and `data/card-presets.html` (CSS classes `card--grid/row/inline`
+  unchanged).
+- Card summaries are no longer truncated in the template: `card.html` emits
+  the plainified summary whole and the CSS 3-line clamp owns the cut, so
+  CJK and long summaries behave the same. `cardSummaryLength` is gone.
 
 ### Fixed
 
