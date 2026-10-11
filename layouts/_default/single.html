@@ -2,6 +2,10 @@
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
 {{- $terms := .GetTerms "tags" }}
+{{- $articleParams := site.Params.article | default dict }}
+{{- $author := .Params.author | default site.Params.author.name | default "" }}
+{{- $showAuthor := false }}
+{{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor | default false }}{{ end }}
 <article>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -9,7 +13,7 @@
   <header class="article__header">
     {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
-    {{- if or (not .Date.IsZero) $terms }}
+    {{- if or (not .Date.IsZero) $terms (and $showAuthor $author) }}
     <p class="article__meta">
       {{- if not .Date.IsZero }}
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
@@ -17,6 +21,9 @@
       {{- range $terms }}
       {{- if not $.Date.IsZero }} · {{ end }}
       <a class="article__tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+      {{- end }}
+      {{- if and $showAuthor $author }}
+      {{- if or (not $.Date.IsZero) $terms }} · {{ end }}By {{ $author }}
       {{- end }}
     </p>
     {{- end }}

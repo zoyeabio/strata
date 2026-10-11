@@ -562,6 +562,11 @@ else
   pass 'page isset keys are lowercase only'
 fi
 
+# 35. article author: page front matter wins, site [author] is the fallback,
+#     both gated by showAuthor
+assert 'section-a/flat/index.html' 'By Flat Author' 'page author renders'
+assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the fallback'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

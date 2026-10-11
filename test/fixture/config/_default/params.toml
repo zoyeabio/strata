@@ -5,6 +5,10 @@ eagerCardCount = 2
 
 [article]
   showBreadcrumbs = true
+  showAuthor = true
+
+[author]
+  name = "Fixture Team"
 
 [taxonomy]
   showBreadcrumbs = true
