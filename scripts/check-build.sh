@@ -122,16 +122,19 @@ else:
     ok('referenced images exist')
 
 # R2 every local <img> of a pipeline-resized format carries srcset, and
-#    every <img> carries a real alt (svg/gif and animated webp pass through
-#    as single files — the pipeline never resizes them)
+#    every <img> carries a real alt. Hugo names processed variants with a
+#    `_hu_<hash>` segment; static files and disableImageOptimization pass
+#    through with their original names and legitimately have no srcset.
 bad_imgs = []
 for t, text in ((t, t.read_text(errors='ignore')) for t in htmls):
     for tag in re.findall(r'<img\b[^>]*>', text, re.I):
         src = re.search(r'\bsrc=["\x27]([^"\x27]*)["\x27]', tag, re.I)
         if not src or not local_path(src.group(1)):
             continue
+        base = Path(local_path(src.group(1))).name
         ext = Path(local_path(src.group(1))).suffix.lower()
-        if ext in {'.jpg', '.jpeg', '.png'} and not re.search(r'\bsrcset=["\x27][^"\x27]+["\x27]', tag, re.I):
+        if (ext in {'.jpg', '.jpeg', '.png'} and '_hu_' in base
+                and not re.search(r'\bsrcset=["\x27][^"\x27]+["\x27]', tag, re.I)):
             bad_imgs.append(f'{t.relative_to(pub)}: no srcset ({src.group(1)})')
         alt = re.search(r'\balt=["\x27]([^"\x27]*)["\x27]', tag, re.I)
         if alt is None:
@@ -210,10 +213,13 @@ for t in htmls:
     else:
         want = '/' + rel.as_posix()
     # Hugo paginates page 1 into /page/1/ while the page keeps the base
-    # permalink — the canonical rightly points at the base
-    want = re.sub(r'/page/1/$', '/', want)
+    # permalink — the canonical rightly points at the base. For page 2+
+    # hugo canonicalizes .Permalink to the listing base by design, which
+    # keeps pagination from duplicating content in search engines.
     got = local_path(m.group(1))
-    if got != want:
+    base_want = re.sub(r'/page/\d+/', '/', want, count=1)
+    base_got = re.sub(r'/page/\d+/', '/', got, count=1)
+    if got != want and base_got != base_want:
         canon_bad.append(f'{t.relative_to(pub)}: canonical {got} != {want}')
 if canon_bad:
     bad('canonical present and self-referential', '\n'.join(f'  {b}' for b in canon_bad))

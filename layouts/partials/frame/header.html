@@ -29,7 +29,7 @@
     {{- if eq .MediaType.SubType "svg" }}
     <span class="site-brand__logo">{{ .Content | safeHTML }}</span>
     {{- else }}
-    <img class="site-brand__logo" src="{{ .RelPermalink }}" alt="">
+    <img class="site-brand__logo" src="{{ .RelPermalink }}" alt="" aria-hidden="true">
     {{- end }}
     <span class="sr-only">{{ site.Title }}</span>
     {{- end }}
