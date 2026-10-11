@@ -327,6 +327,15 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   - `validate-site.sh` checks the taxonomy values (`tags`, `series`) rather
     than the `key = value` pair, so a site that renames the singular key
     still validates
+- `scripts/new-site.sh` — scaffold for a new site against the local theme:
+  config with the taxonomy contract, menus, archetype, content skeleton,
+  image directories, static files, pinned `go.mod` and a site README; no
+  dead parameter keys
+- `scripts/place-image.sh` — per-page image placement with a PLAN §2.5.4
+  size lint (hero ≥1600, illustration ≥1280, card ≥1200, og exactly
+  1200×630); failing lint exits non-zero without writing, successful
+  placement prints the front matter reference; PNG/JPEG/GIF/WebP dimensions
+  are read from headers with stdlib Python (no ImageMagick/sips dependency)
 
 ### Removed
 

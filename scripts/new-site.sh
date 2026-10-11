@@ -1,0 +1,311 @@
+#!/usr/bin/env bash
+# Scaffold a new site against the local Strata theme checkout.
+#
+# Usage:
+#   ./scripts/new-site.sh \
+#     --name "Probio Intel" --slug probiointel --domain probiointel.com \
+#     --out ../probiointel --accent "#295f8f" \
+#     --sections "ingredients,production,safety,quality"
+#
+# Generates the minimal site layer the theme consumes: config with the
+# taxonomy contract, archetype, content skeleton, image directories, static
+# files, go.mod, .gitignore and a short site README. The scaffold contains
+# no dead parameter keys — everything in the generated config is read by the
+# theme.
+#
+# Every site command below is read from this theme checkout:
+#   validate-site.sh /path/to/site   # production build + output rules
+#   hugo --minify                    # with the module replaced locally
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+usage() {
+  sed -n '2,14p' "$0"
+}
+
+NAME=""
+SLUG=""
+DOMAIN=""
+OUT=""
+ACCENT="#295f8f"
+SECTIONS=""
+MODULE_VERSION="v0.1.0"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --name) NAME="$2"; shift 2 ;;
+    --slug) SLUG="$2"; shift 2 ;;
+    --domain) DOMAIN="$2"; shift 2 ;;
+    --out) OUT="$2"; shift 2 ;;
+    --accent) ACCENT="$2"; shift 2 ;;
+    --sections) SECTIONS="$2"; shift 2 ;;
+    --module-version) MODULE_VERSION="$2"; shift 2 ;;
+    *) printf 'ERROR: unknown option %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+if [ -z "$NAME" ]; then printf 'ERROR: --name is required\n' >&2; usage >&2; exit 2; fi
+if [ -z "$DOMAIN" ]; then printf 'ERROR: --domain is required\n' >&2; usage >&2; exit 2; fi
+if [ -z "$OUT" ]; then printf 'ERROR: --out is required\n' >&2; usage >&2; exit 2; fi
+
+if [ -z "$SLUG" ]; then
+  SLUG=$(printf '%s' "$NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+fi
+
+if [ -e "$OUT" ]; then
+  printf 'ERROR: output already exists: %s\n' "$OUT" >&2
+  exit 2
+fi
+
+if ! printf '%s' "$ACCENT" | grep -qE '^#[0-9a-fA-F]{6}$'; then
+  printf 'ERROR: --accent must be a hex colour like #295f8f\n' "$ACCENT" >&2
+  exit 2
+fi
+
+mkdir -p "$OUT"
+trap 'rm -rf "$OUT"' ERR
+
+mkdir -p \
+  "$OUT/config/_default" \
+  "$OUT/archetypes" \
+  "$OUT/content" \
+  "$OUT/assets/css" \
+  "$OUT/assets/images" \
+  "$OUT/static"
+
+# config/_default/hugo.toml — nothing beyond the theme contract and the
+# site's own authored settings
+cat > "$OUT/config/_default/hugo.toml" <<EOF
+baseURL = "https://${DOMAIN}/"
+defaultContentLanguage = "en"
+title = "${NAME}"
+
+enableRobotsTXT = true
+summaryLength = 30
+enableEmoji = false
+
+[module]
+  proxy = "direct"
+
+  [[module.imports]]
+    path = "github.com/zoyeabio/strata"
+
+[module.hugoVersion]
+  extended = true
+  min = "0.142.0"
+
+[pagination]
+  pagerSize = 12
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
+
+[sitemap]
+  changefreq = 'weekly'
+  filename = 'sitemap.xml'
+  priority = 0.5
+
+[outputs]
+  home = ["HTML", "RSS"]
+EOF
+
+# config/_default/languages.en.toml
+cat > "$OUT/config/_default/languages.en.toml" <<EOF
+languageCode = "en"
+languageName = "English"
+weight = 1
+title = "${NAME}"
+
+[params]
+  displayName = "English"
+  isoCode = "en"
+  rtl = false
+  dateFormat = "2006-01-02"
+  description = "${NAME} — independent information site."
+  copyright = "Copyright { year } ${NAME}"
+EOF
+
+# config/_default/menus.en.toml — sections joined into the main menu first
+{
+  : > "$OUT/config/_default/menus.en.toml"
+  if [ -n "$SECTIONS" ]; then
+    weight=10
+    IFS=',' read -ra secs <<< "$SECTIONS"
+    for sec in "${secs[@]}"; do
+      sec=$(printf '%s' "$sec" | xargs)
+      if [ -n "$sec" ]; then
+        title=$(printf '%s' "$sec" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+        cat >> "$OUT/config/_default/menus.en.toml" <<EOF
+
+[[main]]
+  name = "$title"
+  pageRef = "${sec}"
+  weight = ${weight}
+EOF
+        weight=$((weight + 10))
+      fi
+    done
+  fi
+  cat >> "$OUT/config/_default/menus.en.toml" <<EOF
+
+[[main]]
+  name = "About"
+  pageRef = "about"
+  weight = 900
+
+[[main]]
+  name = "Contact"
+  pageRef = "contact"
+  weight = 910
+
+[[footer]]
+  name = "Privacy"
+  pageRef = "privacy-policy"
+  weight = 10
+
+[[footer]]
+  name = "Terms"
+  pageRef = "terms"
+  weight = 20
+EOF
+}
+
+# config/_default/params.toml — only keys emitted by the theme
+cat > "$OUT/config/_default/params.toml" <<EOF
+colorScheme = "strata-default"
+defaultAppearance = "light"
+autoSwitchAppearance = true
+
+[list]
+  cardView = true
+  showSummary = true
+EOF
+
+# custom accent via the site layer; the theme's scheme stays intact
+if [ "$ACCENT" != "#295f8f" ]; then
+  cat > "$OUT/assets/css/site.css" <<EOF
+:root {
+  --site-accent: $ACCENT;
+}
+EOF
+  cat >> "$OUT/config/_default/params.toml" <<EOF
+customCSS = ["css/site.css"]
+EOF
+fi
+
+# archetypes/default.md
+cat > "$OUT/archetypes/default.md" <<'EOF'
+---
+title: "{{ replace .File.ContentBaseName "-" " " | title }}"
+date: {{ .Date }}
+draft: true
+tags: []
+series: []
+---
+EOF
+
+# content skeleton
+cat > "$OUT/content/_index.md" <<EOF
+---
+title: "${NAME}"
+description: "${NAME} — independent information site."
+---
+Welcome to ${NAME}.
+EOF
+
+for dir in about contact privacy-policy terms; do
+  mkdir -p "$OUT/content/$dir"
+  title=$(printf '%s' "$dir" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+  cat > "$OUT/content/$dir/_index.md" <<EOF
+---
+title: "$title"
+---
+EOF
+done
+
+if [ -n "$SECTIONS" ]; then
+  IFS=',' read -ra secs <<< "$SECTIONS"
+  for sec in "${secs[@]}"; do
+    sec=$(printf '%s' "$sec" | xargs)
+    if [ -z "$sec" ]; then
+      continue
+    fi
+    mkdir -p "$OUT/content/$sec"
+    title=$(printf '%s' "$sec" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+    cat > "$OUT/content/$sec/_index.md" <<EOF
+---
+title: "$title"
+---
+EOF
+    mkdir -p "$OUT/assets/images/$sec"
+    cat > "$OUT/assets/images/$sec/README.md" <<EOF
+Image directory for the $sec section. Put section images here and reference
+them from front matter as \`$sec/file.webp\` (or with the full
+\`/images/$sec/file.webp\` path).
+EOF
+  done
+fi
+
+# static files
+cat > "$OUT/static/robots.txt" <<'EOF'
+User-agent: *
+Allow: /
+EOF
+
+cat > "$OUT/static/site.webmanifest" <<EOF
+{
+  "name": "${NAME}",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": []
+}
+EOF
+
+printf 'llms.txt\n' > "$OUT/static/llms.txt"
+
+# go.mod pins the theme version for production builds
+cat > "$OUT/go.mod" <<EOF
+module github.com/zoyeabio/${SLUG}
+
+go 1.22
+
+require github.com/zoyeabio/strata ${MODULE_VERSION}
+EOF
+
+# .gitignore
+cat > "$OUT/.gitignore" <<'EOF'
+resources/
+public/
+.DS_Store
+EOF
+
+# site README
+cat > "$OUT/README.md" <<EOF
+# ${NAME}
+
+Site repository. Content and configuration live here; the layout comes from
+the Strata Hugo theme.
+
+## Development
+
+\`\`\`sh
+hugo server -D
+\`\`\`
+
+Validate against the theme checkout before deploying:
+
+\`\`\`sh
+(cd /path/to/strata && ./scripts/validate-site.sh /path/to/$SLUG)
+\`\`\`
+
+## Structure
+
+- \`content/\` — pages and posts
+- \`assets/images/\` — source images, organised by section
+- \`config/_default/\` — site configuration (includes the Strata taxonomy contract)
+EOF
+
+printf 'ok   scaffolded %s\n' "$OUT"
+printf 'next: hugo server -D --source %s\n' "$OUT"

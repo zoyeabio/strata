@@ -73,6 +73,8 @@ npm run build:css      # rebuild assets/css/compiled/main.css
 ./scripts/smoke.sh     # fixture contract assertions
 ./scripts/validate-theme.sh
 ./scripts/validate-site.sh /path/to/site   # e.g. your site checkout
+./scripts/new-site.sh --name "My Site" --domain example.com --out ../mysite
+./scripts/place-image.sh --section journal --post slug --file photo.png --role hero --site ../mysite
 ```
 
 Do not hand-edit `assets/css/compiled/main.css`; it is generated from

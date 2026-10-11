@@ -45,6 +45,34 @@ declaration does not fail the build — tag links or the series nav simply
 stop appearing. `scripts/validate-site.sh` fails when either entry is
 missing.
 
+## New site from the scaffold
+
+```sh
+./scripts/new-site.sh \
+  --name "Probio Intel" --slug probiointel \
+  --domain probiointel.com --accent "#295f8f" \
+  --sections "ingredients,production,safety,quality" \
+  --out ../probiointel
+```
+
+The scaffold writes the minimal site layer the theme consumes: config with
+the taxonomy contract, sections and menus, archetype, content skeleton,
+image directories, static files, `go.mod`, `.gitignore` and a site README.
+Place images with:
+
+```sh
+./scripts/place-image.sh --section ingredients \
+  --post probiotics-infant-colic \
+  --file out/illustration-1.png --role illustration \
+  --site ../probiointel
+```
+
+`place-image.sh` lints the source width before copying: hero ≥1600px,
+illustration ≥1280px, card ≥1200px, og exactly 1200×630. A failing lint
+exits non-zero and writes nothing. It prints the front matter reference to
+use in the page (the bare filename, for a page bundle at
+`content/{section}/{slug}/index.md`).
+
 ## First build
 
 1. Declare the taxonomies above.
