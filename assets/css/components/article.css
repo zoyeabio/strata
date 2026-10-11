@@ -1,7 +1,7 @@
 @layer strata-components {
 .article__header {
   max-width: 720px;
-  margin: 40px auto 0;
+  margin: 0 auto;
 }
 
 .article__header h1 {
@@ -31,7 +31,7 @@
 
 .page--wide .article__header {
   max-width: none;
-  margin: 40px 0 0;
+  margin: 0;
 }
 
 .page--wide .article__content.prose {

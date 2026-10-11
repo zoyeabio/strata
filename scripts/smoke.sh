@@ -581,6 +581,9 @@ assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
 #     standalone pages render full width
 assert 'notice/index.html' 'class="page--wide"' 'non-article single goes full width'
 assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped'
+# 44. list and single pages share one top rhythm: the article header
+#     carries no top margin of its own (hero images keep their own spacing)
+css_assert 'article__header\{max-width:720px;margin:0 auto' 'article header starts at the shared offset'
 
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
