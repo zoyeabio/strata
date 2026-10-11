@@ -38,5 +38,8 @@
     }
   }, { passive: true });
 
-  updateHeader();
+  if (window.scrollY >= 100) {
+    header.style.transform = "translateY(-110%)";
+    header.inert = true;
+  }
 })();
