@@ -657,6 +657,18 @@ assert 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' 'ads loader 
 assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
 assert 'index.html' 'data-cookie-consent' 'consent hook renders site markup'
 
+# 42. verifiable authorship and trail metadata: Person author and
+#     BreadcrumbList in JSON-LD, article tags/section and twitter:site in
+#     meta, Organization published once with an @id others reference
+assert 'section-a/flat/index.html' '"@type":"Person"' 'schema carries a Person author'
+assert 'section-a/flat/index.html' '"name":"Flat Author"' 'author name matches the byline'
+assert 'section-a/flat/index.html' 'author\.example\.net' 'author links travel as sameAs'
+assert 'section-a/flat/index.html' '"@type":"BreadcrumbList"' 'schema carries the trail'
+assert 'section-a/flat/index.html' 'article:tag' 'article tags are emitted'
+assert 'section-a/flat/index.html' 'article:section' 'article section is emitted'
+assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
+assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

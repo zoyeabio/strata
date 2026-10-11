@@ -91,6 +91,7 @@ htmls = [p for p in files if p.suffix == '.html']
 src_attr = re.compile(r'\b(?:src|href|content|url)=["\x27]([^"\x27]+)["\x27]', re.I)
 srcset_attr = re.compile(r'\b(?:srcset|imagesrcset)=["\x27]([^"\x27]+)["\x27]', re.I)
 css_url = re.compile(r'url\(["\x27]?([^"\x27)]+)["\x27]?\)')
+json_url = re.compile(r':"((?:https?://)[^"]+)"')
 
 referenced = set()
 per_page = {}
@@ -132,6 +133,8 @@ for t in texts:
     for m in css_url.findall(text):
         urls.add(m)
         dl.add(m)
+    for m in json_url.findall(text):
+        urls.add(m.strip())
     local = {u for u in urls if local_path(u) and is_site_url(u)}
     referenced |= local
     if t.suffix == '.html':

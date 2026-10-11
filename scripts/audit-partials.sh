@@ -25,7 +25,7 @@ if [ ! -d "$PARTIALS_DIR" ]; then
 fi
 
 # 站点层钩子：由 templates.Exists 保护，站点提供即启用，主题不提供不算缺失
-SITE_HOOKS="extend-head.html extend-head-uncached.html favicons.html extend-article-link.html"
+SITE_HOOKS="extend-head.html extend-head-uncached.html favicons.html extend-article-link.html cookie-consent.html"
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

@@ -14,6 +14,7 @@
 {{- $isArticle := and (eq $page.Kind "page") (not $page.Date.IsZero) }}
 {{- $lang := site.Language.LanguageCode | default "en" }}
 {{- $websiteID := printf "%s#website" site.Home.Permalink }}
+{{- $orgID := printf "%s#organization" site.Home.Permalink }}
 {{- $graph := slice }}
 {{- if $isHome }}
 {{- $graph = append (dict
@@ -24,6 +25,19 @@
     "url" site.Home.Permalink
     "inLanguage" $lang) $graph }}
 {{- end }}
+{{- $org := dict
+    "@context" "https://schema.org"
+    "@type" "Organization"
+    "@id" $orgID
+    "name" (site.Params.footer.company.name | default site.Title)
+    "url" site.Home.Permalink }}
+{{- with site.Params.footer.social.links }}
+{{- $org = merge $org (dict "sameAs" (apply . "index" "." "url")) }}
+{{- end }}
+{{- with site.Params.logo }}{{ with resources.Get . }}
+{{- $org = merge $org (dict "logo" (.Permalink)) }}
+{{- end }}{{ end }}
+{{- $graph = append $org $graph }}
 {{- $graph = append (dict
     "@context" "https://schema.org"
     "@type" "WebPage"
@@ -32,6 +46,21 @@
     "name" $page.Title
     "isPartOf" (dict "@id" $websiteID)
     "inLanguage" $lang) $graph }}
+{{- if not $isHome }}
+{{- $crumbs := slice (dict "@type" "ListItem" "position" 1 "name" "Home" "item" site.Home.Permalink) }}
+{{- $ancestors := slice }}
+{{- $p := $page.Parent }}
+{{- range seq 10 }}{{ if and $p (not $p.IsHome) }}{{ $ancestors = $ancestors | append $p }}{{ $p = $p.Parent }}{{ end }}{{ end }}
+{{- range $ancestors | collections.Reverse }}
+{{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" .LinkTitle "item" .Permalink) }}
+{{- end }}
+{{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" $page.LinkTitle "item" $page.Permalink) }}
+{{- $graph = append (dict
+    "@context" "https://schema.org"
+    "@type" "BreadcrumbList"
+    "@id" (printf "%s#breadcrumb" $page.Permalink)
+    "itemListElement" $crumbs) $graph }}
+{{- end }}
 {{- if $isArticle }}
 {{- $img := partial "data/image-resource.html" (dict
     "ref" (partial "data/og-image-ref.html" $page)
@@ -45,7 +74,15 @@
     "headline" $page.Title
     "url" $page.Permalink
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
-    "publisher" (dict "@type" "Organization" "name" site.Title "url" site.Home.Permalink) }}
+    "publisher" (dict "@id" $orgID) }}
+{{- $author := $page.Params.author | default site.Params.author.name | default "" }}
+{{- if $author }}
+{{- $person := dict "@type" "Person" "name" $author }}
+{{- with site.Params.author.links }}
+{{- $person = merge $person (dict "sameAs" (apply . "index" "." "url")) }}
+{{- end }}
+{{- $article = merge $article (dict "author" $person) }}
+{{- end }}
 {{- if not $page.PublishDate.IsZero }}
 {{- $article = merge $article (dict "datePublished" ($page.PublishDate.Format "2006-01-02T15:04:05Z07:00")) }}
 {{- end }}
