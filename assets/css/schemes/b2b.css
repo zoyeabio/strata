@@ -5,15 +5,15 @@
   --site-surface-tint: #f5f7fa;
   --site-text-strong: #2d3748;
   --site-link: #1e40af;
-  --site-ring: #6aa9cf;
+  --site-ring: #3b7db4;
 }
 
 :root.dark {
-  --site-accent: #6ea3d8;
-  --site-accent-strong: #a9c8e8;
+  --site-accent: #2f6fa5;
+  --site-accent-strong: #245a87;
   --site-accent-soft: #17293f;
   --site-surface-tint: #141c26;
   --site-text-strong: #e6ebf2;
   --site-link: #8fbfe8;
-  --site-ring: #6aa9cf;
+  --site-ring: #3b7db4;
 }

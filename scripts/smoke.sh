@@ -586,6 +586,59 @@ assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
 assert 'index.html' 'smart-header\.[0-9a-f]+\.js' 'smart script loads'
 
+# 39. scheme contrast: every colour scheme keeps white-on-accent/strong
+#     at 4.5:1 and ring at 3:1 in both modes (a pale dark-mode accent once
+#     shipped below 2:1 on real buttons)
+if contrast_out=$(python3 - "$ROOT" <<'PY'
+import re, sys, pathlib
+root = pathlib.Path(sys.argv[1])
+
+def lum(h):
+    h = h.lstrip('#')
+    c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+def ratio(a, b):
+    hi, lo = sorted([lum(a), lum(b)], reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+def block_vars(text, selector):
+    m = re.search(re.escape(selector) + r'\s*\{([^}]*)\}', text)
+    out = {}
+    if m:
+        for k, v in re.findall(r'(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})', m.group(1)):
+            out[k] = v
+    return out
+
+pal = (root / 'assets/css/base/palette.css').read_text()
+light_bg = block_vars(pal, ':root')['--page-bg']
+dark_bg = block_vars(pal, ':root.dark')['--page-bg']
+bad = []
+for p in sorted((root / 'assets/css/schemes').glob('*.css')):
+    css = p.read_text()
+    for mode, bg in ((':root', light_bg), (':root.dark', dark_bg)):
+        v = block_vars(css, mode)
+        for key in ('--site-accent', '--site-accent-strong'):
+            if key in v and ratio('#ffffff', v[key]) < 4.5:
+                bad.append(f'{p.name} {mode} white-on-{key} {v[key]}')
+        if '--site-link' in v and ratio(v['--site-link'], bg) < 4.5:
+            bad.append(f'{p.name} {mode} link-on-bg {v["--site-link"]}')
+        if '--site-ring' in v and ratio(v['--site-ring'], bg) < 3.0:
+            bad.append(f'{p.name} {mode} ring-on-bg {v["--site-ring"]}')
+if bad:
+    for b in bad:
+        print(f'FAIL {b}')
+    sys.exit(1)
+print('all schemes hold contrast in both modes')
+PY
+); then
+  pass "scheme contrast holds ($contrast_out)"
+else
+  printf '%s\n' "$contrast_out" >&2
+  fail 'every scheme holds text and focus contrast'
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1
