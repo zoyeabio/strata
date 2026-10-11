@@ -359,7 +359,7 @@ count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 5 \
 
 # 27. every class token the templates emit is defined in the shipped CSS
 #     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
-#     so concatenations like card--{{ $variant }} contribute a prefix that
+#     so concatenations like card--{{ $preset }} contribute a prefix that
 #     must still match at least one rule). Author-supplied class parameters
 #     that pass through a shortcode untouched are out of scope by design.
 if classes_out=$(python3 - "$OUT" "$ROOT" <<'PY'

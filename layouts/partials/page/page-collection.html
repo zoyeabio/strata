@@ -9,18 +9,18 @@
     showSummary  (bool, optional) — print the summary under each title
 
   Widths, columns and spacing belong to CSS, so this partial carries no layout
-  decisions; it only names the variant and passes each card its position so
+  decisions; it only names the preset and passes each card its position so
   the eager/lazy image split can be applied.
 
   Called by: _default/list.html
 */ -}}
-{{- $variant := cond .cardView "grid" "row" }}
+{{- $preset := cond .cardView "grid" "row" }}
 {{- if .pages }}
-<div class="page-collection page-collection--{{ $variant }}">
+<div class="page-collection page-collection--{{ $preset }}">
   {{- range $i, $page := .pages }}
   {{ partial "page/card.html" (dict
     "page" $page
-    "variant" $variant
+    "preset" $preset
     "showSummary" $.showSummary
     "index" $i
   ) }}

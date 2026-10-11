@@ -3,9 +3,10 @@
 
   Params
     page         (Page, required)
-    variant      (string, optional) — "grid" (default), "row" or "inline";
+    preset       (string, optional) — "grid" (default), "row" or "inline";
                  the three only differ in CSS
-    showSummary  (bool, optional) — print the summary under the title
+    showSummary  (bool, optional) — print the summary under the title;
+                 visually clamped to 3 lines by CSS, never truncated here
     index        (int, optional) — position in the collection; drives the
                  eager/lazy split below
     eager        (bool, optional) — overrides the eager/lazy decision; the
@@ -18,16 +19,15 @@
   shows roughly three rows of two columns, so anything past that is below the
   fold on a 1080p display.
 
-  Called by: page/page-collection.html
+  Called by: page/page-collection.html, content/list + content/article shortcodes
 */ -}}
 {{- $page := .page }}
-{{- $variant := .variant | default "grid" }}
+{{- $preset := .preset | default "grid" }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
 {{- $eagerCount := site.Params.eagerCardCount | default 6 }}
-{{- $summaryLength := site.Params.cardSummaryLength | default 160 }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 {{- if isset . "eager" }}{{ $eager = .eager }}{{ end }}
-<article class="card card--{{ $variant }}">
+<article class="card card--{{ $preset }}">
   {{- with $page.Params.featureimage }}
   {{- $img := partial "data/image-resource.html" (dict
       "ref" .
@@ -39,7 +39,7 @@
     {{- partial "media/image.html" (dict
         "img" $img
         "alt" $img.alt
-        "sizes" (partial "data/card-presets.html" $variant).sizes
+        "sizes" (partial "data/card-presets.html" $preset).sizes
         "loading" (cond $eager "eager" "lazy")
         "fetchpriority" (cond $eager "" "low")
         "class" "card__image") }}
@@ -57,7 +57,7 @@
     {{- end }}
   </header>
   {{- if and .showSummary $page.Summary }}
-  <p class="card__summary">{{ $page.Summary | plainify | truncate $summaryLength }}</p>
+  <p class="card__summary">{{ $page.Summary | plainify }}</p>
   {{- end }}
   {{- if templates.Exists "partials/extend-article-link.html" }}
   {{ partial "extend-article-link.html" $page }}

@@ -25,7 +25,7 @@
 {{- $where := .Get "where" -}}
 {{- $value := .Get "value" -}}
 {{- $cardView := eq (printf "%v" (.Get "cardView")) "true" -}}
-{{- $variant := cond $cardView "grid" "row" -}}
+{{- $preset := cond $cardView "grid" "row" -}}
 {{- $pages := .Site.RegularPages -}}
 {{- if $where }}{{- $pages = where $pages $where $value -}}{{- end -}}
 {{- $parent := .Page.RelPermalink -}}
@@ -35,7 +35,7 @@
     {{- if ne $p.RelPermalink $parent }}
     {{- partial "page/card.html" (dict
         "page" $p
-        "variant" $variant
+        "preset" $preset
         "showSummary" false
         "index" $i) }}
     {{- end }}

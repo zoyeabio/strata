@@ -1,6 +1,6 @@
 {{- /*
   Embeds another page's card inline in the body, rendering through
-  page/card.html (variant
+  page/card.html (preset
   inline) instead of the deleted article/embedded partial.
 
   Parameters
@@ -13,8 +13,7 @@
                   string "false" cannot read as truthy
 
   compactSummary is not read by this shortcode, so the smoke whitelist
-  rejects it; the summary is already truncated below what the old
-  line-clamp-3 showed.
+  rejects it; the card CSS clamps the summary to 3 lines.
 
   The embedded card never loads eagerly — body images are lazy per
   PLAN §2.3.1.
@@ -44,7 +43,7 @@
 <section class="shortcode-embed">
   {{- partial "page/card.html" (dict
       "page" $target
-      "variant" "inline"
+      "preset" "inline"
       "showSummary" $show
       "eager" false) -}}
 </section>
