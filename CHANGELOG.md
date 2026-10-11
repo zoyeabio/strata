@@ -21,6 +21,15 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   every single is an article); shortcode card grids go 3-up from 853px
   like section lists.
 - Rich footer bottom travels as one bar (menu, social, copyright).
+- AdSense readiness: `ads` shortcode with a head loader that only ships
+  on pages using it, `static/ads.txt` contract (check-build R11),
+  `partials/cookie-consent.html` site hook, and an empty-article gate
+  (R13). Theme `layouts/robots.txt` declares the sitemap (R14).
+- Verifiable authorship: schema `Person` author with `sameAs`,
+  `BreadcrumbList`, `Organization` with `@id`, plus `article:tag`,
+  `article:section` and `twitter:site` meta.
+- Accessibility: skip link, carousel arrow keys and reduced-motion
+  guards, contact live region, AA contrast in every scheme (smoke-gated).
 - `header.layout = "smart"`: sticky header that hides on scroll down and
   reveals on scroll up (10px hysteresis, always visible near the top).
 - `b2b` colour scheme (deep navy) for trade sites.
