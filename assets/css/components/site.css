@@ -1,9 +1,11 @@
 @layer strata-components {
 .site-header {
+  --header-bar: 68px;
+  position: relative;
   border-bottom: 1px solid var(--border);
   background: var(--page-bg);
   padding-block: 12px;
-  min-height: 68px;
+  min-height: var(--header-bar);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -89,6 +91,7 @@
 
 .site-nav__link[aria-current="page"] {
   color: var(--site-link);
+  font-weight: 600;
 }
 
 .site-nav__toggle {
@@ -184,7 +187,7 @@
     z-index: 40;
     background: var(--page-bg);
     border-bottom: 1px solid var(--border);
-    max-height: calc(100vh - 68px);
+    max-height: calc(100vh - var(--header-bar));
     overflow-y: auto;
   }
 

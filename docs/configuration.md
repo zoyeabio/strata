@@ -31,6 +31,17 @@ write them in any case. Site config keys keep their case.
 | `list.showSummary` | `false` | Default card summaries on lists |
 | `mainSections` | — | Sections whose singles are articles (prose-capped); other singles render full width. Compared case-insensitively; absent means every single is an article |
 | `header.layout` | `"standard"` | `"smart"` sticks the header and hides it on scroll down, revealing on scroll up |
+| `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
+| `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
+| `author.name` | — | Site-wide author fallback |
+| `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
+| `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
+| `ads.client` | — | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
+| `list.showBreadcrumbs` | `false` | Trail on section and home pages |
+| `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
+| `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
+| `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
+| `schema.enableProduct` | `false` | Reserved for product JSON-LD (site-layer product template, planned) |
 
 ## Navigation (`menus.en.toml`)
 
@@ -50,17 +61,6 @@ is not picked up:
   pageRef = "section-a/flat"
   parent = "guides"
 ```
-| `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
-| `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
-| `author.name` | — | Site-wide author fallback |
-| `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
-| `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
-| `ads.client` | — | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
-| `list.showBreadcrumbs` | `false` | Trail on section and home pages |
-| `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
-| `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
-| `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
-| `schema.enableProduct` | `false` | Reserved for product JSON-LD (site-layer product template, planned) |
 
 ## Footer (`params.toml [footer]`)
 

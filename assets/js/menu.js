@@ -1,7 +1,8 @@
 /* Main navigation disclosure: toggles the mobile panel, closes on
    Escape with focus back on the button, and resets when crossing to the
-   desktop layout. Submenus are native <details> and need no script.
-   Loaded deferred from the menu partial whenever a main menu exists. */
+   desktop layout. Submenu chevron buttons toggle their sibling block
+   in the same script. Loaded deferred from the menu partial whenever
+   a main menu exists. */
 (function () {
   var btn = document.querySelector("[data-nav-toggle]");
   var panel = document.querySelector("[data-nav-panel]");

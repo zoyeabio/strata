@@ -590,6 +590,27 @@ assert 'index.html' 'data-nav-toggle aria-expanded="false"' 'hamburger starts co
 assert 'index.html' 'data-nav-subtoggle' 'parent gets a submenu chevron'
 assert 'index.html' 'href="/section-a/flat/"' 'nested entry links its page'
 assert 'index.html' 'menu\.[0-9a-f]+\.js' 'menu script loads'
+assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel'
+assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
+assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
+css_assert 'site-header\{--header-bar:68px;position:relative' 'standard header anchors the mobile panel'
+# 45b. the 853px breakpoint is written twice (CSS collapse, JS reset):
+#     drift once and the panel sticks open on desktop or never opens
+if grep -q 'min-width: 853px' "$ROOT/assets/js/menu.js" &&
+   grep -q 'max-width: 852px' "$ROOT/assets/css/components/site.css" &&
+   grep -q 'min-width: 853px' "$ROOT/assets/css/components/site.css"; then
+  pass 'menu breakpoint 853px agrees across CSS and JS'
+else
+  fail 'menu breakpoint 853px agrees across CSS and JS'
+fi
+# 45c. Escape handling is behaviour, not markup: assert the source path
+#     (same pattern as #43 — markup cannot show it)
+if grep -q '"Escape"' "$ROOT/assets/js/menu.js" &&
+   grep -q 'btn.focus()' "$ROOT/assets/js/menu.js"; then
+  pass 'menu closes on Escape with focus back on the button'
+else
+  fail 'menu closes on Escape with focus back on the button'
+fi
 
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'

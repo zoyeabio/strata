@@ -4,9 +4,9 @@
   One markup tree for every breakpoint; desktop and mobile differ in CSS only,
   so there is no second menu to keep in sync. The active item is marked with
   aria-current: section roots through HasMenuCurrent, exact pages through
-  IsMenuCurrent. Parents with children get a native <details> submenu that
-  works keyboard-free everywhere; on desktop it drops down, on mobile it
-  expands in the panel.
+  IsMenuCurrent. Parents with children get a chevron button expanding a
+  sibling block that works keyboard-free everywhere; on desktop it drops
+  down, on mobile it expands in the panel.
 
   Below 853px the tree collapses behind a disclosure button (top right of
   the header) wired by assets/js/menu.js: aria-expanded sync, Escape to
