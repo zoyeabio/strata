@@ -460,6 +460,9 @@ if missing:
     for line in missing:
         print('FAIL', line, file=sys.stderr)
     sys.exit(1)
+if checked == 0:
+    print('FAIL no taxonomy links rendered — GetTerms returned nothing', file=sys.stderr)
+    sys.exit(1)
 print(f'{checked} taxonomy links')
 PY
 ); then

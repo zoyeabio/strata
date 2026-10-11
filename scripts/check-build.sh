@@ -148,7 +148,11 @@ subset_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
     preloads = re.findall(r'<link\b[^>]*rel=["\x27]preload["\x27][^>]*>', text, re.I)
-    img_sets = [expand_srcset(m) for m in srcset_attr.findall(text)]
+    img_sets = []
+    for tag in re.findall(r'<img\b[^>]*>', text, re.I):
+        m = re.search(r'\bsrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
+        if m:
+            img_sets.append(expand_srcset(m.group(1)))
     for tag in preloads:
         m = re.search(r'\bimagesrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
         if not m:

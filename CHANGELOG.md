@@ -315,6 +315,18 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   parameter subset documented in `docs/shortcodes.md` — Hugo silently
   ignores unknown parameters, the whitelist turns the doc table into an
   executable contract
+- Review pass — validator and preload fixes:
+  - the hero preload `<link>` is emitted through `safeHTML`, because
+    html/template URL-escapes the `imagesrcset` attribute (spaces become
+    `%20`) and the browser would treat `url 480w` as one malformed URL,
+    silently breaking the preload; `check-build.sh` R3 now reads `srcset`
+    only from `<img>` tags, so a preload that points at no image on the
+    page fails instead of passing vacuously
+  - smoke assertion 30 fails when zero taxonomy links render (a site whose
+    `GetTerms` silently returns nothing no longer looks green)
+  - `validate-site.sh` checks the taxonomy values (`tags`, `series`) rather
+    than the `key = value` pair, so a site that renames the singular key
+    still validates
 
 ### Removed
 

@@ -28,10 +28,11 @@
   {{ partial "opengraph.html" . }}
   {{ partial "head/schema.html" . }}
 
-  {{/* Hero preload, from the same resolver call the hero <img> uses */}}
+  {{/* Hero preload from the same resolver call as the <img>; safeHTML because
+       html/template URL-escapes imagesrcset (spaces → %20) and breaks it */}}
   {{- $hero := partial "data/hero-image.html" . }}
   {{- if and $hero.ok $hero.srcset }}
-  <link rel="preload" as="image" href="{{ $hero.url }}" imagesrcset="{{ $hero.srcset }}" imagesizes="{{ $hero.sizes }}">
+  {{ printf `<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="%s">` $hero.url $hero.srcset $hero.sizes | safeHTML }}
   {{- end }}
 
   {{/* Appearance applied before first paint to avoid a flash of the wrong theme */}}

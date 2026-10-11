@@ -42,15 +42,16 @@ fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 # fail the build, it just silently drops tag links or series navigation.
 cfg="$(HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \
   HUGO_CACHEDIR="$WORK/cache" hugo config --source "$SITE" 2>/dev/null \
-  | tr -d "'" | awk '/^\[taxonomies\]/{f=1;next} /^\[/{f=0} f' | sed 's/^[[:space:]]*//')"
+  | tr -d "'" | awk '/^\[taxonomies\]/{f=1;next} /^\[/{f=0} f' | sed 's/^[[:space:]]*//' \
+  | sed -n 's/^[^=]*=[[:space:]]*//p')"
 missing_tax=""
-for pair in "series = series" "tag = tags"; do
-  printf '%s\n' "$cfg" | grep -qx "$pair" || missing_tax="$missing_tax ${pair%% =*}"
+for plural in tags series; do
+  printf '%s\n' "$cfg" | grep -qx "$plural" || missing_tax="$missing_tax $plural"
 done
 if [ -z "$missing_tax" ]; then
-  pass 'site declares the tag and series taxonomies'
+  pass 'site declares the tags and series taxonomies'
 else
-  fail "site is missing [taxonomies]$missing_tax — tag links or series nav will vanish silently"
+  fail "site is missing [taxonomies] values:$missing_tax — tag links or series nav will vanish silently"
 fi
 
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode site; then
