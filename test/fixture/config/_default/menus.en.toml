@@ -1,0 +1,21 @@
+[[main]]
+  name = "Section A"
+  pageRef = "section-a"
+  weight = 10
+
+[[main]]
+  name = "Guides"
+  identifier = "guides"
+  weight = 20
+
+[[main]]
+  name = "Flat"
+  pageRef = "section-a/flat"
+  parent = "guides"
+  weight = 10
+
+[[main]]
+  name = "Nested Post"
+  pageRef = "section-a/nested/post"
+  parent = "guides"
+  weight = 20

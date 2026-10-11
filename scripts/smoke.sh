@@ -584,6 +584,12 @@ assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped
 # 44. list and single pages share one top rhythm: the article header
 #     carries no top margin of its own (hero images keep their own spacing)
 css_assert 'article__header\{max-width:720px;margin:0 auto' 'article header starts at the shared offset'
+# 45. mobile disclosure menu: hamburger with synced state, nested
+#     submenu behind a chevron button, loader wired
+assert 'index.html' 'data-nav-toggle aria-expanded="false"' 'hamburger starts collapsed'
+assert 'index.html' 'data-nav-subtoggle' 'parent gets a submenu chevron'
+assert 'index.html' 'href="/section-a/flat/"' 'nested entry links its page'
+assert 'index.html' 'menu\.[0-9a-f]+\.js' 'menu script loads'
 
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'

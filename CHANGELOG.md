@@ -32,6 +32,8 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   guards, contact live region, AA contrast in every scheme (smoke-gated).
 - `header.layout = "smart"`: sticky header that hides on scroll down and
   reveals on scroll up (10px hysteresis, always visible near the top).
+- Mobile disclosure menu below 853px with nested submenus (attached via
+  `parent` identifiers); desktop keeps the row with hover-free dropdowns.
 - `b2b` colour scheme (deep navy) for trade sites.
 - Rich footer from the `[footer]` table: company, quick-links, legal and
   contact columns, social icon row (site `assets/icons/`, name fallback),

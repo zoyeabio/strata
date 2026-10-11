@@ -4,19 +4,56 @@
   One markup tree for every breakpoint; desktop and mobile differ in CSS only,
   so there is no second menu to keep in sync. The active item is marked with
   aria-current: section roots through HasMenuCurrent, exact pages through
-  IsMenuCurrent.
+  IsMenuCurrent. Parents with children get a native <details> submenu that
+  works keyboard-free everywhere; on desktop it drops down, on mobile it
+  expands in the panel.
+
+  Below 853px the tree collapses behind a disclosure button (top right of
+  the header) wired by assets/js/menu.js: aria-expanded sync, Escape to
+  close with focus back on the button. Parents with children get a chevron
+  button expanding a sibling block (same pattern, no animation state to
+  sync). No checkbox hack, no fullscreen modal, no focus trap needed —
+  the panel is a disclosure, the page behind stays reachable.
 
   Called by: frame/header.html
 */ -}}
 {{- with site.Menus.main }}
-<nav id="site-navigation" aria-label="Main">
+{{- $menuJS := resources.Get "js/menu.js" | fingerprint "sha512" }}
+<button type="button" class="site-nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="site-navigation">
+  <span class="site-nav__bars" aria-hidden="true"></span>
+  <span class="sr-only">Menu</span>
+</button>
+<nav id="site-navigation" data-nav-panel aria-label="Main">
   <ul class="site-nav__list">
-    {{- range . }}
-    <li>
-      <a class="site-nav__link" href="{{ .URL }}"
-        {{- if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
+    {{- range $i, $e := . }}
+    <li class="site-nav__item{{ if $e.HasChildren }} site-nav__item--parent{{ end }}">
+      {{- if $e.URL }}
+      <a class="site-nav__link" href="{{ $e.URL }}"
+        {{- if or ($.IsMenuCurrent "main" $e) ($.HasMenuCurrent "main" $e) }} aria-current="page"{{ end }}>{{ $e.Name }}</a>
+      {{- else }}
+      <span class="site-nav__text">{{ $e.Name }}</span>
+      {{- end }}
+      {{- if $e.HasChildren }}
+      {{- $subId := printf "nav-sub-%d" $i }}
+      <button type="button" class="site-nav__chevron" data-nav-subtoggle aria-expanded="false" aria-controls="{{ $subId }}" aria-label="{{ $e.Name }} submenu"></button>
+      <div class="site-nav__sub" id="{{ $subId }}" hidden>
+        <ul class="site-nav__sublist">
+          {{- range $e.Children }}
+          <li>
+            {{- if .URL }}
+            <a class="site-nav__link" href="{{ .URL }}"
+              {{- if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
+            {{- else }}
+            <span class="site-nav__text">{{ .Name }}</span>
+            {{- end }}
+          </li>
+          {{- end }}
+        </ul>
+      </div>
+      {{- end }}
     </li>
     {{- end }}
   </ul>
 </nav>
+<script src="{{ $menuJS.RelPermalink }}" integrity="{{ $menuJS.Data.Integrity }}" defer></script>
 {{- end }}
