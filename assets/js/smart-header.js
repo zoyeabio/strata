@@ -16,10 +16,13 @@
 
     if (scrollY < 100) {
       header.style.transform = "";
+      header.inert = false;
     } else if (scrollY > lastScrollY && scrollY > lastScrollY + 10) {
       header.style.transform = "translateY(-110%)";
+      header.inert = true;
     } else if (scrollY < lastScrollY && scrollY < lastScrollY - 10) {
       header.style.transform = "";
+      header.inert = false;
     }
 
     lastScrollY = scrollY;

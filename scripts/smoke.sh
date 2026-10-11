@@ -585,6 +585,14 @@ assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
 assert 'index.html' 'smart-header\.[0-9a-f]+\.js' 'smart script loads'
+# 43. hidden chrome leaves the focus order: the smart header toggles inert
+#     with its transform (a behaviour assert, since markup cannot show it)
+if grep -q 'header\.inert *= *true' "$ROOT/assets/js/smart-header.js" &&
+   grep -q 'header\.inert *= *false' "$ROOT/assets/js/smart-header.js"; then
+  pass 'smart header toggles inert with visibility'
+else
+  fail 'smart header toggles inert with visibility'
+fi
 
 # 39. scheme contrast: every colour scheme keeps white-on-accent/strong
 #     at 4.5:1 and ring at 3:1 in both modes (a pale dark-mode accent once
