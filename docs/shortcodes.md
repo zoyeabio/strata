@@ -21,6 +21,19 @@ image runs through the responsive pipeline.
 | `quality` | WebP quality 1–100, default 78 |
 | `role` | `card` / `illustration` (default) / `hero` — caps the variant width |
 
+## map
+
+Embedded third-party map frame. The theme itself ships zero external
+requests — this shortcode is the explicit opt-in: nothing renders unless
+the page passes an `https` embed URL.
+
+| Parameter | Notes |
+|---|---|
+| `src` | **required** — `https` embed URL, e.g. `https://maps.google.com/maps?q=Shanghai&z=13&output=embed`; missing or non-`https` fails the build |
+| `title` | Frame label, default `"Location map"` |
+
+The frame loads lazily inside a 16/9 box.
+
 ## content/article
 
 Embed another page's card inline.

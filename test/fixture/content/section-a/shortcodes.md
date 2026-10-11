@@ -53,3 +53,7 @@ Markdown inside the last column.
 ## Ads
 
 {{< ads slot="1234567890" >}}
+
+## map
+
+{{< map src="https://maps.google.com/maps?q=Shanghai&z=13&output=embed" title="Shanghai office map" >}}

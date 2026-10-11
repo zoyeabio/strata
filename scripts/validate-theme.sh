@@ -49,6 +49,14 @@ else
   cat "$WORK/drafts.stderr" >&2
 fi
 
+# the draft map-missing.md calls the map shortcode without its required src
+if grep -q 'map shortcode: missing required src' "$WORK/drafts.stderr"; then
+  pass 'a srcless map fails the production build'
+else
+  fail 'the production failure names the srcless map'
+  cat "$WORK/drafts.stderr" >&2
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'validate-theme: %s failure(s)\n' "$FAILURES" >&2
   exit 1

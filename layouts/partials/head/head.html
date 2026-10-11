@@ -58,7 +58,7 @@
     {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}
   {{- end }}
   {{- $parts := slice (resources.Get "css/main.css") }}
-  {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/multi-col.css" "components/shortcode.css" }}
+  {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/map.css" "components/multi-col.css" "components/shortcode.css" }}
     {{- $parts = $parts | append (resources.Get (print "css/" .)) }}
   {{- end }}
   {{- $bundle := $parts | resources.Concat "css/bundle.css" | css.TailwindCSS }}

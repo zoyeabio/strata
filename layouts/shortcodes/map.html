@@ -1,0 +1,21 @@
+{{- /*
+  Embedded map (e.g. a Google Maps share embed). The theme ships zero
+  external requests of its own — this shortcode is the explicit opt-in:
+  nothing renders unless the page passes an https embed src, so a site
+  without maps ships no third-party frame.
+
+  Parameters
+    src   (string, required) — https embed URL, e.g.
+            https://maps.google.com/maps?q=Shanghai&z=13&output=embed
+    title (string, optional) — frame label, default "Location map"
+
+  The frame loads lazily inside a 16/9 box styled by components/map.css.
+
+  Called by: content markdown
+*/ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src }}{{ errorf "map shortcode: missing required src parameter (%s)" .Position }}{{ end -}}
+{{- if not (hasPrefix $src "https://") }}{{ errorf "map shortcode: src must be an https embed URL (%s)" .Position }}{{ end -}}
+<div class="map">
+  <iframe class="map__frame" src="{{ $src }}" title="{{ .Get "title" | default "Location map" }}" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>

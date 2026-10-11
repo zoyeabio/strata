@@ -227,6 +227,12 @@ assert 'section-a/shortcodes/index.html' '<a href="/section-a/flat/" target="_bl
   'figure wraps the image in the requested link'
 assert 'section-a/shortcodes/index.html' 'width="400" height="300"' \
   'figure honours explicit width/height over the intrinsic size'
+assert 'section-a/shortcodes/index.html' '<div class="map">' \
+  'map renders its box'
+assert 'section-a/shortcodes/index.html' 'title="Shanghai office map" loading="lazy"' \
+  'map frame carries its label and defers loading'
+assert 'section-a/shortcodes/index.html' 'src="https://maps.google.com/maps\?q=Shanghai' \
+  'map passes the embed URL through'
 count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 6 \
   'three figures, two slides and the loop clone carry the text sizes'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 5 \
@@ -507,6 +513,7 @@ for md in sorted((root / 'test/fixture/content').rglob('*.md')):
                 bad.append(f'{md.relative_to(root)}: unknown shortcode {name}')
             continue
         count += 1
+        args = re.sub(r'"[^"]*"', '""', args)
         for key in re.findall(r'([A-Za-z][A-Za-z0-9]*)\s*=', args):
             if key not in SUPPORTED[name]:
                 bad.append(f'{md.relative_to(root)}: {name} unsupported param {key}')
