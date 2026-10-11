@@ -19,16 +19,19 @@
     {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
     {{- if or $dateShown $terms (and $showAuthor $author) }}
+    {{- $sep := false }}
     <p class="article__meta">
       {{- if $dateShown }}
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
+      {{- $sep = true }}
       {{- end }}
       {{- range $terms }}
-      {{- if $dateShown }} · {{ end }}
+      {{- if $sep }} · {{ end }}
       <a class="article__tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+      {{- $sep = true }}
       {{- end }}
       {{- if and $showAuthor $author }}
-      {{- if or $dateShown $terms }} · {{ end }}By {{ $author }}
+      {{- if $sep }} · {{ end }}By {{ $author }}
       {{- end }}
     </p>
     {{- end }}

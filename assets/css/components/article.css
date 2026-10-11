@@ -60,6 +60,20 @@
   color: var(--site-text-strong);
 }
 
+.article__related-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.article__related-list a {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
 .article__share {
   display: flex;
   flex-wrap: wrap;

@@ -1,5 +1,5 @@
 ---
-tags: ["alpha"]
+tags: ["alpha", "beta"]
 title: "Vector passthrough"
 date: 2026-01-05
 weight: 10

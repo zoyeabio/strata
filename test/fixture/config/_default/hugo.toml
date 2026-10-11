@@ -16,6 +16,7 @@ enableRobotsTXT = true
 [related]
   threshold = 80
   toLower = false
+  includeNewer = true
 
   [[related.indices]]
     name = "tags"

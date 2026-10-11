@@ -34,9 +34,8 @@ write them in any case. Site config keys keep their case.
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
-| `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
-| `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
-| `article.showSummary` | `false` | Card summaries in the related grid |
+| `article.showRelatedContent` | `false` | Related-content link list after the body (see [Related content](#related-content)) |
+| `article.relatedContentLimit` | `3` | Maximum related links; Hugo ranks, the theme only caps |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
 | `author.name` | — | Site-wide author fallback |
 | `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
@@ -215,6 +214,7 @@ only asks for the result:
 [related]
   threshold = 80
   toLower = false
+  includeNewer = true
 
   [[related.indices]]
     name = "tags"
@@ -226,15 +226,30 @@ only asks for the result:
 ```
 
 `threshold` is a 0–100 score floor. `weight` is relative, so `tags` at 100
-and `series` at 50 means a shared tag counts double a shared series. A page
-with no terms in common with anything renders no block at all — an empty
-result is not an error and leaves no dead heading behind. Related scoring
-is symmetric, so if `B` appears under `A` then `A` appears under `B`; Hugo
-computes the list lazily per page.
+and `series` at 50 means a shared tag counts double a shared series. `weight`
+is also the ceiling of the normalized score, so a term that only shares a
+low-weight index rarely clears the floor — a shared `series` at 50 alone
+normalizes to 0 and never matches at `threshold = 80`, while a shared `tags`
+at 100 normalizes to 100.
 
-The cards come from `page/page-collection.html`, the same grid as the list
-pages, so `article.showSummary` controls their summaries. Page-level
-override: `showRelatedContent: false` in front matter.
+**`includeNewer` matters.** Hugo excludes newer pages by default, with the
+comment *"To get stable 'See also' sections we, by default, exclude newer
+related pages"*. That makes the block directional: a recent article lists
+older ones, and the oldest article in a tag has nothing to point at, so its
+Related block is simply absent. With `includeNewer = true` the pair is
+bidirectional and every article with a common term gets a block. For a
+journal or a reference site set it to `true`; for a chronological news log
+Hugo's default is arguably right.
+
+A page with no terms in common with anything renders no block at all — an
+empty result is not an error and leaves no dead heading behind. Hugo computes
+the list lazily per page.
+
+The block is a plain link list: a heading and a `<ul>`, no cards, no images.
+It sits at the end of a long article, and a card grid would fetch a hero image
+per entry for nothing the reader needs to decide whether to read more.
+
+Page-level override: `showRelatedContent: false` in front matter.
 
 ## Share buttons
 
@@ -252,7 +267,7 @@ adds a button. No template change is needed to add a service.
 {
   "mastodon": {
     "label": "Mastodon",
-    "url": "https://mastodon.social/share?text=%[2]s%20%[1]s"
+    "url": "https://mastodon.social/share?text=%[2]s+%[1]s"
   }
 }
 ```
@@ -260,11 +275,19 @@ adds a button. No template change is needed to add a service.
 Two arguments are passed to `printf`, in this order: the permalink, then
 the title (already run through `urlquery`, so spaces and `&` survive the URL).
 Include both slots in every template, or use `%[1]s` / `%[2]s` to reorder
-without renaming. Separating them with a literal `+` is how the default
-WhatsApp entry does it — writing `%20` instead breaks, because `printf`
-reads `%2` as an unknown verb and emits `%!2(MISSING)`. Leaving one slot
-unused appends a `%!N(EXTRA …)` marker to the URL and the link stops
-working.
+without renaming. `scripts/validate-theme.sh` fails the build unless every
+`url` in the theme's own `data/sharing.json` has exactly two verbs.
+
+Separate the two with a literal `+`, the way the default WhatsApp entry does
+it. Do not write `%20`: `printf` scans the format string for verbs and reads
+`%2` as an unknown one, emitting `%!2(MISSING)` into the URL. Leaving one
+slot unused is the other half of the same trap — an extra argument appends a
+`%!N(EXTRA …)` marker to the URL and the link stops working.
+
+Every entry may set `"blank": false`. All four defaults render with
+`target="_blank" rel="noopener noreferrer"` except `email`, which sets it
+`false` — a `mailto:` URL does not open a tab, and some browsers show a
+blank one first.
 
 `label` falls back to the name if omitted. A name that resolves to nothing
 in `data/sharing.json` renders no button rather than a dead one. Links are

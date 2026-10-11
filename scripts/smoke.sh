@@ -862,10 +862,14 @@ assert 'section-a/flat/index.html' 'article:section' 'article section is emitted
 assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
 
-# 48. related content and share buttons: Hugo's own ranking rendered as
-#     cards, capped and hidden when empty; one anchor per sharingLinks name
-#     from data/sharing.json, title urlquery-encoded, opener opted out
+# 48. related content and share buttons: Hugo's own ranking rendered as a
+#     link list (no cards, no images), capped and hidden when empty; one
+#     anchor per sharingLinks name from data/sharing.json, title
+#     urlquery-encoded, opener opted out except mailto. Also the meta
+#     separator: the · belongs between adjacent items, not to the date, so a
+#     page with no date must still separate two tags rather than glue them
 css_assert 'article__related\{margin-block:40px' 'related block gets its own rhythm'
+css_assert 'article__related-list\{[^}]*list-style:none' 'related list drops the default markers'
 css_assert 'article__share\{display:flex;flex-wrap:wrap' 'share links wrap on narrow screens'
 css_assert 'article__share-link\{[^}]*min-height:44px' 'share links keep a 44px target'
 css_assert 'article__share-link\{[^}]*border-radius:999px' 'share links are pills'
@@ -887,31 +891,52 @@ def block(text, cls, tag):
 
 # --- related ---
 vec = page("section-a/vector")
-related = block(vec, "article__related", "section")
-if not related:
-    failed.append("vector renders no related block")
-else:
+for rel in ("section-a/vector", "section-a/flat"):
+    related = block(page(rel), "article__related", "section")
+    if not related:
+        failed.append("%s renders no related block" % rel)
+        continue
     if 'aria-labelledby="article-related"' not in related:
-        failed.append("related block does not point at its heading")
+        failed.append("%s: related block does not point at its heading" % rel)
     if '<h2 class="article__related-title" id="article-related">Related</h2>' not in related:
-        failed.append("related heading is missing or mislabelled")
-    links = re.findall(r'<a class="card__link" href="([^"]+)"', related)
+        failed.append("%s: related heading is missing or mislabelled" % rel)
+    if 'class="article__related-list"' not in related:
+        failed.append("%s: related does not render a link list" % rel)
+    if "<img" in related or "card" in related:
+        failed.append("%s: related renders cards or images instead of plain links" % rel)
+    links = re.findall(r'<li><a href="([^"]+)">([^<]+)</a></li>', related)
     if not links:
-        failed.append("related block renders no cards")
-    for href in links:
+        failed.append("%s: related block renders no links" % rel)
+    if len(links) > 3:
+        failed.append("%s: relatedContentLimit = 3 not honoured (%d links)" % (rel, len(links)))
+    for href, title in links:
         if not (out / href.lstrip("/") / "index.html").exists():
-            failed.append("related card points at an unbuilt page: %s" % href)
+            failed.append("%s: related link points at an unbuilt page: %s" % (rel, href))
+        if not title.strip():
+            failed.append("%s: related link renders an empty title" % rel)
 if "article__related" in page("section-a/pixel"):
     failed.append("an empty related result still renders a block")
-if meta := re.search(r'<p class="article__meta">(.*?)</p>', vec, re.S):
-    inner = " ".join(meta.group(1).split())
-    if "<time" in inner:
-        failed.append("showDate = false still renders a date")
-    if inner.startswith("·"):
-        failed.append("hidden date leaves a leading separator")
+
+# --- meta separator: exactly one · between adjacent items ---
+for rel in ("section-a/vector", "section-a/flat", "section-a/nested/post", "section-a/pixel"):
+    for m in re.finditer(r'<p class="article__meta">(.*?)</p>', page(rel), re.S):
+        inner = " ".join(html.unescape(m.group(1)).split())
+        if not inner:
+            continue
+        items = len(re.findall(r"<time", inner)) + inner.count('class="article__tag"')
+        items += 1 if "By " in inner else 0
+        segments = len([s for s in inner.split(" · ") if s.strip()])
+        if segments != items:
+            failed.append("%s meta has %d item(s) but %d separator-run(s): %r"
+                          % (rel, items, segments, inner))
+        if inner.startswith("·") or inner.rstrip().endswith("·"):
+            failed.append("%s meta has a leading or trailing separator: %r" % (rel, inner))
+
 flat = page("section-a/flat")
 if not re.search(r'<p class="article__meta">\s*<time', flat, re.S):
     failed.append("the default showDate = true renders no date")
+if re.search(r'<p class="article__meta">\s*<time', vec, re.S):
+    failed.append("showDate = false still renders a date")
 
 # --- sharing ---
 share = block(flat, "article__share", "div")
@@ -920,21 +945,22 @@ if not share:
 else:
     if 'role="group"' not in share or 'aria-label="Share this article"' not in share:
         failed.append("share block is not an accessible group")
-    pairs = re.findall(r'<a class="article__share-link" href="([^"]+)" target="_blank" rel="noopener noreferrer">([^<]+)</a>', share)
-    if len(pairs) != 4:
-        failed.append("expected 4 share links, got %d" % len(pairs))
-    urls = dict((label, url) for url, label in pairs)
+    if re.search(r'href="[^"]* [^"]*"', share):
+        failed.append("a share URL left a raw space unencoded")
+    links = re.findall(r'<a class="article__share-link" href="([^"]+)"( target="_blank" rel="noopener noreferrer")?>([^<]+)</a>', share)
+    if len(links) != 4:
+        failed.append("expected 4 share links, got %d" % len(links))
+    got = dict((label, (url, bool(blank))) for url, blank, label in links)
     expect = {
-        "LinkedIn": "https://www.linkedin.com/shareArticle?mini=true&url=/section-a/flat/&title=Flat+section+image",
-        "Facebook": "https://www.facebook.com/sharer/sharer.php?u=/section-a/flat/&quote=Flat+section+image",
-        "Email":    "mailto:?body=/section-a/flat/&subject=Flat+section+image",
-        "WhatsApp": "https://api.whatsapp.com/send?text=Flat+section+image+/section-a/flat/",
+        "LinkedIn": ("https://www.linkedin.com/shareArticle?mini=true&url=/section-a/flat/&title=Flat+section+image", True),
+        "Facebook": ("https://www.facebook.com/sharer/sharer.php?u=/section-a/flat/&quote=Flat+section+image", True),
+        "Email":    ("mailto:?body=/section-a/flat/&subject=Flat+section+image", False),
+        "WhatsApp": ("https://api.whatsapp.com/send?text=Flat+section+image+/section-a/flat/", True),
     }
-    for label, url in expect.items():
-        if urls.get(label) != url:
-            failed.append("%s share link is %r" % (label, urls.get(label)))
-if re.search(r'href="[^"]* [^"]*"', share):
-    failed.append("a share URL left a raw space unencoded")
+    for label, (url, blank) in expect.items():
+        if got.get(label) != (url, blank):
+            failed.append("%s share link is %r, want %r" % (label, got.get(label), (url, blank)))
+
 for rel in ("notice", "section-a"):
     if "article__share" in page(rel) or "article__related" in page(rel):
         failed.append("%s is not an article but renders article chrome" % rel)
@@ -943,12 +969,12 @@ if failed:
     for line in failed:
         print("FAIL " + line, file=sys.stderr)
     sys.exit(1)
-print("related cards + 4 share links, empty result hidden, showDate honoured")
+print("related links + 4 share links, separators between every meta item, empty result hidden")
 PY
 ); then
-  pass "related and share render only on articles ($rel_out)"
+  pass "related, meta separators and share render only on articles ($rel_out)"
 else
-  fail 'related and share render only on articles'
+  fail 'related, meta separators and share render only on articles'
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

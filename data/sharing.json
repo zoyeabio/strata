@@ -1,6 +1,7 @@
 {
   "email": {
     "label": "Email",
+    "blank": false,
     "url": "mailto:?body=%s&subject=%s"
   },
   "facebook": {

@@ -11,6 +11,10 @@
   with %[1]s and %[2]s. A name that resolves to nothing is skipped rather
   than rendered as a dead button.
 
+  Every link gets target="_blank" rel="noopener noreferrer" unless the
+  service sets "blank": false, which mailto: needs — most browsers ignore
+  the attribute there and a few open a blank tab first.
+
   No JavaScript and no icons: strata has no icon sprite, and the visible
   labels are what a screen reader announces anyway. rel="noopener
   noreferrer" keeps a share tab from reaching back into this page.
@@ -26,7 +30,7 @@
   {{- range $names }}
   {{- $name := . }}
   {{- with (index $data $name) }}
-  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}" target="_blank" rel="noopener noreferrer">{{ .label | default $name }}</a>
+  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}"{{ if index . "blank" | default true }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .label | default $name }}</a>
   {{- end }}
   {{- end }}
 </div>

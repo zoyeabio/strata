@@ -38,6 +38,39 @@ else
   fail 'check-build theme mode'
 fi
 
+# every share URL template must consume both printf arguments — the permalink
+# and the title. Hugo's printf does not error on a missing verb, it appends
+# %!N(EXTRA string=...) to the URL, so a site author who writes ?url=%s
+# ships a working-looking button that produces a dead link. This catches it at
+# build time rather than at click time.
+if sharing_out=$(cd "$ROOT" && python3 - <<'PY'
+import json
+import pathlib
+import re
+import sys
+
+data = json.loads((pathlib.Path("data/sharing.json")).read_text())
+bad = []
+for name, svc in sorted(data.items()):
+    if not isinstance(svc, dict) or "url" not in svc:
+        bad.append("%s: no url" % name)
+        continue
+    verbs = re.findall(r'%\[\d+\][a-z]|%[a-z]', svc["url"])
+    if len(verbs) != 2:
+        bad.append("%s: %d verb(s) %s, want 2 — %r"
+                   % (name, len(verbs), verbs, svc["url"]))
+if bad:
+    for line in bad:
+        print("FAIL " + line, file=sys.stderr)
+    sys.exit(1)
+print("%d share templates, 2 verbs each" % len(data))
+PY
+); then
+  pass "share URL templates consume both arguments ($sharing_out)"
+else
+  fail 'share URL templates consume both arguments'
+fi
+
 # the draft missing.md declares an unresolvable featureimage on purpose
 if hugo --source "$ROOT/test/fixture" --environment production --buildDrafts \
     --destination "$WORK/public-drafts" 2>"$WORK/drafts.stderr" >/dev/null; then
