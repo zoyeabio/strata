@@ -227,8 +227,8 @@ assert 'section-a/shortcodes/index.html' '<a href="/section-a/flat/" target="_bl
   'figure wraps the image in the requested link'
 assert 'section-a/shortcodes/index.html' 'width="400" height="300"' \
   'figure honours explicit width/height over the intrinsic size'
-count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 5 \
-  'three figures and two slides carry the text sizes'
+count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 6 \
+  'three figures, two slides and the loop clone carry the text sizes'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 5 \
   'four list cards plus the first slide load eagerly'
 if qual_out=$(python3 - "$OUT" <<'PY'
@@ -354,8 +354,8 @@ css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
 css_assert '@media\(min-width:1024px\)\{:root\{--site-gutter:128px' \
   'gutter rung 128px sits at the 1024px breakpoint'
 css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
-count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 5 \
-  'text preset adds the 832px rung on every body image'
+count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 6 \
+  'text preset adds the 832px rung on every body image and the loop clone'
 
 # 27. every class token the templates emit is defined in the shipped CSS
 #     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
@@ -532,8 +532,11 @@ assert 'index.html' 'info&#64;example\.net' 'footer email is entity-obfuscated'
 assert 'index.html' 'Testville' 'footer address second line renders'
 assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
 assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
-assert 'index.html' 'data-appearance-toggle' 'appearance switcher renders'
-assert 'index.html' 'data-scroll-top' 'scroll-to-top button renders'
+assert 'index.html' 'site-header__toggle" data-appearance-toggle' 'switcher sits in the header'
+assert 'index.html' 'class="back-to-top" data-scroll-top' 'scroll-to-top floats at the viewport corner'
+assert 'index.html' 'aria-label="Back to top"' 'scroll-to-top is labelled'
+assert 'index.html' 'site-footer__bottom' 'rich footer bottom travels as one bar'
+assert_not 'index.html' 'site-footer__title' 'rich footer drops the duplicate identity block'
 
 # 33. breadcrumbs: article and section trails link Home and ancestors,
 #     the current page is plain text; taxonomy follows its table, term and
@@ -566,6 +569,18 @@ fi
 #     both gated by showAuthor
 assert 'section-a/flat/index.html' 'By Flat Author' 'page author renders'
 assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the fallback'
+
+# 36. carousel loop is seamless: a hidden clone of the first slide closes
+#     the track so last-to-first animates instead of jumping
+count_assert 'section-a/shortcodes/index.html' 'data-carousel-slide' 2 \
+  'carousel keeps two real slides'
+assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
+  'carousel appends a hidden first-slide clone'
+
+# 37. article-vs-page width: sections in mainSections stay prose-capped,
+#     standalone pages render full width
+assert 'notice/index.html' 'class="page--wide"' 'non-article single goes full width'
+assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

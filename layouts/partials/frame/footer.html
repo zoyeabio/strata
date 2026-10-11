@@ -1,10 +1,12 @@
 {{- /*
   Site footer.
 
-  Two modes. Without a [footer] table in site params the output is the
-  legacy shape: identity, footer menu, copyright. With one, a rich grid
-  (company, quick links, legal, contact) renders above it and the meta row
-  gains social icons, an appearance switcher and a scroll-to-top button.
+  Two modes.   Without a [footer] table in site params the output is the legacy shape:
+  identity, footer menu, copyright — byte for byte. With one, a rich grid
+  (company, quick links, legal, contact) replaces the identity block and a
+  social row may follow the menu. The appearance switcher lives in the
+  header; the scroll-to-top button floats at the bottom right of the
+  viewport once the page is scrolled.
 
   Params (site.Params.footer, all optional)
     showCompanyInfo       (bool) — render the grid, default true
@@ -17,9 +19,10 @@
                            assets/icons/<name>.svg, missing file falls back
                            to the link name)
 
-  Email is entity-obfuscated like the email shortcode. Contact/social icons
-  need no JavaScript; the switcher and top button are wired by
-  assets/js/appearance.js (always loaded) and assets/js/scroll-top.js.
+  Email is entity-obfuscated like the email shortcode. Social icons need
+  no JavaScript; the switcher is wired by assets/js/appearance.js (always
+  loaded) and the floating button by assets/js/scroll-top.js (loaded only
+  when showScrollToTop is set).
 
   Called by: _default/baseof.html
 */ -}}
@@ -71,13 +74,17 @@
     {{- end }}
   </div>
   {{- end }}
+  {{- if not $rich }}
   <div>
     <a class="site-footer__title" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
     {{- with site.Params.description }}
     <p class="site-footer__tagline">{{ . }}</p>
     {{- end }}
   </div>
+  {{- end }}
+  {{- $bar := and $rich (or site.Menus.footer $social) }}
   {{- with site.Menus.footer }}
+  {{- if $bar }}<div class="site-footer__bottom">{{ end }}
   <nav aria-label="Footer">
     <ul class="site-footer__list">
       {{- range . }}
@@ -89,16 +96,11 @@
     </ul>
   </nav>
   {{- end }}
-  {{- if or $social ($footer.showAppearanceSwitcher) ($footer.showScrollToTop) }}
+  {{- if $social }}
+  {{- if and $bar (not site.Menus.footer) }}<div class="site-footer__bottom">{{ end }}
   <div class="site-footer__meta">
     {{- range $social }}
     <a class="site-footer__social" href="{{ .url }}" aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
-    {{- end }}
-    {{- if $footer.showAppearanceSwitcher }}
-    <button type="button" class="site-footer__button" data-appearance-toggle aria-pressed="false">Appearance</button>
-    {{- end }}
-    {{- if $footer.showScrollToTop }}
-    <button type="button" class="site-footer__button" data-scroll-top>Top</button>
     {{- end }}
   </div>
   {{- end }}
@@ -107,8 +109,10 @@
   {{- $copyright = replace . "{ year }" (printf "%d" now.Year) }}
   {{- end }}
   <p class="site-footer__copyright">{{ $copyright }}</p>
+  {{- if $bar }}</div>{{ end }}
 </footer>
 {{- if $footer.showScrollToTop }}
+<button type="button" class="back-to-top" data-scroll-top aria-label="Back to top" hidden>&uarr;</button>
 {{- with resources.Get "js/scroll-top.js" }}
 {{- $st := . | fingerprint "sha512" }}
 <script src="{{ $st.RelPermalink }}" integrity="{{ $st.Data.Integrity }}"></script>

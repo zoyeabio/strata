@@ -1,4 +1,5 @@
 eagerCardCount = 2
+mainSections = ["section-a"]
 
 [list]
   cardView = true

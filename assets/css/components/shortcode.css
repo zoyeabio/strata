@@ -28,6 +28,12 @@
   }
 }
 
+@media (min-width: 853px) {
+  .shortcode-list--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .email-link {
   word-break: break-word;
 }

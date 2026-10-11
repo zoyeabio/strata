@@ -29,6 +29,7 @@ write them in any case. Site config keys keep their case.
 | `list.cardView` | `true` | Default card vs. row layout for section/term lists |
 | `list.orderByWeight` | `false` | Sort list pages by `weight` instead of date |
 | `list.showSummary` | `false` | Default card summaries on lists |
+| `mainSections` | — | Sections whose singles are articles (prose-capped); other singles render full width. Compared case-insensitively; absent means every single is an article |
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `author.name` | — | Site-wide author fallback |
@@ -45,9 +46,9 @@ it, a grid renders above: company, quick links, legal, contact.
 
 | Key | Type / default | Effect |
 |---|---|---|
-| `showCompanyInfo` | `true` | Render the grid at all |
-| `showAppearanceSwitcher` | `false` | Dark/Light toggle button (wired by `assets/js/appearance.js`) |
-| `showScrollToTop` | `false` | Top button (loads `assets/js/scroll-top.js`) |
+| `showCompanyInfo` | `true` | Render the grid at all (without the table the footer is identity, menu, copyright) |
+| `showAppearanceSwitcher` | `false` | Dark/Light toggle button, rendered at the top right of the header |
+| `showScrollToTop` | `false` | Floating round button at the bottom right past 400px scrolled |
 | `company.name` / `company.slogan` | — | Brand column; name falls back to the site title |
 | `company.email` | — | Entity-obfuscated `mailto:` link |
 | `company.phone` | — | `tel:` link, spaces stripped |

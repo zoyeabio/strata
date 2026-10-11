@@ -22,7 +22,10 @@
   height come from the pipeline and the aspect ratio comes from the frame.
   The first slide loads eagerly (it can be the page's LCP), the rest
   lazily. The inline script initialises only its own instance; two
-  carousels on one page stay independent.
+  carousels on one page stay independent. The loop is seamless forward: a
+  hidden clone of the first slide sits at the end, so the last-to-first
+  step animates onto the clone and snaps back to the real first slide
+  without a visible jump.
 
   Called by: content markdown
 */ -}}
@@ -85,8 +88,10 @@
   </div>
   <div class="carousel__viewport" style="aspect-ratio: {{ $aw }} / {{ $ah }};">
     <div class="carousel__track" data-carousel-track style="transition: transform 0.6s ease; will-change: transform;">
-      {{- range $i, $s := $slides }}
-      <div class="carousel__slide" data-carousel-slide{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}">
+      {{- $all := $slides }}
+      {{- if gt (len $slides) 1 }}{{ with index $slides 0 }}{{ $all = $all | append . }}{{ end }}{{ end }}
+      {{- range $i, $s := $all }}
+      <div class="carousel__slide"{{ if lt $i (len $slides) }} data-carousel-slide{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}"{{ else }} aria-hidden="true" tabindex="-1"{{ end }}>
         <div class="carousel__frame">
           {{- partial "media/image.html" (dict
               "img" $s.img
@@ -119,15 +124,15 @@
   var track = root.querySelector("[data-carousel-track]");
   var slides = track.children;
   var dots = root.querySelectorAll("[data-slide-to]");
+  var count = dots.length;
   var index = 0;
   var timer = null;
+  var snap = null;
   var interval = parseInt(root.getAttribute("data-interval"), 10) || 2000;
 
-  function go(next) {
-    index = (next + slides.length) % slides.length;
-    track.style.transform = "translateX(-" + index * 100 + "%)";
+  function paint(n) {
     for (var i = 0; i < dots.length; i++) {
-      if (i === index) {
+      if (i === n) {
         dots[i].setAttribute("data-carousel-active", "");
         dots[i].setAttribute("aria-current", "true");
       } else {
@@ -136,7 +141,7 @@
       }
     }
     for (var j = 0; j < slides.length; j++) {
-      if (j === index) {
+      if (j === n) {
         slides[j].setAttribute("data-carousel-active", "");
       } else {
         slides[j].removeAttribute("data-carousel-active");
@@ -144,9 +149,32 @@
     }
   }
 
+  function go(next) {
+    if (next === count) {
+      index = count;
+      track.style.transform = "translateX(-" + index * 100 + "%)";
+      paint(0);
+      clearTimeout(snap);
+      snap = setTimeout(function () {
+        track.style.transition = "none";
+        index = 0;
+        track.style.transform = "translateX(0)";
+        void track.offsetWidth;
+        track.style.transition = "transform 0.6s ease";
+      }, 650);
+    } else {
+      clearTimeout(snap);
+      index = (next + count) % count;
+      track.style.transform = "translateX(-" + index * 100 + "%)";
+      paint(index);
+    }
+  }
+
   function start() {
     stop();
-    timer = setInterval(function () { go(index + 1); }, interval);
+    if (count > 1) {
+      timer = setInterval(function () { go(index + 1); }, interval);
+    }
   }
 
   function stop() {

@@ -27,6 +27,15 @@
   margin-inline: auto;
 }
 
+.page--wide .article__header {
+  max-width: none;
+  margin: 40px 0 0;
+}
+
+.page--wide .article__content.prose {
+  max-width: none;
+}
+
 .article-hero {
   margin-block: 32px;
   border-radius: 12px;

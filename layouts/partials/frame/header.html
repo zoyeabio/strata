@@ -12,6 +12,10 @@
   the scroll behaviour script that belongs with it.
 
   Called by: _default/baseof.html
+
+  The Dark/Light switcher sits at the end of the header (top right) and is
+  gated by site.Params.footer.showAppearanceSwitcher — the key lives with
+  the footer table so migrating sites keep their config untouched.
 */ -}}
 {{- $logo := "" }}
 {{- $hasLogo := false }}
@@ -38,4 +42,7 @@
     {{- end }}
   </a>
   {{ partial "frame/menu.html" . }}
+  {{- if site.Params.footer.showAppearanceSwitcher }}
+  <button type="button" class="site-header__toggle" data-appearance-toggle aria-pressed="false">Appearance</button>
+  {{- end }}
 </header>

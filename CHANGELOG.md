@@ -16,6 +16,11 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   page Kind with a page-level override that honours explicit `false`.
 - Article byline: page `author` wins, site `[author] name` is the fallback,
   both gated by `showAuthor`.
+- Seamless carousel loop: a hidden first-slide clone closes the track.
+- Non-article singles render full width via `mainSections` (absent means
+  every single is an article); shortcode card grids go 3-up from 853px
+  like section lists.
+- Rich footer bottom travels as one bar (menu, social, copyright).
 - `b2b` colour scheme (deep navy) for trade sites.
 - Rich footer from the `[footer]` table: company, quick-links, legal and
   contact columns, social icon row (site `assets/icons/`, name fallback),

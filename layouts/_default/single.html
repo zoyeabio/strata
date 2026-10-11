@@ -2,11 +2,13 @@
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
 {{- $terms := .GetTerms "tags" }}
+{{- $isArticle := true }}
+{{- with site.Params.mainSections }}{{ $isArticle = in (apply . "lower" ".") (lower $.Section) }}{{ end }}
 {{- $articleParams := site.Params.article | default dict }}
 {{- $author := .Params.author | default site.Params.author.name | default "" }}
 {{- $showAuthor := false }}
 {{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor | default false }}{{ end }}
-<article>
+<article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
   {{- end }}
