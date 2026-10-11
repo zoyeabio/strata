@@ -13,6 +13,18 @@ enableRobotsTXT = true
   tag = "tags"
   series = "series"
 
+[related]
+  threshold = 80
+  toLower = false
+
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+
+  [[related.indices]]
+    name = "series"
+    weight = 50
+
 [security.exec]
   allow = ['go', 'tailwindcss']
 

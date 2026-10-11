@@ -1,0 +1,18 @@
+{
+  "email": {
+    "label": "Email",
+    "url": "mailto:?body=%s&subject=%s"
+  },
+  "facebook": {
+    "label": "Facebook",
+    "url": "https://www.facebook.com/sharer/sharer.php?u=%s&quote=%s"
+  },
+  "linkedin": {
+    "label": "LinkedIn",
+    "url": "https://www.linkedin.com/shareArticle?mini=true&url=%s&title=%s"
+  },
+  "whatsapp": {
+    "label": "WhatsApp",
+    "url": "https://api.whatsapp.com/send?text=%[2]s+%[1]s"
+  }
+}

@@ -16,6 +16,10 @@ enableA11y = true
 [article]
   showBreadcrumbs = true
   showAuthor = true
+  showRelatedContent = true
+  relatedContentLimit = 3
+  showSummary = true
+  sharingLinks = ["linkedin", "facebook", "email", "whatsapp"]
 
 [author]
   name = "Fixture Team"

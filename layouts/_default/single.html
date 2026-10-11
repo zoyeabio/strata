@@ -8,6 +8,9 @@
 {{- $author := .Params.author | default site.Params.author.name | default "" }}
 {{- $showAuthor := false }}
 {{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor | default false }}{{ end }}
+{{- $showDate := true }}
+{{- if isset .Params "showdate" }}{{ $showDate = .Params.showdate }}{{ else }}{{ $showDate = $articleParams.showDate | default true }}{{ end }}
+{{- $dateShown := and $showDate (not .Date.IsZero) }}
 <article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -15,17 +18,17 @@
   <header class="article__header">
     {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
-    {{- if or (not .Date.IsZero) $terms (and $showAuthor $author) }}
+    {{- if or $dateShown $terms (and $showAuthor $author) }}
     <p class="article__meta">
-      {{- if not .Date.IsZero }}
+      {{- if $dateShown }}
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
       {{- end }}
       {{- range $terms }}
-      {{- if not $.Date.IsZero }} · {{ end }}
+      {{- if $dateShown }} · {{ end }}
       <a class="article__tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
       {{- end }}
       {{- if and $showAuthor $author }}
-      {{- if or (not $.Date.IsZero) $terms }} · {{ end }}By {{ $author }}
+      {{- if or $dateShown $terms }} · {{ end }}By {{ $author }}
       {{- end }}
     </p>
     {{- end }}
@@ -36,5 +39,9 @@
     {{ . }}
   </div>
   {{ end }}
+  {{- if $isArticle }}
+  {{ partial "page/related.html" . }}
+  {{ partial "page/share.html" . }}
+  {{- end }}
 </article>
 {{ end }}

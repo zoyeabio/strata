@@ -1,0 +1,35 @@
+{{- /*
+  Related articles: Hugo's own related-content ranking, capped at
+  site.Params.article.relatedContentLimit, rendered as a card grid after the
+  article body.
+
+  The page is the template context itself, because .Site.RegularPages.Related
+  resolves its argument through the current context and returns an empty
+  result when handed a page carried in a dict. Ranking is done by Hugo from
+  the [related] indices and threshold in hugo.toml, so this partial only
+  asks for the result and caps it. No site has to tune anything here.
+
+  An empty result renders nothing rather than a dead heading.
+
+  Params
+    . (Page) — the article being rendered
+
+  Called by: _default/single.html, already guarded to article pages only.
+*/ -}}
+{{- $art := site.Params.article | default dict }}
+{{- $show := $art.showRelatedContent | default false }}
+{{- if isset .Params "showrelatedcontent" }}{{ $show = .Params.showrelatedcontent }}{{ end }}
+{{- if $show }}
+{{- $limit := int ($art.relatedContentLimit | default 3) }}
+{{- $rel := .Site.RegularPages.Related . }}
+{{- $related := first $limit $rel }}
+{{- with $related }}
+<section class="article__related" aria-labelledby="article-related">
+  <h2 class="article__related-title" id="article-related">Related</h2>
+  {{ partial "page/page-collection.html" (dict
+    "pages" .
+    "cardView" true
+    "showSummary" ($art.showSummary | default false)) }}
+</section>
+{{- end }}
+{{- end }}

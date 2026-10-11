@@ -1,0 +1,33 @@
+{{- /*
+  Share buttons: one plain anchor per name in site.Params.article.sharingLinks.
+
+  Each URL comes from a template in data/sharing.json — the theme ships a
+  default set and a site's own data/sharing.json merges over it — so the
+  services stay site-owned and adding one needs no template change.
+
+  The two %s slots are always the permalink, then the title. The title goes
+  through urlquery so spaces and ampersands cannot break the URL; the
+  permalink is already URL-safe. A template may position them explicitly
+  with %[1]s and %[2]s. A name that resolves to nothing is skipped rather
+  than rendered as a dead button.
+
+  No JavaScript and no icons: strata has no icon sprite, and the visible
+  labels are what a screen reader announces anyway. rel="noopener
+  noreferrer" keeps a share tab from reaching back into this page.
+
+  Called by: _default/single.html
+*/ -}}
+{{- $page := . }}
+{{- $names := (site.Params.article | default dict).sharingLinks | default slice }}
+{{- $data := site.Data.sharing | default dict }}
+{{- $title := urlquery $page.Title }}
+{{- if $names }}
+<div class="article__share" role="group" aria-label="Share this article">
+  {{- range $names }}
+  {{- $name := . }}
+  {{- with (index $data $name) }}
+  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}" target="_blank" rel="noopener noreferrer">{{ .label | default $name }}</a>
+  {{- end }}
+  {{- end }}
+</div>
+{{- end }}

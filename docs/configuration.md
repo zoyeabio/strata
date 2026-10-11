@@ -33,6 +33,11 @@ write them in any case. Site config keys keep their case.
 | `header.layout` | `"standard"` | `"smart"` sticks the header and hides it on scroll down, revealing on scroll up |
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
+| `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
+| `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
+| `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
+| `article.showSummary` | `false` | Card summaries in the related grid |
+| `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
 | `author.name` | — | Site-wide author fallback |
 | `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
 | `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
@@ -94,6 +99,8 @@ it, a grid renders above: company, quick links, legal, contact.
 | `featureimagealt` | Alt text for `featureimage`; fallback `Featured image for {title}` |
 | `showHero` | Page hero: shown when `featureimage` resolves, `false` suppresses it |
 | `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
+| `showDate` | Page-level date override (falls back to `[article] showDate`, explicit `false` wins) |
+| `showRelatedContent` | Page-level related-content override (falls back to `[article] showRelatedContent`) |
 | `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
@@ -138,9 +145,8 @@ accident:
 
 ## Not implemented (planned)
 
-Related-content block, table of contents, syntax
-highlighting CSS, i18n string catalogue, product pages. See the project
-roadmap.
+Table of contents, syntax highlighting CSS, i18n string catalogue,
+product pages. See the project roadmap.
 
 ## Search (`enableSearch`)
 
@@ -193,3 +199,74 @@ The three header dropdowns share one contract in `assets/js/dropdowns.js`:
 at most one is open, `aria-expanded` stays in sync, Escape closes with
 focus back on its own button. A new dropdown is one
 `strataRegisterDropdown` call.
+
+## Related content
+
+Two things are required, and they are independent — Hugo ranks, the theme
+only asks for the result:
+
+```toml
+# params.toml
+[article]
+  showRelatedContent = true
+  relatedContentLimit = 3
+
+# hugo.toml — what "related" means and the score floor
+[related]
+  threshold = 80
+  toLower = false
+
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+
+  [[related.indices]]
+    name = "series"
+    weight = 50
+```
+
+`threshold` is a 0–100 score floor. `weight` is relative, so `tags` at 100
+and `series` at 50 means a shared tag counts double a shared series. A page
+with no terms in common with anything renders no block at all — an empty
+result is not an error and leaves no dead heading behind. Related scoring
+is symmetric, so if `B` appears under `A` then `A` appears under `B`; Hugo
+computes the list lazily per page.
+
+The cards come from `page/page-collection.html`, the same grid as the list
+pages, so `article.showSummary` controls their summaries. Page-level
+override: `showRelatedContent: false` in front matter.
+
+## Share buttons
+
+```toml
+[article]
+  sharingLinks = ["linkedin", "facebook", "email", "whatsapp"]
+```
+
+Each name resolves against `data/sharing.json`. The theme ships the four
+above; a site's own `data/sharing.json` **merges over it** — every key the
+site names is replaced, every key it omits is inherited, and a new name
+adds a button. No template change is needed to add a service.
+
+```json
+{
+  "mastodon": {
+    "label": "Mastodon",
+    "url": "https://mastodon.social/share?text=%[2]s%20%[1]s"
+  }
+}
+```
+
+Two arguments are passed to `printf`, in this order: the permalink, then
+the title (already run through `urlquery`, so spaces and `&` survive the URL).
+Include both slots in every template, or use `%[1]s` / `%[2]s` to reorder
+without renaming. Separating them with a literal `+` is how the default
+WhatsApp entry does it — writing `%20` instead breaks, because `printf`
+reads `%2` as an unknown verb and emits `%!2(MISSING)`. Leaving one slot
+unused appends a `%!N(EXTRA …)` marker to the URL and the link stops
+working.
+
+`label` falls back to the name if omitted. A name that resolves to nothing
+in `data/sharing.json` renders no button rather than a dead one. Links are
+plain anchors with `target="_blank" rel="noopener noreferrer"` — no icon
+font, no share widget, no third-party script.

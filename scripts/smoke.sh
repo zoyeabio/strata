@@ -862,6 +862,95 @@ assert 'section-a/flat/index.html' 'article:section' 'article section is emitted
 assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
 
+# 48. related content and share buttons: Hugo's own ranking rendered as
+#     cards, capped and hidden when empty; one anchor per sharingLinks name
+#     from data/sharing.json, title urlquery-encoded, opener opted out
+css_assert 'article__related\{margin-block:40px' 'related block gets its own rhythm'
+css_assert 'article__share\{display:flex;flex-wrap:wrap' 'share links wrap on narrow screens'
+css_assert 'article__share-link\{[^}]*min-height:44px' 'share links keep a 44px target'
+css_assert 'article__share-link\{[^}]*border-radius:999px' 'share links are pills'
+if rel_out=$(python3 - "$OUT" <<'PY'
+import html
+import re
+import sys
+from pathlib import Path
+
+out = Path(sys.argv[1])
+failed = []
+
+def page(rel):
+    return (out / rel / "index.html").read_text(encoding='utf-8')
+
+def block(text, cls, tag):
+    m = re.search(r'<%s class="%s".*?</%s>\s*' % (tag, cls, tag), text, re.S)
+    return html.unescape(m.group(0)) if m else ""
+
+# --- related ---
+vec = page("section-a/vector")
+related = block(vec, "article__related", "section")
+if not related:
+    failed.append("vector renders no related block")
+else:
+    if 'aria-labelledby="article-related"' not in related:
+        failed.append("related block does not point at its heading")
+    if '<h2 class="article__related-title" id="article-related">Related</h2>' not in related:
+        failed.append("related heading is missing or mislabelled")
+    links = re.findall(r'<a class="card__link" href="([^"]+)"', related)
+    if not links:
+        failed.append("related block renders no cards")
+    for href in links:
+        if not (out / href.lstrip("/") / "index.html").exists():
+            failed.append("related card points at an unbuilt page: %s" % href)
+if "article__related" in page("section-a/pixel"):
+    failed.append("an empty related result still renders a block")
+if meta := re.search(r'<p class="article__meta">(.*?)</p>', vec, re.S):
+    inner = " ".join(meta.group(1).split())
+    if "<time" in inner:
+        failed.append("showDate = false still renders a date")
+    if inner.startswith("·"):
+        failed.append("hidden date leaves a leading separator")
+flat = page("section-a/flat")
+if not re.search(r'<p class="article__meta">\s*<time', flat, re.S):
+    failed.append("the default showDate = true renders no date")
+
+# --- sharing ---
+share = block(flat, "article__share", "div")
+if not share:
+    failed.append("flat renders no share block")
+else:
+    if 'role="group"' not in share or 'aria-label="Share this article"' not in share:
+        failed.append("share block is not an accessible group")
+    pairs = re.findall(r'<a class="article__share-link" href="([^"]+)" target="_blank" rel="noopener noreferrer">([^<]+)</a>', share)
+    if len(pairs) != 4:
+        failed.append("expected 4 share links, got %d" % len(pairs))
+    urls = dict((label, url) for url, label in pairs)
+    expect = {
+        "LinkedIn": "https://www.linkedin.com/shareArticle?mini=true&url=/section-a/flat/&title=Flat+section+image",
+        "Facebook": "https://www.facebook.com/sharer/sharer.php?u=/section-a/flat/&quote=Flat+section+image",
+        "Email":    "mailto:?body=/section-a/flat/&subject=Flat+section+image",
+        "WhatsApp": "https://api.whatsapp.com/send?text=Flat+section+image+/section-a/flat/",
+    }
+    for label, url in expect.items():
+        if urls.get(label) != url:
+            failed.append("%s share link is %r" % (label, urls.get(label)))
+if re.search(r'href="[^"]* [^"]*"', share):
+    failed.append("a share URL left a raw space unencoded")
+for rel in ("notice", "section-a"):
+    if "article__share" in page(rel) or "article__related" in page(rel):
+        failed.append("%s is not an article but renders article chrome" % rel)
+
+if failed:
+    for line in failed:
+        print("FAIL " + line, file=sys.stderr)
+    sys.exit(1)
+print("related cards + 4 share links, empty result hidden, showDate honoured")
+PY
+); then
+  pass "related and share render only on articles ($rel_out)"
+else
+  fail 'related and share render only on articles'
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

@@ -45,4 +45,44 @@
   height: auto;
   display: block;
 }
+
+.article__related {
+  margin-block: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.article__related-title {
+  margin: 0 0 18px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--site-text-strong);
+}
+
+.article__share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: 32px 40px;
+}
+
+.article__share-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--site-text-strong);
+  font-size: 14px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.article__share-link:hover {
+  border-color: var(--site-link);
+  color: var(--site-link);
+}
 }
