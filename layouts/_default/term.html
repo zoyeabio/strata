@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- $termParams := site.Params.term | default dict }}
-{{ partial "page/breadcrumbs.html" . }}
 <header class="page-header">
+  {{ partial "page/breadcrumbs.html" . }}
   <h1>{{ .Title | emojify }}</h1>
   <p class="page-header__meta">{{ len .Pages }} articles</p>
 </header>

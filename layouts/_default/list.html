@@ -1,7 +1,7 @@
 {{ define "main" }}
-{{ partial "page/breadcrumbs.html" . }}
 {{- with .Title }}
   <header class="page-header">
+    {{ partial "page/breadcrumbs.html" $ }}
     <h1>{{ . | emojify }}</h1>
   </header>
 {{- end }}

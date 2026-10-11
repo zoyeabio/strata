@@ -549,6 +549,25 @@ assert 'section-a/index.html' 'aria-label="Breadcrumb"' 'section trail renders v
 assert 'tags/index.html' 'aria-label="Breadcrumb"' 'taxonomy trail follows its table'
 assert_not 'tags/alpha/index.html' 'aria-label="Breadcrumb"' 'term trail stays hidden by default'
 assert_not 'index.html' 'aria-label="Breadcrumb"' 'home trail stays hidden by default'
+# 33b. list headers share the article rhythm: the trail renders inside
+#      .page-header ahead of the h1 (a trail outside the header once left
+#      list pages 40px below the trail while articles sat 16px)
+if python3 - "$OUT" <<'PY'
+import pathlib, sys
+for rel in ('section-a/index.html', 'tags/index.html'):
+    html = (pathlib.Path(sys.argv[1]) / rel).read_text()
+    hi = html.find('<header class="page-header">')
+    ni = html.find('<nav aria-label="Breadcrumb">')
+    ti = html.find('<h1>')
+    assert hi != -1 and hi < ni < ti, rel
+PY
+then
+  pass 'list trail sits inside the header ahead of the title'
+else
+  fail 'list trail sits inside the header ahead of the title'
+fi
+css_assert 'page-header\{margin-block:0 12px' 'list header carries no top gap of its own'
+css_assert 'page-header:not\(:has\(.breadcrumb\)\)\{margin-top:40px' 'trail-less header keeps its top air'
 
 # 34. page front matter keys are read lowercase: Hugo folds content keys
 #     (showBreadcrumbs arrives as showbreadcrumbs) while site config keeps
