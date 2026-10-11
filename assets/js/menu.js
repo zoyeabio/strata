@@ -3,8 +3,8 @@
    desktop layout. On open the panel cap is measured from the live header
    bottom, so a wrapped (multi-line) header never pushes it past the
    viewport. Submenu chevron buttons toggle their sibling block
-   in the same script. Opening the nav closes the search panel so the
-   two dropdowns never stack (search.js returns the courtesy).
+   in the same script. Opening the nav closes the search and a11y panels
+   so the dropdowns never stack (both return the courtesy).
    Loaded deferred from the menu partial whenever
    a main menu exists. */
 (function () {
@@ -23,6 +23,12 @@
       if (searchBtn && searchPanel) {
         searchBtn.setAttribute("aria-expanded", "false");
         searchPanel.classList.remove("is-open");
+      }
+      var a11yBtn = document.querySelector("[data-a11y-toggle]");
+      var a11yPanel = document.querySelector("[data-a11y-panel]");
+      if (a11yBtn && a11yPanel) {
+        a11yBtn.setAttribute("aria-expanded", "false");
+        a11yPanel.classList.remove("is-open");
       }
     } else {
       panel.style.maxHeight = "";

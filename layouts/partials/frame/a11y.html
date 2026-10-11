@@ -1,0 +1,44 @@
+{{- /*
+  Accessibility panel: a disclosure button plus a dropdown with three
+  switches — underline links, reduce motion, strong focus. Rendered only
+  when site.Params.enableA11y is true. State lives in localStorage
+  ("strataA11y") and applies as classes on <html>, so preferences survive
+  navigation; assets/js/a11y.js owns both the panel and the application.
+
+  No font-size switch on purpose: the theme sizes text in px, where a root
+  bump only moves headings — browser zoom is the honest tool for that.
+  No image switch either: the theme has no background-image heroes to kill.
+
+  Called by: frame/header.html, after frame/search.html (same stacking
+  rule: the later dropdown paints above; each script closes the others).
+*/ -}}
+{{- if site.Params.enableA11y }}
+{{- $a11yJS := resources.Get "js/a11y.js" | fingerprint "sha512" }}
+<button type="button" class="site-header__a11y" data-a11y-toggle aria-expanded="false" aria-controls="site-a11y" aria-label="Accessibility">
+  <span class="site-a11y__icon" aria-hidden="true">A</span>
+</button>
+<div class="site-a11y" id="site-a11y" data-a11y-panel>
+  <p class="site-a11y__title" id="site-a11y-title">Accessibility</p>
+  <ul class="site-a11y__list" aria-labelledby="site-a11y-title">
+    <li>
+      <label class="site-a11y__row" for="site-a11y-links">
+        <span>Underline links</span>
+        <input type="checkbox" id="site-a11y-links" data-a11y-setting="links">
+      </label>
+    </li>
+    <li>
+      <label class="site-a11y__row" for="site-a11y-motion">
+        <span>Reduce motion</span>
+        <input type="checkbox" id="site-a11y-motion" data-a11y-setting="motion">
+      </label>
+    </li>
+    <li>
+      <label class="site-a11y__row" for="site-a11y-focus">
+        <span>Strong focus</span>
+        <input type="checkbox" id="site-a11y-focus" data-a11y-setting="focus">
+      </label>
+    </li>
+  </ul>
+</div>
+<script src="{{ $a11yJS.RelPermalink }}" integrity="{{ $a11yJS.Data.Integrity }}" defer></script>
+{{- end }}

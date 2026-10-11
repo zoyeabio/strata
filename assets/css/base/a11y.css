@@ -30,4 +30,20 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+html.a11y-underline-links a {
+  text-decoration: underline;
+}
+
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html.a11y-strong-focus :focus-visible {
+  outline-width: 4px;
+}
 }

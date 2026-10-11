@@ -679,6 +679,37 @@ else
   fail 'search scores, escapes and shares the panel contract'
 fi
 css_assert 'article__header h1,.page-header h1\{font-size:2.125rem' 'page titles share one size rule'
+# 47. a11y panel: disclosure plus three persisted switches; the motion
+#     switch is read live by scroll-to-top and the carousel (#43 pattern)
+assert 'index.html' 'data-a11y-toggle aria-expanded="false"' 'a11y button starts collapsed'
+assert 'index.html' 'aria-controls="site-a11y"' 'a11y button names its panel'
+assert 'index.html' 'id="site-a11y" data-a11y-panel' 'a11y panel carries the named id'
+count_assert 'index.html' 'data-a11y-setting="[^"]*"' 3 'three switches render'
+assert 'index.html' 'a11y\.[0-9a-f]+\.js' 'a11y script loads'
+if grep -q 'a11y-reduce-motion' "$ROOT/assets/js/scroll-top.js" &&
+   grep -q 'a11y-reduce-motion' "$ROOT/layouts/shortcodes/interactive/carousel.html" &&
+   grep -q 'if (calm())' "$ROOT/layouts/shortcodes/interactive/carousel.html"; then
+  pass 'motion switch is read live by scroll-to-top and the carousel'
+else
+  fail 'motion switch is read live by scroll-to-top and the carousel'
+fi
+css_assert 'html\.a11y-underline-links a\{text-decoration:underline' 'underline-links class applies'
+css_assert 'html\.a11y-strong-focus :focus-visible\{outline-width:4px' 'strong-focus class applies'
+# the three dropdowns close each other: each opener lists the other two
+if grep -q 'data-search-panel' "$ROOT/assets/js/menu.js" &&
+   grep -q 'data-a11y-panel' "$ROOT/assets/js/menu.js" &&
+   grep -q 'data-a11y-panel' "$ROOT/assets/js/search.js"; then
+  pass 'dropdowns never stack'
+else
+  fail 'dropdowns never stack'
+fi
+# 48. no font-size switch: the theme sizes text in px, where a root bump
+#     only moves headings — browser zoom is the honest tool
+if grep -q 'No font-size switch on purpose' "$ROOT/layouts/partials/frame/a11y.html"; then
+  pass 'the deliberate font-size omission is documented at the point of use'
+else
+  fail 'the deliberate font-size omission is documented at the point of use'
+fi
 # 33c. the home title left the naked-h1 era: it renders inside .page-header
 #      like every other page title (same size, same top air)
 if python3 - "$OUT" <<'PY'

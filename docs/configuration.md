@@ -160,5 +160,26 @@ fields, result items are text-only. `assets/js/search.js` fetches it on
 first open and scores in-page: every query token must occur somewhere,
 title hits weigh 3, summary 2, body 1, top ten render. The header button
 opens a dropdown panel (the disclosure contract from the mobile menu:
-`aria-expanded` sync, Escape closes with focus back, the two panels close
+`aria-expanded` sync, Escape closes with focus back, the panels close
 each other). A search button with no `index.json` fails check-build.
+
+## Accessibility panel (`enableA11y`)
+
+`enableA11y = true` renders a third header dropdown with three switches.
+Choices persist in `localStorage` and apply as classes on `<html>`, so
+they hold across navigation without a reload round-trip:
+
+| Switch | Class | Effect |
+|---|---|---|
+| Underline links | `a11y-underline-links` | Every `a` gets an underline |
+| Reduce motion | `a11y-reduce-motion` | Kills animations and transitions; the carousel stops autoplaying and scroll-to-top becomes instant — both re-read the class, so it takes effect without a reload |
+| Strong focus | `a11y-strong-focus` | Focus outline goes from 2px to 4px |
+
+Deliberately absent: a font-size switch (the theme sizes text in px,
+where a root bump only moves headings — browser zoom is the honest tool
+for that) and a background-image switch (this theme has no background
+heroes to turn off). `scripts/smoke.sh` asserts the omission is
+documented, so adding one later means updating the gate too.
+
+Three header dropdowns now share one contract: each opener closes the
+other two, so they never stack.

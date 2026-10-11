@@ -11,8 +11,9 @@
     update();
     window.addEventListener("scroll", update, { passive: true });
     btn.addEventListener("click", function () {
-      var calm = typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var calm = document.documentElement.classList.contains("a11y-reduce-motion") ||
+        (typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches);
       window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" });
     });
 })();

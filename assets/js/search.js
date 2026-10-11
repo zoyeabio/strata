@@ -5,7 +5,8 @@
    text links (no innerHTML anywhere), at most ten, with a polite live
    status line. Escape closes with focus back on the button — the same
    disclosure contract as assets/js/menu.js, which this script also closes
-   so the two dropdowns never stack (menu.js returns the courtesy).
+   (with the a11y panel) so the dropdowns never stack — every opener
+   closes the other two.
    Loaded deferred from the search partial when enableSearch is on. */
 (function () {
   var btn = document.querySelector("[data-search-toggle]");
@@ -28,6 +29,12 @@
       if (navBtn && navPanel) {
         navBtn.setAttribute("aria-expanded", "false");
         navPanel.classList.remove("is-open");
+      }
+      var a11yBtn = document.querySelector("[data-a11y-toggle]");
+      var a11yPanel = document.querySelector("[data-a11y-panel]");
+      if (a11yBtn && a11yPanel) {
+        a11yBtn.setAttribute("aria-expanded", "false");
+        a11yPanel.classList.remove("is-open");
       }
       load();
       if (input) input.focus();
