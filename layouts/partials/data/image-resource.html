@@ -69,7 +69,7 @@
   {{- range $candidates }}{{ if not $res }}{{ with resources.Get . }}{{ $res = . }}{{ end }}{{ end }}{{ end }}
 {{- end }}
 {{- end }}
-{{- if and (not $res) (not $remote) }}
+{{- if and $ref (not $res) (not $remote) }}
   {{- if fileExists (printf "static/%s" $ref) }}
     {{- $res = dict "RelPermalink" (relURL $ref) "ResourceType" "file" }}
   {{- end }}

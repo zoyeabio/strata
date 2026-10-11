@@ -26,6 +26,10 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Card summaries are no longer truncated in the template: `card.html` emits
   the plainified summary whole and the CSS 3-line clamp owns the cut, so
   CJK and long summaries behave the same. `cardSummaryLength` is gone.
+- Social tags match the page kind: empty image refs no longer fall back to
+  `static/` (which resolved to the bare site root in `og:image`), and
+  `article:*` times are gated on `og:type=article`. New R10 rule in
+  `check-build.sh` pins both; it fails on pre-fix output.
 
 ### Fixed
 

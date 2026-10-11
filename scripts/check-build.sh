@@ -298,6 +298,28 @@ if asset_bad:
 else:
     ok('referenced local assets exist')
 
+# R10 social and temporal tags match the page kind: og:type=website pages
+#    carry no article:* times, and no social image is ever the bare site
+#    root (an empty image ref used to fall back to static/, whose relURL
+#    is the root URL)
+social_bad = []
+for t in htmls:
+    text = t.read_text(errors='ignore')
+    if 'http-equiv="refresh"' in text:
+        continue
+    rel = t.relative_to(pub)
+    og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
+    if (not og or og.group(1) != 'article') and re.search(r'article:(published|modified)_time', text):
+        social_bad.append(f'{rel}: article:* time on og:type={og.group(1) if og else "?"}')
+    for prop in ('og:image', 'twitter:image'):
+        for m in re.findall(rf'property=["\x27]{prop}["\x27] content=["\x27]([^"\x27]*)["\x27]', text):
+            if re.fullmatch(r'https?://[^/]+/?', m.strip()):
+                social_bad.append(f'{rel}: {prop} points at the site root')
+if social_bad:
+    bad('social tags match the page kind', '\n'.join(f'  {b}' for b in social_bad))
+else:
+    ok('social tags match the page kind')
+
 sys.exit(1 if problems else 0)
 PY
 ); then
