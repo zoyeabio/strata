@@ -4,6 +4,23 @@
   outline-offset: 2px;
 }
 
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.skip-link:focus-visible {
+  top: 12px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

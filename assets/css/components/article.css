@@ -16,6 +16,8 @@
 }
 
 .article__tag {
+  display: inline-block;
+  padding-block: 2px;
   color: var(--site-link);
 }
 

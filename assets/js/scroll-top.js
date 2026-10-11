@@ -8,9 +8,11 @@
   function update() {
     btn.hidden = window.scrollY < 400;
   }
-  update();
-  window.addEventListener("scroll", update, { passive: true });
-  btn.addEventListener("click", function () {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    btn.addEventListener("click", function () {
+      var calm = typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" });
+    });
 })();

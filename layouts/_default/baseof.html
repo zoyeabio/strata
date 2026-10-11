@@ -6,6 +6,7 @@
   data-auto-appearance="{{ site.Params.autoSwitchAppearance | default "true" }}">
   {{ partial "head/head.html" . }}
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   {{ partial "frame/header.html" . }}
   <main id="main-content">
     {{ block "main" . }}{{ end }}

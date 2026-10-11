@@ -639,6 +639,15 @@ else
   fail 'every scheme holds text and focus contrast'
 fi
 
+# 40. keyboard and assistive-tech paths: skip link, carousel arrows and
+#     reduced-motion guards, contact live region and invalid flag
+assert 'index.html' 'class="skip-link" href="#main-content"' 'skip link targets the main block'
+assert 'section-a/shortcodes/index.html' 'ArrowLeft' 'carousel handles arrow keys'
+assert 'section-a/shortcodes/index.html' 'prefers-reduced-motion' 'carousel honours reduced motion'
+assert 'section-a/shortcodes/index.html' 'role="status"' 'contact status is a live region'
+assert 'section-a/shortcodes/index.html' 'aria-describedby=' 'message field names its limit'
+assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes validity'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

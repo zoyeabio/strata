@@ -32,15 +32,15 @@
   </div>
   <div class="contact-form__field">
     <label for="{{ $id }}-message">Your brief message *</label>
-    <textarea id="{{ $id }}-message" name="message" rows="5" required></textarea>
-    <p class="contact-form__counter">
+    <textarea id="{{ $id }}-message" name="message" rows="5" required aria-describedby="{{ $id }}-counter" aria-invalid="false"></textarea>
+    <p class="contact-form__counter" id="{{ $id }}-counter">
       <span id="{{ $id }}-bytes">0</span> / {{ $maxBytes }} bytes (<span id="{{ $id }}-chars">0</span> characters)
     </p>
   </div>
   <div class="contact-form__actions">
     <button type="submit">Send Message</button>
   </div>
-  <p class="contact-form__status" id="{{ $id }}-status" hidden></p>
+  <p class="contact-form__status" id="{{ $id }}-status" role="status" hidden></p>
   <div class="contact-form__honeypot" aria-hidden="true">
     <input type="text" name="hp_name" tabindex="-1" autocomplete="off">
   </div>
@@ -61,8 +61,10 @@
     var text = message.value;
     byteEl.textContent = new TextEncoder().encode(text).length;
     charEl.textContent = text.length;
+    var over = Number(byteEl.textContent) > maxBytes;
     message.closest(".contact-form__field").classList.toggle(
-      "contact-form__field--over", Number(byteEl.textContent) > maxBytes);
+      "contact-form__field--over", over);
+    message.setAttribute("aria-invalid", over ? "true" : "false");
   }
 
   function show(kind, text) {
