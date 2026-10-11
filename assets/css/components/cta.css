@@ -1,3 +1,4 @@
+@layer strata-components {
 .cta {
   display: flex;
   align-items: center;
@@ -54,4 +55,5 @@
 .cta__button:hover {
   background: var(--site-accent-strong);
   text-decoration: none;
+}
 }

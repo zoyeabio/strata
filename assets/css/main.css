@@ -4,6 +4,7 @@
 @plugin "@tailwindcss/forms";
 
 @source inline("sr-only prose not-prose");
+@source "../../layouts/**/*.html";
 
 @theme {
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -17,22 +18,3 @@
 }
 
 @layer strata-base, strata-components, strata-overrides;
-
-@import "./base/palette.css" layer(strata-base);
-@import "./base/reset.css" layer(strata-base);
-@import "./base/typography.css" layer(strata-base);
-@import "./base/prose.css" layer(strata-base);
-@import "./base/a11y.css" layer(strata-base);
-
-@import "./components/site.css" layer(strata-components);
-@import "./components/page.css" layer(strata-components);
-@import "./components/card.css" layer(strata-components);
-@import "./components/article.css" layer(strata-components);
-@import "./components/series.css" layer(strata-components);
-@import "./components/taxonomy.css" layer(strata-components);
-@import "./components/carousel.css" layer(strata-components);
-@import "./components/contact-form.css" layer(strata-components);
-@import "./components/cta.css" layer(strata-components);
-@import "./components/figure.css" layer(strata-components);
-@import "./components/multi-col.css" layer(strata-components);
-@import "./components/shortcode.css" layer(strata-components);

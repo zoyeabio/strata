@@ -1,3 +1,4 @@
+@layer strata-components {
 .article__header {
   max-width: 720px;
   margin: 40px auto 0;
@@ -37,4 +38,5 @@
   width: 100%;
   height: auto;
   display: block;
+}
 }

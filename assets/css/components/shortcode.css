@@ -1,3 +1,4 @@
+@layer strata-components {
 .shortcode-embed {
   margin-block: 24px;
 }
@@ -40,4 +41,5 @@
   width: 1em;
   height: 1em;
   display: block;
+}
 }

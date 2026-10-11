@@ -9,6 +9,18 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 ## [Unreleased]
 
+### Changed
+
+- Stylesheet pipeline is now Hugo-native: `head.html` concatenates the
+  `@layer`-wrapped CSS sources in cascade order and compiles them
+  in-process with `css.TailwindCSS` (deferred), minified and fingerprinted
+  as before. `assets/css/compiled/main.css`, `package.json` and
+  `package-lock.json` are gone — no npm anywhere. Builders need the
+  standalone Tailwind v4 CLI on PATH plus `[security.exec]` covering it in
+  site config (both documented in README and the scaffold, which neither
+  can inherit from the theme). Verified byte-equivalent output on the demo
+  and probiointel sites.
+
 ### Fixed
 
 - `assets/css/components/card.css` — `.card__summary` now pairs the

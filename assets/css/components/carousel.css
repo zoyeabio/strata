@@ -1,3 +1,4 @@
+@layer strata-components {
 .carousel {
   position: relative;
   margin-block: 28px;
@@ -112,4 +113,5 @@
 
 .carousel__btn--next {
   right: 10px;
+}
 }

@@ -1,3 +1,4 @@
+@layer strata-components {
 .page-header {
   margin-block: 40px 12px;
 }
@@ -69,4 +70,5 @@
   align-items: center;
   min-height: 44px;
   font-weight: 500;
+}
 }

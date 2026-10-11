@@ -1,3 +1,4 @@
+@layer strata-base {
 :root {
   color-scheme: light;
   --page-bg: #ffffff;
@@ -26,4 +27,5 @@
   --ok: #57c28a;
   --error: #f97066;
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+}
 }

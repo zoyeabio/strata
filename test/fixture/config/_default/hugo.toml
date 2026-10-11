@@ -7,3 +7,6 @@
 [taxonomies]
   tag = "tags"
   series = "series"
+
+[security.exec]
+  allow = ['go', 'tailwindcss']

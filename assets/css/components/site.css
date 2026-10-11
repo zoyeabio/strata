@@ -1,3 +1,4 @@
+@layer strata-components {
 .site-header {
   border-bottom: 1px solid var(--border);
   background: var(--page-bg);
@@ -107,4 +108,5 @@
 .site-footer__copyright {
   font-size: 13px;
   color: var(--text-faint);
+}
 }

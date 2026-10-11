@@ -68,17 +68,19 @@ this from the theme — see [docs/installation.md](docs/installation.md)):
 The theme repo carries its own gates. After any change:
 
 ```sh
-npm install            # once — Tailwind build for assets/css
-npm run build:css      # rebuild assets/css/compiled/main.css
+# once — standalone Tailwind v4 CLI on PATH (pinned: v4.3.3, see releases):
+#   macOS arm64: tailwindcss-macos-arm64, Linux x64: tailwindcss-linux-x64
+#   https://github.com/tailwindlabs/tailwindcss/releases
 ./scripts/smoke.sh     # fixture contract assertions
 ./scripts/validate-theme.sh
 ./scripts/validate-site.sh /path/to/site   # e.g. your site checkout
 ./scripts/new-site.sh --name "My Site" --domain example.com --out ../mysite
-./scripts/place-image.sh --section journal --post slug --file photo.png --role hero --site ../mysite
+./scripts/place-image.sh --section journal --post slug --file photo.png --role illustration --site ../mysite
 ```
 
-Do not hand-edit `assets/css/compiled/main.css`; it is generated from
-`assets/css/` sources and the smoke test fails when it is stale.
+CSS compiles in-process via `css.TailwindCSS` on every build — there is no
+committed bundle. Component files carry their own `@layer` wrappers and the
+concatenation order lives in `layouts/partials/head/head.html`.
 
 ## License
 

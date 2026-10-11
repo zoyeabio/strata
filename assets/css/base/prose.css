@@ -1,3 +1,4 @@
+@layer strata-base {
 .prose {
   --tw-prose-body: var(--text);
   --tw-prose-headings: var(--site-text-strong);
@@ -80,4 +81,5 @@
   margin-block: 1.4em;
   font-style: normal;
   color: var(--text-muted);
+}
 }

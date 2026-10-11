@@ -109,6 +109,25 @@ enableEmoji = false
 
 [outputs]
   home = ["HTML", "RSS"]
+
+[security.exec]
+  allow = ['go', 'tailwindcss']
+
+[build.buildStats]
+  enable = true
+
+[[build.cachebusters]]
+  source = 'assets/notwatching/hugo_stats\.json'
+  target = 'css'
+
+[[module.mounts]]
+  source = 'assets'
+  target = 'assets'
+
+[[module.mounts]]
+  disableWatch = true
+  source = 'hugo_stats.json'
+  target = 'assets/notwatching/hugo_stats.json'
 EOF
 
 # config/_default/languages.en.toml
@@ -308,6 +327,11 @@ Site repository. Content and configuration live here; the layout comes from
 the Strata Hugo theme.
 
 ## Development
+
+The theme compiles its CSS in-process and needs the Tailwind v4 CLI
+(`tailwindcss`, standalone binary from the Tailwind releases) on PATH at
+build time; the required exec/build sections are already in
+`config/_default/hugo.toml`.
 
 Articles are page bundles:
 

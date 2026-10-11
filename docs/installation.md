@@ -4,8 +4,10 @@
 
 - Hugo **0.151.0 or later**, Extended edition (the version the theme is
   tested against; a lower floor is not claimed yet)
+- Tailwind CSS v4 CLI (`tailwindcss`) on PATH — the theme compiles its
+  stylesheet in-process at build time. Use the standalone binary from the
+  Tailwind releases (no npm needed anywhere).
 - Go (only needed for Hugo Modules)
-- Node.js — only when you change theme CSS in a theme checkout
 
 ## Hugo Module (recommended)
 
@@ -99,5 +101,9 @@ use in the page (the bare filename, for a page bundle at
 While on the `replace` flow, pull the theme checkout and re-run the
 validators. Once a release tag exists, `hugo mod get -u
 github.com/zoyeabio/strata && hugo mod tidy` pins the new version, then
-rebuild and run the validator. The theme's CSS ships precompiled; you never
-run npm in a site that only consumes the theme.
+rebuild and run the validator. The theme compiles its CSS in-process from
+`assets/css/` sources on every build — you never run npm in a site that
+only consumes the theme, but the `tailwindcss` binary must be on PATH and
+the site config must allow it under `[security.exec]` (the scaffold writes
+both sections; see the taxonomy-style contract above — Hugo does not
+inherit them from a theme either).

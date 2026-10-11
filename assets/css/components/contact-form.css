@@ -1,3 +1,4 @@
+@layer strata-components {
 .contact-form {
   display: flex;
   flex-direction: column;
@@ -106,4 +107,5 @@
 
 .contact-form__status--neutral {
   color: var(--text-muted);
+}
 }

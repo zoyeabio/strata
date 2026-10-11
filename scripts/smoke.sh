@@ -2,7 +2,7 @@
 # Builds test/fixture and asserts the theme contract against the rendered
 # HTML: image resolver and ladder, sizes invariants, head tags, taxonomy,
 # series, remote gating, shortcodes, production silence, stylesheet wiring
-# (link count, fingerprint, compiled-CSS freshness, sizes-ladder parity,
+# (link count, fingerprint, pipeline output, sizes-ladder parity,
 # template class-token coverage), and build reproducibility. Every assertion
 # is a regression gate; the script exits non-zero if any of them fails.
 #
@@ -15,6 +15,13 @@ OUT="$WORK/public"
 OUT_REMOTE="$WORK/public-remote"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0
+
+# css.TailwindCSS shells out to the standalone Tailwind v4 CLI, which must
+# be on PATH (fail fast — without it every assertion below is noise)
+if ! command -v tailwindcss >/dev/null 2>&1; then
+  echo 'FAIL tailwindcss not on PATH — install the standalone v4 binary (see README)' >&2
+  exit 1
+fi
 
 hugo --source "$ROOT/test/fixture" --destination "$OUT" --quiet 2>"$WORK/build.stderr"
 
@@ -304,19 +311,19 @@ else
   awk 'NR<=20{print "  " $0}' "$WORK/repro.diff" >&2
 fi
 
-# 24. committed compiled CSS is in sync with its sources: a stale
-#     assets/css/compiled/main.css would ship styles that no longer match
-#     the templates, and no HTML assertion would notice
-TW="$ROOT/node_modules/.bin/tailwindcss"
-if [ -x "$TW" ]; then
-  "$TW" --input "$ROOT/assets/css/main.css" --output "$WORK/main.fresh.css" >/dev/null 2>&1
-  if cmp -s "$ROOT/assets/css/compiled/main.css" "$WORK/main.fresh.css"; then
-    pass 'compiled CSS matches a fresh build of the sources'
-  else
-    fail 'compiled CSS is stale — run npm run build:css and commit the result'
-  fi
+# 24. the stylesheet comes from the in-process Tailwind pipeline, not a
+#     committed bundle: no css/compiled reference may survive, and the built
+#     theme CSS must carry a component rule only the sources provide
+if grep -rq 'css/compiled' "$ROOT/layouts" "$ROOT/assets/css/main.css" 2>/dev/null; then
+  fail 'stale css/compiled reference survives in layouts or CSS entry'
 else
-  fail 'node_modules/.bin/tailwindcss missing — run npm install in the theme'
+  pass 'no css/compiled references remain'
+fi
+theme_built=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+if [ -n "$theme_built" ] && grep -q 'card__summary' "$theme_built"; then
+  pass 'built theme CSS carries component rules (pipeline ran)'
+else
+  fail 'built theme CSS carries component rules (pipeline ran)'
 fi
 
 # 25. one stylesheet link per page: scheme and bundle travel as a single
@@ -355,16 +362,15 @@ count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 5 \
 #     so concatenations like card--{{ $variant }} contribute a prefix that
 #     must still match at least one rule). Author-supplied class parameters
 #     that pass through a shortcode untouched are out of scope by design.
-if classes_out=$(python3 - "$ROOT" <<'PY'
+if classes_out=$(python3 - "$OUT" "$ROOT" <<'PY'
 import re, sys, pathlib
-root = pathlib.Path(sys.argv[1])
-bundle = root / 'assets/css/compiled/main.css'
-if not bundle.exists():
-    print('FAIL compiled CSS missing')
+out = pathlib.Path(sys.argv[1])
+root = pathlib.Path(sys.argv[2])
+bundle = next(out.glob('css/theme*.css'), None)
+if bundle is None:
+    print('FAIL built theme CSS missing')
     sys.exit(1)
 css = bundle.read_text()
-for p in sorted((root / 'assets/css/schemes').glob('*.css')):
-    css += p.read_text()
 tokens, prefixes = set(), set()
 for p in (root / 'layouts').rglob('*.html'):
     for m in re.finditer(r'class="([^"]*)"', p.read_text()):
@@ -515,6 +521,12 @@ PY
 else
   fail 'shortcode parameters stay inside the documented subset'
 fi
+
+# 32. template function return values must not leak into the markup:
+#     templates.Defer returns true and a bare call prints it as a text node
+#     in <head>, which the HTML parser relocates into <body>
+assert_not 'index.html' '^  true$' 'no leaked Defer output on home'
+assert_not 'section-a/index.html' '^  true$' 'no leaked Defer output on list'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

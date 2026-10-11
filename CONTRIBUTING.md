@@ -14,12 +14,11 @@
 ## Development
 
 ```sh
-npm install            # once
-npm run build:css      # regenerate assets/css/compiled/main.css
+# once — standalone Tailwind v4 CLI on PATH (see README for the release link)
 ```
 
-Never hand-edit `assets/css/compiled/main.css` — it is generated, and the
-smoke test fails when it is stale.
+CSS compiles in-process on every build; there is no committed bundle to
+regenerate.
 
 ## Before you push
 
@@ -41,8 +40,9 @@ All four must pass. New behaviour means a new assertion, not a comment.
 
 ## CSS
 
-- Source lives in `assets/css/{base,components,utilities}/`; schemes in
-  `assets/css/schemes/`.
+- Source lives in `assets/css/base/` and `assets/css/components/`; schemes
+  in `assets/css/schemes/`. Every file carries its own `@layer` wrapper and
+  the concatenation order lives in `layouts/partials/head/head.html`.
 - Cascade layers are registered in `main.css`; do not add `!important`.
 - New class tokens must be covered by the class-coverage assertion in
   `scripts/smoke.sh`.

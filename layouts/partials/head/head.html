@@ -43,18 +43,25 @@
   <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
   {{ end }}
 
-  {{/* Theme stylesheet: the active colour scheme concatenated ahead of the
-       prebuilt bundle, minified and fingerprinted as one resource */}}
+  {{/* Theme stylesheet: component files carry their own @layer wrappers,
+       so the template concatenates them in cascade order and compiles the
+       bundle in-process via css.TailwindCSS (deferred so every template has
+       rendered first), minified and fingerprinted with the colour scheme.
+       Requires the Tailwind v4 CLI ("tailwindcss") on PATH at build time
+       plus "security.exec.allow" covering it in site config — the theme
+       cannot provide either (site-level only). */}}
   {{- $schemeName := site.Params.colorScheme | default "strata-default" | lower }}
   {{- $scheme := resources.Get (printf "css/schemes/%s.css" $schemeName) }}
   {{- if not $scheme }}
     {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}
   {{- end }}
-  {{- $compiled := resources.Get "css/compiled/main.css" }}
-  {{- if not $compiled }}
-    {{- errorf "css/compiled/main.css missing — run \"npm run build:css\" in the theme checkout" }}
+  {{- if templates.Defer }}{{- end }}
+  {{- $parts := slice (resources.Get "css/main.css") }}
+  {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/multi-col.css" "components/shortcode.css" }}
+    {{- $parts = $parts | append (resources.Get (print "css/" .)) }}
   {{- end }}
-  {{- $theme := slice $scheme $compiled | resources.Concat "css/theme.css" | minify | fingerprint "sha512" }}
+  {{- $bundle := $parts | resources.Concat "css/bundle.css" | css.TailwindCSS }}
+  {{- $theme := slice $scheme $bundle | resources.Concat "css/theme.css" | minify | fingerprint "sha512" }}
   <link rel="stylesheet" href="{{ $theme.RelPermalink }}" integrity="{{ $theme.Data.Integrity }}">
 
   {{/* Site styles, applied after the theme's own stylesheet */}}
