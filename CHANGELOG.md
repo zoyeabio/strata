@@ -339,6 +339,24 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Browser audit — mobile 390px layout fix: the header nav list now wraps
   (`flex-wrap: wrap`), so a site with many sections wraps into rows instead
   of pushing `Contact` and the page edge past the viewport
+- Scaffold consistency review pass:
+  - articles are now page bundles everywhere: the scaffold archetype is a
+    directory archetype (`archetypes/default/index.md`), so `hugo new
+    section/slug` creates `content/section/slug/index.md`, matching
+    `place-image.sh` and the resolver's `assets/images/{section}/{slug}/`
+    convention; docs/images.md states the bundle layout explicitly
+  - the unpublished-module flow is explicit: scaffold `go.mod` pins the
+    theme with a local `replace` until a release tag exists, and
+    docs/installation.md documents both local and tagged flows
+  - the Hugo floor is now the tested version, 0.151.0 (theme.toml,
+    README, scaffold, docs); 0.142.0 was a forward-looking PLAN §8 number
+    with no current basis
+  - shortcode whitelist is generated from the implementation (scanning
+    `.Get "key"` per template), so it cannot drift from the code;
+    `compactSummary` is rejected rather than silently accepted
+  - `llms.txt` lists real site URLs, `site.webmanifest` no longer declares
+    an empty icon set, and the scaffold cleanup trap prints a message
+    before removing a partial output
 
 ### Removed
 

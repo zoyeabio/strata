@@ -64,7 +64,7 @@ if ! printf '%s' "$ACCENT" | grep -qE '^#[0-9a-fA-F]{6}$'; then
 fi
 
 mkdir -p "$OUT"
-trap 'rm -rf "$OUT"' ERR
+trap 'printf "removing partial scaffold %s\n" "$OUT" >&2; rm -rf "$OUT"' ERR
 
 mkdir -p \
   "$OUT/config/_default" \
@@ -93,7 +93,7 @@ enableEmoji = false
 
 [module.hugoVersion]
   extended = true
-  min = "0.142.0"
+  min = "0.151.0"
 
 [pagination]
   pagerSize = 12
@@ -195,8 +195,11 @@ customCSS = ["css/site.css"]
 EOF
 fi
 
-# archetypes/default.md
-cat > "$OUT/archetypes/default.md" <<'EOF'
+# archetypes/default/index.md — directory archetype, so `hugo new
+# section/slug` creates a page bundle content/section/slug/index.md; the
+# image resolver and place-image.sh both expect the bundle layout
+mkdir -p "$OUT/archetypes/default"
+cat > "$OUT/archetypes/default/index.md" <<'EOF'
 ---
 title: "{{ replace .File.ContentBaseName "-" " " | title }}"
 date: {{ .Date }}
@@ -258,20 +261,36 @@ cat > "$OUT/static/site.webmanifest" <<EOF
 {
   "name": "${NAME}",
   "start_url": "/",
-  "display": "standalone",
-  "icons": []
+  "display": "standalone"
 }
 EOF
 
-printf 'llms.txt\n' > "$OUT/static/llms.txt"
+# llms.txt is a real discovery file, not a placeholder
+{
+  printf '# %s\n' "$NAME"
+  printf '> https://%s/\n' "$DOMAIN"
+  printf -- '- https://%s/\n' "$DOMAIN"
+  if [ -n "$SECTIONS" ]; then
+    IFS=',' read -ra secs <<< "$SECTIONS"
+    for sec in "${secs[@]}"; do
+      sec=$(printf '%s' "$sec" | xargs)
+      [ -z "$sec" ] || printf -- '- https://%s/%s/\n' "$DOMAIN" "$sec"
+    done
+  fi
+  printf -- '- https://%s/about/\n' "$DOMAIN"
+  printf -- '- https://%s/contact/\n' "$DOMAIN"
+} > "$OUT/static/llms.txt"
 
-# go.mod pins the theme version for production builds
+# go.mod pins the theme version; the replace keeps local development
+# working before the theme tag exists
 cat > "$OUT/go.mod" <<EOF
 module github.com/zoyeabio/${SLUG}
 
 go 1.22
 
 require github.com/zoyeabio/strata ${MODULE_VERSION}
+
+replace github.com/zoyeabio/strata => $ROOT
 EOF
 
 # .gitignore
@@ -290,6 +309,18 @@ the Strata Hugo theme.
 
 ## Development
 
+Articles are page bundles:
+
+\`\`\`sh
+hugo new ingredients/a-slug
+\`\`\`
+
+That creates \`content/ingredients/a-slug/index.md\`. Images for the article
+live at \`assets/images/ingredients/a-slug/\`; use the theme's
+\`place-image.sh\` to lint and place them.
+
+Run the local server (the go.mod replace points at the theme checkout):
+
 \`\`\`sh
 hugo server -D
 \`\`\`
@@ -300,9 +331,12 @@ Validate against the theme checkout before deploying:
 (cd /path/to/strata && ./scripts/validate-site.sh /path/to/$SLUG)
 \`\`\`
 
+When the theme publishes a release tag, remove the \`replace\` line from
+\`go.mod\` and pin the tag with \`go get\`.
+
 ## Structure
 
-- \`content/\` — pages and posts
+- \`content/\` — page bundles and section indexes
 - \`assets/images/\` — source images, organised by section
 - \`config/_default/\` — site configuration (includes the Strata taxonomy contract)
 EOF

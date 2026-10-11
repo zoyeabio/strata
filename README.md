@@ -21,7 +21,7 @@ every component is available yet.
 
 ## Requirements
 
-- [Hugo](https://gohugo.io) **0.142.0 or later**, Extended edition
+- [Hugo](https://gohugo.io) **0.151.0 or later**, Extended edition
 - Go (only needed for Hugo Modules)
 - Node.js (only needed when changing theme CSS — see Development)
 

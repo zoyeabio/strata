@@ -472,27 +472,24 @@ else
 fi
 
 # 31. shortcode parameter whitelist: content may only use parameters the
-#     theme implements — an unknown parameter is accepted by Hugo and then
-#     silently ignored, which is the failure mode docs/shortcodes.md guards
+#     theme actually reads. The set is derived from each shortcode's
+#     implementation (.Get "key"), so adding a parameter to a template
+#     automatically extends the contract — the whitelist cannot drift from
+#     the code. Unknown parameters are accepted by Hugo and then silently
+#     ignored, which is the failure mode docs/shortcodes.md guards.
 if sc_out=$(python3 - "$ROOT" <<'PY'
 import re, sys, pathlib
 root = pathlib.Path(sys.argv[1])
-SUPPORTED = {
-    'figure': {'src', 'alt', 'title', 'caption', 'attr', 'attrlink', 'link',
-               'target', 'rel', 'class', 'width', 'height', 'loading',
-               'quality', 'role'},
-    'content/article': {'link', 'showSummary'},
-    'content/list': {'limit', 'title', 'where', 'value', 'cardView'},
-    'content/icon': set(),
-    'interactive/carousel': {'images', 'captions', 'aspectRatio', 'interval'},
-    'interactive/contact': {'action', 'maxBytes'},
-    'interactive/cta': {'title', 'subtitle', 'buttonText', 'buttonUrl', 'icon'},
-    'interactive/email': {'user', 'domain'},
-    'layout/multi-col': {'columns', 'ratio', 'gap', 'margin', 'align'},
-    'layout/col-left': set(),
-    'layout/col-mid': set(),
-    'layout/col-right': set(),
-}
+
+def strip_comments(text):
+    return re.sub(r'\{\{[-]?/\*.*?\*/[-]?\}\}', '', text, flags=re.S)
+
+SUPPORTED = {}
+for p in sorted((root / 'layouts/shortcodes').rglob('*.html')):
+    name = p.relative_to(root / 'layouts/shortcodes').as_posix().removesuffix('.html')
+    keys = {m.group(1) for m in re.finditer(r'\.Get\s+"([^"]+)"', strip_comments(p.read_text()))}
+    SUPPORTED[name] = keys
+
 bad = []
 count = 0
 pat = re.compile(r'\{\{[<%]\s*(/?)([a-zA-Z0-9/_-]+)([^>]*?)[>%]\}\}', re.S)
@@ -511,7 +508,7 @@ if bad:
     for line in bad:
         print('FAIL', line, file=sys.stderr)
     sys.exit(1)
-print(f'{count} shortcode calls whitelisted')
+print(f'{count} shortcode calls whitelisted, {len(SUPPORTED)} shortcodes scanned')
 PY
 ); then
   pass "shortcode parameters stay inside the documented subset ($sc_out)"

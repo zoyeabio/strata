@@ -29,7 +29,9 @@
   {{ partial "head/schema.html" . }}
 
   {{/* Hero preload from the same resolver call as the <img>; safeHTML because
-       html/template URL-escapes imagesrcset (spaces → %20) and breaks it */}}
+       html/template URL-escapes imagesrcset (spaces → %20) and breaks it.
+       Safe only because remote and disableOptimization branches return an
+       empty srcset, so these values are pipeline-generated local URLs. */}}
   {{- $hero := partial "data/hero-image.html" . }}
   {{- if and $hero.ok $hero.srcset }}
   {{ printf `<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="%s">` $hero.url $hero.srcset $hero.sizes | safeHTML }}

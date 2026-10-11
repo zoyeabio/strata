@@ -11,9 +11,10 @@
                   front matter, then site.Params.list.showSummary, then
                   false. Parsed via explicit "true"/"false" comparison so a
                   string "false" cannot read as truthy
-    compactSummary accepted for source-site compatibility, no effect: the
-                  summary is already truncated below what the old
-                  line-clamp-3 showed (shortcodes.md documents this)
+
+  compactSummary is not read by this shortcode, so the smoke whitelist
+  rejects it; the summary is already truncated below what the old
+  line-clamp-3 showed.
 
   The embedded card never loads eagerly — body images are lazy per
   PLAN §2.3.1.

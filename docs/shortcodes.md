@@ -30,7 +30,8 @@ Embed another page's card inline.
 | `link` | Target page path, e.g. `/journal/x/`; empty means the current page. Unknown path: development warning, nothing rendered |
 | `showSummary` | `true` / `false`; falls back to the target's front matter, then `site.Params.list.showSummary` |
 
-`compactSummary` is accepted with no effect (legacy compatibility).
+`compactSummary` is **not supported** — the shortcode whitelist rejects it,
+so it cannot silently no-op (legacy compatibility removed).
 
 ## content/list
 

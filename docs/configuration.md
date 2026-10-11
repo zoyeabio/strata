@@ -65,7 +65,8 @@ effect** in the current theme. They are listed so nobody configures them by
 accident:
 
 - `header.layout` (`smart` / `standard`) — single header shell
-- page front matter `compactSummary` — accepted with no effect
+- page front matter `compactSummary` — rejected by the shortcode whitelist,
+  not silently accepted
 - `showBreadcrumbs` — breadcrumbs are not built yet
 - `enableSearch` — search is not built yet
 - `backgroundImageWidth` — superseded by the pipeline's own widths

@@ -2,13 +2,15 @@
 
 ## Requirements
 
-- Hugo **0.142.0 or later**, Extended edition
+- Hugo **0.151.0 or later**, Extended edition (the version the theme is
+  tested against; a lower floor is not claimed yet)
 - Go (only needed for Hugo Modules)
 - Node.js — only when you change theme CSS in a theme checkout
 
 ## Hugo Module (recommended)
 
-In your site's `config/_default/hugo.toml`:
+Before the theme has a published release tag, mount it from a checkout with
+a `replace`:
 
 ```toml
 [module]
@@ -18,11 +20,20 @@ In your site's `config/_default/hugo.toml`:
     path = "github.com/zoyeabio/strata"
 ```
 
+```go
+require github.com/zoyeabio/strata v0.1.0
+
+replace github.com/zoyeabio/strata => /absolute/path/to/strata
+```
+
 Then run:
 
 ```sh
 hugo mod tidy
 ```
+
+Once a release tag exists, remove the `replace` and pin the version with
+`go get github.com/zoyeabio/strata@v0.1.0`.
 
 ## Git clone
 
@@ -75,7 +86,7 @@ use in the page (the bare filename, for a page bundle at
 
 ## First build
 
-1. Declare the taxonomies above.
+1. Use the scaffold or set the taxonomy contract and module replace above.
 2. Set `baseURL`, `title` and at least one menu.
 3. Run `hugo server` — the home page should render header, footer and your
    first pages.
@@ -85,6 +96,8 @@ use in the page (the bare filename, for a page bundle at
 
 ## Upgrading
 
-`hugo mod get -u github.com/zoyeabio/strata && hugo mod tidy`, then rebuild
-and run the validator. The theme's CSS ships precompiled; you never run npm
-in a site that only consumes the theme.
+While on the `replace` flow, pull the theme checkout and re-run the
+validators. Once a release tag exists, `hugo mod get -u
+github.com/zoyeabio/strata && hugo mod tidy` pins the new version, then
+rebuild and run the validator. The theme's CSS ships precompiled; you never
+run npm in a site that only consumes the theme.

@@ -1,10 +1,18 @@
 # Images
 
+## Page layout
+
+Articles are **page bundles**: `content/{section}/{slug}/index.md`. That is
+the layout `place-image.sh` and the image resolver assume. A leaf page
+`content/{section}/post.md` is supported by the resolver too, but its images
+resolve to `assets/images/{section}/`, not to a `{slug}/` subdirectory.
+
 ## Storage
 
 - Site-wide images: `assets/images/…`
 - Section-owned images: `assets/images/{section}/…`
-- Per-page bundle images: next to `index.md` in the page bundle
+- Per-article bundle images: `assets/images/{section}/{slug}/…` (the
+  `place-image.sh` target for `content/{section}/{slug}/index.md`)
 
 ## Resolution order
 
