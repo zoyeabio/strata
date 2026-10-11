@@ -336,6 +336,9 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   1200×630); failing lint exits non-zero without writing, successful
   placement prints the front matter reference; PNG/JPEG/GIF/WebP dimensions
   are read from headers with stdlib Python (no ImageMagick/sips dependency)
+- Browser audit — mobile 390px layout fix: the header nav list now wraps
+  (`flex-wrap: wrap`), so a site with many sections wraps into rows instead
+  of pushing `Contact` and the page edge past the viewport
 
 ### Removed
 
