@@ -2,8 +2,7 @@
   Figure backend: wraps a pipeline <img> in a <figure> with the caption
   block Hugo's built-in figure shortcode produces. The shortcode collects
   parameters; this partial resolves the reference and renders the markup,
-  so the <img> itself comes out identical to the render hook's (PLAN §2.3
-  figure/render-hook division).
+  so the <img> itself comes out identical to the render hook's.
 
   Input dict (strings unless noted)
     src      (string, required) — image reference; query and fragment are
@@ -23,8 +22,8 @@
     width    (string, optional) — width attribute, overrides the intrinsic
              variant size
     height   (string, optional) — height attribute, same override
-    loading  (string, optional) — "lazy" (default: body images are lazy per
-             PLAN §2.3.1) or "eager"
+    loading  (string, optional) — "lazy" (default: body images are lazy)
+             or "eager"
     quality  (int, optional) — WebP quality, default 78
     role     (string, optional) — image role, "illustration" by default
 

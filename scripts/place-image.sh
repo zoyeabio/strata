@@ -12,7 +12,7 @@
 #
 # Copies --file to assets/images/{section}/{slug}/{filename} and prints the
 # front matter reference (the bare filename) for a page bundle at
-# content/{section}/{slug}/index.md. The lint comes from PLAN §2.5.4:
+# content/{section}/{slug}/index.md. Size lint:
 #   hero         >= 1600 wide
 #   illustration >= 1280 wide
 #   card         >= 1200 wide

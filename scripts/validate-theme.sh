@@ -5,8 +5,8 @@
 #
 # Builds test/fixture in production mode twice: without drafts the build
 # must be silent and the output must satisfy scripts/check-build.sh; with
-# drafts the known missing-image page must fail the build (PLAN §2.7 — a
-# silent skip in production is how dead references survive for years).
+# drafts the known missing-image page must fail the build (a silent skip
+# in production is how dead references survive for years).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

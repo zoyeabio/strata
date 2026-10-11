@@ -37,4 +37,6 @@
       ticking = true;
     }
   }, { passive: true });
+
+  updateHeader();
 })();

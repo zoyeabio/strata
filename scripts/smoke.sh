@@ -166,7 +166,7 @@ fi
 
 # 18. sizes invariants across the whole site: a fixed width declared for a
 #     min-width range must fit inside that range, and the fallback may never
-#     be a bare 100vw (PLAN 2.3)
+#     be a bare 100vw
 if sizes_out=$(python3 - "$OUT" <<'PY'
 import re
 import sys
@@ -334,7 +334,7 @@ assert 'section-a/flat/index.html' 'rel="stylesheet"[^>]*integrity="sha512-' \
   'stylesheet is fingerprinted'
 assert 'index.html' 'rel="stylesheet"' 'home page links the stylesheet'
 
-# 26. sizes ladder matches the CSS (PLAN 478): every rung the presets emit
+# 26. sizes ladder matches the CSS: every rung the presets emit
 #     must correspond to a real container width in the stylesheet
 css_assert() { # css_assert <regex> <label>
   local f

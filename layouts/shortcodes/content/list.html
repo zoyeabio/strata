@@ -1,14 +1,12 @@
 {{- /*
-  Lists recent regular pages as cards inside an article. PLAN B25: the
-  previous implementation referenced
-  article-link/card.html, a partial that does not exist, so cardView=true
-  failed the build; this one renders through page/card.html.
+  Lists recent regular pages as cards inside an article, rendering
+  through page/card.html.
 
   Parameters
     limit    (int)    — how many pages to consider, default 1
     title    (string) — heading above the list; default is the i18n key
-             "shortcode.recent_articles" with an English fallback (i18n
-             files arrive with step 9.5)
+             "shortcode.recent_articles" with an English fallback (no
+             catalogue ships yet)
     where    (string) — page field to filter on (e.g. "Type")
     value    (any)    — the value the field must equal
     cardView (bool)   — true renders grid cards, false or absent renders
