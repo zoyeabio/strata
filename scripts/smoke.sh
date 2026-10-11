@@ -582,6 +582,10 @@ assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
 assert 'notice/index.html' 'class="page--wide"' 'non-article single goes full width'
 assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped'
 
+# 38. smart header: sticks, hides on scroll down (script present and wired)
+assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
+assert 'index.html' 'smart-header\.[0-9a-f]+\.js' 'smart script loads'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

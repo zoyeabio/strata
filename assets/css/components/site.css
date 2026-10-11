@@ -11,6 +11,19 @@
   flex-wrap: wrap;
 }
 
+.site-header--smart {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: transform 300ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header--smart {
+    transition: none;
+  }
+}
+
 .site-brand {
   display: flex;
   align-items: center;

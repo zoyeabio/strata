@@ -1,6 +1,9 @@
 eagerCardCount = 2
 mainSections = ["section-a"]
 
+[header]
+  layout = "smart"
+
 [list]
   cardView = true
 

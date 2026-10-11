@@ -8,8 +8,8 @@
       a logo the title always renders, so a site that forgets the logo never
       ends up with an empty header.
 
-  The `header.layout` shell (smart / standard) is not wired up yet; it needs
-  the scroll behaviour script that belongs with it.
+  The `header.layout` shell: "smart" sticks the header and hides it on
+  scroll down (assets/js/smart-header.js); anything else renders static.
 
   Called by: _default/baseof.html
 
@@ -27,7 +27,8 @@
 {{- end }}
 {{- $disableText := site.Params.disableTextInHeader | default false }}
 {{- $showTitle := or (not $hasLogo) (not $disableText) -}}
-<header class="site-header">
+{{- $smart := eq (site.Params.header.layout | default "standard") "smart" }}
+<header class="site-header{{ if $smart }} site-header--smart{{ end }}"{{ if $smart }} data-smart-header{{ end }}>
   <a class="site-brand" href="{{ site.Home.RelPermalink }}">
     {{- with $logo }}
     {{- if eq .MediaType.SubType "svg" }}
@@ -46,3 +47,9 @@
   <button type="button" class="site-header__toggle" data-appearance-toggle aria-pressed="false">Appearance</button>
   {{- end }}
 </header>
+{{- if $smart }}
+{{- with resources.Get "js/smart-header.js" }}
+{{- $sh := . | fingerprint "sha512" }}
+<script src="{{ $sh.RelPermalink }}" integrity="{{ $sh.Data.Integrity }}"></script>
+{{- end }}
+{{- end }}

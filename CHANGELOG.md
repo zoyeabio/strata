@@ -21,6 +21,8 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   every single is an article); shortcode card grids go 3-up from 853px
   like section lists.
 - Rich footer bottom travels as one bar (menu, social, copyright).
+- `header.layout = "smart"`: sticky header that hides on scroll down and
+  reveals on scroll up (10px hysteresis, always visible near the top).
 - `b2b` colour scheme (deep navy) for trade sites.
 - Rich footer from the `[footer]` table: company, quick-links, legal and
   contact columns, social icon row (site `assets/icons/`, name fallback),

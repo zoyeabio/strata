@@ -30,6 +30,7 @@ write them in any case. Site config keys keep their case.
 | `list.orderByWeight` | `false` | Sort list pages by `weight` instead of date |
 | `list.showSummary` | `false` | Default card summaries on lists |
 | `mainSections` | — | Sections whose singles are articles (prose-capped); other singles render full width. Compared case-insensitively; absent means every single is an article |
+| `header.layout` | `"standard"` | `"smart"` sticks the header and hides it on scroll down, revealing on scroll up |
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `author.name` | — | Site-wide author fallback |
