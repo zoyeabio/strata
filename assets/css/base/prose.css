@@ -76,8 +76,8 @@
 }
 
 .prose blockquote {
-  border-left: 3px solid var(--border-strong);
-  padding-left: 16px;
+  border-inline-start: 3px solid var(--border-strong);
+  padding-inline-start: 16px;
   margin-block: 1.4em;
   font-style: normal;
   color: var(--text-muted);

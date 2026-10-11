@@ -202,12 +202,12 @@
 }
 
 .site-footer__bottom .site-footer__copyright {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .back-to-top {
   position: fixed;
-  right: 24px;
+  inset-inline-end: 24px;
   bottom: 24px;
   z-index: 50;
   display: inline-flex;

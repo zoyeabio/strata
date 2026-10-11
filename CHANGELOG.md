@@ -39,9 +39,9 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   standalone Tailwind v4 CLI on PATH plus `[security.exec]` covering it in
   site config (both documented in README and the scaffold, which neither
   can inherit from the theme). Verified byte-equivalent output on the demo
-  and probiointel sites.
-- Card preset parameter renamed `variant` → `preset`, matching ARCH §6.1
-  and `data/card-presets.html` (CSS classes `card--grid/row/inline`
+  and one production site.
+- Card preset parameter renamed `variant` → `preset`, matching
+  `data/card-presets.html` (CSS classes `card--grid/row/inline`
   unchanged).
 - Card summaries are no longer truncated in the template: `card.html` emits
   the plainified summary whole and the CSS 3-line clamp owns the cut, so
@@ -282,7 +282,6 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   fresh `tailwindcss` build, exactly one fingerprinted stylesheet link per
   page, and the sizes-ladder rungs (720px measure, 200px row thumb, 2/3-column
   grids, gutter breakpoints, content cap) must exist in the shipped CSS
-  (PLAN 478)
 - Review pass — class-token coverage: smoke grew to 77 assertions; every
   class token the templates emit must be defined in the shipped CSS (both
   `.token` and `[class~="token"]` forms, dynamic `{{ }}` names contribute a
@@ -319,10 +318,10 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   template arrives
 - `layouts/partials/data/image-resource.html` — a declared but unresolvable
   image now fails the production build (`errorf`) instead of being skipped
-  silently (PLAN §2.7); the development server still only warns, and a page
+  silently; the development server still only warns, and a page
   with no image declared is not an error
 - `layouts/partials/page/card.html` — the `extend-article-link.html`
-  site hook is back at the card tail (ARCH §3.5.2)
+  site hook is back at the card tail
 - `scripts/check-build.sh` — shared output rules for the validators:
   referenced images exist, pipeline images carry `srcset` and a real `alt`,
   preload candidates are a subset of the page `srcset`, no orphan images
@@ -387,7 +386,7 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   config with the taxonomy contract, menus, archetype, content skeleton,
   image directories, static files, pinned `go.mod` and a site README; no
   dead parameter keys
-- `scripts/place-image.sh` — per-page image placement with a PLAN §2.5.4
+- `scripts/place-image.sh` — per-page image placement with a documented
   size lint (hero ≥1600, illustration ≥1280, card ≥1200, og exactly
   1200×630); failing lint exits non-zero without writing, successful
   placement prints the front matter reference; PNG/JPEG/GIF/WebP dimensions
@@ -405,7 +404,7 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
     theme with a local `replace` until a release tag exists, and
     docs/installation.md documents both local and tagged flows
   - the Hugo floor is now the tested version, 0.151.0 (theme.toml,
-    README, scaffold, docs); 0.142.0 was a forward-looking PLAN §8 number
+    README, scaffold, docs); 0.142.0 was a forward-looking speculative number
     with no current basis
   - shortcode whitelist is generated from the implementation (scanning
     `.Get "key"` per template), so it cannot drift from the code;

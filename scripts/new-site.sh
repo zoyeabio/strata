@@ -3,9 +3,9 @@
 #
 # Usage:
 #   ./scripts/new-site.sh \
-#     --name "Probio Intel" --slug probiointel --domain probiointel.com \
-#     --out ../probiointel --accent "#295f8f" \
-#     --sections "ingredients,production,safety,quality"
+#     --name "Example" --slug example --domain example.com \
+#     --out ../example --accent "#295f8f" \
+#     --sections "journal,resources"
 #
 # Generates the minimal site layer the theme consumes: config with the
 # taxonomy contract, archetype, content skeleton, image directories, static
@@ -31,6 +31,7 @@ OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
 MODULE_VERSION="v0.1.0"
+ORG="zoyeabio"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -41,6 +42,7 @@ while [ "$#" -gt 0 ]; do
     --accent) ACCENT="$2"; shift 2 ;;
     --sections) SECTIONS="$2"; shift 2 ;;
     --module-version) MODULE_VERSION="$2"; shift 2 ;;
+    --org) ORG="$2"; shift 2 ;;
     *) printf 'ERROR: unknown option %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -314,7 +316,7 @@ EOF
 # go.mod pins the theme version; the replace keeps local development
 # working before the theme tag exists
 cat > "$OUT/go.mod" <<EOF
-module github.com/zoyeabio/${SLUG}
+module github.com/${ORG}/${SLUG}
 
 go 1.22
 

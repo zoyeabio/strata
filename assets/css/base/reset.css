@@ -102,7 +102,7 @@ th,
 td {
   border: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
-  text-align: left;
+  text-align: start;
 }
 
 th {

@@ -3,10 +3,11 @@
 ## Requirements
 
 - Hugo **0.151.0 or later, but below 0.161.0**, Extended edition (tested
-  on 0.151.0; exercised up to 0.155.3). As of Hugo 0.161.0 the Tailwind
-  standalone binary is no longer supported — past that line the project
-  must switch to the npm CLI flow (`node` on PATH plus `node` in
-  `[security.exec]`), which is not wired yet.
+  on 0.151.0; higher versions are untested — there is no CI matrix yet).
+  As of Hugo 0.161.0 the Tailwind standalone binary is no longer
+  supported — past that line the project must switch to the npm CLI flow
+  (`node` on PATH plus `node` in `[security.exec]`), which is not wired
+  yet.
 - Tailwind CSS v4 CLI (`tailwindcss`) on PATH — the theme compiles its
   stylesheet in-process at build time. Use the standalone binary from the
   Tailwind releases (no npm needed anywhere).
@@ -65,10 +66,10 @@ missing.
 
 ```sh
 ./scripts/new-site.sh \
-  --name "Probio Intel" --slug probiointel \
-  --domain probiointel.com --accent "#295f8f" \
-  --sections "ingredients,production,safety,quality" \
-  --out ../probiointel
+  --name "Example" --slug example \
+  --domain example.com --accent "#295f8f" \
+  --sections "journal,resources" \
+  --out ../example
 ```
 
 The scaffold writes the minimal site layer the theme consumes: config with
@@ -77,10 +78,10 @@ image directories, static files, `go.mod`, `.gitignore` and a site README.
 Place images with:
 
 ```sh
-./scripts/place-image.sh --section ingredients \
-  --post probiotics-infant-colic \
+./scripts/place-image.sh --section journal \
+  --post example-post \
   --file out/illustration-1.png --role illustration \
-  --site ../probiointel
+  --site ../example
 ```
 
 `place-image.sh` lints the source width before copying: hero ≥1600px,

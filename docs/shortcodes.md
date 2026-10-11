@@ -30,8 +30,8 @@ Embed another page's card inline.
 | `link` | Target page path, e.g. `/journal/x/`; empty means the current page. Unknown path: development warning, nothing rendered |
 | `showSummary` | `true` / `false`; falls back to the target's front matter, then `site.Params.list.showSummary` |
 
-`compactSummary` is **not supported** — the shortcode whitelist rejects it,
-so it cannot silently no-op (legacy compatibility removed).
+`compactSummary` is **not supported** — every template silently ignores
+it; the fixture smoke gate fails on it so it never sneaks back in.
 
 ## content/list
 
@@ -102,6 +102,22 @@ Obfuscated mailto link (HTML entities, no JavaScript).
 ```
 
 Both parameters required; a missing one fails the build.
+
+## ads
+
+AdSense display unit. The loader ships in head only on pages using it.
+
+```
+{{</* ads slot="1234567890" */>}}
+```
+
+| Parameter | Notes |
+|---|---|
+| `slot` | Required ad slot ID |
+| `format` | `data-ad-format`, default `auto` |
+
+Requires site `[ads] client`; `static/ads.txt` must name the ID or the
+build fails.
 
 ## layout/multi-col + layout/col-left, col-mid, col-right
 

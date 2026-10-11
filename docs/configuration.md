@@ -34,6 +34,9 @@ write them in any case. Site config keys keep their case.
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `author.name` | — | Site-wide author fallback |
+| `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
+| `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
+| `ads.client` | — | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
@@ -74,6 +77,21 @@ it, a grid renders above: company, quick links, legal, contact.
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |
+| `author` | Byline for this page (falls back to `[author] name`) |
+| `images` | Image refs for Open Graph (first entry wins, before `featureimage`) |
+
+## Consent and ads
+
+The theme ships no consent UI and no ad loader of its own. Sites wire
+theirs through two sanctioned points:
+
+- `partials/cookie-consent.html` (hook above) renders site-owned banner or
+  CMP markup before `</body>`. Load Consent Mode defaults before any
+  measurement tag — typically from `partials/extend-head.html` — and flip
+  to granted from the banner. What counts as consent is site law, not
+  theme code.
+- `{{< ads slot="…" >}}` renders an AdSense unit; `static/ads.txt` must
+  name the `[ads] client` ID or the build fails (check-build R11).
 
 ## Site hooks
 
@@ -85,6 +103,7 @@ Drop-in partials a site may provide; the theme calls them when present:
 | `partials/extend-head.html` | `head/head.html` | Extra head markup (cached) |
 | `partials/extend-head-uncached.html` | `head/head.html` | Extra head markup (uncached) |
 | `partials/extend-article-link.html` | `page/card.html` | Extra markup inside each card link |
+| `partials/cookie-consent.html` | `_default/baseof.html` | Site-owned consent banner/CMP (see Consent below) |
 
 ## Unsupported keys
 
@@ -92,10 +111,8 @@ These keys are accepted by Hugo or older Strata versions but have **no
 effect** in the current theme. They are listed so nobody configures them by
 accident:
 
-- `header.layout` (`smart` / `standard`) — single header shell
-- page front matter `compactSummary` — rejected by the shortcode whitelist,
-  not silently accepted
-- `showBreadcrumbs` — breadcrumbs are not built yet
+- page front matter `compactSummary` — silently ignored by every
+  template; the fixture smoke gate fails on it so it never sneaks back in
 - `enableSearch` — search is not built yet
 - `backgroundImageWidth` — superseded by the pipeline's own widths
 

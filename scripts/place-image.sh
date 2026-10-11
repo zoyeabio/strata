@@ -4,8 +4,8 @@
 #
 # Usage:
 #   ./scripts/place-image.sh \
-#     --section digestion \
-#     --post probiotics-infant-colic \
+#     --section journal \
+#     --post example-post \
 #     --file out/illustration-1.png \
 #     --role illustration \
 #     --site /path/to/site
