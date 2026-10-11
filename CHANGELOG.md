@@ -9,6 +9,15 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 ## [Unreleased]
 
+### Fixed
+
+- `assets/css/components/card.css` — `.card__summary` now pairs the
+  standard `line-clamp: 3` with a `max-height: calc(3lh)` hard cap.
+  Chromium without legacy `-webkit-box` computes even inline
+  `display: -webkit-box` as `flow-root`, so `line-clamp` alone only limits
+  height without paint-clipping and a 4th line bled to the card edge;
+  the `lh`-based cap guarantees exactly 3 lines (compiled CSS rebuilt).
+
 ### Added
 
 - `config/_default/languages.en.toml` — site title, description, date format, RTL flag
