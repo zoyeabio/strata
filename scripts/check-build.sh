@@ -385,8 +385,11 @@ if ad_clients:
         bad('ads.txt names every advertised publisher', '  ads.txt missing')
     else:
         body = ads_txt.read_text(errors='ignore')
-        missing = [c for c in sorted(ad_clients)
-                   if c not in body and c.replace('ca-', '') not in body]
+        missing = []
+        for c in sorted(ad_clients):
+            digits = re.sub(r'\D', '', c)
+            if not digits or not re.search(rf'(?<!\d){digits}(?!\d)', body):
+                missing.append(c)
         if missing:
             bad('ads.txt names every advertised publisher',
                 '\n'.join(f'  {c} not in ads.txt' for c in missing))

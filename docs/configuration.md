@@ -73,7 +73,9 @@ it, a grid renders above: company, quick links, legal, contact.
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |
 | `featureimage` | Page/card image (see [images.md](images.md)) |
 | `featureimagealt` | Alt text for `featureimage`; fallback `Featured image for {title}` |
-| `showHero` | `false` suppresses the hero on a page that has `featureimage` |
+| `showHero` | Page hero: shown when `featureimage` resolves, `false` suppresses it |
+| `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
+| `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |
