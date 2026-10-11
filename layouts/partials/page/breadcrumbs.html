@@ -1,0 +1,31 @@
+{{- /*
+  Ancestor trail: Home / section / … / current page. Ancestors link, the
+  current page is plain text with aria-current. Separators come from CSS.
+
+  Visibility is the page's own showBreadcrumbs when set (isset, so an
+  explicit false wins), otherwise the table matching its Kind: article,
+  list, taxonomy, term. All default to hidden.
+
+  Called by: _default/single.html, list.html, terms.html, term.html
+*/ -}}
+{{- $table := dict }}
+{{- if eq .Kind "page" }}{{ $table = site.Params.article | default dict }}
+{{- else if in (slice "section" "home") .Kind }}{{ $table = site.Params.list | default dict }}
+{{- else if eq .Kind "taxonomy" }}{{ $table = site.Params.taxonomy | default dict }}
+{{- else if eq .Kind "term" }}{{ $table = site.Params.term | default dict }}{{ end }}
+{{- $show := $table.showBreadcrumbs | default false }}
+{{- if isset .Params "showbreadcrumbs" }}{{ $show = .Params.showbreadcrumbs }}{{ end }}
+{{- $ancestors := slice }}
+{{- $p := .Parent }}
+{{- range seq 10 }}{{ if and $p (not $p.IsHome) }}{{ $ancestors = $ancestors | append $p }}{{ $p = $p.Parent }}{{ end }}{{ end }}
+{{- if and $show (or $ancestors (not .IsHome)) }}
+<nav aria-label="Breadcrumb">
+  <ol class="breadcrumb">
+    <li><a class="breadcrumb__link" href="{{ site.Home.RelPermalink }}">Home</a></li>
+    {{- range $ancestors | collections.Reverse }}
+    <li><a class="breadcrumb__link" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+    {{- end }}
+    <li aria-current="page"><span class="breadcrumb__current">{{ .LinkTitle }}</span></li>
+  </ol>
+</nav>
+{{- end }}

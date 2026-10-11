@@ -12,7 +12,7 @@
 {{- $img := $page.Scratch.Get "strataHeroImage" }}
 {{- if not $img }}
   {{- $img = dict "ok" false }}
-  {{- if and $page.IsPage (ne $page.Params.showHero false) }}
+  {{- if and $page.IsPage (ne $page.Params.showhero false) }}
     {{- with $page.Params.featureimage }}
       {{- $img = partial "data/image-resource.html" (dict
           "ref" .

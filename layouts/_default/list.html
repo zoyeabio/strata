@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ partial "page/breadcrumbs.html" . }}
 {{- with .Title }}
   <header class="page-header">
     <h1>{{ . | emojify }}</h1>
@@ -9,14 +10,14 @@
 {{- end }}
   {{- $listParams := site.Params.list | default dict }}
   {{- $sorted := .Pages }}
-  {{- if .Params.orderByWeight | default $listParams.orderByWeight }}
+  {{- if .Params.orderbyweight | default $listParams.orderByWeight }}
   {{- $sorted = .Pages.ByWeight }}
   {{- end }}
   {{- $pager := .Paginate $sorted }}
   {{ partial "page/page-collection.html" (dict
     "pages" $pager.Pages
-    "cardView" (.Params.cardView | default $listParams.cardView)
-    "showSummary" (.Params.showSummary | default $listParams.showSummary)
+    "cardView" (.Params.cardview | default $listParams.cardView)
+    "showSummary" (.Params.showsummary | default $listParams.showSummary)
   ) }}
   {{ partial "page/pagination.html" $pager }}
 {{ end }}

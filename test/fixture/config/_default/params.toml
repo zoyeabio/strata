@@ -3,6 +3,12 @@ eagerCardCount = 2
 [list]
   cardView = true
 
+[article]
+  showBreadcrumbs = true
+
+[taxonomy]
+  showBreadcrumbs = true
+
 [footer]
   showAppearanceSwitcher = true
   showScrollToTop = true

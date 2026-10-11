@@ -7,6 +7,7 @@
   {{ partial "page/hero.html" (dict "img" $hero) }}
   {{- end }}
   <header class="article__header">
+    {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
     {{- if or (not .Date.IsZero) $terms }}
     <p class="article__meta">

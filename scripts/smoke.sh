@@ -535,6 +535,33 @@ assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
 assert 'index.html' 'data-appearance-toggle' 'appearance switcher renders'
 assert 'index.html' 'data-scroll-top' 'scroll-to-top button renders'
 
+# 33. breadcrumbs: article and section trails link Home and ancestors,
+#     the current page is plain text; taxonomy follows its table, term and
+#     home stay hidden by default
+assert 'section-a/flat/index.html' 'aria-label="Breadcrumb"' 'article breadcrumb renders'
+assert 'section-a/flat/index.html' 'href="/"[^>]*>Home<' 'article trail starts at Home'
+assert 'section-a/flat/index.html' 'href="/section-a/"[^>]*>Section A<' 'article trail links the section'
+assert 'section-a/flat/index.html' 'aria-current="page"' 'current page is marked'
+assert 'section-a/index.html' 'aria-label="Breadcrumb"' 'section trail renders via page override'
+assert 'tags/index.html' 'aria-label="Breadcrumb"' 'taxonomy trail follows its table'
+assert_not 'tags/alpha/index.html' 'aria-label="Breadcrumb"' 'term trail stays hidden by default'
+assert_not 'index.html' 'aria-label="Breadcrumb"' 'home trail stays hidden by default'
+
+# 34. page front matter keys are read lowercase: Hugo folds content keys
+#     (showBreadcrumbs arrives as showbreadcrumbs) while site config keeps
+#     its case, so a camelCase .Params read on a page is silently dead
+if grep -rn --include='*.html' -E '\.Params\.[A-Za-z]*[A-Z][A-Za-z]*' "$ROOT/layouts" | grep -v 'site\.Params' | grep -q .; then
+  grep -rn --include='*.html' -E '\.Params\.[A-Za-z]*[A-Z][A-Za-z]*' "$ROOT/layouts" | grep -v 'site\.Params' >&2
+  fail 'page .Params reads are lowercase only'
+else
+  pass 'page .Params reads are lowercase only'
+fi
+if grep -rn --include='*.html' -E 'isset \.Params "[a-z]*[A-Z]' "$ROOT/layouts" | grep -q .; then
+  fail 'page isset keys are lowercase only'
+else
+  pass 'page isset keys are lowercase only'
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

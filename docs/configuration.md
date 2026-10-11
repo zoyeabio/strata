@@ -3,6 +3,10 @@
 All configuration lives in the site layer. The theme consumes only the keys
 listed here; anything else is ignored.
 
+Hugo folds content front matter keys to lowercase (`showBreadcrumbs`
+arrives as `showbreadcrumbs`), so page keys below are read lowercase —
+write them in any case. Site config keys keep their case.
+
 ## Site params (`params.toml`)
 
 | Key | Type / default | Effect |
@@ -25,6 +29,9 @@ listed here; anything else is ignored.
 | `list.cardView` | `true` | Default card vs. row layout for section/term lists |
 | `list.orderByWeight` | `false` | Sort list pages by `weight` instead of date |
 | `list.showSummary` | `false` | Default card summaries on lists |
+| `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
+| `list.showBreadcrumbs` | `false` | Trail on section and home pages |
+| `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
 | `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
 | `schema.enableProduct` | `false` | Reserved for product JSON-LD (site-layer product template, planned) |
