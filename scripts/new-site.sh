@@ -113,6 +113,8 @@ enableEmoji = false
 [security.exec]
   allow = ['go', 'tailwindcss']
 
+# Hugo docs css.TailwindCSS recipe: stats + watch wiring so server rebuilds
+# stay fresh (the pipeline scans @source files, not hugo_stats.json)
 [build.buildStats]
   enable = true
 

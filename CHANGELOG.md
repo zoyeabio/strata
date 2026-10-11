@@ -29,7 +29,12 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Social tags match the page kind: empty image refs no longer fall back to
   `static/` (which resolved to the bare site root in `og:image`), and
   `article:*` times are gated on `og:type=article`. New R10 rule in
-  `check-build.sh` pins both; it fails on pre-fix output.
+  `check-build.sh` pins both, including `name=` Twitter tags; it fails on
+  pre-fix output.
+- Dropped the `templates.Defer` call: with an empty body it deferred
+  nothing, and the pipeline scans `@source` files directly so render order
+  is irrelevant. Docs now state the Hugo ceiling (< 0.161.0, where the
+  standalone binary stops working).
 
 ### Fixed
 

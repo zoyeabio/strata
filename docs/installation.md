@@ -2,8 +2,11 @@
 
 ## Requirements
 
-- Hugo **0.151.0 or later**, Extended edition (the version the theme is
-  tested against; a lower floor is not claimed yet)
+- Hugo **0.151.0 or later, but below 0.161.0**, Extended edition (tested
+  on 0.151.0; exercised up to 0.155.3). As of Hugo 0.161.0 the Tailwind
+  standalone binary is no longer supported — past that line the project
+  must switch to the npm CLI flow (`node` on PATH plus `node` in
+  `[security.exec]`), which is not wired yet.
 - Tailwind CSS v4 CLI (`tailwindcss`) on PATH — the theme compiles its
   stylesheet in-process at build time. Use the standalone binary from the
   Tailwind releases (no npm needed anywhere).
