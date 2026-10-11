@@ -6,6 +6,9 @@ enableSearch = true
 [header]
   layout = "smart"
 
+[search]
+  contentLength = 600
+
 [list]
   cardView = true
 

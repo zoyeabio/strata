@@ -654,7 +654,7 @@ assert isinstance(entries, list) and entries, 'empty index'
 for e in entries:
     assert set(e) == {'title', 'url', 'date', 'summary', 'content'}, e.keys()
     assert e['title'] and e['url'], 'blank title or url'
-    assert len(e['content']) <= 2000, 'content exceeds the slim cap'
+    assert len(e['content']) <= 600, 'search.contentLength override ignored'
     assert e['url'].startswith('/section-a/'), 'non-article leaked in'
 PY
 then

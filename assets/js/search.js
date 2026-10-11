@@ -1,7 +1,7 @@
 /* Site search: fetches the home JSON index on first open and scores it
    in the page. Every query token must occur somewhere; title hits weigh 3,
-   summary 2, body 1. English tokenization (lowercase alphanumeric split);
-   CJK queries still match as whole-string substrings. Results render as
+   summary 2, body 1. English tokenization only (lowercase alphanumeric
+   split). Results render as
    text links (no innerHTML anywhere), at most ten, with a polite live
    status line. Escape closes with focus back on the button — the same
    disclosure contract as assets/js/menu.js, which this script also closes
