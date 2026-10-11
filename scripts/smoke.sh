@@ -648,6 +648,15 @@ assert 'section-a/shortcodes/index.html' 'role="status"' 'contact status is a li
 assert 'section-a/shortcodes/index.html' 'aria-describedby=' 'message field names its limit'
 assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes validity'
 
+# 41. ads ship complete and consent has a home: the unit carries client
+#     and slot, the loader lands only on pages using it, and the
+#     site-owned consent partial renders through the baseof hook
+assert 'section-a/shortcodes/index.html' 'data-ad-client="ca-pub-0000000000000000"' 'ads unit carries the client'
+assert 'section-a/shortcodes/index.html' 'data-ad-slot="1234567890"' 'ads unit carries the slot'
+assert 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' 'ads loader loads on unit pages'
+assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
+assert 'index.html' 'data-cookie-consent' 'consent hook renders site markup'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

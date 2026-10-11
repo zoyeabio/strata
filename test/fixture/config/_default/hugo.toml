@@ -1,3 +1,5 @@
+enableRobotsTXT = true
+
 [module]
   proxy = "direct"
 

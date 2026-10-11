@@ -38,6 +38,10 @@
   word-break: break-word;
 }
 
+.adsbygoogle {
+  display: block;
+}
+
 .icon {
   display: inline-flex;
   vertical-align: -0.125em;

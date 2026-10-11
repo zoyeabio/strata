@@ -12,5 +12,12 @@
     {{ block "main" . }}{{ end }}
   </main>
   {{ partial "frame/footer.html" . }}
+  {{- /* Consent hook: a site-owned banner/CMP lives in its own
+       partials/cookie-consent.html. The theme ships none — copy, law and
+       vendor choice are site responsibilities. Documented in
+       docs/configuration.md. */}}
+  {{ if templates.Exists "partials/cookie-consent.html" }}
+  {{ partial "cookie-consent.html" . }}
+  {{ end }}
 </body>
 </html>

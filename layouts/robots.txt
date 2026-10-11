@@ -1,0 +1,9 @@
+{{- /*
+  Fallback robots.txt for sites without static/robots.txt: open crawl plus
+  the sitemap declaration ad networks and auditors look for. Sites that
+  ship their own static/robots.txt (like the scaffold does) shadow this.
+*/ -}}
+User-agent: *
+Allow: /
+
+Sitemap: {{ "sitemap.xml" | absURL }}

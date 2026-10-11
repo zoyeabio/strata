@@ -49,3 +49,7 @@ Markdown inside the first column.
 Markdown inside the last column.
 {{< /layout/col-right >}}
 {{< /layout/multi-col >}}
+
+## Ads
+
+{{< ads slot="1234567890" >}}

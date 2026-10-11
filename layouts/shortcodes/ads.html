@@ -1,0 +1,24 @@
+{{- /*
+  AdSense display unit. The loader script ships in head only on pages that
+  use this shortcode, so sites without ads pay nothing.
+
+  Parameters
+    slot   (string, required) — the ad slot ID from the AdSense dashboard
+    format (string, optional) — data-ad-format, default "auto"
+
+  Site config [ads] client (string, required) — the "ca-pub-…" publisher
+  ID. Missing client stops the build. Pages carrying a unit must also
+  ship static/ads.txt naming the ID (check-build R11 enforces it).
+
+  Called by: content markdown
+*/ -}}
+{{- $client := site.Params.ads.client | default "" -}}
+{{- if eq $client "" -}}
+  {{- errorf "ads shortcode: site.Params.ads.client is not set (%s)" .Position -}}
+{{- end -}}
+{{- $slot := .Get "slot" -}}
+{{- if not $slot -}}
+  {{- errorf "ads shortcode: requires slot, e.g. {{< ads slot=\"1234567890\" >}} (%s)" .Position -}}
+{{- end -}}
+<ins class="adsbygoogle" style="display:block" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}" data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>

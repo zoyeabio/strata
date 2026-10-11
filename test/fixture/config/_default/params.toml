@@ -14,6 +14,9 @@ mainSections = ["section-a"]
 [author]
   name = "Fixture Team"
 
+[ads]
+  client = "ca-pub-0000000000000000"
+
 [taxonomy]
   showBreadcrumbs = true
 

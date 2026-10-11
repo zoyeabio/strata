@@ -85,4 +85,9 @@
   {{ if templates.Exists "partials/extend-head-uncached.html" }}
   {{ partial "extend-head-uncached.html" . }}
   {{ end }}
+  {{/* AdSense loader, only on pages carrying an ads unit: the single
+       sanctioned external request, gated by site.Params.ads.client */}}
+  {{- if and (.HasShortcode "ads") site.Params.ads.client }}
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.Params.ads.client }}" crossorigin="anonymous"></script>
+  {{- end }}
 </head>

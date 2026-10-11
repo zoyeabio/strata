@@ -34,6 +34,7 @@ if report=$(python3 - "$PUBLIC" <<'PY'
 import json
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 pub = Path(sys.argv[1])
@@ -94,6 +95,29 @@ css_url = re.compile(r'url\(["\x27]?([^"\x27)]+)["\x27]?\)')
 referenced = set()
 per_page = {}
 download_attr = re.compile(r'\b(?:src|href)=["\x27]([^"\x27]+)["\x27]', re.I)
+
+# Site host from the home canonical: only same-host absolute URLs resolve
+# into the output tree; anything else (ad loaders, verification files) is
+# someone else's server and skips existence checks
+site_host = ''
+home_page = pub / 'index.html'
+if home_page.is_file():
+    m = re.search(r'rel=["\x27]canonical["\x27]\s+href=["\x27]([^"\x27]*)',
+                  home_page.read_text(errors='ignore'))
+    if m:
+        hm = re.match(r'^https?://([^/]+)', m.group(1))
+        if hm:
+            site_host = hm.group(1).lower()
+
+
+def is_site_url(u):
+    u = u.strip()
+    if u.startswith('/'):
+        return True
+    if u.startswith('//'):
+        u = 'https:' + u
+    m = re.match(r'^https?://([^/]+)', u)
+    return bool(m) and m.group(1).lower() == site_host
 for t in texts:
     text = t.read_text(errors='ignore')
     urls = set()
@@ -108,10 +132,10 @@ for t in texts:
     for m in css_url.findall(text):
         urls.add(m)
         dl.add(m)
-    local = {u for u in urls if local_path(u)}
+    local = {u for u in urls if local_path(u) and is_site_url(u)}
     referenced |= local
     if t.suffix == '.html':
-        per_page[t] = {u for u in dl if local_path(u)}
+        per_page[t] = {u for u in dl if local_path(u) and is_site_url(u)}
 
 # R1 every referenced local image file exists
 broken = sorted({local_path(u) for u in referenced
@@ -344,6 +368,80 @@ if bal_bad:
     bad('structural tags balance', '\n'.join(f'  {b}' for b in bal_bad))
 else:
     ok('structural tags balance')
+
+# R11 ad units ship with authorization: any data-ad-client in the markup
+#    requires static/ads.txt in the output naming the same publisher ID
+ad_clients = set()
+for t in htmls:
+    text = t.read_text(errors='ignore')
+    for m in re.findall(r'data-ad-client=["\x27]([^"\x27]*)["\x27]', text):
+        ad_clients.add(m)
+if ad_clients:
+    ads_txt = pub / 'ads.txt'
+    if not ads_txt.is_file():
+        bad('ads.txt names every advertised publisher', '  ads.txt missing')
+    else:
+        body = ads_txt.read_text(errors='ignore')
+        missing = [c for c in sorted(ad_clients)
+                   if c not in body and c.replace('ca-', '') not in body]
+        if missing:
+            bad('ads.txt names every advertised publisher',
+                '\n'.join(f'  {c} not in ads.txt' for c in missing))
+        else:
+            ok('ads.txt names every advertised publisher')
+else:
+    ok('ads.txt names every advertised publisher')
+
+# R13 articles carry bodies: an article page (og:type=article) whose content
+#    block holds zero words is a migration accident, not a page
+class BodyWords(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.depth = 0
+        self.words = 0
+
+    def handle_starttag(self, tag, attrs):
+        if self.depth:
+            self.depth += 1
+        elif tag == 'div' and any(k == 'class' and 'article__content' in (v or '')
+                                  for k, v in attrs):
+            self.depth = 1
+
+    def handle_endtag(self, tag):
+        if self.depth:
+            self.depth -= 1
+
+    def handle_data(self, data):
+        if self.depth:
+            self.words += len(data.split())
+
+
+thin = []
+for t in htmls:
+    text = t.read_text(errors='ignore')
+    if 'http-equiv="refresh"' in text:
+        continue
+    og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
+    if not og or og.group(1) != 'article':
+        continue
+    parser = BodyWords()
+    try:
+        parser.feed(text)
+    except Exception:
+        continue
+    if parser.words == 0:
+        thin.append(f'{t.relative_to(pub)}: article has no body text')
+if thin:
+    bad('article pages carry bodies', '\n'.join(f'  {b}' for b in thin))
+else:
+    ok('article pages carry bodies')
+
+# R14 robots declares the sitemap crawlers and auditors look for
+robots = pub / 'robots.txt'
+if robots.is_file() and 'Sitemap:' in robots.read_text(errors='ignore'):
+    ok('robots declares the sitemap')
+else:
+    bad('robots declares the sitemap', '  no Sitemap: line in robots.txt')
 
 sys.exit(1 if problems else 0)
 PY

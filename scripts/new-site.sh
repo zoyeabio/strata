@@ -273,9 +273,18 @@ EOF
 fi
 
 # static files
-cat > "$OUT/static/robots.txt" <<'EOF'
+cat > "$OUT/static/robots.txt" <<EOF
 User-agent: *
 Allow: /
+
+Sitemap: https://${DOMAIN}/sitemap.xml
+EOF
+
+# ads.txt starts as comments only: set [ads] client in config and replace
+# the stub line when the publisher ID is known
+cat > "$OUT/static/ads.txt" <<'EOF'
+# AdSense authorized sellers. Uncomment and set your publisher ID:
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
 EOF
 
 cat > "$OUT/static/site.webmanifest" <<EOF
