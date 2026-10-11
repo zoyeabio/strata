@@ -11,6 +11,12 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 ### Added
 
+- Breadcrumb trail from a `page/breadcrumbs.html` partial mounted on
+  single, list, taxonomy and term pages, gated by the table matching the
+  page Kind with a page-level override that honours explicit `false`.
+- Article byline: page `author` wins, site `[author] name` is the fallback,
+  both gated by `showAuthor`.
+- `b2b` colour scheme (deep navy) for trade sites.
 - Rich footer from the `[footer]` table: company, quick-links, legal and
   contact columns, social icon row (site `assets/icons/`, name fallback),
   Dark/Light switcher and scroll-to-top button. Without the table the
