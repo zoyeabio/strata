@@ -2,3 +2,28 @@ eagerCardCount = 2
 
 [list]
   cardView = true
+
+[footer]
+  showAppearanceSwitcher = true
+  showScrollToTop = true
+
+  [footer.company]
+    name = "Fixture Co."
+    slogan = "A test slogan."
+    email = "info@example.net"
+    phone = "+1 555 0100"
+    address = "1 Test Street<br>Testville"
+
+  [footer.quickLinks]
+    title = "Quick Links"
+    links = [{ name = "Section A", url = "/section-a/" }]
+
+  [footer.legal]
+    title = "Legal"
+    links = [{ name = "Flat", url = "/section-a/flat/" }]
+
+  [footer.social]
+    links = [
+      { name = "Check", icon = "check", url = "https://social.example.net/" },
+      { name = "Fallback", icon = "no-such-icon", url = "/section-a/flat/" },
+    ]

@@ -522,6 +522,19 @@ else
   fail 'shortcode parameters stay inside the documented subset'
 fi
 
+# 32. rich footer: company, link columns, contact, social, switcher and
+#     top button render from the [footer] table; the email is
+#     entity-obfuscated and a missing social icon falls back to the name
+assert 'index.html' 'site-footer__grid' 'footer grid renders'
+assert 'index.html' 'Fixture Co\.' 'footer company name renders'
+assert 'index.html' 'Quick Links' 'footer quick links title renders'
+assert 'index.html' 'info&#64;example\.net' 'footer email is entity-obfuscated'
+assert 'index.html' 'Testville' 'footer address second line renders'
+assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
+assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
+assert 'index.html' 'data-appearance-toggle' 'appearance switcher renders'
+assert 'index.html' 'data-scroll-top' 'scroll-to-top button renders'
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

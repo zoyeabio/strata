@@ -29,6 +29,24 @@ listed here; anything else is ignored.
 | `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
 | `schema.enableProduct` | `false` | Reserved for product JSON-LD (site-layer product template, planned) |
 
+## Footer (`params.toml [footer]`)
+
+Without this table the footer is identity, footer menu, copyright. With
+it, a grid renders above: company, quick links, legal, contact.
+
+| Key | Type / default | Effect |
+|---|---|---|
+| `showCompanyInfo` | `true` | Render the grid at all |
+| `showAppearanceSwitcher` | `false` | Dark/Light toggle button (wired by `assets/js/appearance.js`) |
+| `showScrollToTop` | `false` | Top button (loads `assets/js/scroll-top.js`) |
+| `company.name` / `company.slogan` | — | Brand column; name falls back to the site title |
+| `company.email` | — | Entity-obfuscated `mailto:` link |
+| `company.phone` | — | `tel:` link, spaces stripped |
+| `company.address` | — | Lines split on `<br>`, escaped |
+| `quickLinks.title` / `quickLinks.links` | `"Quick Links"` | `[{name, url}]` column |
+| `legal.title` / `legal.links` | `"Legal"` | `[{name, url}]` column |
+| `social.links` | — | `[{name, icon, url}]` row; icon resolves to `assets/icons/<name>.svg`, a missing file falls back to the link name |
+
 ## Front matter
 
 | Key | Effect |

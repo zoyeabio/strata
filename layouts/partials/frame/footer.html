@@ -1,21 +1,76 @@
 {{- /*
-  Site footer: identity, footer navigation and the copyright line.
+  Site footer.
 
-  The rich blocks — company info, quick links, legal, social — plus the
-  appearance switcher and scroll-to-top are not built yet; they arrive with
-  their own steps.
+  Two modes. Without a [footer] table in site params the output is the
+  legacy shape: identity, footer menu, copyright. With one, a rich grid
+  (company, quick links, legal, contact) renders above it and the meta row
+  gains social icons, an appearance switcher and a scroll-to-top button.
 
-  The site profile this needs stays inline until a second consumer appears
-  (schema, RSS, meta tags), at which point it moves to partials/data/site.html
-  so the values are not written twice.
+  Params (site.Params.footer, all optional)
+    showCompanyInfo       (bool) — render the grid, default true
+    showAppearanceSwitcher(bool) — render the Dark/Light button, default false
+    showScrollToTop       (bool) — render the Top button, default false
+    company               (table: name, slogan, email, phone, address;
+                           address may contain <br>)
+    quickLinks / legal    (table: title, links[{name, url}])
+    social                (table: links[{name, icon, url}]; icon resolves to
+                           assets/icons/<name>.svg, missing file falls back
+                           to the link name)
+
+  Email is entity-obfuscated like the email shortcode. Contact/social icons
+  need no JavaScript; the switcher and top button are wired by
+  assets/js/appearance.js (always loaded) and assets/js/scroll-top.js.
 
   Called by: _default/baseof.html
 */ -}}
-{{- $copyright := printf "© %d %s" now.Year site.Title }}
-{{- with site.Params.copyright }}
-{{- $copyright = replace . "{ year }" (printf "%d" now.Year) }}
-{{- end }}
+{{- $footer := site.Params.footer }}
+{{- $company := $footer.company | default dict }}
+{{- $quick := $footer.quickLinks | default dict }}
+{{- $legal := $footer.legal | default dict }}
+{{- $social := $footer.social.links | default slice }}
+{{- $rich := and $footer ($footer.showCompanyInfo | default true) (or $company.name $company.slogan $quick.links $legal.links $company.email $company.phone $company.address) }}
 <footer class="site-footer">
+  {{- if $rich }}
+  <div class="site-footer__grid">
+    {{- if or $company.name $company.slogan }}
+    <div>
+      <p class="site-footer__heading">{{ $company.name | default site.Title }}</p>
+      {{- with $company.slogan }}<p class="site-footer__text">{{ . }}</p>{{ end }}
+    </div>
+    {{- end }}
+    {{- with $quick.links }}
+    <div>
+      <p class="site-footer__heading">{{ $quick.title | default "Quick Links" }}</p>
+      <ul class="site-footer__links">
+        {{- range . }}<li><a class="site-footer__link" href="{{ .url }}">{{ .name }}</a></li>{{ end }}
+      </ul>
+    </div>
+    {{- end }}
+    {{- with $legal.links }}
+    <div>
+      <p class="site-footer__heading">{{ $legal.title | default "Legal" }}</p>
+      <ul class="site-footer__links">
+        {{- range . }}<li><a class="site-footer__link" href="{{ .url }}">{{ .name }}</a></li>{{ end }}
+      </ul>
+    </div>
+    {{- end }}
+    {{- if or $company.email $company.phone $company.address }}
+    <div>
+      <p class="site-footer__heading">Contact</p>
+      <ul class="site-footer__links">
+        {{- with $company.email }}
+        {{- $eu := split . "@" }}
+        <li>{{ if eq (len $eu) 2 }}<a class="site-footer__link" href="mailto:{{ index $eu 0 }}&#64;{{ index $eu 1 }}">{{ index $eu 0 }}&#64;{{ index $eu 1 }}</a>{{ else }}{{ . }}{{ end }}</li>
+        {{- end }}
+        {{- with $company.phone }}<li><a class="site-footer__link" href="tel:{{ replaceRE `\s+` "" . }}">{{ . }}</a></li>{{ end }}
+        {{- with $company.address }}
+        <li class="site-footer__text">{{- range $i, $line := split (replaceRE `(?i)<br\s*/?>` "\n" .) "\n" }}{{- if $i }}<br>{{ end }}{{ $line | transform.HTMLEscape | safeHTML }}{{- end }}</li>
+        {{- end }}
+      </ul>
+    </div>
+    {{- end }}
+  </div>
+  {{- end }}
   <div>
     <a class="site-footer__title" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
     {{- with site.Params.description }}
@@ -34,5 +89,28 @@
     </ul>
   </nav>
   {{- end }}
+  {{- if or $social ($footer.showAppearanceSwitcher) ($footer.showScrollToTop) }}
+  <div class="site-footer__meta">
+    {{- range $social }}
+    <a class="site-footer__social" href="{{ .url }}" aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
+    {{- end }}
+    {{- if $footer.showAppearanceSwitcher }}
+    <button type="button" class="site-footer__button" data-appearance-toggle aria-pressed="false">Appearance</button>
+    {{- end }}
+    {{- if $footer.showScrollToTop }}
+    <button type="button" class="site-footer__button" data-scroll-top>Top</button>
+    {{- end }}
+  </div>
+  {{- end }}
+  {{- $copyright := printf "© %d %s" now.Year site.Title }}
+  {{- with site.Params.copyright }}
+  {{- $copyright = replace . "{ year }" (printf "%d" now.Year) }}
+  {{- end }}
   <p class="site-footer__copyright">{{ $copyright }}</p>
 </footer>
+{{- if $footer.showScrollToTop }}
+{{- with resources.Get "js/scroll-top.js" }}
+{{- $st := . | fingerprint "sha512" }}
+<script src="{{ $st.RelPermalink }}" integrity="{{ $st.Data.Integrity }}"></script>
+{{- end }}
+{{- end }}

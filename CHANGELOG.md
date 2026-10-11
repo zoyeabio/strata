@@ -9,6 +9,13 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 ## [Unreleased]
 
+### Added
+
+- Rich footer from the `[footer]` table: company, quick-links, legal and
+  contact columns, social icon row (site `assets/icons/`, name fallback),
+  Dark/Light switcher and scroll-to-top button. Without the table the
+  footer is byte-identical to before (identity, menu, copyright).
+
 ### Changed
 
 - Stylesheet pipeline is now Hugo-native: `head.html` concatenates the
