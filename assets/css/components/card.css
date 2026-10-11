@@ -101,6 +101,11 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
+  /* Hard cap: exactly three lines of content. Where line-clamp hides the
+     overflow this never engages; where a browser only limits the height,
+     this clips at a line boundary instead of mid-glyph at the card edge. */
+  max-height: calc(3lh);
 }
 
 .card--row {
