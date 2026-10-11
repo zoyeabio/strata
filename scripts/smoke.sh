@@ -522,12 +522,6 @@ else
   fail 'shortcode parameters stay inside the documented subset'
 fi
 
-# 32. template function return values must not leak into the markup:
-#     templates.Defer returns true and a bare call prints it as a text node
-#     in <head>, which the HTML parser relocates into <body>
-assert_not 'index.html' '^  true$' 'no leaked Defer output on home'
-assert_not 'section-a/index.html' '^  true$' 'no leaked Defer output on list'
-
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
   exit 1

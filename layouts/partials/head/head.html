@@ -45,8 +45,10 @@
 
   {{/* Theme stylesheet: component files carry their own @layer wrappers,
        so the template concatenates them in cascade order and compiles the
-       bundle in-process via css.TailwindCSS (deferred so every template has
-       rendered first), minified and fingerprinted with the colour scheme.
+       bundle in-process via css.TailwindCSS, minified and fingerprinted
+       with the colour scheme. No templates.Defer: the pipeline scans
+       @source files directly (never hugo_stats.json), so class discovery
+       does not depend on render order and the output is deterministic.
        Requires the Tailwind v4 CLI ("tailwindcss") on PATH at build time
        plus "security.exec.allow" covering it in site config — the theme
        cannot provide either (site-level only). */}}
@@ -55,7 +57,6 @@
   {{- if not $scheme }}
     {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}
   {{- end }}
-  {{- if templates.Defer }}{{- end }}
   {{- $parts := slice (resources.Get "css/main.css") }}
   {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/multi-col.css" "components/shortcode.css" }}
     {{- $parts = $parts | append (resources.Get (print "css/" .)) }}
