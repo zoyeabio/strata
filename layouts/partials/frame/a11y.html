@@ -2,18 +2,22 @@
   Accessibility panel: a disclosure button plus a dropdown with three
   switches — underline links, reduce motion, strong focus. Rendered only
   when site.Params.enableA11y is true. State lives in localStorage
-  ("strataA11y") and applies as classes on <html>, so preferences survive
-  navigation; assets/js/a11y.js owns both the panel and the application.
+  ("strataA11y") and applies as classes on <html>. assets/js/a11y.js owns
+  both the panel and the application; it is loaded from head/head.html
+  before the first paint, so a stored preference never flashes the other
+  way.
 
-  No font-size switch on purpose: the theme sizes text in px, where a root
-  bump only moves headings — browser zoom is the honest tool for that.
-  No image switch either: the theme has no background-image heroes to kill.
+  No font-size switch on purpose: the theme mixes rem (headings) with px
+  (prose and components), so a root bump scales only half the type and
+  leaves it inconsistent. Browser zoom scales everything uniformly, which
+  is what WCAG 1.4.4 asks for. No image switch either: the theme has no
+  background-image heroes to kill.
 
   Called by: frame/header.html, after frame/search.html (same stacking
-  rule: the later dropdown paints above; each script closes the others).
+  rule: the later dropdown paints above; assets/js/dropdowns.js keeps only
+  one open).
 */ -}}
 {{- if site.Params.enableA11y }}
-{{- $a11yJS := resources.Get "js/a11y.js" | fingerprint "sha512" }}
 <button type="button" class="site-header__a11y" data-a11y-toggle aria-expanded="false" aria-controls="site-a11y" aria-label="Accessibility">
   <span class="site-a11y__icon" aria-hidden="true">A</span>
 </button>
@@ -31,6 +35,7 @@
         <span>Reduce motion</span>
         <input type="checkbox" id="site-a11y-motion" data-a11y-setting="motion">
       </label>
+      <p class="site-a11y__note" data-a11y-os-note hidden>Already reduced by your system setting</p>
     </li>
     <li>
       <label class="site-a11y__row" for="site-a11y-focus">
@@ -40,5 +45,4 @@
     </li>
   </ul>
 </div>
-<script src="{{ $a11yJS.RelPermalink }}" integrity="{{ $a11yJS.Data.Integrity }}" defer></script>
 {{- end }}

@@ -43,6 +43,16 @@
   <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
   {{ end }}
 
+  {{/* Accessibility classes applied before first paint too — same reason:
+       a stored reduce-motion must not get one animated frame first. Same
+       gating as the panel itself, so a disabled feature ships no script. */}}
+  {{- if site.Params.enableA11y }}
+  {{- with resources.Get "js/a11y.js" }}
+  {{- $a11y := . | fingerprint "sha512" }}
+  <script src="{{ $a11y.RelPermalink }}" integrity="{{ $a11y.Data.Integrity }}"></script>
+  {{- end }}
+  {{- end }}
+
   {{/* Theme stylesheet: component files carry their own @layer wrappers,
        so the template concatenates them in cascade order and compiles the
        bundle in-process via css.TailwindCSS, minified and fingerprinted

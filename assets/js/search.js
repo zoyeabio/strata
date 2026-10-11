@@ -1,12 +1,10 @@
 /* Site search: fetches the home JSON index on first open and scores it
    in the page. Every query token must occur somewhere; title hits weigh 3,
    summary 2, body 1. English tokenization only (lowercase alphanumeric
-   split). Results render as
-   text links (no innerHTML anywhere), at most ten, with a polite live
-   status line. Escape closes with focus back on the button — the same
-   disclosure contract as assets/js/menu.js, which this script also closes
-   (with the a11y panel) so the dropdowns never stack — every opener
-   closes the other two.
+   split). Results render as text links (no innerHTML anywhere), at most
+   ten, with a polite live status line. Mutual exclusion, aria-expanded and
+   Escape are shared with the nav and a11y panels through
+   assets/js/dropdowns.js.
    Loaded deferred from the search partial when enableSearch is on. */
 (function () {
   var btn = document.querySelector("[data-search-toggle]");
@@ -20,26 +18,12 @@
   var failed = false;
   var timer = null;
 
-  function set(open) {
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-    panel.classList.toggle("is-open", open);
-    if (open) {
-      var navBtn = document.querySelector("[data-nav-toggle]");
-      var navPanel = document.querySelector("[data-nav-panel]");
-      if (navBtn && navPanel) {
-        navBtn.setAttribute("aria-expanded", "false");
-        navPanel.classList.remove("is-open");
-      }
-      var a11yBtn = document.querySelector("[data-a11y-toggle]");
-      var a11yPanel = document.querySelector("[data-a11y-panel]");
-      if (a11yBtn && a11yPanel) {
-        a11yBtn.setAttribute("aria-expanded", "false");
-        a11yPanel.classList.remove("is-open");
-      }
+  var set = strataRegisterDropdown(btn, panel, {
+    onOpen: function () {
       load();
       if (input) input.focus();
     }
-  }
+  });
 
   function load() {
     if (entries || failed || !indexURL) return;
@@ -143,11 +127,4 @@
   }
 
   list.addEventListener("click", function () { set(false); });
-
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
-      set(false);
-      btn.focus();
-    }
-  });
 })();

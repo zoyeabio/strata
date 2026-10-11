@@ -1,18 +1,19 @@
-/* Accessibility panel: three switches persisted to localStorage and
-   applied as classes on <html> — a11y-underline-links, a11y-reduce-motion,
-   a11y-strong-focus (see base/a11y.css). Classes go on at load so the
-   preference holds from the first paint; carousel and scroll-to-top read
-   the motion class alongside the OS setting. The panel is the same
-   disclosure contract as menu.js/search.js: aria-expanded sync, Escape
-   closes with focus back, opening closes the other two dropdowns.
-   Loaded deferred from the a11y partial when enableA11y is on. */
+/* Accessibility panel: three switches persisted to localStorage
+   ("strataA11y") and applied as classes on <html> — a11y-underline-links,
+   a11y-reduce-motion, a11y-strong-focus (see base/a11y.css). The classes
+   are applied in the head, before the first paint, so a stored preference
+   never flashes the other way; the panel wiring waits for DOMContentLoaded
+   because this head copy runs before the body exists. Carousel and
+   scroll-to-top read the motion class alongside the OS setting. When the
+   OS already prefers reduced motion the motion switch is disabled and its
+   note shown: both rules only ever turn motion off, so the switch could
+   never re-enable it and leaving it live would mislead.
+   Loaded synchronously from head/head.html when enableA11y is on; the
+   panel is frame/a11y.html, which shares its contract with assets/js/dropdowns.js. */
 (function () {
-  var btn = document.querySelector("[data-a11y-toggle]");
-  var panel = document.querySelector("[data-a11y-panel]");
-  if (!btn || !panel) return;
-
   var KEY = "strataA11y";
   var CLASSES = { links: "a11y-underline-links", motion: "a11y-reduce-motion", focus: "a11y-strong-focus" };
+  var root = document.documentElement;
 
   function read() {
     var saved = {};
@@ -24,56 +25,59 @@
     return saved;
   }
 
-  function applyAll() {
+  function applyClasses() {
     var saved = read();
     Object.keys(CLASSES).forEach(function (name) {
-      document.documentElement.classList.toggle(CLASSES[name], !!saved[name]);
+      root.classList.toggle(CLASSES[name], !!saved[name]);
     });
+    return saved;
+  }
+
+  applyClasses();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var btn = document.querySelector("[data-a11y-toggle]");
+    var panel = document.querySelector("[data-a11y-panel]");
+    if (!btn || !panel) return;
+
+    var saved = applyClasses();
     panel.querySelectorAll("[data-a11y-setting]").forEach(function (box) {
       box.checked = !!saved[box.getAttribute("data-a11y-setting")];
     });
-  }
 
-  function set(open) {
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-    panel.classList.toggle("is-open", open);
-    if (open) {
-      [["[data-nav-toggle]", "[data-nav-panel]"], ["[data-search-toggle]", "[data-search-panel]"]].forEach(function (pair) {
-        var otherBtn = document.querySelector(pair[0]);
-        var otherPanel = document.querySelector(pair[1]);
-        if (otherBtn && otherPanel) {
-          otherBtn.setAttribute("aria-expanded", "false");
-          otherPanel.classList.remove("is-open");
-        }
-      });
-    }
-  }
-
-  btn.addEventListener("click", function () {
-    set(btn.getAttribute("aria-expanded") !== "true");
-  });
-
-  panel.addEventListener("change", function (event) {
-    var box = event.target;
-    if (!box || !box.getAttribute) return;
-    var name = box.getAttribute("data-a11y-setting");
-    if (!name || !CLASSES[name]) return;
-    var saved = read();
-    saved[name] = box.checked;
+    var osMotion = false;
     try {
-      localStorage.setItem(KEY, JSON.stringify(saved));
+      osMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     } catch (e) {
-      /* private mode: the session still applies, it just won't persist */
+      osMotion = false;
     }
-    document.documentElement.classList.toggle(CLASSES[name], box.checked);
-  });
-
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
-      set(false);
-      btn.focus();
+    var motionBox = panel.querySelector('[data-a11y-setting="motion"]');
+    var note = panel.querySelector("[data-a11y-os-note]");
+    if (osMotion && motionBox) {
+      motionBox.checked = true;
+      motionBox.disabled = true;
+      if (note) note.hidden = false;
     }
-  });
 
-  applyAll();
+    var set = strataRegisterDropdown(btn, panel);
+
+    btn.addEventListener("click", function () {
+      set(btn.getAttribute("aria-expanded") !== "true");
+    });
+
+    panel.addEventListener("change", function (event) {
+      var box = event.target;
+      if (!box || !box.getAttribute) return;
+      var name = box.getAttribute("data-a11y-setting");
+      if (!name || !CLASSES[name] || box.disabled) return;
+      var current = read();
+      current[name] = box.checked;
+      try {
+        localStorage.setItem(KEY, JSON.stringify(current));
+      } catch (e) {
+        /* private mode: the session still applies, it just won't persist */
+      }
+      root.classList.toggle(CLASSES[name], box.checked);
+    });
+  });
 })();

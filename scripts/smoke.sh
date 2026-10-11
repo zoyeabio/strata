@@ -631,10 +631,12 @@ if grep -q 'min-width: 853px' "$ROOT/assets/js/menu.js" &&
 else
   fail 'menu breakpoint 853px agrees across CSS and JS'
 fi
-# 45c. Escape handling is behaviour, not markup: assert the source path
-#     (same pattern as #43 — markup cannot show it)
-if grep -q '"Escape"' "$ROOT/assets/js/menu.js" &&
-   grep -q 'btn.focus()' "$ROOT/assets/js/menu.js"; then
+ # 45c. Escape handling is behaviour, not markup: assert the source path
+ #     (same pattern as #43 — markup cannot show it). The handler now lives
+ #     in the shared dropdown contract; the menu is one of its registrants.
+if grep -q 'strataRegisterDropdown(btn, panel' "$ROOT/assets/js/menu.js" &&
+   grep -q '"Escape"' "$ROOT/assets/js/dropdowns.js" &&
+   grep -q 'toggle.focus()' "$ROOT/assets/js/dropdowns.js"; then
   pass 'menu closes on Escape with focus back on the button'
 else
   fail 'menu closes on Escape with focus back on the button'
@@ -670,9 +672,8 @@ else
   fail 'search index holds slim article entries only'
 fi
 if grep -q '3 \* inTitle + 2 \* inSummary + inContent' "$ROOT/assets/js/search.js" &&
-   grep -q '"Escape"' "$ROOT/assets/js/search.js" &&
-   grep -q 'data-nav-panel' "$ROOT/assets/js/search.js" &&
-   grep -q 'data-search-panel' "$ROOT/assets/js/menu.js" &&
+   grep -q 'strataRegisterDropdown(btn, panel' "$ROOT/assets/js/search.js" &&
+   grep -q '"Escape"' "$ROOT/assets/js/dropdowns.js" &&
    grep -q 'list.addEventListener("click"' "$ROOT/assets/js/search.js"; then
   pass 'search scores, escapes and shares the panel contract'
 else
@@ -695,17 +696,48 @@ else
 fi
 css_assert 'html\.a11y-underline-links a\{text-decoration:underline' 'underline-links class applies'
 css_assert 'html\.a11y-strong-focus :focus-visible\{outline-width:4px' 'strong-focus class applies'
-# the three dropdowns close each other: each opener lists the other two
-if grep -q 'data-search-panel' "$ROOT/assets/js/menu.js" &&
-   grep -q 'data-a11y-panel' "$ROOT/assets/js/menu.js" &&
-   grep -q 'data-a11y-panel' "$ROOT/assets/js/search.js"; then
-  pass 'dropdowns never stack'
+ # the three dropdowns share one contract: each opener registers with
+ # assets/js/dropdowns.js, which owns mutual exclusion, aria-expanded and
+ # Escape. Symmetric by construction — dropping the helper from any opener
+ # fails here, and a fourth dropdown is one registration.
+if grep -q 'strataRegisterDropdown' "$ROOT/assets/js/dropdowns.js" &&
+   grep -q '"Escape"' "$ROOT/assets/js/dropdowns.js" &&
+   grep -q 'strataRegisterDropdown' "$ROOT/assets/js/menu.js" &&
+   grep -q 'strataRegisterDropdown' "$ROOT/assets/js/search.js" &&
+   grep -q 'strataRegisterDropdown' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'dropdowns\.[0-9a-f]*\.js' "$OUT/index.html"; then
+  pass 'dropdowns share one mutual-exclusion contract'
 else
-  fail 'dropdowns never stack'
+  fail 'dropdowns share one mutual-exclusion contract'
 fi
-# 48. no font-size switch: the theme sizes text in px, where a root bump
-#     only moves headings — browser zoom is the honest tool
-if grep -q 'No font-size switch on purpose' "$ROOT/layouts/partials/frame/a11y.html"; then
+ # 47b. stored classes must land in the head before the first paint: the
+ #      head copy applies them ahead of the DOMContentLoaded wiring, and
+ #      the panel partial ships no script of its own
+if grep -q 'applyClasses();' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'DOMContentLoaded' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'a11y.Data.Integrity }}"></script>' "$ROOT/layouts/partials/head/head.html" &&
+   ! grep -q '<script' "$ROOT/layouts/partials/frame/a11y.html"; then
+  pass 'a11y classes apply in the head before first paint'
+else
+  fail 'a11y classes apply in the head before first paint'
+fi
+ # 47c. the motion switch is a live no-op for users whose OS already
+ #      reduces motion — both rules only turn motion off — so it is
+ #      disabled and labelled instead of pretending to work
+if grep -q 'prefers-reduced-motion' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'motionBox.disabled = true' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'box.disabled' "$ROOT/assets/js/a11y.js" &&
+   grep -q 'data-a11y-os-note' "$ROOT/layouts/partials/frame/a11y.html"; then
+  pass 'motion switch is disabled, not faked, when the OS reduces motion'
+else
+  fail 'motion switch is disabled, not faked, when the OS reduces motion'
+fi
+ css_assert 'html\.a11y-underline-links a\{text-decoration:underline;text-decoration-thickness:2px' 'underline links carry a visible weight'
+ css_assert '\.site-search__results\{list-style:none;padding-block:6px' 'focus ring is not clipped at the results list top'
+ # 48. no font-size switch: the theme mixes rem and px, so a root bump
+ #     scales only half the type — browser zoom is the honest tool
+if grep -q 'No font-size switch on purpose' "$ROOT/layouts/partials/frame/a11y.html" &&
+   grep -q 'No font-size switch on purpose' "$ROOT/docs/configuration.md"; then
   pass 'the deliberate font-size omission is documented at the point of use'
 else
   fail 'the deliberate font-size omission is documented at the point of use'

@@ -477,7 +477,7 @@
 
 .site-search__results {
   list-style: none;
-  margin-top: 4px;
+  padding-block: 6px;
   max-height: min(50vh, 400px);
   overflow-y: auto;
 }
@@ -579,5 +579,12 @@
   width: 20px;
   height: 20px;
   accent-color: var(--site-accent);
+}
+
+.site-a11y__note {
+  margin: 0;
+  padding-left: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 }

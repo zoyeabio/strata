@@ -167,19 +167,29 @@ each other). A search button with no `index.json` fails check-build.
 
 `enableA11y = true` renders a third header dropdown with three switches.
 Choices persist in `localStorage` and apply as classes on `<html>`, so
-they hold across navigation without a reload round-trip:
+they hold across navigation. `assets/js/a11y.js` loads in `<head>`, before
+the first paint, so a stored preference never flashes the other way.
 
 | Switch | Class | Effect |
 |---|---|---|
-| Underline links | `a11y-underline-links` | Every `a` gets an underline |
+| Underline links | `a11y-underline-links` | Every `a` gets a 2px underline |
 | Reduce motion | `a11y-reduce-motion` | Kills animations and transitions; the carousel stops autoplaying and scroll-to-top becomes instant — both re-read the class, so it takes effect without a reload |
 | Strong focus | `a11y-strong-focus` | Focus outline goes from 2px to 4px |
 
-Deliberately absent: a font-size switch (the theme sizes text in px,
-where a root bump only moves headings — browser zoom is the honest tool
-for that) and a background-image switch (this theme has no background
-heroes to turn off). `scripts/smoke.sh` asserts the omission is
-documented, so adding one later means updating the gate too.
+When the visitor's OS already prefers reduced motion, *Reduce motion* is
+disabled and labelled as such. Both rules only ever turn motion off, so
+the switch could never re-enable it — a live checkbox there would look
+like it did something when it cannot.
 
-Three header dropdowns now share one contract: each opener closes the
-other two, so they never stack.
+No font-size switch on purpose: the theme mixes `rem` (headings) with `px`
+(prose and components), so a root bump scales only half the type and leaves
+it inconsistent. Browser zoom scales everything uniformly, which is what
+WCAG 1.4.4 asks for and what `docs/typography.md` already recommends. No
+background-image switch either — this theme has no background heroes to
+turn off. `scripts/smoke.sh` asserts the omission is documented, so adding
+one later means updating the gate too.
+
+The three header dropdowns share one contract in `assets/js/dropdowns.js`:
+at most one is open, `aria-expanded` stays in sync, Escape closes with
+focus back on its own button. A new dropdown is one
+`strataRegisterDropdown` call.

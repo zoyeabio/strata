@@ -28,6 +28,15 @@
 {{- $disableText := site.Params.disableTextInHeader | default false }}
 {{- $showTitle := or (not $hasLogo) (not $disableText) -}}
 {{- $smart := eq (site.Params.header.layout | default "standard") "smart" }}
+{{- /* One disclosure contract for the header's three dropdowns; deferred
+     scripts run in document order, so this lands ahead of menu.js,
+     search.js and a11y.js. */ -}}
+{{- if or site.Menus.main site.Params.enableSearch site.Params.enableA11y }}
+{{- with resources.Get "js/dropdowns.js" }}
+{{- $dd := . | fingerprint "sha512" }}
+<script src="{{ $dd.RelPermalink }}" integrity="{{ $dd.Data.Integrity }}" defer></script>
+{{- end }}
+{{- end }}
 <header class="site-header{{ if $smart }} site-header--smart{{ end }}"{{ if $smart }} data-smart-header{{ end }}>
   <a class="site-brand" href="{{ site.Home.RelPermalink }}">
     {{- with $logo }}
