@@ -864,9 +864,15 @@ assert 'section-a/flat/index.html' 'article:tag' 'article tags are emitted'
 assert 'section-a/flat/index.html' 'article:section' 'article section is emitted'
 assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
+assert 'section-a/anim/index.html' 'name="description" content="Animated WebP feature image"' \
+  'meta description strips markup from the front matter value'
+assert_not 'section-a/anim/index.html' 'name="description" content="[^"]*&lt;' \
+  'no escaped markup leaks into the meta description'
 
-# 42b. Article description and keywords come from the front matter only: never
-#      invented from the body, never dropped when declared. Parsed from the
+# 42b. Article description and keywords mirror the front matter, including its
+#      two fallbacks (summary -> description, tags -> keywords) and the "neither
+#      source" case where neither key may be invented. All four combinations are
+#      pinned so deleting one side of an `or` fails here. Parsed from the
 #      ld+json payload, not grepped — "description" also appears on the meta
 #      tag line, which would make a grep negative match the wrong node
 if schema_out=$(python3 - "$OUT" <<'PY'
@@ -877,9 +883,15 @@ from pathlib import Path
 
 out = Path(sys.argv[1])
 failed = []
-expect = {"section-a/anim": {"description": "Animated WebP feature image",
-                             "keywords": ["WebP", "animation"]},
-          "section-a/pixel": None}
+expect = {
+    "section-a/anim": {"description": "Animated WebP feature image",
+                       "keywords": ["WebP", "animation"]},
+    "section-a/inline": {"description": "Inline illustration summary",
+                         "keywords": None},
+    "section-a/flat": {"description": None,
+                       "keywords": ["alpha", "beta", "Sci & Tech"]},
+    "section-a/pixel": {"description": None, "keywords": None},
+}
 for rel, want in expect.items():
     text = (out / rel / "index.html").read_text(encoding='utf-8')
     m = re.search(r'<script type="application/ld\+json">(.*?)</script>', text, re.S)
@@ -893,21 +905,19 @@ for rel, want in expect.items():
         failed.append("%s renders %d Article nodes" % (rel, len(art)))
         continue
     a = art[0]
-    if want is None:
-        if "description" in a or "keywords" in a:
-            failed.append("%s invents description/keywords the front matter never set: %r"
-                          % (rel, {k: a.get(k) for k in ("description", "keywords")}))
-    elif a.get("description") != want["description"]:
-        failed.append("%s description is %r, want %r"
-                      % (rel, a.get("description"), want["description"]))
-    elif a.get("keywords") != want["keywords"]:
-        failed.append("%s keywords are %r, want %r"
-                      % (rel, a.get("keywords"), want["keywords"]))
+    for key, wanted in want.items():
+        got = a.get(key)
+        if wanted is None:
+            if key in a:
+                failed.append("%s %s is %r though no front matter source sets it"
+                              % (rel, key, got))
+        elif got != wanted:
+            failed.append("%s %s is %r, want %r" % (rel, key, got, wanted))
 if failed:
     for line in failed:
         print("FAIL " + line, file=sys.stderr)
     sys.exit(1)
-print("description and keywords mirror the front matter and nothing more")
+print("description and keywords mirror the front matter and its two fallbacks")
 PY
 ); then
   pass "article schema description and keywords ($schema_out)"

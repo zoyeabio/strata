@@ -147,11 +147,17 @@ accident:
   template; the fixture smoke gate fails on it so it never sneaks back in
 - page front matter `layout` — a Jekyll/zoyclaw leftover (e.g. `layout: "single"`);
   Strata has one single layout, so the value is never read
-- page front matter `heroStyle` — Strata renders one hero; zoyclaw only honoured
-  it when a `partials/hero/<style>.html` file existed, so a value like
-  `"basic"` was already a silent no-op there
-- page front matter `series_order` — series navigation sorts by `weight`, so
-  keep the two in sync or drop `series_order`
+- `heroStyle` — Strata renders one hero, at either level (page front matter or
+  `[article]` / `[list]` / `[taxonomy]` / `[term]`). zoyclaw only honoured it
+  when a `partials/hero/<style>.html` file existed, so a value like `"basic"`
+  was already a silent no-op there
+- page front matter `series_order` — series navigation sorts by `weight`; set
+  only `weight` and drop `series_order`
+- site-level `[article] showHero`, `[list] showHero`, `[taxonomy] showHero`,
+  `[term] showHero` — only the page front matter `showHero` is read; a site
+  `true` is a no-op because Strata shows a hero whenever `featureimage` resolves
+- site-level `showDraftLabel`, `showPagination` — Strata has no draft badge and
+  renders list pagination unconditionally
 - `backgroundImageWidth` — superseded by the pipeline's own widths
 
 ## Not implemented (planned)

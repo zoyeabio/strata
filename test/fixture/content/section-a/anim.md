@@ -1,6 +1,6 @@
 ---
 title: "Animated sticker"
-description: "Animated WebP feature image"
+description: "<p>Animated WebP feature image</p>"
 keywords: ["WebP", "animation"]
 date: 2020-01-04
 lastmod: 2020-06-01
