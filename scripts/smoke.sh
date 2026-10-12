@@ -69,8 +69,31 @@ assert 'section-a/flat/index.html' 'property="og:image:width" content="1200"' 'o
 assert 'section-a/flat/index.html' 'property="og:image:height" content="630"' 'og:image height 630'
 assert 'section-a/flat/index.html' 'property="og:image:alt" content="Flat asset image"' 'og:image alt'
 
-# 7. eager/lazy split follows eagerCardCount = 2
-count_assert 'section-a/index.html' 'loading="eager"' 2 'exactly two eager card images'
+# 7. eager/lazy split follows eagerCardCount = 2. The hero is eager too but it
+#    is not a card, so count inside card tags only; the attributes sit one per
+#    line, so no single regex can span a tag here.
+if eager_out=$(python3 - "$OUT" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+html = (Path(sys.argv[1]) / "section-a/index.html").read_text()
+cards = [tag for tag in re.findall(r'<img\b[^>]*>', html) if 'card__image' in tag]
+eager = sum('loading="eager"' in tag for tag in cards)
+lazy = sum('loading="lazy"' in tag for tag in cards)
+failed = len(cards) != 4 or eager != 2 or lazy != 2
+if failed:
+    print(f"FAIL exactly two eager card images (cards {len(cards)}, eager {eager}, lazy {lazy})")
+else:
+    print("ok   exactly two eager card images")
+sys.exit(1 if failed else 0)
+PY
+); then
+  printf '%s\n' "$eager_out"
+else
+  printf '%s\n' "$eager_out"
+  FAILURES=$((FAILURES + 1))
+fi
 assert 'section-a/index.html' 'fetchpriority="low"' 'later cards get fetchpriority=low'
 
 # 8. the hero preload matches the hero <img> in srcset and sizes
@@ -84,9 +107,9 @@ from pathlib import Path
 
 html = (Path(sys.argv[1]) / "section-a/flat/index.html").read_text()
 preload = re.search(r'rel="preload"[^>]*imagesrcset="([^"]+)"', html)
-hero = re.search(r'srcset="([^"]+)"[^>]*article-hero__image', html)
+hero = re.search(r'srcset="([^"]+)"[^>]*page-hero__image', html)
 preload_sizes = re.search(r'rel="preload"[^>]*imagesizes="([^"]+)"', html)
-hero_sizes = re.search(r'sizes="([^"]+)"[^>]*article-hero__image', html)
+hero_sizes = re.search(r'sizes="([^"]+)"[^>]*page-hero__image', html)
 failed = False
 if not preload or not hero:
     print("FAIL hero preload srcset matches the hero img srcset")
@@ -622,6 +645,29 @@ fi
 css_assert 'page-header\{margin-block:0 12px' 'list header carries no top gap of its own'
 css_assert 'page-header:not\(:has\(.breadcrumb\)\)\{margin-top:40px' 'trail-less header keeps its top air'
 
+# 33d. a section banner: gated by [list] showHero, mounted ahead of the
+#      header on the shared hero block, preloaded like an article hero; a
+#      section with no featureimage keeps the header rhythm instead
+assert 'section-a/index.html' '<figure class="page-hero">' 'section banner renders'
+assert 'section-a/index.html' 'class="page-hero__image"' 'section banner reuses the shared hero block'
+assert 'section-a/index.html' 'alt="Section list hero"' 'section banner takes featureimagealt'
+assert 'section-a/index.html' 'rel="preload"[^>]*imagesrcset="[^"]*"' 'section banner is preloaded'
+assert_not 'section-a/nested/index.html' 'page-hero' 'a section with no featureimage shows no banner'
+if python3 - "$OUT" <<'PY'
+import pathlib, sys
+html = (pathlib.Path(sys.argv[1]) / "section-a/index.html").read_text()
+hi = html.find('<figure class="page-hero">')
+head = html.find('<header class="page-header">')
+ti = html.find('<h1>')
+assert hi != -1 and head != -1 and ti != -1, 'banner, header or title missing'
+assert hi < head < ti, 'the banner must come before the header and the title'
+PY
+then
+  pass 'section banner sits ahead of the header'
+else
+  fail 'section banner sits ahead of the header'
+fi
+
 # 34. page front matter keys are read lowercase: Hugo folds content keys
 #     (showBreadcrumbs arrives as showbreadcrumbs) while site config keeps
 #     its case, so a camelCase .Params read on a page is silently dead
@@ -669,8 +715,8 @@ assert 'index.html' 'menu\.[0-9a-f]+\.js' 'menu script loads'
 assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel'
 assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
 assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
-css_assert 'site-header\{--header-bar:56px;position:relative' 'standard header anchors the mobile panel'
-css_assert 'site-header\{[^}]*padding-block:6px' 'header padding agrees with the 56px bar'
+css_assert 'site-header\{--header-bar:92px;position:relative' 'standard header anchors the mobile panel'
+css_assert 'site-header\{[^}]*padding-block:6px' 'header padding agrees with the 92px bar'
 css_assert 'site-nav__link\{[^}]*font-size:16px' 'nav links carry the 16px size'
 css_assert 'site-nav__link\{[^}]*font-weight:600' 'nav links carry the weight that makes them read at 16px'
 css_assert 'site-nav\{margin-inline-start:auto' 'nav and action buttons sit as one group at the right'
@@ -679,7 +725,7 @@ assert 'index.html' 'class="site-nav" id="site-navigation"' \
 css_assert 'max-width:852px\)\{\.site-nav__toggle\{display:inline-flex;margin-inline-start:auto' \
   'mobile: the hidden nav gives its auto margin to the hamburger'
 css_assert 'site-header\{[^}]*gap:12px' 'header items are tight once the nav is pushed right'
-css_assert '\-\-brand-logo-height:48px' 'logo height is a token a site can override'
+css_assert '\-\-brand-logo-height:80px' 'logo height is a token a site can override'
 css_assert 'site-brand__logo\{[^}]*height:var\(--brand-logo-height\)' 'logo size reads the token'
 css_assert 'site-header__toggle\{[^}]*width:44px' 'appearance toggle is a square target, not a padded box'
 css_assert 'site-header__toggle\{[^}]*border:0' 'appearance toggle carries no box, hover is colour only'
@@ -1062,7 +1108,10 @@ fi
 #     except mailto. Also the meta separator: the · belongs between adjacent
 #     items, not to the date, so a page with no date must still separate two
 #     tags rather than glue them
-css_assert 'article-hero__image\{[^}]*height:var\(--article-hero-height\);object-fit:cover' 'the hero crops to its configured height'
+css_assert 'page-hero\{[^}]*margin-block:32px' 'the hero block keeps its own air'
+css_assert 'page-hero__image\{[^}]*height:var\(--page-hero-height\);object-fit:cover' 'the hero crops to its configured height'
+css_assert 'page-hero\+\.page-header\{margin-top:0' 'a trail-less header adds no air after a hero'
+css_assert 'page-content\{[^}]*max-width:none' 'landing page copy rides the full column'
 css_assert 'article__content\.prose\{max-width:none' 'the article body rides the full column'
 css_assert 'article__related\{margin-block:0;padding-top:28px' 'related block gets its own rhythm'
 css_assert_not 'article__related\{[^}]*border-top' 'related sits apart by space, not a rule'

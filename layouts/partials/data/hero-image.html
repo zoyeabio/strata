@@ -1,18 +1,26 @@
 {{- /*
-  Returns the hero image dict for a regular page: the resolver result plus
-  its `sizes` string. Pages without a hero get a dict with ok=false.
+  Returns the hero image dict for a page: the resolver result plus its
+  `sizes` string. Pages without a hero get a dict with ok=false.
+
+  A regular page takes its featureimage unless the page says showHero: false.
+  A section page takes one only when [list] showHero is true, so a section
+  banner is opt-in. Either way a page-level showHero wins over the table.
 
   The result is cached on the page scratch so that head/head.html (which
   preloads the hero) and page/hero.html render the exact same srcset from a
   single computation — two independent calls are how preload and <img> drift.
 
-  Called by: head/head.html, _default/single.html
+  Called by: head/head.html, _default/single.html, _default/list.html
 */ -}}
 {{- $page := . }}
 {{- $img := $page.Scratch.Get "strataHeroImage" }}
 {{- if not $img }}
   {{- $img = dict "ok" false }}
-  {{- if and $page.IsPage (ne $page.Params.showhero false) }}
+  {{- $hero := false }}
+  {{- if isset $page.Params "showhero" }}{{ $hero = $page.Params.showhero }}
+  {{- else if $page.IsPage }}{{ $hero = true }}
+  {{- else if eq $page.Kind "section" }}{{ $hero = (site.Params.list | default dict).showHero | default false }}{{ end }}
+  {{- if $hero }}
     {{- with $page.Params.featureimage }}
       {{- $img = partial "data/image-resource.html" (dict
           "ref" .

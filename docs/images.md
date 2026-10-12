@@ -59,7 +59,7 @@ The caps are `[params.image].caps.*` and the preview size is
 `[params.image].og.width` / `.height`, both overridable per site.
 
 The hero is cropped to a fixed height rather than letterboxed, so an image of
-any aspect ratio fills its frame. The height is `--article-hero-height`
+any aspect ratio fills its frame. The height is `--page-hero-height`
 (200 / 260 / 300px by breakpoint); override the variable to change the crop.
 
 ## Front matter

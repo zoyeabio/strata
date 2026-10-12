@@ -1,10 +1,30 @@
 @layer strata-components {
+.page-hero {
+  margin-block: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.page-hero__image {
+  width: 100%;
+  height: var(--page-hero-height);
+  object-fit: cover;
+  display: block;
+}
+
 .page-header {
   margin-block: 0 12px;
 }
 
 .page-header:not(:has(.breadcrumb)) {
   margin-top: 40px;
+}
+
+/* The hero's own bottom margin is the air after it; a trail-less header must
+   not stack its own 40px on top of it. */
+.page-hero + .page-header {
+  margin-top: 0;
 }
 
 .page-header__meta {
@@ -15,6 +35,7 @@
 
 .page-content {
   margin-block: 16px 40px;
+  max-width: none;
 }
 
 .pagination {

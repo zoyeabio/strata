@@ -19,20 +19,6 @@
   max-width: none;
 }
 
-.article-hero {
-  margin-block: 32px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.article-hero__image {
-  width: 100%;
-  height: var(--article-hero-height);
-  object-fit: cover;
-  display: block;
-}
-
 .article__related {
   margin-block: 0;
   padding-top: 28px;

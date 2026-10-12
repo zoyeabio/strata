@@ -58,6 +58,7 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `allowRemoteImages` | `false` | Permit `https://` image sources; skipped with a warning when off |
 | `disableImageOptimization` | `false` | Pass original files through without the WebP ladder |
 | `list.cardView` | `true` | Default card vs. row layout for section/term lists |
+| `list.showHero` | `false` | Section banner from the section's `featureimage`, above the title; page `showHero` wins, even `false` |
 | `list.orderByWeight` | `false` | Sort list pages by `weight` instead of date |
 | `list.showSummary` | `false` | Default card summaries on lists |
 | `mainSections` | — | Sections whose singles are articles (they get share buttons, related content and previous/next links); other singles render full width and none of them. Compared case-insensitively; absent means every single is an article |

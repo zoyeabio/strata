@@ -42,14 +42,25 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Previous/next links to the neighbouring articles of the same section, from
   Hugo's `PrevInSection` / `NextInSection`, gated by `[article] showPagination`
   with a per-page `showPagination` override. A lone article prints nothing.
+- Section banner: `[list] showHero` lifts the section's `featureimage` above
+  its title, on the shared hero block with the same fixed-height crop and the
+  same preload as an article hero. A section without a `featureimage` keeps
+  the header rhythm; a page-level `showHero` wins either way.
 
 ### Changed
 
-- Article hero crops to a fixed `--article-hero-height` (200 / 260 / 300px
-  by breakpoint) instead of letterboxing at its native ratio, so an image of
-  any aspect fills its frame.
-- The article header and body ride the full content column instead of the
-  720px reading measure; that cap now belongs to the landing page only.
+- Article hero crops to a fixed `--page-hero-height` (200 / 260 / 300px by
+  breakpoint) instead of letterboxing at its native ratio, so an image of any
+  aspect fills its frame.
+- `--article-hero-height` → `--page-hero-height` and `.article-hero` →
+  `.page-hero`: the block is shared by article and section pages now, so the
+  names were too narrow. Same crop, same token values.
+- Section, taxonomy and term bodies ride the full content column too.
+  `.page-content` carries the lift, so the 720px reading measure no longer
+  applies to any landing page — only to article prose.
+- The logo is bigger: `--brand-logo-height` 48 → 80px and the header bar
+  grows to match (`--header-bar` 56 → 92px, so the mobile panel still clears
+  the header). A 48px mark in a 56px bar read as postage-stamp small.
 - Related content renders as a lazy card grid instead of a plain link list.
 - Share buttons are 44×44 icon tiles instead of outlined pills; the label
   moves to `aria-label` and the theme now ships `email` and `whatsapp` icons.

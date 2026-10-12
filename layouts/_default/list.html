@@ -1,4 +1,8 @@
 {{ define "main" }}
+{{- $hero := partial "data/hero-image.html" . }}
+{{- if $hero.ok }}
+{{ partial "page/hero.html" (dict "img" $hero) }}
+{{- end }}
 {{- with .Title }}
   <header class="page-header">
     {{ partial "page/breadcrumbs.html" $ }}

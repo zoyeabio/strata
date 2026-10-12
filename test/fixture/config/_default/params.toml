@@ -13,6 +13,7 @@ enableA11y = true
 [list]
   cardView = true
   showBreadcrumbs = true
+  showHero = true
 
 [article]
   showBreadcrumbs = true

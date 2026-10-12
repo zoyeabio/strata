@@ -1,6 +1,6 @@
 @layer strata-components {
 .site-header {
-  --header-bar: 56px;
+  --header-bar: 92px;
   position: relative;
   border-bottom: 1px solid var(--border);
   background: var(--page-bg);
