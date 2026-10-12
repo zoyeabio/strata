@@ -7,7 +7,12 @@
             HTML; the trailing newline is plainify's own artefact.
             Site-level values are deliberately not reached here — JSON-LD's
             Article.description must stay page-specific, so callers that need a
-            last resort add site.Params.description and site.Title themselves.
+            last resort add site.Params.description themselves. Their final
+            fallback is the page title, not the bare site title: one title per
+            page beats the same site-wide string on every page, and that string
+            is what lands in a search snippet. On the home page the two collapse
+            into "Title — Title", but only for a site that cleared its own
+            description, so the trade stays acceptable.
             .Description is deliberately not consulted either: Hugo fills it from
             the same `description` front matter key as .Params.description, so it
             can never win the fallback.

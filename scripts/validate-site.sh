@@ -23,13 +23,18 @@ trap 'rm -rf "$WORK"' EXIT
 # checkout never produced, reading as a wall of failures that say nothing about
 # it. Seen once: a not-yet-migrated site reported 8 failures that were all the
 # previous theme's output, including JSON-LD this checkout does not emit.
-if ! grep -rq 'github.com/zoyeabio/strata' "$SITE/config" 2>/dev/null; then
-  have="$(grep -rhoE 'github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' "$SITE/config" \
-    2>/dev/null | grep -v 'zoyeabio/strata' | sort -u | paste -sd, - || true)"
-  printf 'ERROR: %s does not import github.com/zoyeabio/strata (found: %s)\n' \
-    "$SITE" "${have:-no module imports}" >&2
+# Hugo's default scaffold keeps config at the repository root instead of in
+# config/, so both places are searched; a glob with no match is skipped by
+# grep rather than aborting the check.
+found="$(grep -rhoE 'github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' \
+  "$SITE/config" "$SITE"/hugo*.toml "$SITE"/config*.toml 2>/dev/null | sort -u || true)"
+if ! printf '%s\n' "$found" | grep -q 'zoyeabio/strata'; then
+  have="$(printf '%s\n' "$found" | grep -v 'zoyeabio/strata' | paste -sd, - || true)"
+  printf 'ERROR: %s does not import github.com/zoyeabio/strata\n' "$SITE" >&2
+  printf '  searched: config/, hugo*.toml, config*.toml\n' >&2
+  printf '  found: %s\n' "${have:-no module imports}" >&2
   printf 'these rules judge strata output; migrate the site first\n' >&2
-  exit 2
+  exit 3
 fi
 
 if ! HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \

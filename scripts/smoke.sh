@@ -13,6 +13,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK="$(mktemp -d)"
 OUT="$WORK/public"
 OUT_REMOTE="$WORK/public-remote"
+OUT_NOSITEDESC="$WORK/public-nositedesc"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0
 
@@ -876,6 +877,27 @@ assert 'section-a/inline/index.html' 'property="og:description" content="Inline 
   'og:description falls back to the summary when no description is set'
 assert_not 'section-a/anim/index.html' 'property="og:description" content="[^"]*&lt;' \
   'no escaped markup leaks into og:description'
+assert 'section-a/pixel/index.html' 'name="description" content="A Hugo theme for content sites\."' \
+  'a page with neither key falls back to the site description'
+assert 'section-a/pixel/index.html' 'property="og:description" content="A Hugo theme for content sites\."' \
+  'og:description takes the same site description'
+# Last resort, past the site description: the page title must win, not the bare
+# site title. Needs its own build because the theme ships a site description
+# that the fixture inherits, so no fixture page reaches this on its own.
+HUGO_PARAMS_DESCRIPTION= hugo --source "$ROOT/test/fixture" \
+  --destination "$OUT_NOSITEDESC" --quiet
+if grep -qE 'name="description" content="GIF pixel — Strata Fixture"' \
+    "$OUT_NOSITEDESC/section-a/pixel/index.html" 2>/dev/null; then
+  pass 'clearing the site description falls back to the page title'
+else
+  fail 'clearing the site description falls back to the page title'
+fi
+if grep -qE 'property="og:description" content="GIF pixel — Strata Fixture"' \
+    "$OUT_NOSITEDESC/section-a/pixel/index.html" 2>/dev/null; then
+  pass 'og:description falls back to the page title as well'
+else
+  fail 'og:description falls back to the page title as well'
+fi
 
 # 42b. Article description and keywords mirror the front matter, including its
 #      two fallbacks (summary -> description, tags -> keywords) and the "neither

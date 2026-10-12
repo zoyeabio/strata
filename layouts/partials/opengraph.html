@@ -10,7 +10,7 @@
 */ -}}
 {{- $page := . }}
 {{- $title := $page.Title }}
-{{- $description := partial "data/description.html" $page | default site.Params.description | default site.Title }}
+{{- $description := partial "data/description.html" $page | default site.Params.description | default (printf "%s — %s" $page.Title site.Title) }}
 {{- $url := $page.Permalink }}
 {{- $ref := partial "data/og-image-ref.html" $page }}
 {{- $img := partial "data/image-resource.html" (dict
