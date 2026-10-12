@@ -3,11 +3,13 @@
   --site-gutter: 24px;
   --site-content: 1024px;
   --brand-logo-height: 48px;
+  --article-hero-height: 200px;
 }
 
 @media (min-width: 640px) {
   :root {
     --site-gutter: 56px;
+    --article-hero-height: 260px;
   }
 }
 
@@ -20,6 +22,7 @@
 @media (min-width: 1024px) {
   :root {
     --site-gutter: 128px;
+    --article-hero-height: 300px;
   }
 }
 

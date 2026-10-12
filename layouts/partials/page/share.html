@@ -15,9 +15,11 @@
   service sets "blank": false, which mailto: needs — most browsers ignore
   the attribute there and a few open a blank tab first.
 
-  No JavaScript and no icons: strata has no icon sprite, and the visible
-  labels are what a screen reader announces anyway. rel="noopener
-  noreferrer" keeps a share tab from reaching back into this page.
+   Tiles rather than labelled pills: the link is a 44x44 icon when the theme
+   ships assets/icons/<service>.svg and falls back to the label text, so a
+   site's own service from data/sharing.json stays reachable without a theme
+   change. rel="noopener noreferrer" keeps a share tab from reaching back
+   into this page.
 
   Called by: _default/single.html
 */ -}}
@@ -30,7 +32,7 @@
   {{- range $names }}
   {{- $name := . }}
   {{- with (index $data $name) }}
-  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}"{{ if index . "blank" | default true }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .label | default $name }}</a>
+  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}" aria-label="{{ .label | default $name }}"{{ if index . "blank" | default true }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" $name) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .label | default $name }}{{ end }}</a>
   {{- end }}
   {{- end }}
 </div>

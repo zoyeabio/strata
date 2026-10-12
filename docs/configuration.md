@@ -57,14 +57,15 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `list.cardView` | `true` | Default card vs. row layout for section/term lists |
 | `list.orderByWeight` | `false` | Sort list pages by `weight` instead of date |
 | `list.showSummary` | `false` | Default card summaries on lists |
-| `mainSections` | — | Sections whose singles are articles (prose-capped); other singles render full width. Compared case-insensitively; absent means every single is an article |
+| `mainSections` | — | Sections whose singles are articles (they get share buttons, related content and previous/next links); other singles render full width and none of them. Compared case-insensitively; absent means every single is an article |
 | `header.layout` | `"standard"` | `"smart"` sticks the header and hides it on scroll down, revealing on scroll up |
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
 | `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
-| `article.showRelatedContent` | `false` | Related-content link list after the body (see [Related content](#related-content)) |
-| `article.relatedContentLimit` | `3` | Maximum related links; Hugo ranks, the theme only caps |
+| `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
+| `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
+| `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
 | `author.name` | — | Site-wide author fallback |
 | `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
@@ -138,6 +139,7 @@ warning instead of being rendered as a dead link.
 | `showDateUpdated` | Page-level `Updated` override (falls back to `[article] showDateUpdated`) |
 | `lastmod` | Update day. `dateModified` and `article:modified_time` always reflect it; the visible `Updated` line is only gated by `showDateUpdated`, so hiding that line never hides the machine-readable signal. Only front matter counts — file mtime is never used, so an unrelated save cannot move the update date |
 | `showRelatedContent` | Page-level related-content override (falls back to `[article] showRelatedContent`) |
+| `showPagination` | Page-level previous/next override (falls back to `[article] showPagination`) |
 | `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
@@ -188,8 +190,7 @@ accident:
 - site `[article]` / `[list]` / `[taxonomy]` / `[term]` `showHero` — only the
   page front matter `showHero` is read; a site `true` is a no-op because
   Strata shows a hero whenever `featureimage` resolves
-- site `showDraftLabel`, `showPagination` — Strata has no draft badge and
-  renders list pagination unconditionally
+- site `showDraftLabel` — Strata has no draft badge
 - `[params] backgroundImageWidth` — superseded by the pipeline's own widths
 
 ## Not implemented (planned)
@@ -295,11 +296,25 @@ A page with no terms in common with anything renders no block at all — an
 empty result is not an error and leaves no dead heading behind. Hugo computes
 the list lazily per page.
 
-The block is a plain link list: a heading and a `<ul>`, no cards, no images.
-It sits at the end of a long article, and a card grid would fetch a hero image
-per entry for nothing the reader needs to decide whether to read more.
+The block is a card grid, three columns wide and capped at
+`relatedContentLimit` cards. Every card loads its image lazily and deprioritised
+— the block sits below a long article, so no entry may cost the first paint.
 
 Page-level override: `showRelatedContent: false` in front matter.
+
+## Previous and next
+
+```toml
+[article]
+  showPagination = true
+```
+
+On by default. Each article links to its neighbours inside the same section —
+the older one on the left, the newer one on the right — from Hugo's
+`PrevInSection` and `NextInSection`, which sort by date. A lone article prints
+nothing rather than an empty bar.
+
+Page-level override: `showPagination: false` in front matter.
 
 ## Share buttons
 
@@ -341,5 +356,11 @@ blank one first.
 
 `label` falls back to the name if omitted. A name that resolves to nothing
 in `data/sharing.json` renders no button rather than a dead one. Links are
-plain anchors with `target="_blank" rel="noopener noreferrer"` — no icon
-font, no share widget, no third-party script.
+plain anchors with `target="_blank" rel="noopener noreferrer"` — no share
+widget, no third-party script.
+
+Each tile is a 44×44 icon when `assets/icons/<name>.svg` exists and falls back
+to the `label` text otherwise, so a service added to a site's `data/sharing.json`
+stays reachable without a template change. The `label` doubles as the
+`aria-label`, since the icon is decorative. A site's own
+`assets/icons/<name>.svg` overrides a same-named theme icon.

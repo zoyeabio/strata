@@ -1,0 +1,36 @@
+{{- /*
+  Previous / next navigation to the neighbouring articles of the current
+  section.
+
+  Takes a page, not a paginator: {{ partial "page/neighbors.html" . }}. Hugo
+  sorts the neighbours by date, so PrevInSection is the older article and
+  NextInSection the newer one — the left link goes back, the right link goes
+  on.
+
+  Gated by site.Params.article.showPagination (default true), overridable per
+  page as showpagination. A lone article prints nothing rather than an empty
+  bar.
+
+  Called by: _default/single.html, already guarded to article pages only.
+*/ -}}
+{{- $art := site.Params.article | default dict }}
+{{- $show := $art.showPagination | default true }}
+{{- if isset .Params "showpagination" }}{{ $show = .Params.showpagination }}{{ end }}
+{{- if $show }}
+{{- if or .PrevInSection .NextInSection }}
+<nav class="article__neighbors" aria-label="Adjacent articles">
+  {{- with .PrevInSection }}
+  <a class="article__neighbors-link" href="{{ .RelPermalink }}" rel="prev">
+    <span class="article__neighbors-label">← Previous article</span>
+    <span class="article__neighbors-title">{{ .Title | emojify }}</span>
+  </a>
+  {{- end }}
+  {{- with .NextInSection }}
+  <a class="article__neighbors-link article__neighbors--next" href="{{ .RelPermalink }}" rel="next">
+    <span class="article__neighbors-label">Next article →</span>
+    <span class="article__neighbors-title">{{ .Title | emojify }}</span>
+  </a>
+  {{- end }}
+</nav>
+{{- end }}
+{{- end }}

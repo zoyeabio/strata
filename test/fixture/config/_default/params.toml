@@ -19,6 +19,7 @@ enableA11y = true
   showDateUpdated = true
   showRelatedContent = true
   relatedContentLimit = 3
+  showPagination = true
   showSummary = true
   sharingLinks = ["linkedin", "facebook", "email", "whatsapp"]
 

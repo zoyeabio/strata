@@ -52,8 +52,9 @@
   </div>
   {{ end }}
   {{- if $isArticle }}
-  {{ partial "page/related.html" . }}
   {{ partial "page/share.html" . }}
+  {{ partial "page/related.html" . }}
+  {{ partial "page/neighbors.html" . }}
   {{- end }}
 </article>
 {{ end }}

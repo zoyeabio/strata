@@ -39,8 +39,22 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   contact columns, social icon row (site `assets/icons/`, name fallback),
   Dark/Light switcher and scroll-to-top button. Without the table the
   footer is byte-identical to before (identity, menu, copyright).
+- Previous/next links to the neighbouring articles of the same section, from
+  Hugo's `PrevInSection` / `NextInSection`, gated by `[article] showPagination`
+  with a per-page `showPagination` override. A lone article prints nothing.
 
 ### Changed
+
+- Article hero crops to a fixed `--article-hero-height` (200 / 260 / 300px
+  by breakpoint) instead of letterboxing at its native ratio, so an image of
+  any aspect fills its frame.
+- The article header and body ride the full content column instead of the
+  720px reading measure; that cap now belongs to the landing page only.
+- Related content renders as a lazy card grid instead of a plain link list.
+- Share buttons are 44×44 icon tiles instead of outlined pills; the label
+  moves to `aria-label` and the theme now ships `email` and `whatsapp` icons.
+
+### Fixed
 
 - Stylesheet pipeline is now Hugo-native: `head.html` concatenates the
   `@layer`-wrapped CSS sources in cascade order and compiles them

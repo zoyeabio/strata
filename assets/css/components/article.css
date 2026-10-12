@@ -1,9 +1,4 @@
 @layer strata-components {
-.article__header {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
 .article__meta {
   margin-top: 10px;
   font-size: 14px;
@@ -21,15 +16,6 @@
 }
 
 .article__content.prose {
-  margin-inline: auto;
-}
-
-.page--wide .article__header {
-  max-width: none;
-  margin: 0;
-}
-
-.page--wide .article__content.prose {
   max-width: none;
 }
 
@@ -42,12 +28,13 @@
 
 .article-hero__image {
   width: 100%;
-  height: auto;
+  height: var(--article-hero-height);
+  object-fit: cover;
   display: block;
 }
 
 .article__related {
-  margin-block: 40px;
+  margin-block: 0;
   padding-top: 28px;
   border-top: 1px solid var(--border);
 }
@@ -60,43 +47,83 @@
   color: var(--site-text-strong);
 }
 
-.article__related-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.article__related-list a {
-  font-size: 1.125rem;
-  line-height: 1.4;
-}
-
 .article__share {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
-  margin-block: 32px 40px;
+  margin-block: 28px 0;
 }
 
 .article__share-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
   min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  padding: 0 10px;
+  color: var(--text-muted);
   background: var(--surface);
-  color: var(--site-text-strong);
+  border-radius: 8px;
   font-size: 14px;
   text-decoration: none;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* An icon fills the tile exactly; the padding above is the text fallback for
+   a service the theme does not ship an icon for. */
+.article__share-link:has(svg) {
+  width: 44px;
+  height: 44px;
+  padding: 0;
 }
 
 .article__share-link:hover {
-  border-color: var(--site-link);
   color: var(--site-link);
+  background: var(--surface-hover);
+}
+
+.article__share-link svg {
+  width: 22px;
+  height: 22px;
+}
+
+.article__neighbors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-block: 0 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.article__neighbors-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 240px;
+  min-width: 0;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.article__neighbors-link:hover {
+  color: var(--site-link);
+}
+
+.article__neighbors--next {
+  text-align: right;
+}
+
+.article__neighbors-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.article__neighbors-title {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 }

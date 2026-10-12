@@ -633,7 +633,7 @@ css_assert_not 'page--wide\.prose>p\{max-width' \
   'landing paragraphs ride the wide measure, no separate cap'
 # 44. list and single pages share one top rhythm: the article header
 #     carries no top margin of its own (hero images keep their own spacing)
-css_assert 'article__header\{max-width:720px;margin:0 auto' 'article header starts at the shared offset'
+css_assert_not 'article__header\{[^}]*max-width' 'article header fills its content column'
 # 45. mobile disclosure menu: hamburger with synced state, nested
 #     submenu behind a chevron button, loader wired
 assert 'index.html' 'data-nav-toggle aria-expanded="false"' 'hamburger starts collapsed'
@@ -1028,17 +1028,25 @@ else
   fail 'article schema description and keywords'
 fi
 
-# 48. related content and share buttons: Hugo's own ranking rendered as a
-#     link list (no cards, no images), capped and hidden when empty; one
-#     anchor per sharingLinks name from data/sharing.json, title
-#     urlquery-encoded, opener opted out except mailto. Also the meta
-#     separator: the · belongs between adjacent items, not to the date, so a
-#     page with no date must still separate two tags rather than glue them
-css_assert 'article__related\{margin-block:40px' 'related block gets its own rhythm'
-css_assert 'article__related-list\{[^}]*list-style:none' 'related list drops the default markers'
-css_assert 'article__share\{display:flex;flex-wrap:wrap' 'share links wrap on narrow screens'
+# 48. article chrome: the hero crops to its configured height instead of
+#     letterboxing, the body rides the full column, related content reuses the
+#     card grid with lazy images, sharing links are centred icon tiles, and
+#     adjacent articles sit under their own rule. One anchor per sharingLinks
+#     name from data/sharing.json, title urlquery-encoded, opener opted out
+#     except mailto. Also the meta separator: the · belongs between adjacent
+#     items, not to the date, so a page with no date must still separate two
+#     tags rather than glue them
+css_assert 'article-hero__image\{[^}]*height:var\(--article-hero-height\);object-fit:cover' 'the hero crops to its configured height'
+css_assert 'article__content\.prose\{max-width:none' 'the article body rides the full column'
+css_assert 'article__related\{margin-block:0;padding-top:28px' 'related block gets its own rhythm'
+css_assert 'article__share\{display:flex;flex-wrap:wrap;justify-content:center' 'share tiles centre on the column'
 css_assert 'article__share-link\{[^}]*min-height:44px' 'share links keep a 44px target'
-css_assert 'article__share-link\{[^}]*border-radius:999px' 'share links are pills'
+css_assert 'article__share-link\{[^}]*border-radius:8px' 'share tiles share the footer radius'
+css_assert 'article__share-link:has\(svg\)\{[^}]*width:44px' 'an icon fills its tile exactly'
+css_assert 'article__share-link svg\{[^}]*width:22px' 'share icons size to their tile'
+css_assert 'article__neighbors\{[^}]*border-top:1px solid var\(--border\)' 'adjacent articles sit under their own rule'
+css_assert 'article__neighbors-link\{[^}]*flex:1 1 240px' 'prev and next split the column'
+css_assert_not 'article__related-list' 'related reuses the card grid, no list of its own'
 if rel_out=$(python3 - "$OUT" <<'PY'
 import html
 import re
@@ -1055,7 +1063,7 @@ def block(text, cls, tag):
     m = re.search(r'<%s class="%s".*?</%s>\s*' % (tag, cls, tag), text, re.S)
     return html.unescape(m.group(0)) if m else ""
 
-# --- related ---
+# --- related: a lazy card grid, capped, and hidden when there is nothing ---
 vec = page("section-a/vector")
 for rel in ("section-a/vector", "section-a/flat"):
     related = block(page(rel), "article__related", "section")
@@ -1066,16 +1074,18 @@ for rel in ("section-a/vector", "section-a/flat"):
         failed.append("%s: related block does not point at its heading" % rel)
     if '<h2 class="article__related-title" id="article-related">Related</h2>' not in related:
         failed.append("%s: related heading is missing or mislabelled" % rel)
-    if 'class="article__related-list"' not in related:
-        failed.append("%s: related does not render a link list" % rel)
-    if "<img" in related or "card" in related:
-        failed.append("%s: related renders cards or images instead of plain links" % rel)
-    links = re.findall(r'<li><a href="([^"]+)">([^<]+)</a></li>', related)
-    if not links:
-        failed.append("%s: related block renders no links" % rel)
-    if len(links) > 3:
-        failed.append("%s: relatedContentLimit = 3 not honoured (%d links)" % (rel, len(links)))
-    for href, title in links:
+    if 'class="page-collection page-collection--grid"' not in related:
+        failed.append("%s: related does not render the card grid" % rel)
+    if 'class="article__related-list"' in related:
+        failed.append("%s: related still renders its own link list" % rel)
+    cards = re.findall(r'<article class="card card--grid"', related)
+    if not cards:
+        failed.append("%s: related block renders no cards" % rel)
+    if len(cards) > 3:
+        failed.append("%s: relatedContentLimit = 3 not honoured (%d cards)" % (rel, len(cards)))
+    if 'loading="eager"' in related:
+        failed.append("%s: a related card fetches its image eagerly" % rel)
+    for href, title in re.findall(r'<a class="card__link" href="([^"]+)">([^<]+)</a>', related):
         if not (out / href.lstrip("/") / "index.html").exists():
             failed.append("%s: related link points at an unbuilt page: %s" % (rel, href))
         if not title.strip():
@@ -1123,7 +1133,7 @@ if not re.search(r'<p class="article__meta">\s*<time', flat, re.S):
 if re.search(r'<p class="article__meta">\s*<time', vec, re.S):
     failed.append("showDate = false still renders a date")
 
-# --- sharing ---
+# --- sharing: one 44px tile per sharingLinks name, icon with a text fallback ---
 share = block(flat, "article__share", "div")
 if not share:
     failed.append("flat renders no share block")
@@ -1132,29 +1142,62 @@ else:
         failed.append("share block is not an accessible group")
     if re.search(r'href="[^"]* [^"]*"', share):
         failed.append("a share URL left a raw space unencoded")
-    links = re.findall(r'<a class="article__share-link" href="([^"]+)"( target="_blank" rel="noopener noreferrer")?>([^<]+)</a>', share)
+    links = re.findall(
+        r'<a class="article__share-link" href="([^"]+)" aria-label="([^"]+)"'
+        r'( target="_blank" rel="noopener noreferrer")?>(.*?)</a>',
+        share, re.S)
     if len(links) != 4:
         failed.append("expected 4 share links, got %d" % len(links))
-    got = dict((label, (url, bool(blank))) for url, blank, label in links)
+    if len({label for _, label, _, _ in links}) != len(links):
+        failed.append("a sharingLinks service renders twice")
     expect = {
         "LinkedIn": ("https://www.linkedin.com/shareArticle?mini=true&url=/section-a/flat/&title=Flat+section+image", True),
         "Facebook": ("https://www.facebook.com/sharer/sharer.php?u=/section-a/flat/&quote=Flat+section+image", True),
         "Email":    ("mailto:?body=/section-a/flat/&subject=Flat+section+image", False),
         "WhatsApp": ("https://api.whatsapp.com/send?text=Flat+section+image+/section-a/flat/", True),
     }
-    for label, (url, blank) in expect.items():
-        if got.get(label) != (url, blank):
-            failed.append("%s share link is %r, want %r" % (label, got.get(label), (url, blank)))
+    for url, label, blank, body in links:
+        want = expect.get(label)
+        if want is None:
+            failed.append("an unexpected share service renders: %r" % label)
+            continue
+        if (url, bool(blank)) != want:
+            failed.append("%s share link is %r, want %r" % (label, (url, bool(blank)), want))
+        if "<svg" not in body or "viewBox" not in body:
+            failed.append("%s share tile renders no icon" % label)
+
+# --- neighbors: the section's own prev/next, gated by showPagination ---
+nb = block(flat, "article__neighbors", "nav")
+if not nb:
+    failed.append("flat renders no adjacent-article nav")
+else:
+    if 'aria-label="Adjacent articles"' not in nb:
+        failed.append("the adjacent-article nav does not name itself")
+    for want, why in (
+        (r'<a class="article__neighbors-link" href="([^"]+)" rel="prev">', "previous"),
+        (r'<a class="article__neighbors-link article__neighbors--next" href="([^"]+)" rel="next">', "next")):
+        m = re.search(want, nb)
+        if not m:
+            failed.append("flat renders no %s-article link" % why)
+            continue
+        if not (out / m.group(1).lstrip("/") / "index.html").exists():
+            failed.append("the %s-article link points at an unbuilt page" % why)
+    if 'class="article__neighbors-label"' not in nb:
+        failed.append("an adjacent-article link renders no label")
+    if 'class="article__neighbors-title"' not in nb:
+        failed.append("an adjacent-article link renders no title")
+if "article__neighbors" in page("section-a/pixel"):
+    failed.append("showPagination = false still renders an adjacent-article nav")
 
 for rel in ("notice", "section-a"):
-    if "article__share" in page(rel) or "article__related" in page(rel):
+    if any(cls in page(rel) for cls in ("article__share", "article__related", "article__neighbors")):
         failed.append("%s is not an article but renders article chrome" % rel)
 
 if failed:
     for line in failed:
         print("FAIL " + line, file=sys.stderr)
     sys.exit(1)
-print("related links + 4 share links, separators between every meta item, empty result hidden")
+print("related card grid, 4 share tiles, adjacent articles, meta separators, empty results hidden")
 PY
 ); then
   pass "related, meta separators and share render only on articles ($rel_out)"

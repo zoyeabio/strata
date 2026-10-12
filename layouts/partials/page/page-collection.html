@@ -1,29 +1,28 @@
 {{- /*
   Renders a list of pages as cards.
 
-  Params
-    pages        (Page collection, required) — already sorted and paginated
-                 by the caller
-    cardView     (bool, optional) — "grid" for the card layout, "row" for the
-                 compact one
-    showSummary  (bool, optional) — print the summary under each title
+   Params
+     pages        (Page collection, required) — already sorted and paginated
+                  by the caller
+     cardView     (bool, optional) — "grid" for the card layout, "row" for the
+                  compact one
+     showSummary  (bool, optional) — print the summary under each title
+     eager        (bool, optional) — force the eager/lazy split; page/related
+                  passes false, since its cards sit below a long article
 
-  Widths, columns and spacing belong to CSS, so this partial carries no layout
-  decisions; it only names the preset and passes each card its position so
-  the eager/lazy image split can be applied.
+   Widths, columns and spacing belong to CSS, so this partial carries no layout
+   decisions; it only names the preset and passes each card its position so
+   the eager/lazy image split can be applied.
 
-  Called by: _default/list.html
+   Called by: _default/list.html, page/related.html
 */ -}}
 {{- $preset := cond .cardView "grid" "row" }}
 {{- if .pages }}
 <div class="page-collection page-collection--{{ $preset }}">
   {{- range $i, $page := .pages }}
-  {{ partial "page/card.html" (dict
-    "page" $page
-    "preset" $preset
-    "showSummary" $.showSummary
-    "index" $i
-  ) }}
+  {{- $card := dict "page" $page "preset" $preset "showSummary" $.showSummary "index" $i }}
+  {{- if isset $ "eager" }}{{ $card = merge $card (dict "eager" $.eager) }}{{ end }}
+  {{ partial "page/card.html" $card }}
   {{- end }}
 </div>
 {{- else }}

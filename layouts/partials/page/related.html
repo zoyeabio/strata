@@ -1,6 +1,6 @@
 {{- /*
   Related articles: Hugo's own related-content ranking, capped at
-  site.Params.article.relatedContentLimit, rendered as a list of links after
+  site.Params.article.relatedContentLimit, rendered as a card grid after
   the article body.
 
   The page is the template context itself, because .Site.RegularPages.Related
@@ -9,10 +9,10 @@
   the [related] indices and threshold in hugo.toml, so this partial only
   asks for the result and caps it. No site has to tune anything here.
 
-  Links rather than cards: the block sits at the end of a long article, and
-  a card grid would fetch a hero image per entry for nothing the reader needs
-  to decide whether to read more. An empty result renders nothing rather
-  than a dead heading.
+  Cards rather than links: the grid is capped at three columns and every card
+  loads its image lazy, since the block sits below a long article and is never
+  in the first viewport. An empty result renders nothing rather than a dead
+  heading.
 
   Params
     . (Page) — the article being rendered
@@ -29,11 +29,7 @@
 {{- with $related }}
 <section class="article__related" aria-labelledby="article-related">
   <h2 class="article__related-title" id="article-related">Related</h2>
-  <ul class="article__related-list">
-    {{- range . }}
-    <li><a href="{{ .RelPermalink }}">{{ .Title | emojify }}</a></li>
-    {{- end }}
-  </ul>
+  {{ partial "page/page-collection.html" (dict "pages" . "cardView" true "showSummary" true "eager" false) }}
 </section>
 {{- end }}
 {{- end }}
