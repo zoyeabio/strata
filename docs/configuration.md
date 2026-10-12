@@ -74,6 +74,7 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `author.name` | — | Site-wide author fallback |
 | `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
 | `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
+| `twitterCreator` | — | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | — | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
@@ -157,7 +158,7 @@ warning instead of being rendered as a dead link.
 | `date` | Card and article date; articles without a date show no `<time>` and no `Article` node |
 | `weight` | Ordering when `orderByWeight` is on; series order |
 | `description` / `summary` | Page meta description; both also feed `Article.description` (description wins) |
-| `keywords` | `["Prebiotic", "Bifidobacterium"]` — emitted as `Article.keywords`; falls back to `tags` |
+| `keywords` | `["Prebiotic", "Bifidobacterium"]` — feeds both `<meta name="keywords">` and `Article.keywords` from one resolver; falls back to `tags`, which may be a list or a bare comma string. Items are trimmed, deduplicated and blank-dropped, and with no source at all no tag is emitted |
 | `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |

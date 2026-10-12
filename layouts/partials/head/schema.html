@@ -84,8 +84,9 @@
 {{- with partial "data/description.html" $page }}
 {{- $article = merge $article (dict "description" .) }}
 {{- end }}
-{{- with or $page.Keywords $page.Params.tags }}
-{{- $article = merge $article (dict "keywords" .) }}
+{{- $kw := partial "data/keywords.html" $page }}
+{{- with $kw }}
+{{- $article = merge $article (dict "keywords" $kw) }}
 {{- end }}
 {{- if not $page.PublishDate.IsZero }}
 {{- $article = merge $article (dict "datePublished" ($page.PublishDate.Format "2006-01-02T15:04:05Z07:00")) }}

@@ -1,0 +1,30 @@
+{{- /*
+  Partial: data/keywords.html
+  Role:     Resolve the page's keyword list so the meta keywords tag and
+            JSON-LD's Article.keywords carry the same items: params.keywords,
+            else params.tags. Hugo already splits a comma-separated keywords
+            string into a list, but params.tags may still be a bare string, so
+            both forms are normalised; each item is whitespace-trimmed, inner
+            whitespace collapsed to one space, and blanks and duplicates are
+            dropped — the meta value is a single attribute, so repeated items
+            are pure noise.
+            Template strings follow Go escaping, so the whitespace class is
+            written \\s rather than \s: the latter is a parse error. A page with
+            neither key returns an empty list, not the printf "%s" artefact
+            %!s(<nil>) that a nil value would otherwise yield.
+  Params:   page (Page, required)
+  Outputs:  list of strings (may be empty)
+  Called by: head/head.html, head/schema.html
+*/ -}}
+{{- $page := . }}
+{{- $out := slice }}
+{{- $raw := $page.Params.keywords | default $page.Params.tags }}
+{{- if $raw }}
+  {{- $list := split (printf "%s" $raw) "," }}
+  {{- if reflect.IsSlice $raw }}{{ $list = $raw }}{{ end }}
+  {{- range $k := $list }}
+    {{- $t := strings.TrimSpace (replaceRE "\\s+" " " $k) }}
+    {{- if and $t (not (in $out $t)) }}{{ $out = $out | append $t }}{{ end }}
+  {{- end }}
+{{- end }}
+{{- return $out }}

@@ -43,6 +43,9 @@
 {{- with site.Params.twitterSite }}
 <meta name="twitter:site" content="{{ . }}">
 {{- end }}
+{{- with site.Params.twitterCreator }}
+<meta name="twitter:creator" content="{{ . }}">
+{{- end }}
 {{- if $img.ok }}
 <meta property="og:image" content="{{ $img.url | absURL }}">
 {{- if $img.width }}

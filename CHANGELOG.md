@@ -43,7 +43,14 @@ be re-derived from the templates.
   page bundle with a sibling `featured.jpg` needs no front matter key. Social
   falls back to `images[0]`, then `site.Params.defaultSocialImage`, and
   `featureimage` still beats `images` — the picture a page shows is the picture
-  it advertises.
+   it advertises.
+- **One keyword resolver.** `data/keywords.html` feeds
+  `<meta name="keywords">` and schema `keywords` from one place —
+  `params.keywords`, else `params.tags`. Items are trimmed, deduplicated and
+  blank-dropped; a bare string splits on commas rather than iterating runes;
+  and no source means no tag, since a theme must not invent keywords it was
+  not given.
+
 - **The taxonomy contract is enforced at validation, not declared.** Hugo does
   not inherit a theme's `[taxonomies]`, so a theme `hugo.toml` declaring them
   would be read by nobody. `validate-site.sh` asserts the host site declares

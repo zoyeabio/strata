@@ -1,6 +1,7 @@
 eagerCardCount = 2
 mainSections = ["section-a"]
 twitterSite = "@fixturetest"
+twitterCreator = "@fixturecreator"
 enableSearch = true
 enableA11y = true
 

@@ -14,6 +14,7 @@ WORK="$(mktemp -d)"
 OUT="$WORK/public"
 OUT_REMOTE="$WORK/public-remote"
 OUT_NOSITEDESC="$WORK/public-nositedesc"
+OUT_DRAFTS="$WORK/public-drafts"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0
 
@@ -35,6 +36,12 @@ assert() { # assert <file> <regex> <label>
 
 assert_not() { # assert_not <file> <regex> <label>
   if grep -qE "$2" "$OUT/$1" 2>/dev/null; then fail "$3"; else pass "$3"; fi
+}
+
+# assert_at reads a build written outside $OUT, where assert's fixed root
+# would silently look for a page the build never produced
+assert_at() { # assert_at <dir> <file> <regex> <label>
+  if grep -qE "$3" "$1/$2" 2>/dev/null; then pass "$4"; else fail "$4"; fi
 }
 
 count_assert() { # count_assert <file> <regex> <n> <label>
@@ -1017,6 +1024,8 @@ assert 'section-a/flat/index.html' '"@type":"BreadcrumbList"' 'schema carries th
 assert 'section-a/flat/index.html' 'article:tag' 'article tags are emitted'
 assert 'section-a/flat/index.html' 'article:section' 'article section is emitted'
 assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
+assert 'section-a/flat/index.html' 'name="twitter:creator" content="@fixturecreator"' \
+  'twitter:creator is emitted from the site param'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
 assert 'section-a/anim/index.html' 'name="description" content="Animated WebP feature image"' \
   'meta description strips markup from the front matter value'
@@ -1055,9 +1064,11 @@ fi
 # 42b. Article description and keywords mirror the front matter, including its
 #      two fallbacks (summary -> description, tags -> keywords) and the "neither
 #      source" case where neither key may be invented. All four combinations are
-#      pinned so deleting one side of an `or` fails here. Parsed from the
-#      ld+json payload, not grepped — "description" also appears on the meta
-#      tag line, which would make a grep negative match the wrong node
+#      pinned so deleting one side of an `or` fails here. The anim keywords are
+#      trimmed, deduplicated and blank-stripped, which pins data/keywords.html's
+#      normalisation on the JSON-LD side. Parsed from the ld+json payload, not
+#      grepped — "description" also appears on the meta tag line, which would
+#      make a grep negative match the wrong node
 if schema_out=$(python3 - "$OUT" <<'PY'
 import json
 import re
@@ -1068,7 +1079,7 @@ out = Path(sys.argv[1])
 failed = []
 expect = {
     "section-a/anim": {"description": "Animated WebP feature image",
-                       "keywords": ["WebP", "animation"]},
+                       "keywords": ["WebP", "animation", "animated image"]},
     "section-a/inline": {"description": "Inline illustration summary",
                          "keywords": None},
     "section-a/flat": {"description": None,
@@ -1107,6 +1118,35 @@ PY
 else
   fail 'article schema description and keywords'
 fi
+
+# 42c. The meta keywords tag comes from the same data/keywords.html partial the
+#      JSON-LD reads, so one resolver feeds both. Items are deduplicated and
+#      whitespace-trimmed, the tag is omitted when no item survives, and a
+#      page carrying neither keywords nor tags may not get one invented. The
+#      tags form written as a bare string must split on commas instead of
+#      iterating runes, which the fixture's all-array tags cannot reach on its
+#      own, so it builds the draft strtags page the same way validate-theme
+#      builds missing.md
+assert 'section-a/anim/index.html' 'name="keywords" content="WebP, animation, animated image"' \
+  'meta keywords trims, deduplicates and drops blanks'
+assert 'section-a/flat/index.html' 'name="keywords" content="alpha, beta, Sci &amp; Tech"' \
+  'meta keywords falls back to tags and escapes markup'
+assert_not 'section-a/pixel/index.html' 'name="keywords"' \
+  'a page with neither key gets no keywords tag'
+if grep -rlE '%!s\(' "$OUT" --include='*.html' >/dev/null 2>&1; then
+  fail 'no format artefact leaks into the rendered output'
+else
+  pass 'no format artefact leaks into the rendered output'
+fi
+# The drafts build exits non-zero on the draft missing.md's unresolvable
+# featureimage, which validate-theme asserts; strtags.md is written before the
+# build stops, so the assertions below still have a page to read
+hugo --source "$ROOT/test/fixture" --buildDrafts --destination "$OUT_DRAFTS" \
+  --quiet 2>"$WORK/drafts.stderr" || true
+assert_at "$OUT_DRAFTS" 'section-a/strtags/index.html' 'name="keywords" content="bare, string"' \
+  'tags written as a bare string split on commas'
+assert_at "$OUT_DRAFTS" 'section-a/strtags/index.html' '"keywords":\["bare","string"\]' \
+  'a bare string tags value yields exactly two items'
 
 # 48. article chrome: the hero crops to its configured height instead of
 #     letterboxing, the body rides the full column, related content reuses the
