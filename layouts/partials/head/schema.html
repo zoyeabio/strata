@@ -83,6 +83,12 @@
 {{- end }}
 {{- $article = merge $article (dict "author" $person) }}
 {{- end }}
+{{- with or $page.Params.description $page.Params.summary | plainify }}
+{{- $article = merge $article (dict "description" .) }}
+{{- end }}
+{{- with or $page.Keywords $page.Params.tags }}
+{{- $article = merge $article (dict "keywords" .) }}
+{{- end }}
 {{- if not $page.PublishDate.IsZero }}
 {{- $article = merge $article (dict "datePublished" ($page.PublishDate.Format "2006-01-02T15:04:05Z07:00")) }}
 {{- end }}

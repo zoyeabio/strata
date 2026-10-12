@@ -1,2 +1,5 @@
 title = "Strata Fixture"
 description = "Rendered assertions for the theme"
+
+[params]
+dateFormat = "2 Jan 2006"

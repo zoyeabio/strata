@@ -865,6 +865,56 @@ assert 'section-a/flat/index.html' 'article:section' 'article section is emitted
 assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
 
+# 42b. Article description and keywords come from the front matter only: never
+#      invented from the body, never dropped when declared. Parsed from the
+#      ld+json payload, not grepped — "description" also appears on the meta
+#      tag line, which would make a grep negative match the wrong node
+if schema_out=$(python3 - "$OUT" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+out = Path(sys.argv[1])
+failed = []
+expect = {"section-a/anim": {"description": "Animated WebP feature image",
+                             "keywords": ["WebP", "animation"]},
+          "section-a/pixel": None}
+for rel, want in expect.items():
+    text = (out / rel / "index.html").read_text(encoding='utf-8')
+    m = re.search(r'<script type="application/ld\+json">(.*?)</script>', text, re.S)
+    if not m:
+        failed.append("%s renders no JSON-LD" % rel)
+        continue
+    nodes = json.loads(m.group(1))
+    nodes = nodes.get("@graph", nodes) if isinstance(nodes, dict) else nodes
+    art = [n for n in nodes if n.get("@type") == "Article"]
+    if len(art) != 1:
+        failed.append("%s renders %d Article nodes" % (rel, len(art)))
+        continue
+    a = art[0]
+    if want is None:
+        if "description" in a or "keywords" in a:
+            failed.append("%s invents description/keywords the front matter never set: %r"
+                          % (rel, {k: a.get(k) for k in ("description", "keywords")}))
+    elif a.get("description") != want["description"]:
+        failed.append("%s description is %r, want %r"
+                      % (rel, a.get("description"), want["description"]))
+    elif a.get("keywords") != want["keywords"]:
+        failed.append("%s keywords are %r, want %r"
+                      % (rel, a.get("keywords"), want["keywords"]))
+if failed:
+    for line in failed:
+        print("FAIL " + line, file=sys.stderr)
+    sys.exit(1)
+print("description and keywords mirror the front matter and nothing more")
+PY
+); then
+  pass "article schema description and keywords ($schema_out)"
+else
+  fail 'article schema description and keywords'
+fi
+
 # 48. related content and share buttons: Hugo's own ranking rendered as a
 #     link list (no cards, no images), capped and hidden when empty; one
 #     anchor per sharingLinks name from data/sharing.json, title
@@ -921,7 +971,7 @@ if "article__related" in page("section-a/pixel"):
     failed.append("an empty related result still renders a block")
 
 # --- meta separator: exactly one · between adjacent items ---
-for rel in ("section-a/vector", "section-a/flat", "section-a/nested/post", "section-a/pixel"):
+for rel in ("section-a/vector", "section-a/flat", "section-a/nested/post", "section-a/anim", "section-a/pixel"):
     for m in re.finditer(r'<p class="article__meta">(.*?)</p>', page(rel), re.S):
         inner = " ".join(html.unescape(m.group(1)).split())
         if not inner:
@@ -934,6 +984,25 @@ for rel in ("section-a/vector", "section-a/flat", "section-a/nested/post", "sect
                           % (rel, items, segments, inner))
         if inner.startswith("·") or inner.rstrip().endswith("·"):
             failed.append("%s meta has a leading or trailing separator: %r" % (rel, inner))
+
+# --- updated date: shown only when lastmod is later than date, page false wins ---
+if not re.search(r'<p class="article__meta">\s*<time[^>]*datetime="2020-01-04">4 Jan 2020</time>\s*·\s*Updated\s*<time[^>]*datetime="2020-06-01">1 Jun 2020</time>',
+                 page("section-a/anim"), re.S):
+    failed.append("a lastmod newer than date renders no Updated line")
+for rel, why in (("section-a/nested/post", "a lastmod earlier than date renders an Updated line"),
+                 ("section-a/pixel", "showDateUpdated = false still renders an Updated line"),
+                 ("section-a/flat", "lastmod equal to date renders an Updated line"),
+                 ("section-a/vector", "lastmod equal to date renders an Updated line")):
+    if "Updated" in page(rel):
+        failed.append("%s: %s" % (rel, why))
+
+# --- dateFormat: read from the language config, datetime attr stays ISO ---
+if not re.search(r'<time datetime="2026-01-03">3 Jan 2026</time>', page("section-a/flat")):
+    failed.append("language-level dateFormat is not honoured")
+for rel in ("section-a",):
+    list_page = page(rel)
+    if "3 Jan 2026" not in list_page:
+        failed.append("list cards ignore the language dateFormat")
 
 flat = page("section-a/flat")
 if not re.search(r'<p class="article__meta">\s*<time', flat, re.S):

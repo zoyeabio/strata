@@ -19,7 +19,7 @@ write them in any case. Site config keys keep their case.
 | `copyright` | — | Footer line; `{ year }` is replaced with the current year. Fallback: `© {year} {site title}` |
 | `description` | — | Default `<meta name="description">` (page description/summary wins) |
 | `robots` | — | Default `<meta name="robots">` (page-level `robots` wins) |
-| `dateFormat` | `"2006-01-02"` | Go time format for card and article dates |
+| `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Declare it under a `[params]` table (the theme's `languages.en.toml` does this); a bare top-level key in `languages.<lang>.toml` is invisible to the theme |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |
 | `customCSS` | `[]` | Asset paths loaded after the theme stylesheet (fingerprinted) |
@@ -34,6 +34,7 @@ write them in any case. Site config keys keep their case.
 | `article.showBreadcrumbs` | `false` | Ancestor trail on articles (page `showBreadcrumbs` wins, even `false`) |
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
+| `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
 | `article.showRelatedContent` | `false` | Related-content link list after the body (see [Related content](#related-content)) |
 | `article.relatedContentLimit` | `3` | Maximum related links; Hugo ranks, the theme only caps |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
@@ -89,9 +90,11 @@ it, a grid renders above: company, quick links, legal, contact.
 | Key | Effect |
 |---|---|
 | `title` | Required |
-| `date` | Card and article date; articles without a date show no `<time>` |
+| `date` | Card and article date; articles without a date show no `<time>` and no `Article` node |
 | `weight` | Ordering when `orderByWeight` is on; series order |
-| `description` / `summary` | Page meta description; summary also feeds `.Summary` |
+| `description` / `summary` | Page meta description; both also feed `Article.description` (description wins) |
+| `keywords` | `["Prebiotic", "Bifidobacterium"]` — emitted as `Article.keywords`; falls back to `tags` |
+| `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |
 | `featureimage` | Page/card image (see [images.md](images.md)) |
@@ -99,6 +102,8 @@ it, a grid renders above: company, quick links, legal, contact.
 | `showHero` | Page hero: shown when `featureimage` resolves, `false` suppresses it |
 | `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
 | `showDate` | Page-level date override (falls back to `[article] showDate`, explicit `false` wins) |
+| `showDateUpdated` | Page-level `Updated` override (falls back to `[article] showDateUpdated`) |
+| `lastmod` | Update day. `dateModified` and `article:modified_time` always reflect it; the visible `Updated` line is only gated by `showDateUpdated`, so hiding that line never hides the machine-readable signal. Only front matter counts — file mtime is never used, so an unrelated save cannot move the update date |
 | `showRelatedContent` | Page-level related-content override (falls back to `[article] showRelatedContent`) |
 | `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
 | `robots` | Page-level robots meta |
@@ -140,6 +145,13 @@ accident:
 
 - page front matter `compactSummary` — silently ignored by every
   template; the fixture smoke gate fails on it so it never sneaks back in
+- page front matter `layout` — a Jekyll/zoyclaw leftover (e.g. `layout: "single"`);
+  Strata has one single layout, so the value is never read
+- page front matter `heroStyle` — Strata renders one hero; zoyclaw only honoured
+  it when a `partials/hero/<style>.html` file existed, so a value like
+  `"basic"` was already a silent no-op there
+- page front matter `series_order` — series navigation sorts by `weight`, so
+  keep the two in sync or drop `series_order`
 - `backgroundImageWidth` — superseded by the pipeline's own widths
 
 ## Not implemented (planned)

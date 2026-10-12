@@ -11,6 +11,11 @@
 {{- $showDate := true }}
 {{- if isset .Params "showdate" }}{{ $showDate = .Params.showdate }}{{ else }}{{ $showDate = $articleParams.showDate | default true }}{{ end }}
 {{- $dateShown := and $showDate (not .Date.IsZero) }}
+{{- $showDateUpdated := true }}
+{{- if isset .Params "showdateupdated" }}{{ $showDateUpdated = .Params.showdateupdated }}{{ else }}{{ $showDateUpdated = $articleParams.showDateUpdated | default true }}{{ end }}
+{{- $dateDay := .Date.Format "2006-01-02" }}
+{{- $modDay := .Lastmod.Format "2006-01-02" }}
+{{- $updatedShown := and $showDateUpdated (not .Lastmod.IsZero) (gt $modDay $dateDay) }}
 <article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -18,11 +23,15 @@
   <header class="article__header">
     {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
-    {{- if or $dateShown $terms (and $showAuthor $author) }}
+    {{- if or $dateShown $updatedShown $terms (and $showAuthor $author) }}
     {{- $sep := false }}
     <p class="article__meta">
       {{- if $dateShown }}
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format $dateFormat }}</time>
+      {{- $sep = true }}
+      {{- end }}
+      {{- if $updatedShown }}
+      {{- if $sep }} · {{ end }}Updated <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format $dateFormat }}</time>
       {{- $sep = true }}
       {{- end }}
       {{- range $terms }}
