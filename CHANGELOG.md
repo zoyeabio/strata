@@ -9,6 +9,16 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 
 ## [Unreleased]
 
+### Removed
+
+- `scripts/diff-build.sh` (375 lines): a build-output parity gate for
+  migration work during the rebuild. No gate calls it and the rebuild is done,
+  so it had no remaining consumer.
+- `configuration.md` "Not implemented (planned)": a released theme should not
+  carry a roadmap.
+- `shortcodes.md` "Not implemented": same, and it was wrong — search ships in
+  `frame/search.html`.
+
 ### Added
 
 - Breadcrumb trail from a `page/breadcrumbs.html` partial mounted on

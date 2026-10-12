@@ -74,7 +74,6 @@ The theme repo carries its own gates. After any change:
 ./scripts/smoke.sh     # fixture contract assertions
 ./scripts/validate-theme.sh
 ./scripts/audit-partials.sh   # partial call-graph audit (missing/orphan)
-./scripts/diff-build.sh <before> <after>   # build-output parity for migrations
 ./scripts/validate-site.sh /path/to/site   # e.g. your site checkout
 ./scripts/new-site.sh --name "My Site" --domain example.com --out ../mysite
 ./scripts/place-image.sh --section journal --post slug --file photo.png --role illustration --site ../mysite

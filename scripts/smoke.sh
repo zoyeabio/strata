@@ -340,7 +340,7 @@ count_assert 'section-a/shortcodes/index.html' 'class="mcol"' 2 \
 # 23. build reproducibility: two independent builds of the same tree are
 #     byte-identical, so no template may leak now/rand/unsorted iteration
 #     into the output — a swapping id or timestamp slips past every content
-#     assertion above and would blind the diff-build gate to real changes
+#     assertion above and would only ever show up as an unexplained diff
 OUT_REPRO="$WORK/public-repro"
 hugo --source "$ROOT/test/fixture" --destination "$OUT_REPRO" --quiet \
   2>"$WORK/build-repro.stderr"

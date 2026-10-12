@@ -144,8 +144,3 @@ Multi-column grid. Wrap content in `col-*` shortcodes inside `multi-col`.
 | `gap` | Grid gap, default `2rem` |
 | `margin` | Outer margin, default `3rem 0` |
 | `align` | `top` / `center` / `bottom` inside each column |
-
-## Not implemented
-
-TOC, syntax-highlighted code blocks (no chroma CSS ships yet), search. They
-will arrive with their own documentation updates.

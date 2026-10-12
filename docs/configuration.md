@@ -224,11 +224,6 @@ accident:
 - site `showDraftLabel` — Strata has no draft badge
 - `[params] backgroundImageWidth` — superseded by the pipeline's own widths
 
-## Not implemented (planned)
-
-Table of contents, syntax highlighting CSS, i18n string catalogue,
-product pages. See the project roadmap.
-
 ## Search (`enableSearch`)
 
 Two keys opt in, both required:
