@@ -18,6 +18,20 @@ fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
+# Fail fast if the site imports a different theme. The build still succeeds —
+# against that other theme — and every rule below would judge output this
+# checkout never produced, reading as a wall of failures that say nothing about
+# it. Seen once: a not-yet-migrated site reported 8 failures that were all the
+# previous theme's output, including JSON-LD this checkout does not emit.
+if ! grep -rq 'github.com/zoyeabio/strata' "$SITE/config" 2>/dev/null; then
+  have="$(grep -rhoE 'github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' "$SITE/config" \
+    2>/dev/null | grep -v 'zoyeabio/strata' | sort -u | paste -sd, - || true)"
+  printf 'ERROR: %s does not import github.com/zoyeabio/strata (found: %s)\n' \
+    "$SITE" "${have:-no module imports}" >&2
+  printf 'these rules judge strata output; migrate the site first\n' >&2
+  exit 2
+fi
+
 if ! HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \
     HUGO_CACHEDIR="$WORK/cache" \
     hugo --source "$SITE" --environment production \

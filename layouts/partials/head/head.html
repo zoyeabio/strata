@@ -14,7 +14,7 @@
 
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title | emojify }} · {{ site.Title | emojify }}{{ end }}</title>
 
-  {{ $desc := .Params.description | default .Params.summary | default site.Params.description | default (printf "%s — %s" .Title site.Title) | plainify | replaceRE "^\\s+|\\s+$" "" }}
+  {{ $desc := partial "data/description.html" . | default site.Params.description | default site.Title }}
   <meta name="description" content="{{ $desc }}">
   {{ with or site.Params.robots .Params.robots }}
   <meta name="robots" content="{{ . }}">

@@ -1,0 +1,20 @@
+{{- /*
+  Partial: data/description.html
+  Role:     Resolve and clean the page's own description so every consumer emits
+            the same text: params.description → params.summary, markup stripped,
+            surrounding whitespace removed. Markup must go because the value
+            lands in attribute values and JSON-LD, neither of which can hold
+            HTML; the trailing newline is plainify's own artefact.
+            Site-level values are deliberately not reached here — JSON-LD's
+            Article.description must stay page-specific, so callers that need a
+            last resort add site.Params.description and site.Title themselves.
+            .Description is deliberately not consulted either: Hugo fills it from
+            the same `description` front matter key as .Params.description, so it
+            can never win the fallback.
+  Params:   page (Page, required)
+  Outputs:  string (may be empty when the page supplies neither source)
+  Called by: head/head.html, head/schema.html, opengraph.html
+*/ -}}
+{{- $page := . }}
+{{- $desc := $page.Params.description | default $page.Params.summary }}
+{{- return ($desc | plainify | replaceRE "^\\s+|\\s+$" "") }}

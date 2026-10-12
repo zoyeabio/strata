@@ -868,6 +868,14 @@ assert 'section-a/anim/index.html' 'name="description" content="Animated WebP fe
   'meta description strips markup from the front matter value'
 assert_not 'section-a/anim/index.html' 'name="description" content="[^"]*&lt;' \
   'no escaped markup leaks into the meta description'
+assert 'section-a/anim/index.html' 'property="og:description" content="Animated WebP feature image"' \
+  'og:description carries the same stripped text as the meta tag'
+assert 'section-a/anim/index.html' 'name="twitter:description" content="Animated WebP feature image"' \
+  'twitter:description carries the same stripped text as the meta tag'
+assert 'section-a/inline/index.html' 'property="og:description" content="Inline illustration summary"' \
+  'og:description falls back to the summary when no description is set'
+assert_not 'section-a/anim/index.html' 'property="og:description" content="[^"]*&lt;' \
+  'no escaped markup leaks into og:description'
 
 # 42b. Article description and keywords mirror the front matter, including its
 #      two fallbacks (summary -> description, tags -> keywords) and the "neither
