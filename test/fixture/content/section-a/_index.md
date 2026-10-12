@@ -1,5 +1,5 @@
 ---
-title: "Section A"
+title: "Feature Images, Formats and Optimization"
 showBreadcrumbs: true
 ---
 List body.

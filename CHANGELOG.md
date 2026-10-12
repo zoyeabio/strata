@@ -53,8 +53,24 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Related content renders as a lazy card grid instead of a plain link list.
 - Share buttons are 44×44 icon tiles instead of outlined pills; the label
   moves to `aria-label` and the theme now ships `email` and `whatsapp` icons.
+- Breadcrumbs show ancestors only — Home, then each parent up to the
+  section — since the current page is the `<h1>` beside the trail and would be
+  a crumb with no destination. A crumb takes its menu entry's name over the
+  page title, so a long section title no longer ships as one crumb; the
+  JSON-LD `BreadcrumbList` keeps the current page, which search engines want.
+  Nothing renders when nothing sits above Home.
+- `check-build.sh` and `place-image.sh` accept `--environment`, so a build made
+  for a non-default environment is checked against the same config overlay Hugo
+  used instead of a silently misassumed one.
 
 ### Fixed
+
+- Docs no longer claim Hugo ignores a theme's `config/_default/` — it merges it
+  deep, with a site value winning per key. The defaults still live in the
+  theme's root `config.toml`, which is a choice now that the real limit is
+  documented, not a limit that forced it. The environment-overlay claim was
+  wrong the other way round: the scripts read `config/production/` too.
+- Comment indentation in `page/share.html` and `page/page-collection.html`.
 
 - Stylesheet pipeline is now Hugo-native: `head.html` concatenates the
   `@layer`-wrapped CSS sources in cascade order and compiles them
@@ -116,10 +132,8 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   image budget and the per-role minimum source width live in the theme's
   root `config.toml` under `[params.image]` and `[params.build]`.
   `image-resource.html` reads them with its previous hardcoded values as
-  fallbacks, and a site overrides a single key in its own `params.toml`. A
-  theme can only ship config from its root `config.toml` — Hugo ignores a
-  theme's `config/_default/`, so the defaults were not reachable from a
-  config file at all before this. `scripts/lib/build_config.py` resolves
+  fallbacks, and a site overrides a single key in its own `params.toml`;
+  before this the numbers lived only in the template. `scripts/lib/build_config.py` resolves
   the same file pair for `check-build.sh --site` and
   `place-image.sh --site`, so a threshold you change in config is the
   threshold the gate checks. `validate-theme.sh` asserts the config reaches

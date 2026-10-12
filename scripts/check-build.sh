@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Assert the rules Strata guarantees in its build output.
 #
-# Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>]
+# Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>] [--environment production]
 #
 # Shared by validate-theme.sh and validate-site.sh so the rule set stays
 # in one place. <public_dir> is a finished Hugo build; nothing is built
 # here. --site selects the site whose config supplies the thresholds; without
-# it the theme defaults in config.toml apply. Rules are grouped by concern:
+# it the theme defaults in config.toml apply. --environment names the config
+# overlay that build used; it defaults to production, which is Hugo's own
+# default, and must match a non-default build or the thresholds come from the
+# wrong overlay. Rules are grouped by concern:
 # SEO, schema, images, links, assets. Absolute URLs are mapped onto the
 # output tree by path only, so a remote image on an allowed domain is skipped
 # rather than misreported; baseURL misconfiguration is caught by the canonical
@@ -17,17 +20,19 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PUBLIC=""
 MODE="theme"
 SITE=""
+ENVIRONMENT="production"
 while [ $# -gt 0 ]; do
   case "$1" in
     --mode) MODE="${2:?--mode needs theme or site}"; shift 2 ;;
     --site) SITE="${2:?--site needs a directory}"; shift 2 ;;
+    --environment) ENVIRONMENT="${2:?--environment needs a name}"; shift 2 ;;
     -*) printf 'unknown flag: %s\n' "$1" >&2; exit 2 ;;
     *) PUBLIC="$1"; shift ;;
   esac
 done
 case "$MODE" in theme|site) ;; *) printf 'unknown mode: %s\n' "$MODE" >&2; exit 2 ;; esac
 if [ -z "$PUBLIC" ] || [ ! -d "$PUBLIC" ]; then
-  printf 'Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>]\n' >&2
+  printf 'Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>] [--environment production]\n' >&2
   exit 2
 fi
 
@@ -35,7 +40,7 @@ fi
 # merged with the site's own config. scripts/lib/build_config.py resolves the
 # same file pair Hugo merges when it renders, so the scripts and the
 # templates judge the same numbers. Needs python3 >= 3.11 for tomllib.
-CFG_CMD=("$ROOT/scripts/lib/build_config.py")
+CFG_CMD=("$ROOT/scripts/lib/build_config.py" --environment "$ENVIRONMENT")
 if [ -n "$SITE" ]; then CFG_CMD+=(--site "$SITE"); fi
 if ! BUILD_CONFIG="$(python3 "${CFG_CMD[@]}")"; then
   printf 'ERROR: failed to resolve the build config (needs python3 >= 3.11)\n' >&2

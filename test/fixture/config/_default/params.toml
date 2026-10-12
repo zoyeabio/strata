@@ -12,6 +12,7 @@ enableA11y = true
 
 [list]
   cardView = true
+  showBreadcrumbs = true
 
 [article]
   showBreadcrumbs = true
@@ -31,6 +32,11 @@ enableA11y = true
   client = "ca-pub-0000000000000000"
 
 [taxonomy]
+  showBreadcrumbs = true
+
+# Terms exercise the trail through a taxonomy ancestor, which has no menu
+# entry, so the crumb falls back to LinkTitle.
+[term]
   showBreadcrumbs = true
 
 [footer]

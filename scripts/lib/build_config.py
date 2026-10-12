@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """Resolve strata's build config and print shell assignments.
 
-A theme can only ship config from its root config.toml — Hugo ignores a
-theme's config/_default/ — so the defaults live in the theme's config.toml
-and merge underneath a site's own. That is the same file pair Hugo merges
-when it renders, so the build scripts and the templates read one source of
-truth instead of two copies of the same number.
+The theme's defaults live in its root config.toml and a site overrides them in
+its own config. Hugo merges that same file pair when it renders, so the build
+scripts and the templates judge one source of truth instead of two copies of
+the same number. Hugo also merges a theme's config/_default/, but those files
+are not read here: a theme ships defaults from exactly one place.
 
 Site files are read in Hugo's precedence order, lowest first: config/_default/,
-config/<environment>/, files in config/, then config.toml at the site root.
+config/<environment>/, files in config/, then config.toml at the site root. The
+environment defaults to production, which is Hugo's own default; pass
+--environment to match a build made for a different one.
 
-Usage:  eval "$(python3 scripts/lib/build_config.py [--site /path/to/site])"
+Usage:
+  eval "$(python3 scripts/lib/build_config.py [--site /path/to/site] [--environment production])"
 """
 import argparse
 import tomllib
 from pathlib import Path
 
 THEME = Path(__file__).resolve().parents[2]
+# Hugo's own default environment. Pass --environment to match a build made for
+# a different one: Hugo then skips config/production/ and so do these scripts.
 ENV = 'production'
 
 # name -> (default, path under [params])
@@ -47,10 +52,10 @@ def _merge(base, override):
     return out
 
 
-def _toml_files(root):
+def _toml_files(root, environment=ENV):
     """The site's TOML config, lowest precedence first."""
     files = []
-    for level in (('_default',), (ENV,), ()):
+    for level in (('_default',), (environment,), ()):
         directory = root.joinpath(*(('config',) + level))
         if directory.is_dir():
             files.extend(sorted(directory.glob('*.toml')))
@@ -73,13 +78,13 @@ def _get(mapping, path):
     return node
 
 
-def load(site=None):
+def load(site=None, environment=ENV):
     cfg = {}
     theme_cfg = THEME / 'config.toml'
     if theme_cfg.exists():
         cfg = _merge(cfg, _load(theme_cfg))
     if site:
-        for path in _toml_files(Path(site)):
+        for path in _toml_files(Path(site), environment):
             cfg = _merge(cfg, _load(path))
     params = cfg.get('params', {})
     out = {}
@@ -97,8 +102,9 @@ def load(site=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--site')
+    parser.add_argument('--environment', default=ENV)
     args = parser.parse_args()
-    for name, value in load(args.site).items():
+    for name, value in load(args.site, args.environment).items():
         if isinstance(value, list):
             value = ' '.join(str(v) for v in value)
         # Single-quoted so a list like 480 800 1280 1920 evals as one value.

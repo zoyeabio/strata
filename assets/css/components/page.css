@@ -107,8 +107,4 @@
 .breadcrumb__link:hover {
   color: var(--site-link);
 }
-
-.breadcrumb__current {
-  color: var(--text);
-}
 }

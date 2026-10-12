@@ -4,3 +4,4 @@ resources/_gen/
 .DS_Store
 node_modules/
 hugo_stats.json
+__pycache__/

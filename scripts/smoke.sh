@@ -55,9 +55,10 @@ assert 'section-a/nested/post/index.html' 'property="og:image" content="[^"]*nes
 assert 'section-a/inline/index.html' 'srcset="[^"]*480w' \
   'inline markdown image carries a srcset'
 
-# 4. a missing reference leaves no empty media wrapper; flat, nested, vector,
-#    gif and animated webp emit one each, the blocked remote card none
-count_assert 'section-a/index.html' 'card__media' 5 'five cards render card__media'
+# 4. a missing reference leaves no empty media wrapper; flat, vector, gif and
+#    animated webp emit one each; the blocked remote card and the nested
+#    section card none
+count_assert 'section-a/index.html' 'card__media' 4 'four cards render card__media'
 
 # 5. svg passes through untouched
 assert 'section-a/vector/index.html' 'property="og:image" content="[^"]*\.svg"' \
@@ -565,28 +566,53 @@ assert_not 'index.html' 'Categories<' 'unresolvable footer menu entry is dropped
 assert_not 'index.html' 'href="/categories/"' 'dropped footer menu entry ships no dead link'
 assert_not 'index.html' 'site-footer__title' 'rich footer drops the duplicate identity block'
 
-# 33. breadcrumbs: article and section trails link Home and ancestors,
-#     the current page is plain text; taxonomy follows its table, term and
-#     home stay hidden by default
-assert 'section-a/flat/index.html' 'aria-label="Breadcrumb"' 'article breadcrumb renders'
-assert 'section-a/flat/index.html' 'href="/"[^>]*>Home<' 'article trail starts at Home'
-assert 'section-a/flat/index.html' 'href="/section-a/"[^>]*>Section A<' 'article trail links the section'
-assert 'section-a/flat/index.html' 'aria-current="page"' 'current page is marked'
-assert 'section-a/index.html' 'aria-label="Breadcrumb"' 'section trail renders via page override'
-assert 'tags/index.html' 'aria-label="Breadcrumb"' 'taxonomy trail follows its table'
-assert_not 'tags/alpha/index.html' 'aria-label="Breadcrumb"' 'term trail stays hidden by default'
-assert_not 'index.html' 'aria-label="Breadcrumb"' 'home trail stays hidden by default'
-# 33b. list headers share the article rhythm: the trail renders inside
+# 33. breadcrumbs: ancestors only. The current page is the H1 beside the trail,
+#     so it is not repeated as a crumb. A crumb for a page that is in a menu
+#     takes that menu's short label instead of the page title, while the schema
+#     keeps the real title; a taxonomy ancestor with no menu entry falls back
+#     to LinkTitle. Hidden when nothing sits above Home — a top-level section,
+#     a taxonomy page or home is already announced by its menu entry and H1 —
+#     and the page's own showBreadcrumbs still wins, either way.
+assert 'section-a/flat/index.html' 'aria-label="Breadcrumb"' 'article trail renders'
+assert 'section-a/flat/index.html' 'href="/"[^>]*>Home<' 'trail starts at Home'
+assert 'section-a/flat/index.html' 'href="/section-a/"[^>]*>Section A<' 'crumb takes the menu label'
+assert 'section-a/flat/index.html' '"name":"Feature Images, Formats and Optimization"' \
+  'the schema keeps the section title'
+assert 'tags/alpha/index.html' 'href="/tags/"[^>]*>Tags<' 'taxonomy crumb falls back to LinkTitle'
+assert_not 'section-a/pixel/index.html' 'aria-label="Breadcrumb"' 'a page showBreadcrumbs false wins'
+assert_not 'section-a/index.html' 'aria-label="Breadcrumb"' 'a top-level section has nothing above Home'
+assert_not 'tags/index.html' 'aria-label="Breadcrumb"' 'a taxonomy page has nothing above Home'
+assert_not 'index.html' 'aria-label="Breadcrumb"' 'home has nothing above Home'
+# 33b. the trail is Home plus the ancestors and nothing else: no duplicate of
+#      the section title or the page title, no current-page marker
+if python3 - "$OUT" <<'PY'
+import pathlib, re, sys
+nav = pathlib.Path(sys.argv[1], 'section-a/flat/index.html').read_text()
+m = re.search(r'<nav aria-label="Breadcrumb">.*?</nav>', nav, re.S)
+assert m, 'no trail'
+tray = m.group(0)
+assert 'Feature Images, Formats and Optimization' not in tray, 'section title reached the trail'
+assert 'Flat section image' not in tray, 'current page reached the trail'
+assert 'breadcrumb__current' not in tray, 'current-page marker survived'
+assert 'aria-current' not in tray, 'a crumb claims the current page'
+assert re.findall(r'>([^<>]+)</a>', tray) == ['Home', 'Section A'], tray
+PY
+then
+  pass 'trail is Home plus the ancestors, nothing repeated'
+else
+  fail 'trail is Home plus the ancestors, nothing repeated'
+fi
+# 33c. list and term headers share the article rhythm: the trail renders inside
 #      .page-header ahead of the h1 (a trail outside the header once left
 #      list pages 40px below the trail while articles sat 16px)
 if python3 - "$OUT" <<'PY'
 import pathlib, sys
-for rel in ('section-a/index.html', 'tags/index.html'):
+for rel in ('section-a/nested/index.html', 'tags/alpha/index.html'):
     html = (pathlib.Path(sys.argv[1]) / rel).read_text()
     hi = html.find('<header class="page-header">')
     ni = html.find('<nav aria-label="Breadcrumb">')
     ti = html.find('<h1>')
-    assert hi != -1 and hi < ni < ti, rel
+    assert hi != -1 and ni != -1 and hi < ni < ti, rel
 PY
 then
   pass 'list trail sits inside the header ahead of the title'
@@ -1234,6 +1260,25 @@ if diff <(printf '%s\n' "$CFG_DEFAULT" | grep -Ev "$CFG_OWN") \
   pass 'build_config deep-merges: unset keys keep the theme defaults'
 else
   fail 'build_config deep-merges: unset keys keep the theme defaults'
+fi
+
+# The environment overlay is honoured the way Hugo honours it: config/dev/ wins
+# for --environment dev and is invisible for the production default.
+CFG_ENV="$(mktemp -d)"
+mkdir -p "$CFG_ENV/config/dev"
+cat > "$CFG_ENV/config/dev/params.toml" <<'EOF'
+[params.build]
+  pageimageskb = 400
+EOF
+CFG_DEV="$(python3 "$ROOT/scripts/lib/build_config.py" --site "$CFG_ENV" --environment dev)"
+CFG_PROD="$(python3 "$ROOT/scripts/lib/build_config.py" --site "$CFG_ENV")"
+rm -rf "$CFG_ENV"
+
+if ( eval "$CFG_DEV" && [ "$PAGE_IMAGES_KB" -eq 400 ] ) \
+    && ( eval "$CFG_PROD" && [ "$PAGE_IMAGES_KB" -eq 600 ] ); then
+  pass 'build_config honours --environment the way Hugo does'
+else
+  fail 'build_config honours --environment the way Hugo does'
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

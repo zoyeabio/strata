@@ -32,11 +32,10 @@ else
   pass 'production build is silent'
 fi
 
-# A theme can only ship config from its root config.toml — Hugo ignores a
-# theme's config/_default/ — so the image pipeline and build thresholds live
-# there. Prove they reach a consuming site; without this the theme could keep
-# shipping broken config and every gate below would still pass on the
-# scripts' own fallback defaults.
+# The image pipeline and build thresholds are theme defaults, so they live in
+# the theme's root config.toml, which Hugo loads first. Prove they reach a
+# consuming site; without this the theme could keep shipping broken config and
+# every gate below would still pass on the scripts' own fallback defaults.
 if cfg_out=$(cd "$ROOT" && python3 - <<'PY'
 import json
 import subprocess

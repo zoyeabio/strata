@@ -11,11 +11,14 @@ write them in any case. Site config keys keep their case.
 
 ## Theme defaults (`config.toml`)
 
-A theme can only ship config from its root `config.toml` — Hugo ignores a
-theme's `config/_default/`. Those values merge underneath your site's config,
-so you override a single key in your own `params.toml` and it wins everywhere,
-in the templates and in the build scripts. Environment overlays
-(`config/production/`) are read by Hugo only, not by the scripts.
+The theme loads `config.toml` first, so these values merge underneath your
+site's config: override a single key in your own `params.toml` and it wins
+everywhere, in the templates and in the build scripts, which resolve the same
+file pair. Hugo also merges a theme's `config/_default/`, but these defaults
+are not kept there as well — a theme ships them from one place only.
+Environment overlays (`config/production/`) are honoured by Hugo and by the
+build scripts alike; both default to that overlay, and `--environment` names
+another.
 
 | Key | Default | Effect |
 |---|---|---|
@@ -95,6 +98,33 @@ is not picked up:
   pageRef = "section-a/flat"
   parent = "guides"
 ```
+
+## Breadcrumbs
+
+Ancestor trail, hidden by default:
+
+```toml
+[article]
+  showBreadcrumbs = true
+```
+
+Only ancestors render — Home, then each parent up to the containing section.
+The current page is the `<h1>` beside the trail, so repeating it would be a
+crumb with no destination. The JSON-LD `BreadcrumbList` keeps it, since search
+engines expect it.
+
+A crumb takes its menu entry's name when the page is in any menu — the same
+short label the navigation shows — otherwise the page title. Without this a
+section titled "Probiotic Strains and Prebiotic Fiber Ingredients" would ship
+that whole string as one crumb. The URL is matched against both the relative
+and the baseURL-prefixed form, since Hugo resolves a menu URL to one or the
+other depending on how baseURL is set.
+
+Nothing renders when nothing sits above Home: a top-level section or taxonomy
+page is already announced by its highlighted menu entry and its own title, and
+a trail of just "Home" would be decoration.
+
+Page-level override: `showBreadcrumbs: false` in front matter.
 
 ## Footer (`params.toml [footer]`)
 

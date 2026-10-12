@@ -1,11 +1,13 @@
 # Strata's image pipeline and build thresholds.
 #
-# A theme can only ship config from its root config.toml — Hugo ignores a
-# theme's config/_default/ — so the defaults live here and merge underneath
-# every site. A site overrides a single key in its own params.toml; that key
-# then wins everywhere, in the templates and in scripts/lib/build_config.py,
-# which resolves the same file pair for the build scripts. Environment
-# overlays (config/production/) are read by Hugo only, not by the scripts.
+# The defaults live here and merge underneath every site: Hugo loads this file
+# first, so a single key overridden in a site's own params.toml wins that key
+# everywhere — in the templates and in scripts/lib/build_config.py, which
+# resolves the same file pair for the build scripts. Hugo also merges a
+# theme's config/_default/, but the defaults are not kept there as well: a
+# theme ships them from one place only. Environment overlays are honoured by
+# Hugo and by the build scripts alike, both defaulting to config/production/;
+# --environment names another.
 #
 # Keys are lowercase: Hugo lowercases every config key, and the build scripts
 # read the file straight through tomllib, so a camelCase key would be

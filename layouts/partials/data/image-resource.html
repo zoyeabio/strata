@@ -30,8 +30,7 @@
 
   The variant ladder, role caps, WebP quality and social preview size are
   config — [params.image] in the theme's root config.toml, which a site
-  overrides in its own. A theme can only ship config from its root config.toml;
-  Hugo ignores a theme's config/_default/. Each ladder step is capped by the
+  overrides in its own. Each ladder step is capped by the
   source width and by the role cap, then de-duplicated, then a step less than
   15% wider than its kept predecessor is dropped. The result is never more than
   four files per image and never two near-identical widths — the largest variant

@@ -1,10 +1,22 @@
 {{- /*
-  Ancestor trail: Home / section / … / current page. Ancestors link, the
-  current page is plain text with aria-current. Separators come from CSS.
+  Ancestor trail: Home / section / … . Ancestors only — the current page is
+  the H1 beside the trail, so repeating it here is a crumb with no destination.
 
-  Visibility is the page's own showBreadcrumbs when set (isset, so an
-  explicit false wins), otherwise the table matching its Kind: article,
-  list, taxonomy, term. All default to hidden.
+  Hidden when nothing sits above Home: a top-level section or taxonomy page is
+  already announced by the highlighted menu entry and its own H1, and a trail
+  of just "Home" would be decoration. The first crumb that earns the trail is
+  the child of such a page.
+
+  A crumb's label is its menu name when the page is in any menu — the same
+  short label the navigation shows — falling back to LinkTitle. Without this a
+  section titled "Probiotic Strains and Prebiotic Fiber Ingredients" would ship
+  that whole string as a single crumb. Matched against both the relative and
+  the baseURL-prefixed URL, since Hugo resolves a menu URL to one or the other
+  depending on how baseURL is set.
+
+  Visibility is the page's own showBreadcrumbs when set (isset, so an explicit
+  false wins), otherwise the table matching its Kind: article, list, taxonomy,
+  term. All default to hidden.
 
   Called by: _default/single.html, list.html, terms.html, term.html
 */ -}}
@@ -18,14 +30,16 @@
 {{- $ancestors := slice }}
 {{- $p := .Parent }}
 {{- range seq 10 }}{{ if and $p (not $p.IsHome) }}{{ $ancestors = $ancestors | append $p }}{{ $p = $p.Parent }}{{ end }}{{ end }}
-{{- if and $show (or $ancestors (not .IsHome)) }}
+{{- if and $show $ancestors }}
 <nav aria-label="Breadcrumb">
   <ol class="breadcrumb">
     <li><a class="breadcrumb__link" href="{{ site.Home.RelPermalink }}">Home</a></li>
     {{- range $ancestors | collections.Reverse }}
-    <li><a class="breadcrumb__link" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+    {{- $crumb := . }}
+    {{- $label := $crumb.LinkTitle }}
+    {{- range $menu := site.Menus }}{{ range $entry := $menu }}{{ if and $entry.URL (or (eq $entry.URL $crumb.RelPermalink) (eq $entry.URL (printf "%s%s" site.BaseURL $crumb.RelPermalink))) }}{{ $label = $entry.Name }}{{ end }}{{ end }}{{ end }}
+    <li><a class="breadcrumb__link" href="{{ $crumb.RelPermalink }}">{{ $label }}</a></li>
     {{- end }}
-    <li aria-current="page"><span class="breadcrumb__current">{{ .LinkTitle }}</span></li>
   </ol>
 </nav>
 {{- end }}

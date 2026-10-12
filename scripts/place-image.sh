@@ -7,8 +7,9 @@
 #     --section journal \
 #     --post example-post \
 #     --file out/illustration-1.png \
-#     --role illustration \
-#     --site /path/to/site
+#   --role illustration \
+#     --site /path/to/site \
+#     --environment production
 #
 # Copies --file to assets/images/{section}/{slug}/{filename} and prints the
 # front matter reference (the bare filename) for a page bundle at
@@ -28,6 +29,7 @@ POST=""
 FILE=""
 ROLE="illustration"
 SITE=""
+ENVIRONMENT="production"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -36,6 +38,7 @@ while [ "$#" -gt 0 ]; do
     --file) FILE="$2"; shift 2 ;;
     --role) ROLE="$2"; shift 2 ;;
     --site) SITE="$2"; shift 2 ;;
+    --environment) ENVIRONMENT="$2"; shift 2 ;;
     *) printf 'ERROR: unknown option %s\n' "$1" >&2; exit 2 ;;
   esac
 done
@@ -51,7 +54,7 @@ fi
 # Size thresholds from config: the theme's config.toml merged with the
 # site's own, resolved by scripts/lib/build_config.py — the same file pair
 # Hugo merges when it renders. Needs python3 >= 3.11 for tomllib.
-CFG_CMD=("$ROOT/scripts/lib/build_config.py")
+CFG_CMD=("$ROOT/scripts/lib/build_config.py" --environment "$ENVIRONMENT")
 if [ -n "$SITE" ]; then CFG_CMD+=(--site "$SITE"); fi
 if ! BUILD_CONFIG="$(python3 "${CFG_CMD[@]}")"; then
   printf 'ERROR: failed to resolve the build config (needs python3 >= 3.11)\n' >&2
