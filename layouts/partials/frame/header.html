@@ -55,7 +55,12 @@
   {{ partial "frame/search.html" . }}
   {{ partial "frame/a11y.html" . }}
   {{- if site.Params.footer.showAppearanceSwitcher }}
-  <button type="button" class="site-header__toggle" data-appearance-toggle>Appearance</button>
+  {{- $moon := resources.Get "icons/moon.svg" -}}
+  {{- $sun := resources.Get "icons/sun.svg" -}}
+  <button type="button" class="site-header__toggle" data-appearance-toggle aria-label="Appearance">
+    <span class="site-header__toggle__icon site-header__toggle__icon--moon" aria-hidden="true">{{- with $moon }}{{- strings.TrimSpace .Content | safeHTML -}}{{- end }}</span>
+    <span class="site-header__toggle__icon site-header__toggle__icon--sun" aria-hidden="true">{{- with $sun }}{{- strings.TrimSpace .Content | safeHTML -}}{{- end }}</span>
+  </button>
   {{- end }}
 </header>
 {{- if $smart }}

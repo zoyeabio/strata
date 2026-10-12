@@ -81,11 +81,6 @@
 
 {{- if $slides }}
 <div class="carousel not-prose" id="{{ $id }}" role="region" aria-roledescription="carousel" aria-label="Image carousel" tabindex="0" data-carousel data-interval="{{ $interval }}">
-  <div class="carousel__indicators" data-carousel-indicators>
-    {{- range $i, $s := $slides }}
-    <button type="button" data-slide-to="{{ $i }}"{{ if eq $i 0 }} data-carousel-active aria-current="true"{{ end }} aria-label="Slide {{ add $i 1 }}"></button>
-    {{- end }}
-  </div>
   <div class="carousel__viewport" style="aspect-ratio: {{ $aw }} / {{ $ah }};">
     <div class="carousel__track" data-carousel-track style="transition: transform 0.6s ease; will-change: transform;">
       {{- $all := $slides }}
@@ -107,6 +102,11 @@
       </div>
       {{- end }}
     </div>
+  </div>
+  <div class="carousel__indicators" data-carousel-indicators>
+    {{- range $i, $s := $slides }}
+    <button type="button" data-slide-to="{{ $i }}"{{ if eq $i 0 }} data-carousel-active aria-current="true"{{ end }} aria-label="Slide {{ add $i 1 }}"></button>
+    {{- end }}
   </div>
   <button class="carousel__btn carousel__btn--prev" type="button" data-carousel-prev aria-label="Previous slide">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>

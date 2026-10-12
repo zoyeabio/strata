@@ -119,43 +119,50 @@
   grid-template-columns: 1fr;
 }
 
-.card--row .card__media,
-.card--inline .card__media {
-  aspect-ratio: 16 / 9;
-}
-
 .card--inline {
   display: grid;
   grid-template-columns: 1fr;
 }
 
+/* Row and inline cards keep the grid card's 16:9 thumbnail. The fixed aspect
+   is what makes the row height predictable: an auto aspect lets a portrait
+   source set the height of the whole row. */
+.card--row .card__media,
+.card--inline .card__media {
+  aspect-ratio: 16 / 9;
+}
+
 @media (min-width: 640px) {
-  .card--row,
-  .card--inline {
-    grid-template-columns: 200px 1fr;
+  /* Two columns only when there is media. Every placement rule below puts its
+     element on column 2, so a list of imageless pages must stay one column or
+     it opens a 240px void next to the title. */
+  .card--row:has(> .card__media),
+  .card--inline:has(> .card__media) {
+    grid-template-columns: 240px 1fr;
     column-gap: 16px;
-    align-items: stretch;
+    row-gap: 6px;
+    align-items: center;
   }
 
-  .card--row .card__media,
-  .card--inline .card__media {
+  .card--row:has(> .card__media) .card__media,
+  .card--inline:has(> .card__media) .card__media {
     grid-column: 1;
     grid-row: 1 / span 2;
-    aspect-ratio: auto;
-    height: 100%;
-    min-height: 112px;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    min-height: 0;
   }
 
-  .card--row .card__header,
-  .card--inline .card__header {
+  .card--row:has(> .card__media) .card__header,
+  .card--inline:has(> .card__media) .card__header {
     grid-column: 2;
-    padding: 0 16px 0 0;
+    padding: 12px 16px 0 0;
   }
 
-  .card--row .card__summary,
-  .card--inline .card__summary {
+  .card--row:has(> .card__media) .card__summary,
+  .card--inline:has(> .card__media) .card__summary {
     grid-column: 2;
-    padding: 0 16px 0 0;
+    padding: 0 16px 14px 0;
   }
 }
 }

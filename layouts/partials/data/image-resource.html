@@ -8,7 +8,7 @@
     role  (string, optional) — "card" | "illustration" | "hero" | "og";
           caps the widest variant
     alt   (string, optional) — empty string means decorative
-    quality (int, optional) — WebP quality, defaults to the site-wide 78;
+    quality (int, optional) — WebP quality, defaults to [params.image].quality;
           the figure shortcode's quality parameter passes it through
 
   Output dict
@@ -28,15 +28,17 @@
   passed through only when site.Params.allowRemoteImages is set; otherwise
   they are skipped with the same dev-only warning.
 
-  Variant ladder: [480, 800, 1280, 1920]; every step is capped by the source
-  width and by the role cap, then de-duplicated, then a step less than 15%
-  wider than its kept predecessor is dropped. The result is never more than
-  four files per image and never two near-identical widths — the largest
-  variant may sit a little below the source width, which is accepted in
-  exchange for the smaller payload. Everything is encoded WebP q78 so the
-  same width is never written twice at two qualities. SVG, GIF and animated
-  WebP bypass processing entirely — the imaging pipeline would fail on SVG
-  and flatten animations to frame one.
+  The variant ladder, role caps, WebP quality and social preview size are
+  config — [params.image] in the theme's root config.toml, which a site
+  overrides in its own. A theme can only ship config from its root config.toml;
+  Hugo ignores a theme's config/_default/. Each ladder step is capped by the
+  source width and by the role cap, then de-duplicated, then a step less than
+  15% wider than its kept predecessor is dropped. The result is never more than
+  four files per image and never two near-identical widths — the largest variant
+  may sit a little below the source width, which is accepted in exchange for the
+  smaller payload. Everything is encoded at one quality so the same width is
+  never written twice. SVG, GIF and animated WebP bypass processing entirely —
+  the imaging pipeline would fail on SVG and flatten animations to frame one.
 
   site.Params.disableImageOptimization = true hands back the original file
   for every role, generating no variants at all.
@@ -47,10 +49,26 @@
 {{- if eq $raw "<nil>" }}{{ $raw = "" }}{{ end }}
 {{- $ref := trim $raw " /" }}
 {{- $page := .page }}
-{{- $role := .role | default "illustration" }}
-{{- $caps := dict "card" 800 "illustration" 1280 "hero" 1920 "og" 1920 }}
-{{- $cap := index $caps $role | default 1280 }}
-{{- $quality := .quality | default 78 }}
+{{- $role := .role | default "illustration" -}}
+{{- /* Pipeline knobs come from [params.image] in the theme's root config.toml,
+     which a site overrides in its own. The fallbacks mirror the theme's
+     defaults, so a site written before those keys existed still renders. */ -}}
+{{- $imgCfg := site.Params.image | default dict -}}
+{{- $capsCfg := $imgCfg.caps | default dict -}}
+{{- $ogCfg := $imgCfg.og | default dict -}}
+{{- $caps := dict
+  "card" (int ($capsCfg.card | default 800))
+  "illustration" (int ($capsCfg.illustration | default 1280))
+  "hero" (int ($capsCfg.hero | default 1920))
+  "og" (int ($capsCfg.og | default 1920)) -}}
+{{- $cap := index $caps $role | default 1280 -}}
+{{- $ladder := slice -}}
+{{- range $imgCfg.ladder | default (slice 480 800 1280 1920) -}}
+  {{- $ladder = $ladder | append (int .) -}}
+{{- end -}}
+{{- $quality := .quality | default (int ($imgCfg.quality | default 78)) -}}
+{{- $ogWidth := int ($ogCfg.width | default 1200) -}}
+{{- $ogHeight := int ($ogCfg.height | default 630) -}}
 {{- $disable := site.Params.disableImageOptimization | default false }}
 
 {{- $res := "" }}
@@ -94,13 +112,13 @@
     {{- if or (eq $subtype "svg") (eq $subtype "gif") $animated }}
       {{- $result = dict "ok" true "url" $res.RelPermalink "srcset" "" "width" 0 "height" 0 }}
     {{- else if eq $role "og" }}
-      {{- $social := $res.Fill (printf "1200x630 jpeg q%d" $quality) }}
+      {{- $social := $res.Fill (printf "%dx%d jpeg q%d" $ogWidth $ogHeight $quality) }}
       {{- $result = dict "ok" true "url" $social.RelPermalink "srcset" "" "width" $social.Width "height" $social.Height }}
     {{- else }}
       {{- $sourceWidth := $res.Width }}
       {{- $max := int (math.Min $sourceWidth $cap) }}
       {{- $steps := slice }}
-      {{- range slice 480 800 1280 1920 }}
+      {{- range $ladder }}
         {{- $step := int (math.Min . $max) }}
         {{- if not (in $steps $step) }}{{ $steps = $steps | append $step }}{{ end }}
       {{- end }}

@@ -1,11 +1,39 @@
 # Configuration
 
-All configuration lives in the site layer. The theme consumes only the keys
-listed here; anything else is ignored.
+Everything a site configures lives in the site layer. The theme consumes only
+the keys listed here; anything else is ignored. The theme's own defaults —
+the image pipeline and the build thresholds — live in the theme's root
+`config.toml` and are listed in [Theme defaults](#theme-defaults-configtoml).
 
 Hugo folds content front matter keys to lowercase (`showBreadcrumbs`
 arrives as `showbreadcrumbs`), so page keys below are read lowercase —
 write them in any case. Site config keys keep their case.
+
+## Theme defaults (`config.toml`)
+
+A theme can only ship config from its root `config.toml` — Hugo ignores a
+theme's `config/_default/`. Those values merge underneath your site's config,
+so you override a single key in your own `params.toml` and it wins everywhere,
+in the templates and in the build scripts. Environment overlays
+(`config/production/`) are read by Hugo only, not by the scripts.
+
+| Key | Default | Effect |
+|---|---|---|
+| `[params.image].ladder` | `[480, 800, 1280, 1920]` | Variant widths, smallest first. Each is capped by the source width and the role cap, de-duplicated, and dropped if less than 15% wider than its kept predecessor |
+| `[params.image].quality` | `78` | One WebP quality for every width, so a width is never stored twice |
+| `[params.image].caps.card` | `800` | Widest variant for a card |
+| `[params.image].caps.illustration` | `1280` | Widest variant for an illustration |
+| `[params.image].caps.hero` | `1920` | Widest variant for a hero |
+| `[params.image].caps.og` | `1920` | Widest variant for the social preview |
+| `[params.image].og.width` / `.height` | `1200` / `630` | Fixed preview size — what Facebook, LinkedIn and Google request. `scripts/place-image.sh` lints the source against the same pair |
+| `[params.build].pageimageskb` | `600` | Largest total image payload on a page, in KiB — `check-build` R5 |
+| `[params.build].minwidth.hero` | `1600` | Minimum source width per role, linted by `scripts/place-image.sh` |
+| `[params.build].minwidth.illustration` | `1280` | Same |
+| `[params.build].minwidth.card` | `1200` | Same |
+| `[params.build].minwidth.og` | `1200` | Same |
+
+`scripts/lib/build_config.py` resolves that same file pair for the build
+scripts, so a threshold you change in config is the threshold the gate checks.
 
 ## Site params (`params.toml`)
 
@@ -83,7 +111,12 @@ it, a grid renders above: company, quick links, legal, contact.
 | `company.address` | — | Lines split on `<br>`, escaped |
 | `quickLinks.title` / `quickLinks.links` | `"Quick Links"` | `[{name, url}]` column |
 | `legal.title` / `legal.links` | `"Legal"` | `[{name, url}]` column |
-| `social.links` | — | `[{name, icon, url}]` row; icon resolves to `assets/icons/<name>.svg`, a missing file falls back to the link name |
+| `social.links` | — | `[{name, icon, url}]` row; icon resolves to `assets/icons/<name>.svg`. The theme ships `linkedin`, `facebook`, `instagram`, `moon`, `sun` as defaults — put a file of the same name in your own `assets/icons/` to override one — and a missing file falls back to the link name |
+
+The footer menu is read from `[[menu.footer]]` in the menus file. An entry
+that resolves to no URL — a `pageRef` pointing at a section the site never
+declared is the usual cause — is dropped from the output with a build
+warning instead of being rendered as a dead link.
 
 ## Front matter
 

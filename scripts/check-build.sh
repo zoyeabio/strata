@@ -1,30 +1,48 @@
 #!/usr/bin/env bash
 # Assert the rules Strata guarantees in its build output.
 #
-# Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site]
+# Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>]
 #
 # Shared by validate-theme.sh and validate-site.sh so the rule set stays
 # in one place. <public_dir> is a finished Hugo build; nothing is built
-# here. Rules are grouped by concern: SEO, schema, images, links, assets.
-# Absolute URLs are mapped onto the output tree by path only, so a remote
-# image on an allowed domain is skipped rather than misreported; baseURL
-# misconfiguration is caught by the canonical and link rules instead.
+# here. --site selects the site whose config supplies the thresholds; without
+# it the theme defaults in config.toml apply. Rules are grouped by concern:
+# SEO, schema, images, links, assets. Absolute URLs are mapped onto the
+# output tree by path only, so a remote image on an allowed domain is skipped
+# rather than misreported; baseURL misconfiguration is caught by the canonical
+# and link rules instead.
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PUBLIC=""
 MODE="theme"
+SITE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --mode) MODE="${2:?--mode needs theme or site}"; shift 2 ;;
+    --site) SITE="${2:?--site needs a directory}"; shift 2 ;;
     -*) printf 'unknown flag: %s\n' "$1" >&2; exit 2 ;;
     *) PUBLIC="$1"; shift ;;
   esac
 done
 case "$MODE" in theme|site) ;; *) printf 'unknown mode: %s\n' "$MODE" >&2; exit 2 ;; esac
 if [ -z "$PUBLIC" ] || [ ! -d "$PUBLIC" ]; then
-  printf 'Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site]\n' >&2
+  printf 'Usage: ./scripts/check-build.sh <public_dir> [--mode theme|site] [--site <dir>]\n' >&2
   exit 2
 fi
+
+# Thresholds come from config, not from this file: the theme's config.toml
+# merged with the site's own config. scripts/lib/build_config.py resolves the
+# same file pair Hugo merges when it renders, so the scripts and the
+# templates judge the same numbers. Needs python3 >= 3.11 for tomllib.
+CFG_CMD=("$ROOT/scripts/lib/build_config.py")
+if [ -n "$SITE" ]; then CFG_CMD+=(--site "$SITE"); fi
+if ! BUILD_CONFIG="$(python3 "${CFG_CMD[@]}")"; then
+  printf 'ERROR: failed to resolve the build config (needs python3 >= 3.11)\n' >&2
+  exit 2
+fi
+eval "$BUILD_CONFIG"
+
 
 FAILURES=0
 pass() { printf 'ok   %s\n' "$1"; }
@@ -32,6 +50,7 @@ fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
 if report=$(python3 - "$PUBLIC" <<'PY'
 import json
+import os
 import re
 import sys
 from html.parser import HTMLParser
@@ -41,7 +60,8 @@ pub = Path(sys.argv[1])
 TEXT_EXT = {'.html', '.xml', '.json', '.css', '.txt', '.webmanifest'}
 IMG_EXT = {'.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.avif', '.ico'}
 FAVICON_RE = re.compile(r'(favicon|apple-touch-icon|android-chrome|safari-pinned-tab|mstile|browserconfig)', re.I)
-PAGE_BUDGET = 600 * 1024
+# [params.build.pageimageskb] from config, via scripts/lib/build_config.py
+PAGE_BUDGET = int(os.environ.get('PAGE_IMAGES_KB', 600)) * 1024
 
 problems = []
 
@@ -83,6 +103,43 @@ def expand_srcset(attr):
     return urls
 
 
+# R5 counts a page's downloadable images in candidate *groups*, not as one
+# flat list. A srcset ladder is a single group because the browser fetches one
+# rung from it. Summing every rung of every ladder reports a page far bigger
+# than it can ever be, so the budget failed on real content while the fixture
+# passed. A group contained in another never adds a download either — the hero
+# <img> and the <link rel="preload" imagesrcset> that accelerates it carry the
+# same rungs (R3 checks the preload is such a subset) — so those collapse too.
+IMG_CARRIERS = re.compile(r'<(?:img|link|meta)\b[^>]*>', re.I)
+ATTR_URL = re.compile(r'\b(?:src|href|content)=["\x27]([^"\x27]*)["\x27]', re.I)
+
+
+def groups_for(tag):
+    """The candidate sets one element can download."""
+    ladders = [expand_srcset(a) for a in srcset_attr.findall(tag)]
+    singles = [m for m in ATTR_URL.findall(tag) if m.strip()]
+    if ladders:
+        ladder = set()
+        for cand in ladders:
+            ladder |= cand
+        ladder.update(singles)
+        return [ladder]
+    return [{u} for u in singles]
+
+
+def collapse(groups):
+    """Distinct candidate sets, no group contained in another."""
+    seen = set()
+    uniq = []
+    for g in groups:
+        if not g:
+            continue
+        if frozenset(g) not in seen:
+            seen.add(frozenset(g))
+            uniq.append(g)
+    return [g for g in uniq if not any(g < other for other in uniq)]
+
+
 files = [p for p in pub.rglob('*') if p.is_file()]
 texts = [p for p in files if p.suffix.lower() in TEXT_EXT]
 images = [p for p in files if p.suffix.lower() in IMG_EXT]
@@ -95,7 +152,6 @@ json_url = re.compile(r':"((?:https?://)[^"]+)"')
 
 referenced = set()
 per_page = {}
-download_attr = re.compile(r'\b(?:src|href)=["\x27]([^"\x27]+)["\x27]', re.I)
 
 # Site host from the home canonical: only same-host absolute URLs resolve
 # into the output tree; anything else (ad loaders, verification files) is
@@ -122,23 +178,21 @@ def is_site_url(u):
 for t in texts:
     text = t.read_text(errors='ignore')
     urls = set()
-    dl = set()
+    dl = []
     for attr in srcset_attr.findall(text):
         urls |= expand_srcset(attr)
-        dl |= expand_srcset(attr)
     for m in src_attr.findall(text):
         urls.add(m.strip().split()[0] if m.strip() else m)
-    for m in download_attr.findall(text):
-        dl.add(m.strip().split()[0] if m.strip() else m)
     for m in css_url.findall(text):
         urls.add(m)
-        dl.add(m)
-    for m in json_url.findall(text):
-        urls.add(m.strip())
+        dl.append({m})
+    for tag in IMG_CARRIERS.findall(text):
+        dl.extend(groups_for(tag))
     local = {u for u in urls if local_path(u) and is_site_url(u)}
     referenced |= local
     if t.suffix == '.html':
-        per_page[t] = {u for u in dl if local_path(u) and is_site_url(u)}
+        raw = [{u for u in g if local_path(u) and is_site_url(u)} for g in dl]
+        per_page[t] = collapse([g for g in raw if g])
 
 # R1 every referenced local image file exists
 broken = sorted({local_path(u) for u in referenced
@@ -205,14 +259,19 @@ if orphans:
 else:
     ok('no orphan images')
 
-# R5 per-page image payload stays inside the budget
+# R5 per-page image payload stays inside the budget. Each candidate group
+# counts its largest rung: that is the most one element can ever download.
 worst = ('', 0)
-for t, urls in per_page.items():
+for t, groups in per_page.items():
     total = 0
-    for u in urls:
-        rel = local_path(u)
-        if Path(rel).suffix.lower() in IMG_EXT and exists(rel):
-            total += (pub / rel.lstrip('/')).stat().st_size
+    for group in groups:
+        sizes = []
+        for u in group:
+            rel = local_path(u)
+            if Path(rel).suffix.lower() in IMG_EXT and exists(rel):
+                sizes.append((pub / rel.lstrip('/')).stat().st_size)
+        if sizes:
+            total += max(sizes)
     if total > worst[1]:
         worst = (str(t.relative_to(pub)), total)
 site_total = sum(p.stat().st_size for p in images)
@@ -300,6 +359,10 @@ for t in htmls:
         for attr in ('href', 'src'):
             m = re.search(rf'\b{attr}=["\x27]([^"\x27]*)["\x27]', tag, re.I)
             if not m:
+                # A bare attribute (href with no value) is a broken link too,
+                # and it renders without the "=" the check above needs.
+                if re.search(rf'(?<![\w-]){attr}(?![\w-])', tag, re.I):
+                    link_bad.append(f'{rel}: bare {attr} attribute on {tag[:60]}')
                 continue
             v = m.group(1).strip()
             if v == '' or v.lower().startswith('javascript:'):

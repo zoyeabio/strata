@@ -54,5 +54,6 @@ enableA11y = true
   [footer.social]
     links = [
       { name = "Check", icon = "check", url = "https://social.example.net/" },
+      { name = "LinkedIn", icon = "linkedin", url = "https://linkedin.example.net/" },
       { name = "Fallback", icon = "no-such-icon", url = "/section-a/flat/" },
     ]

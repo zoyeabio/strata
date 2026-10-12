@@ -64,8 +64,50 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   pre-fix output.
 - Dropped the `templates.Defer` call: with an empty body it deferred
   nothing, and the pipeline scans `@source` files directly so render order
-  is irrelevant. Docs now state the Hugo ceiling (< 0.161.0, where the
+  is irrelevant.   Docs now state the Hugo ceiling (< 0.161.0, where the
   standalone binary stops working).
+- Landing pages lift the prose measure entirely, paragraphs included. The
+  720px cap is for long-form reading; on a landing page it only leaves dead
+  air at the right edge (`docs/typography.md` states the split).
+- Row and inline cards keep the grid card's 16:9 thumbnail at a fixed
+  240px column. The old `aspect-ratio: auto` let a portrait source set the
+  height of the whole row; the image's own size no longer drives layout.
+  The two columns only exist when there is media, so a list of imageless
+  pages stays a single column instead of opening a void beside the title.
+- `content/list` shows each page's summary by default; `summary=false`
+  suppresses it. A list card reads as a card again (title, date, summary).
+- Carousel indicators overlay the bottom of the image as a row of bars
+  instead of taking a bar out of the layout; the controls now follow the
+  slides in DOM order. A captioned carousel moves the dots to the top so
+  neither hides the other.
+- Header: logo 28px → 40px, nav links 16px/600, and the nav plus the action
+  buttons sit as one group at the right (an auto margin, not the even spread
+  of `justify-content: space-between`), with the gap tightened to 12px.
+- Footer: the social group takes the right of the bottom bar and each link
+  is a filled 44px tile (8px radius, 22px glyph) that reads on hover instead
+  of a bare outlined glyph. The theme now ships `linkedin`, `facebook`,
+  `instagram`, `moon` and `sun` icons a site can override by name.
+- The appearance switch is an icon button: both scheme glyphs ship inline
+  from `assets/icons/`, the moon hides via a source-order-gated rule, and
+  `appearance.js` drives it with `data-effective` plus a scheme-named label.
+- `check-build.sh` R5 counts one image per *carrier group* and collapses a
+  candidate that is a subset of another, so a hero `<img>` preloaded through
+  an `<link>` counts once instead of twice. R8 also catches a bare attribute
+  (`href` with no `=`), which the old `href=["']` pattern skipped.
+- The image pipeline and the build thresholds are config, not code: the
+  variant ladder, role caps, WebP quality, social preview size, the page
+  image budget and the per-role minimum source width live in the theme's
+  root `config.toml` under `[params.image]` and `[params.build]`.
+  `image-resource.html` reads them with its previous hardcoded values as
+  fallbacks, and a site overrides a single key in its own `params.toml`. A
+  theme can only ship config from its root `config.toml` — Hugo ignores a
+  theme's `config/_default/`, so the defaults were not reachable from a
+  config file at all before this. `scripts/lib/build_config.py` resolves
+  the same file pair for `check-build.sh --site` and
+  `place-image.sh --site`, so a threshold you change in config is the
+  threshold the gate checks. `validate-theme.sh` asserts the config reaches
+  a consuming site; `smoke.sh` asserts the merge keeps an override scoped
+  to the keys it sets.
 
 ### Fixed
 

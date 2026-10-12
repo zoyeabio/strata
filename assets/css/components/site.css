@@ -1,15 +1,15 @@
 @layer strata-components {
 .site-header {
-  --header-bar: 68px;
+  --header-bar: 56px;
   position: relative;
   border-bottom: 1px solid var(--border);
   background: var(--page-bg);
-  padding-block: 12px;
+  padding-block: 6px;
   min-height: var(--header-bar);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -47,8 +47,15 @@
 
 .site-brand__logo svg,
 .site-brand__logo {
-  height: 28px;
+  height: var(--brand-logo-height);
   width: auto;
+}
+
+/* Brand left, nav and action buttons as one group at the far right. Without
+   this the three children spread across the bar (justify-content: space-
+   between) and a hollow middle opens between the logo and the menu. */
+.site-nav {
+  margin-inline-start: auto;
 }
 
 .site-nav__list {
@@ -62,27 +69,54 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text);
 }
 
 .site-header__toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 44px;
   min-height: 44px;
-  padding: 0 16px;
-  font-size: 14px;
+  padding: 0;
   color: var(--text-muted);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: none;
+  border: 0;
   cursor: pointer;
 }
 
 .site-header__toggle:hover {
   color: var(--site-link);
-  border-color: var(--site-link);
+}
+
+.site-header__toggle__icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.site-header__toggle__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Only one glyph shows at a time. The sun is the default, matching the
+   theme's light default, so first paint is already right and no glyph flips
+   in after appearance.js records the effective scheme on the button. The
+   base rule above keeps the shared box; these flip it. */
+.site-header__toggle__icon--moon {
+  display: none;
+}
+
+.site-header__toggle[data-effective="dark"] .site-header__toggle__icon--sun {
+  display: none;
+}
+
+.site-header__toggle[data-effective="dark"] .site-header__toggle__icon--moon {
+  display: block;
 }
 
 .site-nav__link:hover {
@@ -91,7 +125,7 @@
 
 .site-nav__link[aria-current="page"] {
   color: var(--site-link);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .site-nav__toggle {
@@ -101,38 +135,23 @@
   width: 44px;
   min-height: 44px;
   padding: 0;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: none;
+  border: 0;
   cursor: pointer;
 }
 
-.site-nav__bars,
-.site-nav__bars::before,
-.site-nav__bars::after {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: var(--text);
-}
-
+/* The glyph is zclaw's bars icon, sized here rather than drawn with a
+   border and two pseudo-elements, so the header keeps one icon language. */
 .site-nav__bars {
-  position: relative;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
 }
 
-.site-nav__bars::before,
-.site-nav__bars::after {
-  content: "";
-  position: absolute;
-  left: 0;
-}
-
-.site-nav__bars::before {
-  top: -6px;
-}
-
-.site-nav__bars::after {
-  top: 6px;
+.site-nav__bars svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .site-nav__text {
@@ -174,8 +193,12 @@
 }
 
 @media (max-width: 852px) {
+  /* The nav panel is hidden, so its auto margin no longer applies. The
+     hamburger takes it instead, keeping the logo alone on the left and the
+     controls grouped at the right. */
   .site-nav__toggle {
     display: inline-flex;
+    margin-inline-start: auto;
   }
 
   [data-nav-panel] {
@@ -283,7 +306,7 @@
 .site-footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 28px;
   font-size: 14px;
   color: var(--text-muted);
 }
@@ -309,11 +332,27 @@
   padding-bottom: 8px;
 }
 
+/* All four columns present: the identity and contact blocks need more room
+   than the link lists, so the tracks are weighted instead of equal. With
+   fewer columns auto-fit keeps spreading what there is, which reads better
+   than leaving empty weighted tracks. */
+@media (min-width: 768px) {
+  .site-footer__grid:has(> :nth-child(4)) {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr);
+  }
+}
+
 .site-footer__heading {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--site-text-strong);
   margin-bottom: 12px;
+}
+
+/* The company block leads the grid, so its heading carries the site name at
+   a full size rather than the column-label size the other three use. */
+.site-footer__grid > div:first-child .site-footer__heading {
+  font-size: 18px;
 }
 
 .site-footer__text {
@@ -329,30 +368,46 @@
   gap: 8px;
 }
 
+/* The group takes the right of the bottom bar; the footer menu and the
+   copyright keep the left. */
 .site-footer__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  margin-inline-start: auto;
 }
 
+/* A filled tile rather than a bare glyph: at 22px an outlined brand mark is
+   hard to read in a footer, and the tile gives it a shape to hover. */
 .site-footer__social {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  font-size: 14px;
+  padding: 0 10px;
   color: var(--text-muted);
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+/* An icon fills the tile exactly; the padding above is for the text fallback
+   when a site names an icon the theme does not ship. */
+.site-footer__social:has(svg) {
+  width: 44px;
+  height: 44px;
+  padding: 0;
 }
 
 .site-footer__social:hover {
   color: var(--site-link);
+  background: var(--surface-hover);
 }
 
 .site-footer__social svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .site-footer__bottom {
@@ -360,10 +415,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 24px;
-}
-
-.site-footer__bottom .site-footer__copyright {
-  margin-inline-start: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .back-to-top {
@@ -397,43 +450,28 @@
   width: 44px;
   min-height: 44px;
   padding: 0;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
   color: var(--text-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
 }
 
 .site-header__search:hover {
   color: var(--site-link);
-  border-color: var(--site-link);
 }
 
+/* zclaw's search glyph; the magnifier is symmetric enough that no RTL
+   mirror is needed. */
 .site-search__icon {
-  position: relative;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.site-search__icon svg {
   display: block;
-  width: 15px;
-  height: 15px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-.site-search__icon::after {
-  content: "";
-  position: absolute;
-  inset-inline-end: -7px;
-  bottom: -5px;
-  width: 8px;
-  height: 2px;
-  background: currentColor;
-  border-radius: 2px;
-  transform: rotate(45deg);
-  transform-origin: left center;
-}
-
-[dir="rtl"] .site-search__icon::after {
-  transform: rotate(-45deg);
-  transform-origin: right center;
+  width: 100%;
+  height: 100%;
 }
 
 .site-search {

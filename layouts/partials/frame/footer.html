@@ -82,33 +82,36 @@
     {{- end }}
   </div>
   {{- end }}
-  {{- $bar := and $rich (or site.Menus.footer $social) }}
-  {{- with site.Menus.footer }}
-  {{- if $bar }}<div class="site-footer__bottom">{{ end }}
-  <nav aria-label="Footer">
-    <ul class="site-footer__list">
-      {{- range . }}
-      <li>
-        <a class="site-footer__link" href="{{ .URL }}"
-          {{- if or ($.IsMenuCurrent "footer" .) ($.HasMenuCurrent "footer" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
-      </li>
-      {{- end }}
-    </ul>
-  </nav>
-  {{- end }}
-  {{- if $social }}
-  {{- if and $bar (not site.Menus.footer) }}<div class="site-footer__bottom">{{ end }}
-  <div class="site-footer__meta">
-    {{- range $social }}
-    <a class="site-footer__social" href="{{ .url }}" aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
-    {{- end }}
-  </div>
-  {{- end }}
   {{- $copyright := printf "© %d %s" now.Year site.Title }}
   {{- with site.Params.copyright }}
   {{- $copyright = replace . "{ year }" (printf "%d" now.Year) }}
   {{- end }}
+  {{- $bar := and $rich (or site.Menus.footer $social) }}
+  {{- if $bar }}<div class="site-footer__bottom">{{ end }}
+  {{- with site.Menus.footer }}
+  <nav aria-label="Footer">
+    <ul class="site-footer__list">
+      {{- range . }}
+      {{- if .URL }}
+      <li>
+        <a class="site-footer__link" href="{{ .URL }}"
+          {{- if or ($.IsMenuCurrent "footer" .) ($.HasMenuCurrent "footer" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
+      </li>
+      {{- else }}
+      {{- if hugo.IsServer }}{{- warnf "menu.footer %q resolves to no URL — the entry is dropped, not rendered as a dead link" .Name }}{{- end }}
+      {{- end }}
+      {{- end }}
+    </ul>
+  </nav>
+  {{- end }}
   <p class="site-footer__copyright">{{ $copyright }}</p>
+  {{- if $social }}
+  <div class="site-footer__meta">
+    {{- range $social }}
+    <a class="site-footer__social" href="{{ .url }}" aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
+    {{- end }}
+  </div>
+  {{- end }}
   {{- if $bar }}</div>{{ end }}
 </footer>
 {{- if $footer.showScrollToTop }}

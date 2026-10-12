@@ -13,6 +13,9 @@
              row cards; compared against an explicit "true" so a string
              "false" selects the row branch (the source template's truthy
              check sent it to the grid branch)
+    summary  (bool)   — show each page's summary on its card, default true;
+             compared against an explicit "false" so a string "true"
+             still shows it
 
   The page containing the shortcode never appears in its own list.
 
@@ -23,6 +26,7 @@
 {{- $where := .Get "where" -}}
 {{- $value := .Get "value" -}}
 {{- $cardView := eq (printf "%v" (.Get "cardView")) "true" -}}
+{{- $showSummary := ne (printf "%v" (.Get "summary")) "false" -}}
 {{- $preset := cond $cardView "grid" "row" -}}
 {{- $pages := .Site.RegularPages -}}
 {{- if $where }}{{- $pages = where $pages $where $value -}}{{- end -}}
@@ -34,7 +38,7 @@
     {{- partial "page/card.html" (dict
         "page" $p
         "preset" $preset
-        "showSummary" false
+        "showSummary" $showSummary
         "index" $i) }}
     {{- end }}
   {{- end }}

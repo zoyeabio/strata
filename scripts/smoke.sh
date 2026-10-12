@@ -236,8 +236,8 @@ assert 'section-a/shortcodes/index.html' 'src="https://maps.google.com/maps\?q=S
   'map passes the embed URL through'
 count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 6 \
   'three figures, two slides and the loop clone carry the text sizes'
-count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 5 \
-  'four list cards plus the first slide load eagerly'
+count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 6 \
+  'five list cards plus the first slide load eagerly'
 if qual_out=$(python3 - "$OUT" <<'PY'
 import re
 import sys
@@ -269,8 +269,10 @@ count_assert 'section-a/shortcodes/index.html' 'card card--grid' 2 \
   'the grid list renders two cards'
 assert 'section-a/shortcodes/index.html' 'class="shortcode-list">' \
   'cardView=false selects the row branch (base class only)'
-count_assert 'section-a/shortcodes/index.html' 'card card--row' 2 \
-  'the row list renders two cards'
+count_assert 'section-a/shortcodes/index.html' 'card card--row' 3 \
+  'the row lists render three cards'
+count_assert 'section-a/shortcodes/index.html' 'card__summary' 5 \
+  'list and embedded cards render their summaries (summary=false suppresses one)'
 assert 'section-a/shortcodes/index.html' '<span class="icon" aria-hidden="true"><svg' \
   'icon inlines the svg from assets/icons'
 
@@ -348,13 +350,21 @@ css_assert() { # css_assert <regex> <label>
   f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
   if [ -n "$f" ] && grep -qE -e "$1" "$f"; then pass "$2"; else fail "$2"; fi
 }
+
+css_assert_not() { # css_assert_not <regex> <label>
+  local f
+  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+  if [ -z "$f" ]; then fail "$2"; return; fi
+  if grep -qE -e "$1" "$f"; then fail "$2"; else pass "$2"; fi
+}
 css_assert 'max-width:720px' 'prose caps at 720px (text preset)'
-css_assert 'width:200px' 'row thumb is fixed at 200px (row/inline preset)'
+assert 'section-a/shortcodes/index.html' 'min-width:640px\) 240px' \
+  'row thumb requests a 240px image at the fixed column width'
 css_assert 'repeat\(3,minmax\(0,1fr\)\)' 'three columns from 853px (grid preset)'
 css_assert 'repeat\(2,minmax\(0,1fr\)\)' 'two columns from 640px (grid preset)'
 css_assert '@media\(min-width:853px\)\{:root\{--site-gutter:96px' \
   'gutter rung 96px sits at the 853px breakpoint'
-css_assert ':root\{--site-gutter:24px;--site-content:1024px\}' \
+css_assert ':root\{--site-gutter:24px;--site-content:1024px;--brand-logo-height' \
   'base gutter 24px and content cap 1024px'
 css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
   'gutter rung 56px sits at the 640px breakpoint'
@@ -539,6 +549,8 @@ assert 'index.html' 'Quick Links' 'footer quick links title renders'
 assert 'index.html' 'info&#64;example\.net' 'footer email is entity-obfuscated'
 assert 'index.html' 'Testville' 'footer address second line renders'
 assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
+assert 'index.html' 'aria-label="LinkedIn"[^>]*><svg' \
+  'theme-shipped brand icon resolves from the module assets'
 assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
 assert 'index.html' 'site-header__toggle" data-appearance-toggle' 'switcher sits in the header'
 assert_not 'index.html' 'data-appearance-toggle aria-pressed' \
@@ -546,6 +558,9 @@ assert_not 'index.html' 'data-appearance-toggle aria-pressed' \
 assert 'index.html' 'class="back-to-top" data-scroll-top' 'scroll-to-top floats at the viewport corner'
 assert 'index.html' 'aria-label="Back to top"' 'scroll-to-top is labelled'
 assert 'index.html' 'site-footer__bottom' 'rich footer bottom travels as one bar'
+assert 'index.html' 'href="/tags/"' 'footer menu entry links its page'
+assert_not 'index.html' 'Categories<' 'unresolvable footer menu entry is dropped'
+assert_not 'index.html' 'href="/categories/"' 'dropped footer menu entry ships no dead link'
 assert_not 'index.html' 'site-footer__title' 'rich footer drops the duplicate identity block'
 
 # 33. breadcrumbs: article and section trails link Home and ancestors,
@@ -610,6 +625,10 @@ assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
 #     standalone pages render full width
 assert 'notice/index.html' 'class="page--wide"' 'non-article single goes full width'
 assert_not 'section-a/flat/index.html' 'page--wide' 'article single stays capped'
+assert 'index.html' 'class="page-content prose page--wide"' 'home content uses the wide landing measure'
+css_assert 'page--wide\.prose\{max-width:none' 'landing page lifts the measure off the container'
+css_assert_not 'page--wide\.prose>p\{max-width' \
+  'landing paragraphs ride the wide measure, no separate cap'
 # 44. list and single pages share one top rhythm: the article header
 #     carries no top margin of its own (hero images keep their own spacing)
 css_assert 'article__header\{max-width:720px;margin:0 auto' 'article header starts at the shared offset'
@@ -622,9 +641,61 @@ assert 'index.html' 'menu\.[0-9a-f]+\.js' 'menu script loads'
 assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel'
 assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
 assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
-css_assert 'site-header\{--header-bar:68px;position:relative' 'standard header anchors the mobile panel'
-css_assert 'site-nav__link\[aria-current=page\]\{[^}]*font-weight:600' 'active nav item has a non-color cue'
+css_assert 'site-header\{--header-bar:56px;position:relative' 'standard header anchors the mobile panel'
+css_assert 'site-header\{[^}]*padding-block:6px' 'header padding agrees with the 56px bar'
+css_assert 'site-nav__link\{[^}]*font-size:16px' 'nav links carry the 16px size'
+css_assert 'site-nav__link\{[^}]*font-weight:600' 'nav links carry the weight that makes them read at 16px'
+css_assert 'site-nav\{margin-inline-start:auto' 'nav and action buttons sit as one group at the right'
+assert 'index.html' 'class="site-nav" id="site-navigation"' \
+  'the nav carries the class that right-align rule targets'
+css_assert 'max-width:852px\)\{\.site-nav__toggle\{display:inline-flex;margin-inline-start:auto' \
+  'mobile: the hidden nav gives its auto margin to the hamburger'
+css_assert 'site-header\{[^}]*gap:12px' 'header items are tight once the nav is pushed right'
+css_assert '\-\-brand-logo-height:48px' 'logo height is a token a site can override'
+css_assert 'site-brand__logo\{[^}]*height:var\(--brand-logo-height\)' 'logo size reads the token'
+css_assert 'site-header__toggle\{[^}]*width:44px' 'appearance toggle is a square target, not a padded box'
+css_assert 'site-header__toggle\{[^}]*border:0' 'appearance toggle carries no box, hover is colour only'
+css_assert 'site-header__search\{[^}]*border:0' 'search toggle carries no box, hover is colour only'
+css_assert 'site-nav__toggle\{[^}]*border:0' 'hamburger carries no box'
+assert 'index.html' 'site-search__icon" aria-hidden="true"><svg' 'search toggle ships the search glyph'
+assert 'index.html' 'site-nav__bars" aria-hidden="true"><svg' 'hamburger ships the bars glyph'
+css_assert 'site-nav__link\[aria-current=page\]\{[^}]*font-weight:700' 'active nav item has a non-color cue'
+css_assert 'site-footer__link\{[^}]*min-height:28px' 'footer links keep a 28px target'
+css_assert 'site-footer__heading\{font-size:16px' 'footer column headings carry the 16px size'
+css_assert 'site-header__toggle__icon\{[^}]*width:18px' 'appearance glyphs render at 18px'
+assert 'index.html' 'site-header__toggle__icon--moon' 'appearance toggle ships both scheme glyphs'
+# The moon-hide rule must come AFTER the shared icon box rule. Both carry one
+# class of specificity, so source order decides — reversed, both glyphs render
+# at once. This is a cascade-order property, so grep for the offsets.
+if cssfile=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1) &&
+   [ -n "$cssfile" ] &&
+   base_off=$(grep -bo 'site-header__toggle__icon{display:inline-flex' "$cssfile" | cut -d: -f1) &&
+   moon_off=$(grep -bo 'site-header__toggle__icon--moon{display:none' "$cssfile" | cut -d: -f1) &&
+   [ "$base_off" -lt "$moon_off" ]; then
+  pass 'moon glyph hides after the shared icon box rule'
+else
+  fail 'moon glyph hides after the shared icon box rule'
+fi
 css_assert 'site-footer__link\[aria-current=page\]\{[^}]*font-weight:600' 'active footer item has a non-color cue'
+css_assert 'carousel__indicators\{[^}]*position:absolute' 'carousel dots overlay the image'
+css_assert 'carousel__indicators\{[^}]*bottom:10px' 'carousel dots sit at the image bottom'
+css_assert 'carousel__indicators button\{[^}]*width:32px' 'carousel dots are bars, not circles'
+css_assert 'carousel__indicators button::before\{[^}]*inset:-10px -6px' \
+  'carousel dot hit area stays at 44x25 behind a 5px bar'
+css_assert 'carousel:has\(\.carousel__caption\)[^}]*\.carousel__indicators\{top:10px' \
+  'captioned carousel moves the dots above the caption'
+css_assert 'card--row:has\(> *\.card__media\)[^{}]*\{[^}]*240px 1fr' \
+  'row card splits into two columns only when it has media'
+css_assert 'card--row:has\(> *\.card__media\) \.card__media[^{}]*\{[^}]*min-height:0' \
+  'row thumb height comes from the 16:9 aspect, not the source image'
+css_assert 'card--row:has\(> *\.card__media\) \.card__summary[^{}]*\{[^}]*grid-column:2' \
+  'row summary sits beside the thumb, not over it'
+css_assert_not 'min-height:112px' 'no residual row thumb minimum height'
+css_assert 'site-footer__meta\{[^}]*margin-inline-start:auto' \
+  'footer social group sits at the right of the bottom bar'
+css_assert 'site-footer__social\{[^}]*background:var\(--surface\)' 'footer social is a filled tile'
+css_assert 'site-footer__social:has\(svg\)\{[^}]*width:44px' 'footer social icon fills the tile'
+css_assert 'site-footer__social svg\{[^}]*width:22px' 'footer social glyphs are large enough to read'
 # 45b. the 853px breakpoint is written twice (CSS collapse, JS reset):
 #     drift once and the panel sticks open on desktop or never opens
 if grep -q 'min-width: 853px' "$ROOT/assets/js/menu.js" &&
@@ -1087,6 +1158,37 @@ PY
   pass "related, meta separators and share render only on articles ($rel_out)"
 else
   fail 'related, meta separators and share render only on articles'
+fi
+
+ # scripts/lib/build_config.py resolves the same config pair Hugo merges: the
+# theme's config.toml underneath a site's own. Assert the merge semantics, so
+# a ladder, cap or budget can never drift back into a template or a script.
+CFG_DEFAULT="$(python3 "$ROOT/scripts/lib/build_config.py")"
+CFG_DIR="$(mktemp -d)"
+mkdir -p "$CFG_DIR/config/_default"
+cat > "$CFG_DIR/config/_default/params.toml" <<'EOF'
+[params.image]
+  ladder = [560, 900]
+  quality = 71
+  [params.image.caps]
+    card = 760
+EOF
+CFG_SITE="$(python3 "$ROOT/scripts/lib/build_config.py" --site "$CFG_DIR")"
+rm -rf "$CFG_DIR"
+CFG_OWN='^(IMAGE_LADDER|IMAGE_QUALITY|IMAGE_CAP_CARD)='
+
+if ( eval "$CFG_SITE" && [ "$IMAGE_LADDER" = '560 900' ] && [ "$IMAGE_QUALITY" -eq 71 ] \
+     && [ "$IMAGE_CAP_CARD" -eq 760 ] && [ "$IMAGE_CAP_HERO" -eq 1920 ] ); then
+  pass 'build_config applies a site override over the theme defaults'
+else
+  fail 'build_config applies a site override over the theme defaults'
+fi
+
+if diff <(printf '%s\n' "$CFG_DEFAULT" | grep -Ev "$CFG_OWN") \
+        <(printf '%s\n' "$CFG_SITE" | grep -Ev "$CFG_OWN") >/dev/null; then
+  pass 'build_config deep-merges: unset keys keep the theme defaults'
+else
+  fail 'build_config deep-merges: unset keys keep the theme defaults'
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

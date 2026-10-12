@@ -32,7 +32,40 @@ else
   pass 'production build is silent'
 fi
 
-if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme; then
+# A theme can only ship config from its root config.toml — Hugo ignores a
+# theme's config/_default/ — so the image pipeline and build thresholds live
+# there. Prove they reach a consuming site; without this the theme could keep
+# shipping broken config and every gate below would still pass on the
+# scripts' own fallback defaults.
+if cfg_out=$(cd "$ROOT" && python3 - <<'PY'
+import json
+import subprocess
+import sys
+
+cfg = json.loads(subprocess.check_output([
+    "hugo", "--source", "test/fixture", "--format", "json", "config",
+], text=True))
+missing = []
+for path in (("image", "ladder"), ("image", "quality"), ("image", "caps"),
+             ("image", "og"), ("build", "pageimageskb"),
+             ("build", "minwidth")):
+    node = cfg.get("params", {})
+    for key in path:
+        node = node.get(key, {}) if isinstance(node, dict) else {}
+    if not node:
+        missing.append("params.%s" % ".".join(path))
+if missing:
+    print("FAIL missing: %s" % ", ".join(missing), file=sys.stderr)
+    sys.exit(1)
+print("params.image and params.build merge into the site")
+PY
+); then
+  pass "the theme's config.toml reaches a consuming site ($cfg_out)"
+else
+  fail 'the theme config.toml reaches a consuming site'
+fi
+
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture"; then
   pass 'check-build theme mode'
 else
   fail 'check-build theme mode'

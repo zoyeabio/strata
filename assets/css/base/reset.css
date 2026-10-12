@@ -2,6 +2,7 @@
 :root {
   --site-gutter: 24px;
   --site-content: 1024px;
+  --brand-logo-height: 48px;
 }
 
 @media (min-width: 640px) {

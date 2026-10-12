@@ -19,3 +19,15 @@
   pageRef = "section-a/nested/post"
   parent = "guides"
   weight = 20
+
+[[footer]]
+  name = "Tags"
+  pageRef = "tags"
+  weight = 10
+
+# "Categories" is a section this site never declared, so the pageRef does not
+# resolve. The footer must drop the entry rather than ship href="".
+[[footer]]
+  name = "Categories"
+  pageRef = "categories"
+  weight = 20

@@ -112,7 +112,7 @@ else
   fail 'share URL templates consume both arguments'
 fi
 
-if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode site; then
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode site --site "$SITE"; then
   pass 'check-build site mode'
 else
   fail 'check-build site mode'

@@ -32,14 +32,15 @@ otherwise they are skipped with a development warning.
 
 ## Variant ladder
 
-Bitmap images (JPEG/PNG) are encoded as WebP at widths 480, 800, 1280, 1920,
-each step capped by the source width and by the image role, de-duplicated,
-and a step less than 15% wider than its predecessor is dropped. Results:
+Bitmap images (JPEG/PNG) are encoded as WebP at the ladder widths —
+`[params.image].ladder`, 480 / 800 / 1280 / 1920 by default — each step capped
+by the source width and by the image role, de-duplicated, and a step less than
+15% wider than its predecessor is dropped. Results:
 
 - at most four files per image
 - never two near-identical widths
-- one quality everywhere (WebP q78 by default), so one width is never stored
-  twice at two qualities
+- one quality everywhere (`[params.image].quality`, WebP q78 by default), so
+  one width is never stored twice at two qualities
 
 SVG, GIF and animated WebP bypass processing entirely (the pipeline would
 flatten animations to frame one). `disableImageOptimization = true` returns
@@ -53,6 +54,9 @@ the original file for every role.
 | `illustration` (default) | 1280 | body figures, markdown images |
 | `hero` | 1920 | article hero, with preload |
 | `og` | 1200×630 JPEG fill | Open Graph / Twitter card |
+
+The caps are `[params.image].caps.*` and the preview size is
+`[params.image].og.width` / `.height`, both overridable per site.
 
 ## Front matter
 

@@ -12,13 +12,16 @@
 #
 # Copies --file to assets/images/{section}/{slug}/{filename} and prints the
 # front matter reference (the bare filename) for a page bundle at
-# content/{section}/{slug}/index.md. Size lint:
-#   hero         >= 1600 wide
-#   illustration >= 1280 wide
-#   card         >= 1200 wide
-#   og            exactly 1200x630
+# content/{section}/{slug}/index.md.
+#
+# The size lint is config, not code: [params.build.minwidth] per role, and
+# [params.image.og] for the social preview, which must be an exact match.
+# scripts/lib/build_config.py resolves the theme defaults in config.toml
+# merged with --site's own config, the same pair Hugo merges for rendering.
 # A failing lint exits non-zero and writes nothing.
 set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 SECTION=""
 POST=""
@@ -45,16 +48,27 @@ if [ -n "$SITE" ]; then
   SITE="$(cd "$SITE" && pwd)"
 fi
 
+# Size thresholds from config: the theme's config.toml merged with the
+# site's own, resolved by scripts/lib/build_config.py — the same file pair
+# Hugo merges when it renders. Needs python3 >= 3.11 for tomllib.
+CFG_CMD=("$ROOT/scripts/lib/build_config.py")
+if [ -n "$SITE" ]; then CFG_CMD+=(--site "$SITE"); fi
+if ! BUILD_CONFIG="$(python3 "${CFG_CMD[@]}")"; then
+  printf 'ERROR: failed to resolve the build config (needs python3 >= 3.11)\n' >&2
+  exit 2
+fi
+eval "$BUILD_CONFIG"
+
 if [ ! -f "$FILE" ]; then
   printf 'ERROR: source image not found: %s\n' "$FILE" >&2
   exit 2
 fi
 
 case "$ROLE" in
-  hero) MIN_W=1600 ;;
-  illustration) MIN_W=1280 ;;
-  card) MIN_W=1200 ;;
-  og) MIN_W=1200 ;;
+  hero) MIN_W="$MIN_WIDTH_HERO" ;;
+  illustration) MIN_W="$MIN_WIDTH_ILLUSTRATION" ;;
+  card) MIN_W="$MIN_WIDTH_CARD" ;;
+  og) MIN_W="$MIN_WIDTH_OG" ;;
   *) printf 'ERROR: unknown role %s (hero|illustration|card|og)\n' "$ROLE" >&2; exit 2 ;;
 esac
 
@@ -105,8 +119,9 @@ W="${dims% *}"
 H="${dims#* }"
 
 if [ "$ROLE" = "og" ]; then
-  if [ "$W" -ne 1200 ] || [ "$H" -ne 630 ]; then
-    printf 'FAIL og image must be exactly 1200x630 (got %sx%s)\n' "$W" "$H" >&2
+  if [ "$W" -ne "$OG_WIDTH" ] || [ "$H" -ne "$OG_HEIGHT" ]; then
+    printf 'FAIL og image must be exactly %sx%s (got %sx%s)\n' \
+      "$OG_WIDTH" "$OG_HEIGHT" "$W" "$H" >&2
     exit 1
   fi
 elif [ "$W" -lt "$MIN_W" ]; then

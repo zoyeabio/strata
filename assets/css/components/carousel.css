@@ -8,32 +8,48 @@
   background: var(--surface);
 }
 
+/* The dots overlay the image instead of taking a bar out of the layout.
+   page-bg is white on a light page and reads the same as the caption's scrim,
+   so the active and idle states stay one token apart in both schemes. */
 .carousel__indicators {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 10px;
+  z-index: 2;
   display: flex;
   justify-content: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 14px;
+  padding: 0;
 }
 
 .carousel__indicators button {
   position: relative;
-  width: 10px;
-  height: 10px;
+  width: 32px;
+  height: 5px;
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--border-strong);
+  background: color-mix(in srgb, var(--page-bg) 55%, transparent);
   cursor: pointer;
 }
 
+/* A 5px strip would be a near-miss to tap; the invisible pad carries the hit
+   area out to 44x25 without painting anything extra. */
 .carousel__indicators button::before {
   content: "";
   position: absolute;
-  inset: -8px;
+  inset: -10px -6px;
 }
 
 .carousel__indicators button[data-carousel-active] {
-  background: var(--site-accent);
+  background: var(--page-bg);
+}
+
+/* A caption already owns the bottom edge of the image, so the dots move to
+   the top rather than painting over the caption's scrim. */
+.carousel:has(.carousel__caption) .carousel__indicators {
+  top: 10px;
+  bottom: auto;
 }
 
 .carousel__viewport {

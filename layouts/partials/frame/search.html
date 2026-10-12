@@ -12,8 +12,9 @@
 */ -}}
 {{- if site.Params.enableSearch }}
 {{- $searchJS := resources.Get "js/search.js" | fingerprint "sha512" }}
+{{- $icon := resources.Get "icons/search.svg" }}
 <button type="button" class="site-header__search" data-search-toggle aria-expanded="false" aria-controls="site-search" aria-label="Search">
-  <span class="site-search__icon" aria-hidden="true"></span>
+  <span class="site-search__icon" aria-hidden="true">{{- with $icon }}{{- strings.TrimSpace .Content | safeHTML -}}{{- end }}</span>
 </button>
 <div class="site-search" id="site-search" data-search-panel data-search-index="{{ "index.json" | relURL }}">
   <label class="sr-only" for="site-search-input">Search articles</label>

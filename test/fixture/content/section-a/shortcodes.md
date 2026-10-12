@@ -23,6 +23,8 @@ output contract.
 
 {{< content/list limit=2 cardView=false title="Row picks" >}}
 
+{{< content/list limit=1 cardView=false summary=false title="Row picks, no summary" >}}
+
 {{< content/icon "check" >}}
 
 ## interactive

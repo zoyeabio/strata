@@ -1,0 +1,51 @@
+# Strata's image pipeline and build thresholds.
+#
+# A theme can only ship config from its root config.toml — Hugo ignores a
+# theme's config/_default/ — so the defaults live here and merge underneath
+# every site. A site overrides a single key in its own params.toml; that key
+# then wins everywhere, in the templates and in scripts/lib/build_config.py,
+# which resolves the same file pair for the build scripts. Environment
+# overlays (config/production/) are read by Hugo only, not by the scripts.
+#
+# Keys are lowercase: Hugo lowercases every config key, and the build scripts
+# read the file straight through tomllib, so a camelCase key would be
+# invisible to them.
+
+[params.image]
+  # Variant widths, smallest first. Each step is capped by the source width
+  # and by the role cap below, de-duplicated, and a step under 15% wider than
+  # its kept predecessor is dropped. Four is the working maximum — one image
+  # is never more than four files.
+  ladder = [480, 800, 1280, 1920]
+
+  # One WebP quality for every width, so the same width is never written
+  # twice at two qualities.
+  quality = 78
+
+  [params.image.caps]
+    card = 800
+    illustration = 1280
+    hero = 1920
+    og = 1920
+
+  # The social preview is generated at a fixed size: 1200x630 is what
+  # Facebook, LinkedIn and Google request. scripts/place-image.sh lints the
+  # source against this same pair.
+  [params.image.og]
+    width = 1200
+    height = 630
+
+[params.build]
+  # Largest total image payload on a single page, in KiB — check-build R5.
+  # Raise this rather than weakening the rule: it exists to stop a page from
+  # shipping eight 1920px variants.
+  pageimageskb = 600
+
+  # Minimum source width per role, linted by scripts/place-image.sh before an
+  # image is copied into a site. Keep each at or above the matching cap above
+  # — a source narrower than its own cap can never fill the widest variant.
+  [params.build.minwidth]
+    hero = 1600
+    illustration = 1280
+    card = 1200
+    og = 1200

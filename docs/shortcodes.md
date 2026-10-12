@@ -56,6 +56,7 @@ List recent pages as cards inside an article (the current page is excluded).
 | `title` | Heading above the list; default "Recent articles" |
 | `where`, `value` | Filter, e.g. `where="Type" value="journal"` |
 | `cardView` | `true` for grid cards, `false`/absent for row cards |
+| `summary` | Show each page's summary on its card, default `true` |
 
 ## content/icon
 

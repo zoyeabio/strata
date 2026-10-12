@@ -18,6 +18,12 @@ and scientific publishing.
 ## Measure
 
 - Article body (`.prose`) is capped at **720px**
+- Landing pages lift that cap entirely: the home page renders its content as
+  `.page-content .prose .page--wide`, so full-width shortcodes (hero carousel,
+  grids, card rows) **and** the paragraphs around them use the whole column.
+  The 720px measure is for long-form reading; a landing page carries short
+  marketing blocks, where the cap only leaves dead air at the right edge.
+  The same `.page--wide` token is what a non-article single page receives
 - Site content column caps at **1024px** with responsive gutters
   (24px → 56px → 96px → 128px at 640/853/1024px breakpoints)
 - Card rows and grids use the same column width ladder

@@ -29,6 +29,16 @@
   }
 }
 
+/* A landing page lifts the measure off the container, including its own
+   paragraphs. Article body copy stays at the 720px measure: a long reading
+   column at 1024px is hard to scan. A landing page carries marketing copy in
+   short blocks, so the cap only leaves dead air at the right edge.
+   .page--wide is the same token article.css gives a non-article single page,
+   and both lift the same way: max-width: none on the container. */
+.page--wide.prose {
+  max-width: none;
+}
+
 .prose > :first-child {
   margin-top: 0;
 }

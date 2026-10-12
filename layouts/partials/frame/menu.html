@@ -19,11 +19,12 @@
 */ -}}
 {{- with site.Menus.main }}
 {{- $menuJS := resources.Get "js/menu.js" | fingerprint "sha512" }}
+{{- $icon := resources.Get "icons/bars.svg" }}
 <button type="button" class="site-nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="site-navigation">
-  <span class="site-nav__bars" aria-hidden="true"></span>
+  <span class="site-nav__bars" aria-hidden="true">{{- with $icon }}{{- strings.TrimSpace .Content | safeHTML -}}{{- end }}</span>
   <span class="sr-only">Menu</span>
 </button>
-<nav id="site-navigation" data-nav-panel aria-label="Main">
+<nav class="site-nav" id="site-navigation" data-nav-panel aria-label="Main">
   <ul class="site-nav__list">
     {{- range $i, $e := . }}
     <li class="site-nav__item{{ if $e.HasChildren }} site-nav__item--parent{{ end }}">
