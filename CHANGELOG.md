@@ -53,6 +53,10 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - Related content renders as a lazy card grid instead of a plain link list.
 - Share buttons are 44×44 icon tiles instead of outlined pills; the label
   moves to `aria-label` and the theme now ships `email` and `whatsapp` icons.
+- The 1px rules above the related grid and the adjacent-article block are
+  gone. Both sections separate by their own 28px space, which is what the
+  "Related" heading already needed — the rules sat flush against the share
+  tiles and the card images and read as noise.
 - Breadcrumbs show ancestors only — Home, then each parent up to the
   section — since the current page is the `<h1>` beside the trail and would be
   a crumb with no destination. A crumb takes its menu entry's name over the
