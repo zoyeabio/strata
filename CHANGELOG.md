@@ -18,6 +18,14 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   carry a roadmap.
 - `shortcodes.md` "Not implemented": same, and it was wrong — search ships in
   `frame/search.html`.
+- `product-pages.md`: the whole file was aspirational, and it documented
+  `schema.enableProduct` — a config key no template reads. No gate asserted
+  it and no site-layer product template exists, so the key was reserved for
+  work the theme never ships. The key row is gone from `configuration.md` too,
+  and the forward reference left in `head/schema.html`'s doc comment.
+- `images.md` note that focal-point cropping is planned; `README.md`'s
+  "in development… not every component is available yet", which was false —
+  the rebuild is done.
 
 ### Added
 

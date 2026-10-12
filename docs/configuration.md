@@ -79,7 +79,6 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
 | `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
-| `schema.enableProduct` | `false` | Reserved for product JSON-LD (site-layer product template, planned) |
 
 ## Navigation (`menus.en.toml`)
 

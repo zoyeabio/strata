@@ -97,5 +97,4 @@ figures that need sharper text.
 ## Focus / cropping
 
 `og` fills are always 1200×630 (centre crop). Variant resizing never crops —
-aspect ratio is preserved. Per-image focal-point cropping (`focus` front
-matter) is planned, not shipped.
+aspect ratio is preserved.

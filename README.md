@@ -6,8 +6,8 @@ Strata keeps everything site-agnostic inside the theme — layout, components
 and styling. Branding, copy, navigation and configuration stay in each site's
 own layer, so one theme can serve several sites without forking.
 
-**Status:** in development. The theme is being rebuilt file by file, and not
-every component is available yet.
+**Status:** the rebuild is complete. Everything linked under [docs/](docs/README.md)
+describes shipped behaviour.
 
 ## Highlights
 
@@ -57,11 +57,10 @@ this from the theme — see [docs/installation.md](docs/installation.md)):
 |---|---|
 | [docs/installation.md](docs/installation.md) | Module setup, taxonomy contract, first build |
 | [docs/configuration.md](docs/configuration.md) | Site params, front matter keys, site hooks |
-| [docs/images.md](docs/images.md) | Image storage, ladder, focus, roles |
+| [docs/images.md](docs/images.md) | Image storage, ladder, cropping, roles |
 | [docs/typography.md](docs/typography.md) | Type scale, prose width, system fonts |
 | [docs/customization.md](docs/customization.md) | Colour schemes, CSS variables, custom CSS |
 | [docs/shortcodes.md](docs/shortcodes.md) | Shortcode reference and supported parameters |
-| [docs/product-pages.md](docs/product-pages.md) | Product/ingredient pages (planned) |
 
 ## Development
 

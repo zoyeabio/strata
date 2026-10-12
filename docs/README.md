@@ -1,8 +1,7 @@
 # Strata documentation
 
 User-facing documentation for the Strata Hugo theme. Everything here describes
-shipped behaviour; planned work is marked as such and lives in
-[product-pages.md](product-pages.md).
+shipped behaviour.
 
 | Document | Contents |
 |---|---|
@@ -12,6 +11,5 @@ shipped behaviour; planned work is marked as such and lives in
 | [typography.md](typography.md) | Type scale, prose width, system font stack |
 | [customization.md](customization.md) | Colour schemes, CSS variables, custom CSS |
 | [shortcodes.md](shortcodes.md) | Shortcode reference and supported parameters |
-| [product-pages.md](product-pages.md) | Product/ingredient pages (planned) |
 
 Internal rebuild notes are not published here.
