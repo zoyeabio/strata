@@ -74,6 +74,13 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
   page title, so a long section title no longer ships as one crumb; the
   JSON-LD `BreadcrumbList` keeps the current page, which search engines want.
   Nothing renders when nothing sits above Home.
+- The header bar's 1px bottom rule is gone. The opaque `--page-bg` background
+  already separates the bar from the page, and it does the real work when the
+  smart header is pinned over scrolling text. It also drops the border out of
+  the border-box 92px `min-height`, so the rendered height is exactly
+  `--header-bar` and the mobile panel's `calc(100vh - var(--header-bar))` stops
+  being off by a pixel. Dropdowns keep their own bottom rules, which mark the
+  panel not the bar.
 - `check-build.sh` and `place-image.sh` accept `--environment`, so a build made
   for a non-default environment is checked against the same config overlay Hugo
   used instead of a silently misassumed one.

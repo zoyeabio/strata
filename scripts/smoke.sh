@@ -716,6 +716,7 @@ assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel
 assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
 assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
 css_assert 'site-header\{--header-bar:92px;position:relative' 'standard header anchors the mobile panel'
+css_assert_not 'site-header\{[^}]*border-bottom' 'header bar is ruled by its opaque background, not a hairline'
 css_assert 'site-header\{[^}]*padding-block:6px' 'header padding agrees with the 92px bar'
 css_assert 'site-nav__link\{[^}]*font-size:16px' 'nav links carry the 16px size'
 css_assert 'site-nav__link\{[^}]*font-weight:600' 'nav links carry the weight that makes them read at 16px'
