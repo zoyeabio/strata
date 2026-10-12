@@ -10,6 +10,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Hugo 0.161.0+ runs the TailwindCSS CLI through node, so its npm install has
+# to be on PATH before any build below can transform the stylesheet.
+if [ -d "$ROOT/node_modules/.bin" ]; then
+  PATH="$ROOT/node_modules/.bin:$PATH"
+  export PATH
+fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0

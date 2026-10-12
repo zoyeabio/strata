@@ -26,8 +26,21 @@ enableRobotsTXT = true
     name = "series"
     weight = 50
 
+# Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the tailwindcss
+# script and its interpreter must both be allowed, and the tailwindcss addon
+# needs its own node policy
+[security.node]
+  [security.node.permissions]
+    allowAddons = ['tailwindcss']
+    allowChildProcess = ['tailwindcss']
+    allowRead = ['.']
+    allowWorker = ['tailwindcss']
+    allowWrite = []
+    disable = false
+
 [security.exec]
-  allow = ['go', 'tailwindcss']
+  allow = ['go', 'node', 'tailwindcss']
+
 
 # Hugo docs css.TailwindCSS recipe: stats + watch wiring so server rebuilds
 # stay fresh (the pipeline scans @source files, not hugo_stats.json)

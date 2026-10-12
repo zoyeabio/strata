@@ -1,0 +1,5 @@
+# Environment overlay for the "remote images opt in" assertion in
+# scripts/smoke.sh. Replaces the HUGO_PARAMS_ALLOWREMOTEIMAGES env var the
+# assertion used to use; Hugo dropped HUGO_PARAMS_* overrides after 0.151.
+[params]
+  allowRemoteImages = true

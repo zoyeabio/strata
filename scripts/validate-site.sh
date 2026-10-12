@@ -15,6 +15,16 @@ if [ ! -d "$SITE" ]; then
   printf 'ERROR: no such site directory: %s\n' "$SITE" >&2
   exit 2
 fi
+# Hugo 0.161.0+ runs the TailwindCSS CLI through node. A site that ran `npm
+# install` puts it in its own node_modules/.bin, which is not on PATH by
+# default — the same reason `npm run` adds it. Fall back to this checkout's
+# install for a site that has not wired it yet.
+for bin in "$SITE/node_modules/.bin" "$ROOT/node_modules/.bin"; do
+  if [ -d "$bin" ]; then
+    PATH="$bin:$PATH"
+    export PATH
+  fi
+done
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 

@@ -1,0 +1,10 @@
+# Environment overlay for the "site description absent" assertion in
+# scripts/smoke.sh. The theme's own languages.en.toml sets [params]
+# description, which is what pages fall back to; clearing it here reaches the
+# last resort past that — the page title. An empty string is what makes the
+# template's `| default` treat the key as missing.
+#
+# Hugo dropped HUGO_PARAMS_* environment-variable overrides after 0.151, so
+# this overlay replaces the env var the assertion used to use.
+[params]
+  description = ""

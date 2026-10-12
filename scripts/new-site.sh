@@ -95,7 +95,7 @@ enableEmoji = false
 
 [module.hugoVersion]
   extended = true
-  min = "0.151.0"
+  min = "0.161.0"
 
 [pagination]
   pagerSize = 12
@@ -112,8 +112,20 @@ enableEmoji = false
 [outputs]
   home = ["HTML", "RSS"]
 
+# Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the tailwindcss
+# script and its interpreter must both be allowed, and the tailwindcss addon
+# needs its own node policy
+[security.node]
+  [security.node.permissions]
+    allowAddons = ['tailwindcss']
+    allowChildProcess = ['tailwindcss']
+    allowRead = ['.']
+    allowWorker = ['tailwindcss']
+    allowWrite = []
+    disable = false
+
 [security.exec]
-  allow = ['go', 'tailwindcss']
+  allow = ['go', 'node', 'tailwindcss']
 
 # Hugo docs css.TailwindCSS recipe: stats + watch wiring so server rebuilds
 # stay fresh (the pipeline scans @source files, not hugo_stats.json)
@@ -325,10 +337,31 @@ require github.com/zoyeabio/strata ${MODULE_VERSION}
 replace github.com/zoyeabio/strata => $ROOT
 EOF
 
+# package.json — Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the
+# build needs an npm install. `npm run build` / `npm run dev` put
+# node_modules/.bin on PATH, which is how Hugo finds the tailwindcss script.
+cat > "$OUT/package.json" <<EOF
+{
+  "name": "$SLUG",
+  "private": true,
+  "scripts": {
+    "dev": "hugo server -D",
+    "build": "hugo --minify"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "@tailwindcss/forms": "0.5.11",
+    "@tailwindcss/typography": "0.5.20",
+    "tailwindcss": "4.3.3"
+  }
+}
+EOF
+
 # .gitignore
 cat > "$OUT/.gitignore" <<'EOF'
 resources/
 public/
+node_modules/
 .DS_Store
 EOF
 
@@ -341,9 +374,22 @@ the Strata Hugo theme.
 
 ## Development
 
-The theme compiles its CSS in-process and needs the Tailwind v4 CLI
-(`tailwindcss`, standalone binary from the Tailwind releases) on PATH at
-build time; the required exec/build sections are already in
+Hugo compiles the theme's CSS in-process and, since 0.161.0, runs the
+Tailwind v4 CLI through node. Install the build dependencies once:
+
+\`\`\`sh
+npm install
+\`\`\`
+
+Then build or serve through npm, which puts node_modules/.bin on PATH — that
+is how Hugo finds the tailwindcss script:
+
+\`\`\`sh
+npm run dev      # hugo server -D
+npm run build    # hugo --minify
+\`\`\`
+
+The required security.exec and security.node sections are already in
 `config/_default/hugo.toml`.
 
 Articles are page bundles:

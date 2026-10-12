@@ -56,6 +56,18 @@ be re-derived from the templates.
   would be read by nobody. `validate-site.sh` asserts the host site declares
   `tags` and `series`; tag and series links resolve through `GetTerms`, so a
   tag with no built term page renders no link instead of a dead one.
+- **Hugo 0.161.0+ compiles the stylesheet through node.** Hugo dropped the
+  standalone Tailwind binary in 0.161.0, so the theme ships a `package.json`
+  naming the four Tailwind packages and `scripts/new-site.sh` writes one into
+  every scaffolded site; `npm run build` is what puts `node_modules/.bin` on
+  PATH for Hugo. A site config needs `node` next to `tailwindcss` in
+  `[security.exec]` plus a `[security.node].permissions` block for the addon —
+  Hugo inherits neither from a theme. Along the same line Hugo dropped
+  `HUGO_PARAMS_*` environment-variable overrides, so the fixture reaches its
+  config-only states through the `config/remote/` and `config/nodesc/`
+  environment overlays instead; and its default `baseURL` became absolute,
+  which makes canonical and share URLs absolute too. Both are correct, so the
+  share assertion pins the built canonical rather than the shape the URL takes.
 - **The hero preload goes through `safeHTML`.** html/template URL-escapes the
   `imagesrcset` attribute, so a bare expression turned `url 480w` into one
   malformed URL and silently killed the preload.

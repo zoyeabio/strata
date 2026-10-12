@@ -2,8 +2,8 @@
 # description, not [params] description. [params] description is deliberately
 # left unset so the fixture inherits the theme's, which means pages without a
 # front matter description exercise the site-level fallback in
-# data/description.html. scripts/smoke.sh builds once more with
-# HUGO_PARAMS_DESCRIPTION= to reach the last resort past that.
+# data/description.html. scripts/smoke.sh builds once more against the
+# config/nodesc/ overlay to reach the last resort past that.
 title = "Strata Fixture"
 description = "Rendered assertions for the theme"
 

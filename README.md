@@ -21,9 +21,9 @@ describes shipped behaviour.
 
 ## Requirements
 
-- [Hugo](https://gohugo.io) **0.151.0 or later**, Extended edition
-- Go (only needed for Hugo Modules)
-- Node.js (only needed when changing theme CSS — see Development)
+- [Hugo](https://gohugo.io) **0.161.0 or later**, Extended edition
+- Node.js 20 or later, with npm — Hugo runs the Tailwind CSS CLI through node
+- Go 1.22 (only needed for Hugo Modules)
 
 ## Installation
 
@@ -67,9 +67,8 @@ this from the theme — see [docs/installation.md](docs/installation.md)):
 The theme repo carries its own gates. After any change:
 
 ```sh
-# once — standalone Tailwind v4 CLI on PATH (pinned: v4.3.3, see releases):
-#   macOS arm64: tailwindcss-macos-arm64, Linux x64: tailwindcss-linux-x64
-#   https://github.com/tailwindlabs/tailwindcss/releases
+# once — Hugo 0.161.0+ runs the Tailwind CSS CLI through node
+npm install
 ./scripts/smoke.sh     # fixture contract assertions
 ./scripts/validate-theme.sh
 ./scripts/audit-partials.sh   # partial call-graph audit (missing/orphan)

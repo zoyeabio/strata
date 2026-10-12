@@ -10,7 +10,7 @@
 {{- if ne $page.Kind "404" }}
 {{- $isHome := eq $page.Kind "home" }}
 {{- $isArticle := and (eq $page.Kind "page") (not $page.Date.IsZero) }}
-{{- $lang := site.Language.LanguageCode | default "en" }}
+{{- $lang := site.Language.Locale | default "en" }}
 {{- $websiteID := printf "%s#website" site.Home.Permalink }}
 {{- $orgID := printf "%s#organization" site.Home.Permalink }}
 {{- $graph := slice }}

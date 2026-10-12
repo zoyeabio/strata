@@ -2,16 +2,11 @@
 
 ## Requirements
 
-- Hugo **0.151.0 or later, but below 0.161.0**, Extended edition (tested
-  on 0.151.0; higher versions are untested — there is no CI matrix yet).
-  As of Hugo 0.161.0 the Tailwind standalone binary is no longer
-  supported — past that line the project must switch to the npm CLI flow
-  (`node` on PATH plus `node` in `[security.exec]`), which is not wired
-  yet.
-- Tailwind CSS v4 CLI (`tailwindcss`) on PATH — the theme compiles its
-  stylesheet in-process at build time. Use the standalone binary from the
-  Tailwind releases (no npm needed anywhere).
-- Go (only needed for Hugo Modules)
+- Hugo **0.161.0 or later**, Extended edition (tested on 0.167.0).
+- Node.js 20 or later, with npm. Hugo runs the Tailwind CSS v4 CLI through
+  node; the standalone binary Hugo used to call directly was dropped in
+  0.161.0.
+- Go 1.22 (only needed for Hugo Modules)
 
 ## Hugo Module (recommended)
 
@@ -94,9 +89,11 @@ use in the page (the bare filename, for a page bundle at
 
 1. Use the scaffold or set the taxonomy contract and module replace above.
 2. Set `baseURL`, `title` and at least one menu.
-3. Run `hugo server` — the home page should render header, footer and your
-   first pages.
-4. Validate before deploying: `./scripts/validate-site.sh /path/to/site`
+3. Run `npm install` so the build can compile the stylesheet.
+4. Run `npm run dev` (`hugo server -D`) — the home page should render
+   header, footer and your first pages. npm puts `node_modules/.bin` on
+   PATH, which is where Hugo finds the tailwindcss script.
+5. Validate before deploying: `./scripts/validate-site.sh /path/to/site`
    (run from a theme checkout, or adjust the path) builds your site in
    production mode against the theme and checks output rules.
 
@@ -105,9 +102,17 @@ use in the page (the bare filename, for a page bundle at
 While on the `replace` flow, pull the theme checkout and re-run the
 validators. Once a release tag exists, `hugo mod get -u
 github.com/zoyeabio/strata && hugo mod tidy` pins the new version, then
-rebuild and run the validator. The theme compiles its CSS in-process from
-`assets/css/` sources on every build — you never run npm in a site that
-only consumes the theme, but the `tailwindcss` binary must be on PATH and
-the site config must allow it under `[security.exec]` (the scaffold writes
-both sections; see the taxonomy-style contract above — Hugo does not
-inherit them from a theme either).
+rebuild and run the validator.
+
+Bumping Hugo changes how the stylesheet is compiled. Below 0.161.0 Hugo
+calls the standalone Tailwind binary directly; from 0.161.0 it runs the
+npm CLI through node. A site that moves across that line needs `npm
+install` and the `security.node` block added to its config — the scaffold
+writes both, and a hand-built site should copy that section from
+`scripts/new-site.sh`.
+
+The theme compiles its CSS in-process from `assets/css/` sources on every
+build. The site config must allow the compiler under `[security.exec]`
+and grant the addon its node policy under `[security.node]`; Hugo does not
+inherit either block from a theme, so both must live in the site config
+alongside the taxonomy contract above.

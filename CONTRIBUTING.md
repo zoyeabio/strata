@@ -14,7 +14,7 @@
 ## Development
 
 ```sh
-# once — standalone Tailwind v4 CLI on PATH (see README for the release link)
+npm install   # once — Hugo 0.161.0+ runs the Tailwind CSS CLI through node
 ```
 
 CSS compiles in-process on every build; there is no committed bundle to

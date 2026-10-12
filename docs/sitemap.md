@@ -21,7 +21,7 @@ This drops the term RSS feeds but leaves every HTML term page in the sitemap.
 Verified on this checkout: 19 `<loc>` entries before and after, 8 of them
 taxonomy/term both times. Restricting a kind's output list removes the extra
 formats, not the page. There is also no `disablesInSitemap` format option in
-Hugo 0.151.0 — grepping the module source for it returns nothing.
+Hugo 0.167.0 — grepping the binary for it returns nothing.
 
 ## What works: a site-layer template
 

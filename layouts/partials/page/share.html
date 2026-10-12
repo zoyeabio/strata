@@ -25,7 +25,7 @@
 */ -}}
 {{- $page := . }}
 {{- $names := (site.Params.article | default dict).sharingLinks | default slice }}
-{{- $data := site.Data.sharing | default dict }}
+{{- $data := hugo.Data.sharing | default dict }}
 {{- $title := urlquery $page.Title }}
 {{- if $names }}
 <div class="article__share" role="group" aria-label="Share this article">

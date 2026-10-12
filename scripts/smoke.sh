@@ -18,10 +18,17 @@ OUT_DRAFTS="$WORK/public-drafts"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0
 
-# css.TailwindCSS shells out to the standalone Tailwind v4 CLI, which must
-# be on PATH (fail fast — without it every assertion below is noise)
+# css.TailwindCSS shells out to the Tailwind v4 CLI, which must be on PATH
+# (fail fast — without it every assertion below is noise). Since Hugo 0.161.0
+# Hugo runs it through node, so the npm CLI has to be reachable too. The repo
+# keeps node_modules here; test/fixture sits underneath, so @plugin resolution
+# walks up from either the source dir or the stylesheet and finds it.
+if [ -d "$ROOT/node_modules/.bin" ]; then
+  PATH="$ROOT/node_modules/.bin:$PATH"
+  export PATH
+fi
 if ! command -v tailwindcss >/dev/null 2>&1; then
-  echo 'FAIL tailwindcss not on PATH — install the standalone v4 binary (see README)' >&2
+  echo 'FAIL tailwindcss not on PATH — run npm install (see README)' >&2
   exit 1
 fi
 
@@ -179,10 +186,12 @@ assert 'section-a/pixel/index.html' 'src="/images/section-a/pixel\.gif"' \
   'gif passes through untouched'
 assert_not 'section-a/pixel/index.html' 'srcset=' 'gif carries no srcset'
 
-# 15. remote images stay out unless the site opts in
+# 15. remote images stay out unless the site opts in. The opt-in comes from an
+#      environment overlay (config/remote/), not HUGO_PARAMS_* — Hugo dropped
+#      those env-var overrides after 0.151
 assert_not 'section-a/remote/index.html' 'example\.com' \
   'remote image is absent when allowRemoteImages is off'
-HUGO_PARAMS_ALLOWREMOTEIMAGES=true hugo --source "$ROOT/test/fixture" \
+hugo --source "$ROOT/test/fixture" --environment remote \
   --destination "$OUT_REMOTE" --quiet
 if grep -qE 'example\.com' "$OUT_REMOTE/section-a/remote/index.html" 2>/dev/null; then
   pass 'remote image renders when allowRemoteImages is on'
@@ -1045,8 +1054,11 @@ assert 'section-a/pixel/index.html' 'property="og:description" content="A Hugo t
   'og:description takes the same site description'
 # Last resort, past the site description: the page title must win, not the bare
 # site title. Needs its own build because the theme ships a site description
-# that the fixture inherits, so no fixture page reaches this on its own.
-HUGO_PARAMS_DESCRIPTION= hugo --source "$ROOT/test/fixture" \
+# that the fixture inherits, so no fixture page reaches this on its own. The
+# config/nodesc/ overlay clears the key at the language level — Hugo dropped
+# HUGO_PARAMS_* env-var overrides after 0.151, and the theme sets the key in
+# its own languages.en.toml, which a site-level [params] cannot shadow.
+hugo --source "$ROOT/test/fixture" --environment nodesc \
   --destination "$OUT_NOSITEDESC" --quiet
 if grep -qE 'name="description" content="GIF pixel — Strata Fixture"' \
     "$OUT_NOSITEDESC/section-a/pixel/index.html" 2>/dev/null; then
@@ -1274,11 +1286,17 @@ else:
         failed.append("expected 4 share links, got %d" % len(links))
     if len({label for _, label, _, _ in links}) != len(links):
         failed.append("a sharingLinks service renders twice")
+    # Hugo 0.167.0's default baseURL is absolute, so .Permalink — and therefore
+    # the share URL — renders absolute. Older Hugo leaves it relative. Both
+    # forms are valid, so pin the page URL the build produced rather than the
+    # shape it takes; the thing under test is the URL and title encoding.
+    m = re.search(r'rel="canonical" href="([^"]+)"', flat)
+    purl = m.group(1) if m else "/section-a/flat/"
     expect = {
-        "LinkedIn": ("https://www.linkedin.com/shareArticle?mini=true&url=/section-a/flat/&title=Flat+section+image", True),
-        "Facebook": ("https://www.facebook.com/sharer/sharer.php?u=/section-a/flat/&quote=Flat+section+image", True),
-        "Email":    ("mailto:?body=/section-a/flat/&subject=Flat+section+image", False),
-        "WhatsApp": ("https://api.whatsapp.com/send?text=Flat+section+image+/section-a/flat/", True),
+        "LinkedIn": ("https://www.linkedin.com/shareArticle?mini=true&url=%s&title=Flat+section+image" % purl, True),
+        "Facebook": ("https://www.facebook.com/sharer/sharer.php?u=%s&quote=Flat+section+image" % purl, True),
+        "Email":    ("mailto:?body=%s&subject=Flat+section+image" % purl, False),
+        "WhatsApp": ("https://api.whatsapp.com/send?text=Flat+section+image+%s" % purl, True),
     }
     for url, label, blank, body in links:
         want = expect.get(label)
