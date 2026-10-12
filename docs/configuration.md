@@ -162,9 +162,9 @@ warning instead of being rendered as a dead link.
 | `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |
-| `featureimage` | Page/card image (see [images.md](images.md)) |
+| `featureimage` | Page/card image; without it a bundle resource named `feature*`/`cover*`/`thumbnail*` is used (see [images.md](images.md)) |
 | `featureimagealt` | Alt text for `featureimage`; fallback `Featured image for {title}` |
-| `showHero` | Page hero: shown when `featureimage` resolves, `false` suppresses it |
+| `showHero` | Page hero: shown when an image resolves (`featureimage` or a bundle cover), `false` suppresses it |
 | `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
 | `showDate` | Page-level date override (falls back to `[article] showDate`, explicit `false` wins) |
 | `showDateUpdated` | Page-level `Updated` override (falls back to `[article] showDateUpdated`) |
@@ -176,7 +176,7 @@ warning instead of being rendered as a dead link.
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |
 | `author` | Byline for this page (falls back to `[author] name`) |
-| `images` | Image refs for Open Graph (first entry wins, before `featureimage`) |
+| `images` | Image refs for Open Graph; `images[0]` is used only when `featureimage` is absent (see [images.md](images.md)) |
 
 ## Consent and ads
 
@@ -220,7 +220,7 @@ accident:
   only `weight` and drop `series_order`
 - site `[article]` / `[list]` / `[taxonomy]` / `[term]` `showHero` — only the
   page front matter `showHero` is read; a site `true` is a no-op because
-  Strata shows a hero whenever `featureimage` resolves
+  Strata shows a hero whenever an image resolves
 - site `showDraftLabel` — Strata has no draft badge
 - `[params] backgroundImageWidth` — superseded by the pipeline's own widths
 

@@ -3,8 +3,9 @@
   Hugo's built-in opengraph template so the social image comes out of the
   responsive pipeline as a fixed 1200x630 JPEG with a real alt text.
 
-  Image selection order: params.images[0] → featureimage → a page resource
-  whose name contains feature, cover or thumbnail → site.Params.defaultSocialImage.
+  Image selection order: data/image-ref.html — params.images[0] and
+  site.Params.defaultSocialImage are social only, featureimage still wins, and
+  a bundle resource named feature/cover/thumbnail closes the chain.
 
   Called by: head/head.html, once per page
 */ -}}
@@ -12,7 +13,7 @@
 {{- $title := $page.Title }}
 {{- $description := partial "data/description.html" $page | default site.Params.description | default (printf "%s — %s" $page.Title site.Title) }}
 {{- $url := $page.Permalink }}
-{{- $ref := partial "data/og-image-ref.html" $page }}
+{{- $ref := partial "data/image-ref.html" (dict "page" $page "social" true) }}
 {{- $img := partial "data/image-resource.html" (dict
     "ref" $ref
     "page" $page

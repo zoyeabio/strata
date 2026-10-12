@@ -13,7 +13,8 @@
                  content/article shortcode passes false (body images are
                  always lazy)
 
-  Featured image: front matter featureimage / featureimagealt. The first
+  Featured image: data/image-ref.html (featureimage, else a bundle resource
+  named feature/cover/thumbnail), alt from featureimagealt. The first
   site.Params.eagerCardCount cards (6 by default) load eagerly with normal
   fetch priority, the rest lazily with low fetch priority — the first screen
   shows roughly three rows of two columns, so anything past that is below the
@@ -28,7 +29,7 @@
 {{- $eager := lt (.index | default 0) $eagerCount }}
 {{- if isset . "eager" }}{{ $eager = .eager }}{{ end }}
 <article class="card card--{{ $preset }}">
-  {{- with $page.Params.featureimage }}
+  {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
   {{- $img := partial "data/image-resource.html" (dict
       "ref" .
       "page" $page

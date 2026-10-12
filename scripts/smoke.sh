@@ -64,6 +64,13 @@ count_assert 'section-a/index.html' 'card__media' 4 'four cards render card__med
 assert 'section-a/vector/index.html' 'property="og:image" content="[^"]*\.svg"' \
   'svg is passed through, not processed'
 
+# 5b. a page with no featureimage key still finds an image: the vector leaf
+#     bundle carries cover.svg, and hero, card and social output all take it
+assert 'section-a/vector/index.html' 'class="page-hero__image"' \
+  'a bundle cover renders the hero with no featureimage key'
+assert 'section-a/vector/index.html' 'property="og:image" content="[^"]*cover\.svg"' \
+  'social output takes the bundle cover too'
+
 # 6. og:image is a 1200x630 jpeg with an alt
 assert 'section-a/flat/index.html' 'property="og:image:width" content="1200"' 'og:image width 1200'
 assert 'section-a/flat/index.html' 'property="og:image:height" content="630"' 'og:image height 630'

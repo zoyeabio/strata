@@ -63,7 +63,7 @@
 {{- end }}
 {{- if $isArticle }}
 {{- $img := partial "data/image-resource.html" (dict
-    "ref" (partial "data/og-image-ref.html" $page)
+    "ref" (partial "data/image-ref.html" (dict "page" $page "social" true))
     "page" $page
     "role" "og"
     "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}

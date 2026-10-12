@@ -2,7 +2,9 @@
   Returns the hero image dict for a page: the resolver result plus its
   `sizes` string. Pages without a hero get a dict with ok=false.
 
-  A regular page takes its featureimage unless the page says showHero: false.
+  A regular page takes its image from data/image-ref.html (featureimage, else
+  a bundle resource named feature/cover/thumbnail) unless the page says
+  showHero: false.
   A section page takes one only when [list] showHero is true, so a section
   banner is opt-in. Either way a page-level showHero wins over the table.
 
@@ -21,7 +23,7 @@
   {{- else if $page.IsPage }}{{ $hero = true }}
   {{- else if eq $page.Kind "section" }}{{ $hero = (site.Params.list | default dict).showHero | default false }}{{ end }}
   {{- if $hero }}
-    {{- with $page.Params.featureimage }}
+    {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
       {{- $img = partial "data/image-resource.html" (dict
           "ref" .
           "page" $page

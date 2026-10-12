@@ -8,9 +8,10 @@
                    eager/lazy split the same way page cards do
     showTermCount  (bool, optional) — print the article count (default true)
 
-  The image is the term page's own featureimage, resolved through the shared
-  pipeline with the card role; a term without an image renders title and
-  count only. The count badge is plain markup — where it sits on the card
+  The image is the term page's own, from data/image-ref.html (featureimage,
+  else a bundle resource named feature/cover/thumbnail), resolved through the
+  shared pipeline with the card role; a term without an image renders title
+  and count only. The count badge is plain markup — where it sits on the card
   belongs to CSS.
 
   Called by: _default/terms.html
@@ -19,7 +20,7 @@
 {{- $eagerCount := site.Params.eagerCardCount | default 6 }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 <article class="term-card">
-  {{- with $page.Params.featureimage }}
+  {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
   {{- $img := partial "data/image-resource.html" (dict
       "ref" .
       "page" $page

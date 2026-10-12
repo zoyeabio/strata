@@ -84,6 +84,13 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - `check-build.sh` and `place-image.sh` accept `--environment`, so a build made
   for a non-default environment is checked against the same config overlay Hugo
   used instead of a silently misassumed one.
+- `data/og-image-ref.html` → `data/image-ref.html`: the resolver now serves
+  cards, term cards, heroes and social output alike. Cards, term cards and
+  heroes take `featureimage` and fall back to a page-bundle resource whose
+  name contains `feature`, `cover` or `thumbnail`, so a page bundle with a
+  sibling `featured.jpg` needs no front matter key. Social keeps its own
+  order — `featureimage`, then `images[0]`, then the bundle resource, then
+  `site.Params.defaultSocialImage` — and `featureimage` still beats `images`.
 
 ### Fixed
 

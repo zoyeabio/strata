@@ -13,6 +13,8 @@ resolve to `assets/images/{section}/`, not to a `{slug}/` subdirectory.
 - Section-owned images: `assets/images/{section}/…`
 - Per-article bundle images: `assets/images/{section}/{slug}/…` (the
   `place-image.sh` target for `content/{section}/{slug}/index.md`)
+- Or inside the page bundle as a sibling of `index.md` — discovered by name
+  when no `featureimage` is declared, see [Which image a page renders](#which-image-a-page-renders)
 
 ## Resolution order
 
@@ -29,6 +31,22 @@ in this order:
 
 `https://` sources pass through only when `allowRemoteImages = true`;
 otherwise they are skipped with a development warning.
+
+## Which image a page renders
+
+A page declares `featureimage`. Without it, the theme still finds an image
+when the page bundle holds a resource whose name contains `feature`, `cover`
+or `thumbnail` — so `content/science/manufacturing/index.md` plus a sibling
+`featured.jpg` needs no front matter key at all. The chain is:
+
+1. `featureimage`
+2. bundle resource named `feature*`, `cover*`, `thumbnail*`
+
+Cards, term cards and page heroes all take the same reference. Open Graph and
+schema take it too, with `images` a social-only fallback: `images[0]` is used
+only when `featureimage` is absent, then the bundle resource, then
+`site.Params.defaultSocialImage`. `featureimage` still beats `images` so the
+picture a page shows is the picture it advertises.
 
 ## Variant ladder
 
