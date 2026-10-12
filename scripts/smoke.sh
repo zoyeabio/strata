@@ -357,6 +357,8 @@ css_assert_not() { # css_assert_not <regex> <label>
   if [ -z "$f" ]; then fail "$2"; return; fi
   if grep -qE -e "$1" "$f"; then fail "$2"; else pass "$2"; fi
 }
+css_assert_not 'contact-form\{[^}]*max-width' \
+  'the contact form fills its content column'
 css_assert 'max-width:720px' 'prose caps at 720px (text preset)'
 assert 'section-a/shortcodes/index.html' 'min-width:640px\) 240px' \
   'row thumb requests a 240px image at the fixed column width'

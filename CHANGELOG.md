@@ -90,6 +90,9 @@ Entries follow the rebuild steps; each step is one browser-verified pass.
 - The appearance switch is an icon button: both scheme glyphs ship inline
   from `assets/icons/`, the moon hides via a source-order-gated rule, and
   `appearance.js` drives it with `data-effective` plus a scheme-named label.
+- The contact form fills its content column. The 640px cap left a dead
+  quarter of the page on a 1024px column and made the two-column field row
+  twice as narrow as the address column above it.
 - `check-build.sh` R5 counts one image per *carrier group* and collapses a
   candidate that is a subset of another, so a hero `<img>` preloaded through
   an `<link>` counts once instead of twice. R8 also catches a bare attribute
