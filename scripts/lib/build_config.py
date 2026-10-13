@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Resolve strata's build config and print shell assignments.
 
-The theme's defaults live in its root config.toml and a site overrides them in
-its own config. Hugo merges that same file pair when it renders, so the build
+The theme's defaults live in config/_default/*.toml and a site overrides them
+in its own config. Hugo merges those same files when it renders, so the build
 scripts and the templates judge one source of truth instead of two copies of
-the same number. Hugo also merges a theme's config/_default/, but those files
-are not read here: a theme ships defaults from exactly one place.
+the same number. The theme's config/_default/ is read here in the same order
+Hugo reads it: sorted by name, lowest precedence first.
 
 Site files are read in Hugo's precedence order, lowest first: config/_default/,
 config/<environment>/, files in config/, then config.toml at the site root. The
@@ -80,8 +80,7 @@ def _get(mapping, path):
 
 def load(site=None, environment=ENV):
     cfg = {}
-    theme_cfg = THEME / 'config.toml'
-    if theme_cfg.exists():
+    for theme_cfg in sorted((THEME / 'config' / '_default').glob('*.toml')):
         cfg = _merge(cfg, _load(theme_cfg))
     if site:
         for path in _toml_files(Path(site), environment):

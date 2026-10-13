@@ -5,25 +5,35 @@ keywords: ["configuration", "params", "front matter"]
 weight: 20
 ---
 
-Everything a site configures lives in the site layer. The theme consumes only
-the keys listed here; anything else is ignored. The theme's own defaults —
-the image pipeline and the build thresholds — live in the theme's root
-`config.toml` and are listed in [Theme defaults](#theme-defaults-configtoml).
+The theme consumes only the keys listed here; anything else is ignored. Every
+key's default lives in the theme's `config/_default/params.toml` — that file is
+both the source of truth and the complete list. Hugo merges it underneath your
+site's config, so a site value for any key wins here.
 
 Hugo folds content front matter keys to lowercase (`showBreadcrumbs`
 arrives as `showbreadcrumbs`), so page keys below are read lowercase —
 write them in any case. Site config keys keep their case.
 
-## Theme defaults (`config.toml`)
+## Theme defaults (`config/_default/params.toml`)
 
-The theme loads `config.toml` first, so these values merge underneath your
-site's config: override a single key in your own `params.toml` and it wins
-everywhere, in the templates and in the build scripts, which resolve the same
-file pair. Hugo also merges a theme's `config/_default/`, but these defaults
-are not kept there as well — a theme ships them from one place only.
+The file carries every key the theme reads, grouped the way the tables below
+are. Override one key in your own `params.toml` and it wins everywhere — in the
+templates and in the build scripts, which resolve that same file pair.
 Environment overlays (`config/production/`) are honoured by Hugo and by the
 build scripts alike; both default to that overlay, and `--environment` names
 another.
+
+`[mainSections]` is deliberately absent from it. An empty slice is truthy in Go
+templates and `_default/single.html` reads it through `with`, so shipping
+`mainSections = []` would flip "every single is an article" into "none is".
+Absent means every single is an article.
+
+Two tables stay lowercase — `image` and `build` — because
+`scripts/lib/build_config.py` reads the file through `tomllib`, which does not
+apply Hugo's case folding.
+
+The image and build thresholds get their own table because the build scripts and
+`scripts/place-image.sh` read them as well:
 
 | Key | Default | Effect |
 |---|---|---|
@@ -40,8 +50,9 @@ another.
 | `[params.build].minwidth.card` | `1200` | Same |
 | `[params.build].minwidth.og` | `1200` | Same |
 
-`scripts/lib/build_config.py` resolves that same file pair for the build
-scripts, so a threshold you change in config is the threshold the gate checks.
+`scripts/lib/build_config.py` reads the theme's `config/_default/*.toml` in the
+same order Hugo does, then layers your site's config over it — so a threshold
+you change in config is the threshold the gate checks.
 
 ## Site params (`params.toml`)
 
@@ -55,7 +66,7 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `copyright` | — | Footer line; `{ year }` is replaced with the current year. Fallback: `© {year} {site title}` |
 | `description` | — | Default `<meta name="description">` (page description/summary wins) |
 | `robots` | `"index, follow, max-image-preview:large"` | Default `<meta name="robots">` (page-level `robots` wins). A site setting applies to every page; leave both unset for the default |
-| `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Declare it under a `[params]` table (the theme's `languages.en.toml` does this); a bare top-level key in `languages.<lang>.toml` is invisible to the theme |
+| `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Must sit under a `[params]` table — a bare top-level key in `languages.<lang>.toml` is invisible to the theme. For a per-language format, set it in that language's file under its own `[params]` |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |
 | `customCSS` | `[]` | Asset paths loaded after the theme stylesheet (fingerprinted) |

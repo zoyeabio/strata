@@ -38,10 +38,52 @@ else
   pass 'production build is silent'
 fi
 
-# The image pipeline and build thresholds are theme defaults, so they live in
-# the theme's root config.toml, which Hugo loads first. Prove they reach a
-# consuming site; without this the theme could keep shipping broken config and
-# every gate below would still pass on the scripts' own fallback defaults.
+# The theme's defaults live in its config/_default/params.toml. Assert every key
+# a template reads is defined there, so a site always overrides a key rather than
+# a template fallback deciding for it. Read the file directly rather than going
+# through `hugo config`, which marshals with omitempty and would silently hide
+# every default that happens to be false, "" or [].
+if cfg_out=$(cd "$ROOT" && python3 - <<'PY'
+import re
+import sys
+import tomllib
+from pathlib import Path
+
+with Path("config/_default/params.toml").open("rb") as fh:
+    theme = tomllib.load(fh)
+theme_params = {k.lower(): v for k, v in theme.items()}
+
+# Absent by design: an empty slice is truthy in Go templates and
+# _default/single.html reads it through `with`, so shipping one would flip
+# "every single is an article" into "none is".
+if "mainSections" in theme_params:
+    print("FAIL params.mainSections must stay absent from the theme",
+          file=sys.stderr)
+    sys.exit(1)
+
+read = set()
+for page in Path("layouts").rglob("*"):
+    if page.is_file():
+        read |= set(re.findall(r"(?:site|\.Site)\.Params\.(\w+)", page.read_text()))
+
+missing = sorted(k for k in read - {"mainSections"}
+                 if k.lower() not in theme_params)
+if missing:
+    print("FAIL undefined in config/_default/params.toml: %s"
+          % ", ".join(missing), file=sys.stderr)
+    sys.exit(1)
+print("%d params defined, all %d read by templates covered"
+      % (len(theme_params), len(read - {"mainSections"})))
+PY
+); then
+  pass "every key a template reads is defined in the theme's params.toml ($cfg_out)"
+else
+  fail 'every key a template reads is defined in the theme params.toml'
+fi
+
+# The image pipeline and build thresholds must also reach a consuming site, not
+# just sit in a file: prove they merge underneath a site's own config. `hugo
+# config` is safe here because these defaults are all non-zero.
 if cfg_out=$(cd "$ROOT" && python3 - <<'PY'
 import json
 import subprocess
@@ -50,24 +92,29 @@ import sys
 cfg = json.loads(subprocess.check_output([
     "hugo", "--source", "test/fixture", "--format", "json", "config",
 ], text=True))
-missing = []
-for path in (("image", "ladder"), ("image", "quality"), ("image", "caps"),
-             ("image", "og"), ("build", "pageimageskb"),
-             ("build", "minwidth")):
-    node = cfg.get("params", {})
+params = {k.lower(): v for k, v in cfg.get("params", {}).items()}
+
+def absent(path):
+    node = params
     for key in path:
-        node = node.get(key, {}) if isinstance(node, dict) else {}
-    if not node:
-        missing.append("params.%s" % ".".join(path))
+        node = node.get(key.lower(), {}) if isinstance(node, dict) else {}
+    return not node
+
+missing = [
+    "params.%s" % ".".join(p)
+    for p in (("image", "ladder"), ("image", "quality"), ("image", "caps"),
+              ("image", "og"), ("build", "pageimageskb"), ("build", "minwidth"))
+    if absent(p)
+]
 if missing:
     print("FAIL missing: %s" % ", ".join(missing), file=sys.stderr)
     sys.exit(1)
 print("params.image and params.build merge into the site")
 PY
 ); then
-  pass "the theme's config.toml reaches a consuming site ($cfg_out)"
+  pass "the theme's config reaches a consuming site ($cfg_out)"
 else
-  fail 'the theme config.toml reaches a consuming site'
+  fail 'the theme config reaches a consuming site'
 fi
 
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture"; then

@@ -72,7 +72,7 @@
        Requires the Tailwind v4 CLI ("tailwindcss") on PATH at build time
        plus "security.exec.allow" covering it in site config — the theme
        cannot provide either (site-level only). */}}
-  {{- $schemeName := site.Params.colorScheme | default "strata-default" | lower }}
+  {{- $schemeName := site.Params.colorScheme | lower }}
   {{- $scheme := resources.Get (printf "css/schemes/%s.css" $schemeName) }}
   {{- if not $scheme }}
     {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}

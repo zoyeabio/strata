@@ -1432,7 +1432,7 @@ else
 fi
 
  # scripts/lib/build_config.py resolves the same config pair Hugo merges: the
-# theme's config.toml underneath a site's own. Assert the merge semantics, so
+# theme's config/_default/params.toml underneath a site's own. Assert the merge semantics, so
 # a ladder, cap or budget can never drift back into a template or a script.
 CFG_DEFAULT="$(python3 "$ROOT/scripts/lib/build_config.py")"
 CFG_DIR="$(mktemp -d)"

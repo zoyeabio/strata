@@ -21,11 +21,11 @@
   Called by: _default/single.html, list.html, terms.html, term.html
 */ -}}
 {{- $table := dict }}
-{{- if eq .Kind "page" }}{{ $table = site.Params.article | default dict }}
-{{- else if in (slice "section" "home") .Kind }}{{ $table = site.Params.list | default dict }}
-{{- else if eq .Kind "taxonomy" }}{{ $table = site.Params.taxonomy | default dict }}
-{{- else if eq .Kind "term" }}{{ $table = site.Params.term | default dict }}{{ end }}
-{{- $show := $table.showBreadcrumbs | default false }}
+{{- if eq .Kind "page" }}{{ $table = site.Params.article }}
+{{- else if in (slice "section" "home") .Kind }}{{ $table = site.Params.list }}
+{{- else if eq .Kind "taxonomy" }}{{ $table = site.Params.taxonomy }}
+{{- else if eq .Kind "term" }}{{ $table = site.Params.term }}{{ end }}
+{{- $show := $table.showBreadcrumbs }}
 {{- if isset .Params "showbreadcrumbs" }}{{ $show = .Params.showbreadcrumbs }}{{ end }}
 {{- $ancestors := slice }}
 {{- $p := .Parent }}

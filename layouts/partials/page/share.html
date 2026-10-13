@@ -24,7 +24,7 @@
   Called by: _default/single.html
 */ -}}
 {{- $page := . }}
-{{- $names := (site.Params.article | default dict).sharingLinks | default slice }}
+{{- $names := site.Params.article.sharingLinks }}
 {{- $data := hugo.Data.sharing | default dict }}
 {{- $title := urlquery $page.Title }}
 {{- if $names }}

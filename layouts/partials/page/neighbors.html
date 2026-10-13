@@ -13,8 +13,8 @@
 
   Called by: _default/single.html, already guarded to article pages only.
 */ -}}
-{{- $art := site.Params.article | default dict }}
-{{- $show := $art.showPagination | default true }}
+{{- $art := site.Params.article }}
+{{- $show := $art.showPagination }}
 {{- if isset .Params "showpagination" }}{{ $show = .Params.showpagination }}{{ end }}
 {{- if $show }}
 {{- if or .PrevInSection .NextInSection }}

@@ -5,8 +5,8 @@ weight = 1
 title = "Strata"
 
 [params]
+# Per-language by nature: an RTL or ISO code belongs with the language it
+# describes, not with the site. Override it per language in your own
+# languages.<lang>.toml. Everything else the theme reads sits in
+# config/_default/params.toml.
 isoCode = "en"
-rtl = false
-dateFormat = "2006-01-02"
-description = "A Hugo theme for content sites."
-copyright = "© { year } Strata"

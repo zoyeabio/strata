@@ -25,9 +25,9 @@
 {{- $hasLogo = true }}
 {{- end }}
 {{- end }}
-{{- $disableText := site.Params.disableTextInHeader | default false }}
+{{- $disableText := site.Params.disableTextInHeader }}
 {{- $showTitle := or (not $hasLogo) (not $disableText) -}}
-{{- $smart := eq (site.Params.header.layout | default "standard") "smart" }}
+{{- $smart := eq (site.Params.header.layout) "smart" }}
 {{- /* One disclosure contract for the header's three dropdowns; deferred
      scripts run in document order, so this lands ahead of menu.js,
      search.js and a11y.js. */ -}}

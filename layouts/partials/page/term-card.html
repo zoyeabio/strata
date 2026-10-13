@@ -17,7 +17,7 @@
   Called by: _default/terms.html
 */ -}}
 {{- $page := .entry.Page }}
-{{- $eagerCount := site.Params.eagerCardCount | default 6 }}
+{{- $eagerCount := site.Params.eagerCardCount }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 <article class="term-card">
   {{- with (partial "data/image-ref.html" (dict "page" $page)) }}

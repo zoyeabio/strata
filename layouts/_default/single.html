@@ -1,18 +1,18 @@
 {{ define "main" }}
 {{- $hero := partial "data/hero-image.html" . }}
-{{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
+{{- $dateFormat := site.Params.dateFormat }}
 {{- $terms := .GetTerms "tags" }}
 {{- $isArticle := true }}
 {{- with site.Params.mainSections }}{{ $isArticle = in (apply . "lower" ".") (lower $.Section) }}{{ end }}
-{{- $articleParams := site.Params.article | default dict }}
-{{- $author := .Params.author | default site.Params.author.name | default "" }}
+{{- $articleParams := site.Params.article }}
+{{- $author := .Params.author | default site.Params.author.name }}
 {{- $showAuthor := false }}
-{{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor | default false }}{{ end }}
+{{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor }}{{ end }}
 {{- $showDate := true }}
-{{- if isset .Params "showdate" }}{{ $showDate = .Params.showdate }}{{ else }}{{ $showDate = $articleParams.showDate | default true }}{{ end }}
+{{- if isset .Params "showdate" }}{{ $showDate = .Params.showdate }}{{ else }}{{ $showDate = $articleParams.showDate }}{{ end }}
 {{- $dateShown := and $showDate (not .Date.IsZero) }}
 {{- $showDateUpdated := true }}
-{{- if isset .Params "showdateupdated" }}{{ $showDateUpdated = .Params.showdateupdated }}{{ else }}{{ $showDateUpdated = $articleParams.showDateUpdated | default true }}{{ end }}
+{{- if isset .Params "showdateupdated" }}{{ $showDateUpdated = .Params.showdateupdated }}{{ else }}{{ $showDateUpdated = $articleParams.showDateUpdated }}{{ end }}
 {{- $dateDay := .Date.Format "2006-01-02" }}
 {{- $modDay := .Lastmod.Format "2006-01-02" }}
 {{- $updatedShown := and $showDateUpdated (not .Lastmod.IsZero) (gt $modDay $dateDay) }}

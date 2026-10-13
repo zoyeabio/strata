@@ -6,7 +6,7 @@
 # Shared by validate-theme.sh and validate-site.sh so the rule set stays
 # in one place. <public_dir> is a finished Hugo build; nothing is built
 # here. --site selects the site whose config supplies the thresholds; without
-# it the theme defaults in config.toml apply. --environment names the config
+# it the theme defaults in config/_default/params.toml apply. --environment names the config
 # overlay that build used; it defaults to production, which is Hugo's own
 # default, and must match a non-default build or the thresholds come from the
 # wrong overlay. Rules are grouped by concern:
@@ -36,7 +36,7 @@ if [ -z "$PUBLIC" ] || [ ! -d "$PUBLIC" ]; then
   exit 2
 fi
 
-# Thresholds come from config, not from this file: the theme's config.toml
+# Thresholds come from config, not from this file: the theme's config/_default/params.toml
 # merged with the site's own config. scripts/lib/build_config.py resolves the
 # same file pair Hugo merges when it renders, so the scripts and the
 # templates judge the same numbers. Needs python3 >= 3.11 for tomllib.

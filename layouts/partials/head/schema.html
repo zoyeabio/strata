@@ -73,7 +73,7 @@
     "url" $page.Permalink
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
     "publisher" (dict "@id" $orgID) }}
-{{- $author := $page.Params.author | default site.Params.author.name | default "" }}
+{{- $author := $page.Params.author | default site.Params.author.name }}
 {{- if $author }}
 {{- $person := dict "@type" "Person" "name" $author }}
 {{- with site.Params.author.links }}

@@ -6,14 +6,14 @@
 {{- with .Content }}
 <div class="page-content prose">{{ . }}</div>
 {{- end }}
-{{- $taxParams := site.Params.taxonomy | default dict }}
+{{- $taxParams := site.Params.taxonomy }}
 {{- if $taxParams.cardView }}
 <div class="term-collection--grid">
   {{- range $i, $entry := .Data.Terms }}
   {{ partial "page/term-card.html" (dict
       "entry" $entry
       "index" $i
-      "showTermCount" ($taxParams.showTermCount | default true)) }}
+      "showTermCount" ($taxParams.showTermCount)) }}
   {{- end }}
 </div>
 {{- else }}
@@ -21,7 +21,7 @@
   {{- range $entry := .Data.Terms }}
   {{ partial "page/term-text.html" (dict
       "entry" $entry
-      "showTermCount" ($taxParams.showTermCount | default true)) }}
+      "showTermCount" ($taxParams.showTermCount)) }}
   {{- end }}
 </div>
 {{- end }}

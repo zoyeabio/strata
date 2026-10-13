@@ -18,7 +18,7 @@
 
   Called by: content markdown
 */ -}}
-{{- $client := site.Params.ads.client | default "" -}}
+{{- $client := site.Params.ads.client -}}
 {{- if eq $client "" -}}
   {{- errorf "ads shortcode: site.Params.ads.client is not set (%s)" .Position -}}
 {{- end -}}

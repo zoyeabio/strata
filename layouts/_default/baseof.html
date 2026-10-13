@@ -2,8 +2,8 @@
 <html
   lang="{{ site.Language.Locale | default "en" }}"
   dir="{{ if site.Params.rtl }}rtl{{ else }}ltr{{ end }}"
-  data-default-appearance="{{ site.Params.defaultAppearance | default "light" }}"
-  data-auto-appearance="{{ site.Params.autoSwitchAppearance | default "true" }}">
+  data-default-appearance="{{ site.Params.defaultAppearance }}"
+  data-auto-appearance="{{ site.Params.autoSwitchAppearance }}">
   {{ partial "head/head.html" . }}
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>

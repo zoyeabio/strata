@@ -24,8 +24,8 @@
 */ -}}
 {{- $page := .page }}
 {{- $preset := .preset | default "grid" }}
-{{- $dateFormat := site.Params.dateFormat | default "2006-01-02" }}
-{{- $eagerCount := site.Params.eagerCardCount | default 6 }}
+{{- $dateFormat := site.Params.dateFormat }}
+{{- $eagerCount := site.Params.eagerCardCount }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 {{- if isset . "eager" }}{{ $eager = .eager }}{{ end }}
 <article class="card card--{{ $preset }}">

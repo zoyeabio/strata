@@ -1,0 +1,129 @@
+# Strata's defaults for every key the theme reads from site.Params.
+#
+# Hugo merges this underneath your site's config, so a site value for any key
+# wins here. Override one key and it wins in the templates and in
+# scripts/lib/build_config.py alike, which resolve this same file pair.
+# Environment overlays (config/production/) are honoured by both, and
+# --environment names another.
+#
+# Keys keep their case: Hugo lowercases front matter keys but not config keys.
+# The two exceptions are [image] and [build] below, whose keys are lowercase
+# because scripts/lib/build_config.py reads the file through tomllib.
+#
+# [mainSections] is deliberately absent. An empty slice is truthy in Go
+# templates, and _default/single.html reads it through `with`, so writing
+# `mainSections = []` here would flip "every single is an article" into
+# "none is". Absent means every single is an article.
+#
+# A bare top-level key in languages.<lang>.toml is invisible to the theme:
+# dateFormat and the like must sit under a [params] table, as they do here.
+
+colorScheme = "strata-default"
+defaultAppearance = "light"
+autoSwitchAppearance = true
+dateFormat = "2006-01-02"
+robots = "index, follow, max-image-preview:large"
+eagerCardCount = 6
+rtl = false
+allowRemoteImages = false
+disableImageOptimization = false
+disableTextInHeader = false
+enableSearch = false
+enableA11y = false
+logo = ""
+copyright = "© { year } Strata"
+description = "A Hugo theme for content sites."
+defaultSocialImage = ""
+twitterSite = ""
+twitterCreator = ""
+customCSS = []
+
+[header]
+layout = "standard"
+
+[search]
+contentLength = 2000
+
+[list]
+cardView = true
+showHero = false
+orderByWeight = false
+showSummary = false
+showBreadcrumbs = false
+
+[article]
+showBreadcrumbs = false
+showAuthor = false
+showDate = true
+showDateUpdated = true
+showRelatedContent = false
+relatedContentLimit = 3
+showPagination = true
+showSummary = false
+sharingLinks = []
+
+[author]
+name = ""
+links = []
+
+[taxonomy]
+# cardView is false here and true in [list]: /tags/ lists terms, not articles,
+# so it starts as a plain row list.
+cardView = false
+showHero = false
+orderByWeight = false
+showSummary = false
+showTermCount = true
+showBreadcrumbs = false
+
+[term]
+cardView = false
+orderByWeight = false
+showSummary = false
+showBreadcrumbs = false
+
+[footer]
+# showAppearanceSwitcher and showScrollToTop live here on purpose: the switcher
+# is wired by assets/js/appearance.js, the floating button by
+# assets/js/scroll-top.js.
+showCompanyInfo = true
+showAppearanceSwitcher = false
+showScrollToTop = false
+
+[ads]
+client = ""
+
+# ── Keys below are lowercase: see the header comment. ──────────────────────
+
+[image]
+# Variant widths, smallest first. Each step is capped by the source width and
+# by the role cap below, de-duplicated, and a step under 15% wider than its
+# kept predecessor is dropped. Four is the working maximum per role — a source
+# used by several roles carries each role's steps.
+ladder = [480, 800, 1280, 1920]
+
+# One WebP quality for every width, so the same width is never written twice.
+quality = 78
+
+[image.caps]
+card = 800
+illustration = 1280
+hero = 1920
+og = 1920
+
+# The social preview is generated at a fixed size: 1200x630 is what Facebook,
+# LinkedIn and Google request. scripts/place-image.sh lints the source against
+# this same pair.
+[image.og]
+width = 1200
+height = 630
+
+[build]
+# Largest total image payload on a page, in KiB — check-build R5.
+pageimageskb = 600
+
+[build.minwidth]
+hero = 1600
+illustration = 1280
+card = 1200
+og = 1200

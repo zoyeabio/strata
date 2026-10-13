@@ -12,7 +12,7 @@
 {{- with .Content }}
   <div class="page-content prose">{{ . }}</div>
 {{- end }}
-  {{- $listParams := site.Params.list | default dict }}
+  {{- $listParams := site.Params.list }}
   {{- $sorted := .Pages }}
   {{- if .Params.orderbyweight | default $listParams.orderByWeight }}
   {{- $sorted = .Pages.ByWeight }}

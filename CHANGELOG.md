@@ -19,14 +19,20 @@ be re-derived from the templates.
   analytics or third-party scripts. The reference theme shipped Google Fonts;
   Strata uses system stacks. No gate asserts this — it is a standing rule, not
   a check.
-- **Config is data, not code.** The variant ladder, role caps, WebP quality,
-  social preview size, the page image budget and the per-role minimum source
-  width live in the theme's root `config.toml` under `[params.image]` and
-  `[params.build]`, read by the templates with the previous hardcoded values as
-  fallbacks. `scripts/lib/build_config.py` resolves the same file pair for the
-  build scripts, so a threshold changed in config is the threshold the gate
-  checks. Hugo also merges a theme `config/_default/` and `config/production/`;
-  the defaults ship from the root file only, so there is one place to look.
+- **Config is data, not code, and it is the only place defaults live.** Every
+  key the theme reads from `site.Params` has a default in
+  `config/_default/params.toml` — the variant ladder, role caps, WebP quality,
+  social preview size, page image budget, per-role minimum source width and the
+  UI switches alongside. Hugo merges it underneath a site's config, and
+  `scripts/lib/build_config.py` resolves that same file pair, so a threshold
+  changed in config is the threshold the gate checks. Templates no longer carry
+  a `| default` for a key the config already defines, so there is one place to
+  look and a site can never resolve a key to nothing. `validate-theme.sh`
+  asserts the invariant by diffing every `site.Params.<key>` the templates read
+  against the merged config. `[mainSections]` is the one deliberate omission:
+  an empty slice is truthy in Go templates and `single.html` reads it through
+  `with`, so shipping `mainSections = []` would flip "every single is an
+  article" into "none is".
 - **Reproducible builds.** Two independent builds of the same tree are
   byte-identical, so a swapping id or timestamp cannot slip past every content
   assertion. The carousel instance id is the ordinal alone — the wall-clock
@@ -51,6 +57,13 @@ be re-derived from the templates.
   and no source means no tag, since a theme must not invent keywords it was
   not given.
 
+- **Site config wins over a theme language file.** The theme defaults used to
+  sit in the theme's `languages.en.toml` under `[params]`. Hugo gives language
+  config precedence over global site config, so the theme's own `description`
+  quietly beat a site's — every page without its own description shipped the
+  theme's string instead of the site's, in `name=description`, `og:description`
+  and `twitter:description`. Only `isoCode` stays in the language file, because
+  an ISO code belongs with the language it names.
 - **The taxonomy contract is enforced at validation, not declared.** Hugo does
   not inherit a theme's `[taxonomies]`, so a theme `hugo.toml` declaring them
   would be read by nobody. `validate-site.sh` asserts the host site declares

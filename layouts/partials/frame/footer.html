@@ -31,7 +31,7 @@
 {{- $quick := $footer.quickLinks | default dict }}
 {{- $legal := $footer.legal | default dict }}
 {{- $social := $footer.social.links | default slice }}
-{{- $rich := and $footer ($footer.showCompanyInfo | default true) (or $company.name $company.slogan $quick.links $legal.links $company.email $company.phone $company.address) }}
+{{- $rich := and $footer $footer.showCompanyInfo (or $company.name $company.slogan $quick.links $legal.links $company.email $company.phone $company.address) }}
 <footer class="site-footer">
   {{- if $rich }}
   <div class="site-footer__grid">

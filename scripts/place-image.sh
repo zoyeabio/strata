@@ -17,7 +17,7 @@
 #
 # The size lint is config, not code: [params.build.minwidth] per role, and
 # [params.image.og] for the social preview, which must be an exact match.
-# scripts/lib/build_config.py resolves the theme defaults in config.toml
+# scripts/lib/build_config.py resolves the theme defaults in config/_default/params.toml
 # merged with --site's own config, the same pair Hugo merges for rendering.
 # A failing lint exits non-zero and writes nothing.
 set -euo pipefail
@@ -51,7 +51,7 @@ if [ -n "$SITE" ]; then
   SITE="$(cd "$SITE" && pwd)"
 fi
 
-# Size thresholds from config: the theme's config.toml merged with the
+# Size thresholds from config: the theme's config/_default/params.toml merged with the
 # site's own, resolved by scripts/lib/build_config.py — the same file pair
 # Hugo merges when it renders. Needs python3 >= 3.11 for tomllib.
 CFG_CMD=("$ROOT/scripts/lib/build_config.py" --environment "$ENVIRONMENT")

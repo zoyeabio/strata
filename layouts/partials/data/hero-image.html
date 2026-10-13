@@ -21,7 +21,7 @@
   {{- $hero := false }}
   {{- if isset $page.Params "showhero" }}{{ $hero = $page.Params.showhero }}
   {{- else if $page.IsPage }}{{ $hero = true }}
-  {{- else if eq $page.Kind "section" }}{{ $hero = (site.Params.list | default dict).showHero | default false }}{{ end }}
+  {{- else if eq $page.Kind "section" }}{{ $hero = site.Params.list.showHero }}{{ end }}
   {{- if $hero }}
     {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
       {{- $img = partial "data/image-resource.html" (dict

@@ -19,11 +19,11 @@
 
   Called by: _default/single.html, already guarded to article pages only.
 */ -}}
-{{- $art := site.Params.article | default dict }}
-{{- $show := $art.showRelatedContent | default false }}
+{{- $art := site.Params.article }}
+{{- $show := $art.showRelatedContent }}
 {{- if isset .Params "showrelatedcontent" }}{{ $show = .Params.showrelatedcontent }}{{ end }}
 {{- if $show }}
-{{- $limit := int ($art.relatedContentLimit | default 3) }}
+{{- $limit := int ($art.relatedContentLimit) }}
 {{- $rel := .Site.RegularPages.Related . }}
 {{- $related := first $limit $rel }}
 {{- with $related }}

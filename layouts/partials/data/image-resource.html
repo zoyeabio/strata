@@ -27,7 +27,7 @@
   they are skipped with the same dev-only warning.
 
   The variant ladder, role caps, WebP quality and social preview size are
-  config — [params.image] in the theme's root config.toml, which a site
+  config — [params.image] in the theme's config/_default/params.toml, which a site
   overrides in its own. Each ladder step is capped by the
   source width and by the role cap, then de-duplicated, then a step less than
   15% wider than its kept predecessor is dropped. One role produces at most
@@ -49,26 +49,25 @@
 {{- $ref := trim $raw " /" }}
 {{- $page := .page }}
 {{- $role := .role | default "illustration" -}}
-{{- /* Pipeline knobs come from [params.image] in the theme's root config.toml,
-     which a site overrides in its own. The fallbacks mirror the theme's
-     defaults, so a site written before those keys existed still renders. */ -}}
-{{- $imgCfg := site.Params.image | default dict -}}
-{{- $capsCfg := $imgCfg.caps | default dict -}}
-{{- $ogCfg := $imgCfg.og | default dict -}}
+{{- /* Pipeline knobs come from [params.image]; the theme's defaults are in
+      config/_default/params.toml and a site overrides a single key there. */ -}}
+{{- $imgCfg := site.Params.image -}}
+{{- $capsCfg := $imgCfg.caps -}}
+{{- $ogCfg := $imgCfg.og -}}
 {{- $caps := dict
-  "card" (int ($capsCfg.card | default 800))
-  "illustration" (int ($capsCfg.illustration | default 1280))
-  "hero" (int ($capsCfg.hero | default 1920))
-  "og" (int ($capsCfg.og | default 1920)) -}}
+  "card" (int $capsCfg.card)
+  "illustration" (int $capsCfg.illustration)
+  "hero" (int $capsCfg.hero)
+  "og" (int $capsCfg.og) -}}
 {{- $cap := index $caps $role | default 1280 -}}
 {{- $ladder := slice -}}
-{{- range $imgCfg.ladder | default (slice 480 800 1280 1920) -}}
+{{- range $imgCfg.ladder -}}
   {{- $ladder = $ladder | append (int .) -}}
 {{- end -}}
-{{- $quality := int ($imgCfg.quality | default 78) -}}
-{{- $ogWidth := int ($ogCfg.width | default 1200) -}}
-{{- $ogHeight := int ($ogCfg.height | default 630) -}}
-{{- $disable := site.Params.disableImageOptimization | default false }}
+{{- $quality := int $imgCfg.quality -}}
+{{- $ogWidth := int $ogCfg.width -}}
+{{- $ogHeight := int $ogCfg.height -}}
+{{- $disable := site.Params.disableImageOptimization }}
 
 {{- $res := "" }}
 {{- $remote := false }}
