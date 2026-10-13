@@ -32,7 +32,15 @@ be re-derived from the templates.
   against the merged config. `[mainSections]` is the one deliberate omission:
   an empty slice is truthy in Go templates and `single.html` reads it through
   `with`, so shipping `mainSections = []` would flip "every single is an
-  article" into "none is".
+   article" into "none is".
+- **`exampleSite` carries overrides only.** Its `params.toml` keeps just the
+  keys it sets differently from the theme, since the theme's own
+  `config/_default/params.toml` is the reference and
+  `docs/configuration.md` explains each key. Dropping the eight keys that
+  duplicated a theme default — `colorScheme`, `autoSwitchAppearance`, `robots`,
+  `list.cardView`, `article.showDate`, `article.showDateUpdated`,
+  `article.relatedContentLimit`, `article.showPagination` — left all 162 built
+  files byte-identical, which is what proves the theme's defaults hold.
 - **Reproducible builds.** Two independent builds of the same tree are
   byte-identical, so a swapping id or timestamp cannot slip past every content
   assertion. The carousel instance id is the ordinal alone — the wall-clock
