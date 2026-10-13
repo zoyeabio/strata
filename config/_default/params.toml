@@ -24,6 +24,11 @@ autoSwitchAppearance = true
 dateFormat = "2006-01-02"
 robots = "index, follow, max-image-preview:large"
 eagerCardCount = 6
+# Widest reading column, in pixels. Applies to article bodies only — list and
+# landing pages keep the full frame. The column is centred and the text inside
+# stays left-aligned. Below the measure the frame is narrower, so on a phone the
+# body is flush with the title. "none" lifts the cap.
+readingMeasure = 720
 rtl = false
 allowRemoteImages = false
 disableImageOptimization = false

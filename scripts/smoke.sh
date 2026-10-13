@@ -455,7 +455,8 @@ css_assert_not() { # css_assert_not <regex> <label>
 }
 css_assert_not 'contact-form\{[^}]*max-width' \
   'the contact form fills its content column'
-css_assert 'max-width:720px' 'prose caps at 720px (text preset)'
+css_assert 'prose\{[^}]*max-width:var\(--prose-measure,720px\)' 'prose caps at the configured measure (default 720px)'
+css_assert 'prose\{[^}]*margin-inline:auto' 'the reading column is centred, not left against the frame'
 assert 'section-a/shortcodes/index.html' 'min-width:640px\) 240px' \
   'row thumb requests a 240px image at the fixed column width'
 css_assert 'repeat\(3,minmax\(0,1fr\)\)' 'three columns from 853px (grid preset)'
@@ -553,8 +554,8 @@ fi
 #     (assertion 28) keeps the strata rule effective, this pins the values
 css_assert 'pre\{font-family:var\(--font-mono\);font-size:13px' \
   'pre rule carries mono 13px (strata-base over utilities)'
-css_assert 'prose\{[^}]*max-width:720px' \
-  '.prose rule carries 720px, not the plugin 65ch'
+css_assert 'prose\{[^}]*max-width:var\(--prose-measure,720px\);margin-inline:auto' \
+  '.prose rule carries the measure and centring, not the plugin 65ch'
 
 # 30. taxonomy links are real pages: tags resolve through GetTerms, so the
 #     href must equal the term's own URL even for punctuation ("Sci & Tech"
@@ -777,7 +778,9 @@ css_assert_not 'page--wide\.prose>p\{max-width' \
   'landing paragraphs ride the wide measure, no separate cap'
 # 44. list and single pages share one top rhythm: the article header
 #     carries no top margin of its own (hero images keep their own spacing)
-css_assert_not 'article__header\{[^}]*max-width' 'article header fills its content column'
+css_assert_not 'article__header\{[^}]*margin-top' 'the article header carries no top margin of its own'
+css_assert 'article__header\{[^}]*max-width:var\(--prose-measure,720px\);margin-inline:auto' \
+  'the article header rides the reading measure with the body'
 # 45. mobile disclosure menu: hamburger with synced state, nested
 #     submenu behind a chevron button, loader wired
 assert 'index.html' 'data-nav-toggle aria-expanded="false"' 'hamburger starts collapsed'
@@ -1245,7 +1248,7 @@ assert_at "$OUT_DRAFTS" 'section-a/strtags/index.html' '"keywords":\["bare","str
   'a bare string tags value yields exactly two items'
 
 # 48. article chrome: the hero crops to its configured height instead of
-#     letterboxing, the body rides the full column, related content reuses the
+#     letterboxing, the body keeps the reading measure, related content reuses the
 #     card grid with lazy images, sharing links are centred icon tiles, and
 #     adjacent articles sit under their own rule. One anchor per sharingLinks
 #     name from data/sharing.json, title urlquery-encoded, opener opted out
@@ -1256,7 +1259,11 @@ css_assert 'page-hero\{[^}]*margin-block:32px' 'the hero block keeps its own air
 css_assert 'page-hero__image\{[^}]*height:var\(--page-hero-height\);object-fit:cover' 'the hero crops to its configured height'
 css_assert 'page-hero\+\.page-header\{margin-top:0' 'a trail-less header adds no air after a hero'
 css_assert 'page-content\{[^}]*max-width:none' 'landing page copy rides the full column'
-css_assert 'article__content\.prose\{max-width:none' 'the article body rides the full column'
+css_assert_not 'article__content\.prose\{max-width:none' 'the article body keeps the reading measure'
+css_assert 'article\.page--wide>\.article__header' \
+  'a landing page lifts the title block with the body'
+css_assert 'series\{[^}]*max-width:var\(--prose-measure,720px\)' \
+  'the series box tracks the reading measure'
 css_assert 'article__related\{margin-block:0;padding-top:28px' 'related block gets its own rhythm'
 css_assert_not 'article__related\{[^}]*border-top' 'related sits apart by space, not a rule'
 css_assert 'article__share\{display:flex;flex-wrap:wrap;justify-content:center' 'share tiles centre on the column'

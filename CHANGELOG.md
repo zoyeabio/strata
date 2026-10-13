@@ -33,6 +33,22 @@ be re-derived from the templates.
   an empty slice is truthy in Go templates and `single.html` reads it through
   `with`, so shipping `mainSections = []` would flip "every single is an
    article" into "none is".
+- **The reading measure is a parameter.** Article bodies cap at
+  `params.readingMeasure` (default 720px), centred, text left-aligned. Before
+  this, `components/article.css` lifted `.prose` to `max-width: none` and body
+  copy rode the 1024px frame — 108 characters at 17px, against the 45–75 that
+  the prose stylesheet's own comment asked for. The value ships as a CSS custom
+  property in `<head>` before the stylesheet, so a site can set `800` or the
+  string `"none"` without touching CSS. The title block rides the same measure
+  — a centred body under a full-frame h1 reads as a 152px misalignment at 1440,
+  not as an intentional column. The hero stays full-frame: an image edge does
+  not anchor the text grid. `.series` tracks the measure too, so one knob moves
+  the whole column. The lift still exists for landing and
+  list pages: short marketing blocks in a capped column only leave dead air at
+  the right edge, so those keep `max-width: none`. `smoke.sh` guards both
+  directions — that the `.prose` rule carries the measure and centring, and
+  that the article body no longer carries the lift.
+
 - **`exampleSite` carries overrides only.** Its `params.toml` keeps just the
   keys it sets differently from the theme, since the theme's own
   `config/_default/params.toml` is the reference and
@@ -45,9 +61,9 @@ be re-derived from the templates.
   byte-identical, so a swapping id or timestamp cannot slip past every content
   assertion. The carousel instance id is the ordinal alone — the wall-clock
   suffix it once carried made every rebuild a diff.
-- **The prose measure is for prose.** Article bodies get a 720px column;
-  sections, terms and the home page ride the full content column, so a landing
-  page never leaves dead air at the right edge.
+- **The prose measure is for prose.** Sections, terms and the home page ride
+  the full content column, so a landing page never leaves dead air at the right
+  edge. The article cap itself is `params.readingMeasure`.
 
 ### Behaviour notes
 

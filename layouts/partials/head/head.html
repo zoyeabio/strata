@@ -8,6 +8,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{- /* Reading measure, params.readingMeasure. In head before the stylesheet so
+        the column is right on first paint; style-src ships 'unsafe-inline' for
+        it. "none" lifts the cap for full-width reading. */ -}}
+  <style>:root{--prose-measure:{{ if eq site.Params.readingMeasure "none" }}none{{ else }}{{ site.Params.readingMeasure }}px{{ end }}}</style>
   {{ with site.Language.Locale }}
   <meta http-equiv="content-language" content="{{ . }}">
   {{ end }}

@@ -15,7 +15,19 @@
   margin-block: 24px;
 }
 
-.article__content.prose {
+/* The title block rides the reading measure too, so the article has one left
+   edge: a reader's eye moves from the h1 straight into the first paragraph.
+   The hero above stays full-frame — an image edge does not anchor the text
+   grid. */
+.article__header {
+  max-width: var(--prose-measure, 720px);
+  margin-inline: auto;
+}
+
+/* A landing page lifts both. Short marketing blocks in a capped column only
+   leave dead air at the right edge, so there the copy rides the full frame. */
+article.page--wide > .article__header,
+article.page--wide > .article__content {
   max-width: none;
 }
 

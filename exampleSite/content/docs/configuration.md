@@ -69,6 +69,7 @@ you change in config is the threshold the gate checks.
 | `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Must sit under a `[params]` table — a bare top-level key in `languages.<lang>.toml` is invisible to the theme. For a per-language format, set it in that language's file under its own `[params]` |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |
+| `readingMeasure` | `720` | Widest reading column, in pixels — article bodies only. List and landing pages keep the full frame. The column is centred and the text inside stays left-aligned; below it the frame is narrower, so on a phone the body stays flush with the title. A string `"none"` lifts the cap for full-width reading. Shipped as a CSS custom property in `<head>` before the stylesheet, so the column is right on first paint |
 | `customCSS` | `[]` | Asset paths loaded after the theme stylesheet (fingerprinted) |
 | `rtl` | `false` | Sets `<html dir="rtl">` |
 | `allowRemoteImages` | `false` | Permit `https://` image sources; skipped with a warning when off |

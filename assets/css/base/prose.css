@@ -16,7 +16,14 @@
   --tw-prose-th-borders: var(--border-strong);
   --tw-prose-td-borders: var(--border);
 
-  max-width: 720px;
+  /* The reading measure. --prose-measure comes from params.readingMeasure,
+     injected in head before this stylesheet; 720px is the fallback for a site
+     that never sets it. Auto margins centre the column; the text inside stays
+     left-aligned. Below the measure the frame is narrower, so the column fills
+     it and the body's left edge stays flush with the title — phones are
+     unaffected. "none" lifts the cap for full-width reading. */
+  max-width: var(--prose-measure, 720px);
+  margin-inline: auto;
   font-size: 17px;
   line-height: 1.7;
   letter-spacing: 0.012em;
@@ -30,7 +37,7 @@
 }
 
 /* A landing page lifts the measure off the container, including its own
-   paragraphs. Article body copy stays at the 720px measure: a long reading
+   paragraphs. Article body copy stays at the reading measure: a long reading
    column at 1024px is hard to scan. A landing page carries marketing copy in
    short blocks, so the cap only leaves dead air at the right edge.
    .page--wide is the same token article.css gives a non-article single page,
