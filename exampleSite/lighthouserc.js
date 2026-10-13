@@ -5,6 +5,11 @@
  * and fails the shell on a threshold breach. Local only: this repo ships no
  * workflow, so the check is one a developer runs before pushing.
  *
+ * @lhci/cli is run through npx and pinned in package.json's script rather than
+ * committed as a devDependency. It pulls ~320 packages and ~120MB for a check
+ * that runs on a laptop once a week; keeping it out of the lockfile leaves the
+ * build at the four Tailwind packages it actually needs.
+ *
  * Two deliberate choices:
  *
  * - The server is bound to 127.0.0.1. The scores are local-network numbers

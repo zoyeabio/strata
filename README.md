@@ -78,6 +78,11 @@ cd exampleSite && npm run build && npm run lighthouse
 It needs a system Chrome or Chromium; LHCI finds one through
 `chrome-launcher` instead of downloading its own ~150MB copy.
 
+`@lhci/cli` is not a committed dependency: npx fetches it on demand and the
+version is pinned in the script. It drags in ~320 packages for a check that
+runs once a week, so the example site's build dependencies stay at the four
+Tailwind packages the theme actually needs.
+
 ## Documentation
 
 The docs live in the example site, as pages, so they are built and

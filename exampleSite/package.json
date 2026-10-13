@@ -7,7 +7,7 @@
     "dev": "hugo server -D",
     "build": "hugo --minify",
     "validate": "bash ../scripts/validate-site.sh .",
-    "lighthouse": "lhci autorun --config=lighthouserc.js",
+    "lighthouse": "npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.js",
     "images": "python3 ../scripts/gen-example-images.py --out assets/images"
   },
   "dependencies": {
@@ -15,9 +15,6 @@
     "@tailwindcss/forms": "0.5.11",
     "@tailwindcss/typography": "0.5.20",
     "tailwindcss": "4.3.3"
-  },
-  "devDependencies": {
-    "@lhci/cli": "0.15.1"
   },
   "engines": {
     "node": ">=20"
