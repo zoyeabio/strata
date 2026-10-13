@@ -1132,6 +1132,21 @@ assert_at "$OUT_ROBOTS" 'section-a/flat/index.html' 'name="robots" content="noin
 assert_at "$OUT_ROBOTS" 'notice/index.html' 'name="robots" content="index, follow, noarchive"' \
   'a page-level robots value beats the site value'
 
+# The rendered robots.txt opens the crawl only in a production build and
+# declares the sitemap. hugo.IsProduction is false under `hugo server`, which
+# is what keeps a local dev server out of the index; that branch is pinned in
+# the template, since a build can only ever prove the production one.
+assert_at "$OUT" 'robots.txt' '^Allow: /$' \
+  'robots.txt allows the crawl in a production build'
+assert_at "$OUT" 'robots.txt' '^Sitemap: https://example\.org/sitemap\.xml$' \
+  'robots.txt declares the sitemap'
+if grep -q 'Disallow: /' "$ROOT/layouts/robots.txt" \
+  && grep -q 'hugo.IsProduction' "$ROOT/layouts/robots.txt"; then
+  pass 'robots.txt keeps a dev server out of the index'
+else
+  fail 'robots.txt keeps a dev server out of the index'
+fi
+
 # 42b. Article description and keywords mirror the front matter, including its
 #      two fallbacks (summary -> description, tags -> keywords) and the "neither
 #      source" case where neither key may be invented. All four combinations are

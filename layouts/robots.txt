@@ -1,9 +1,16 @@
 {{- /*
-  Fallback robots.txt for sites without static/robots.txt: open crawl plus
-  the sitemap declaration ad networks and auditors look for. Sites that
-  ship their own static/robots.txt (like the scaffold does) shadow this.
+  Fallback robots.txt for sites without static/robots.txt. A static file
+  shadows this one, so a site that needs a bespoke policy keeps it there.
+
+  hugo.IsProduction is true for `hugo build` and false for `hugo server`, so a
+  local dev server asks for no indexing while a production build opens the
+  crawl and declares the sitemap the ad networks and auditors look for.
 */ -}}
 User-agent: *
+{{- if hugo.IsProduction }}
 Allow: /
+{{- else }}
+Disallow: /
+{{- end }}
 
 Sitemap: {{ "sitemap.xml" | absURL }}

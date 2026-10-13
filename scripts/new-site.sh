@@ -286,14 +286,9 @@ EOF
   done
 fi
 
-# static files
-cat > "$OUT/static/robots.txt" <<EOF
-User-agent: *
-Allow: /
-
-Sitemap: https://${DOMAIN}/sitemap.xml
-EOF
-
+# no static/robots.txt: that would shadow the theme's templated fallback,
+# which keeps a local `hugo server` out of the index while a production build
+# opens the crawl and declares the sitemap
 # ads.txt starts as comments only: set [ads] client in config and replace
 # the stub line when the publisher ID is known
 cat > "$OUT/static/ads.txt" <<'EOF'
