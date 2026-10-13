@@ -1,0 +1,82 @@
+description = "A content-first Hugo theme for independent sites. This site is the theme's own example: every page exercises a real feature."
+eagerCardCount = 3
+mainSections = ["posts"]
+# The home page has no hero of its own, so its social card needs an explicit
+# image; pages with a featureimage keep it.
+defaultSocialImage = "images/hero-home.png"
+twitterSite = "@stratastudio"
+twitterCreator = "@stratastudio"
+enableSearch = true
+enableA11y = true
+colorScheme = "strata-default"
+defaultAppearance = "auto"
+autoSwitchAppearance = true
+robots = "index, follow, max-image-preview:large"
+
+[header]
+  layout = "smart"
+
+[search]
+  contentLength = 600
+
+[list]
+  cardView = true
+  showBreadcrumbs = true
+  showHero = true
+
+[article]
+  showBreadcrumbs = true
+  showAuthor = true
+  showDate = true
+  showDateUpdated = true
+  showRelatedContent = true
+  relatedContentLimit = 3
+  showPagination = true
+  showSummary = true
+  sharingLinks = ["linkedin", "facebook", "email", "whatsapp"]
+
+[author]
+  name = "Strata Studio"
+  links = [{ name = "GitHub", url = "https://github.com/zoyeabio/" }]
+
+[taxonomy]
+  showBreadcrumbs = true
+
+[term]
+  showBreadcrumbs = true
+
+[footer]
+  showAppearanceSwitcher = true
+  showScrollToTop = true
+
+  [footer.company]
+    name = "Strata Studio"
+    slogan = "Independent sites, built to last."
+    email = "hello@strata.example"
+    phone = "+1 555 0100"
+    address = "14 Foundry Lane<br>Portland, OR"
+
+  [footer.quickLinks]
+    title = "Explore"
+    links = [
+      { name = "Features", url = "/features/" },
+      { name = "Shortcodes", url = "/shortcodes/" },
+      { name = "Gallery", url = "/gallery/" },
+      { name = "Posts", url = "/posts/" },
+    ]
+
+  [footer.legal]
+    title = "Site"
+    links = [
+      { name = "Docs", url = "/docs/" },
+      { name = "About", url = "/about/" },
+      { name = "Contact", url = "/contact/" },
+    ]
+
+  [footer.social]
+    links = [
+      { name = "LinkedIn", icon = "linkedin", url = "https://www.linkedin.com/" },
+      { name = "Instagram", icon = "instagram", url = "https://www.instagram.com/" },
+      { name = "Facebook", icon = "facebook", url = "https://www.facebook.com/" },
+      { name = "Email", icon = "email", url = "mailto:hello@strata.example" },
+    ]

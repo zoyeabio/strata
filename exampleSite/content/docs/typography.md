@@ -1,4 +1,9 @@
-# Typography
+---
+title: "Typography"
+description: "The type scale, the prose width, and the system font stack."
+keywords: ["typography", "type", "fonts"]
+weight: 40
+---
 
 ## Font stack
 

@@ -2,10 +2,11 @@
   Partial: data/keywords.html
   Role:     Resolve the page's keyword list so the meta keywords tag and
             JSON-LD's Article.keywords carry the same items: params.keywords,
-            else params.tags. Hugo already splits a comma-separated keywords
-            string into a list, but params.tags may still be a bare string, so
-            both forms are normalised; each item is whitespace-trimmed, inner
-            whitespace collapsed to one space, and blanks and duplicates are
+            else params.tags. Hugo splits a bare keywords string on whitespace
+            and a bare tags string on commas, so keywords must be written as a
+            list and a tags string arrives untrimmed; both forms are normalised,
+            with each item whitespace-trimmed, inner whitespace collapsed to one
+            space, and blanks and duplicates are
             dropped — the meta value is a single attribute, so repeated items
             are pure noise.
             Template strings follow Go escaping, so the whitespace class is

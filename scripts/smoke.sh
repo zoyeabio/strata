@@ -951,8 +951,8 @@ fi
  css_assert '\.site-search__results\{list-style:none;padding-block:6px' 'focus ring is not clipped at the results list top'
  # 48. no font-size switch: the theme mixes rem and px, so a root bump
  #     scales only half the type — browser zoom is the honest tool
-if grep -q 'No font-size switch on purpose' "$ROOT/layouts/partials/frame/a11y.html" &&
-   grep -q 'No font-size switch on purpose' "$ROOT/docs/configuration.md"; then
+ if grep -q 'No font-size switch on purpose' "$ROOT/layouts/partials/frame/a11y.html" &&
+    grep -q 'No font-size switch on purpose' "$ROOT/exampleSite/content/docs/configuration.md"; then
   pass 'the deliberate font-size omission is documented at the point of use'
 else
   fail 'the deliberate font-size omission is documented at the point of use'

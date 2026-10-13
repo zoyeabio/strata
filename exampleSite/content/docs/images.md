@@ -1,4 +1,9 @@
-# Images
+---
+title: "Images"
+description: "Storage rules, resolution order, the variant ladder, and image roles."
+keywords: ["images", "pipeline", "ladder", "roles"]
+weight: 30
+---
 
 ## Page layout
 

@@ -1,4 +1,9 @@
-# Sitemap
+---
+title: "Sitemap"
+description: "The sitemap, robots.txt, and exactly which pages get listed."
+keywords: ["sitemap", "robots", "xml"]
+weight: 70
+---
 
 The theme ships Hugo's built-in `sitemap.xml`, which lists every page that has
 any rendered output — including `/tags/` taxonomy indexes and every `/tags/x/`

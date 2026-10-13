@@ -404,7 +404,9 @@ for t in htmls:
         continue
     rel = t.relative_to(pub)
     og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
-    if (not og or og.group(1) != 'article') and re.search(r'article:(published|modified)_time', text):
+    # Match a real meta tag, not the substring anywhere: a docs page that
+    # names the tag in prose or a table is not carrying it.
+    if (not og or og.group(1) != 'article') and re.search(r'<meta[^>]*(?:property|name)=["\x27]article:(?:published|modified)_time["\x27]', text):
         social_bad.append(f'{rel}: article:* time on og:type={og.group(1) if og else "?"}')
     for prop in ('og:image', 'twitter:image'):
         for m in re.findall(rf'(?:property|name)=["\x27]{prop}["\x27] content=["\x27]([^"\x27]*)["\x27]', text):

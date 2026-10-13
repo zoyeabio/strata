@@ -1,0 +1,25 @@
+{
+  "name": "strata-example",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Build dependencies for the Strata example site. Hugo runs tailwindcss in-process during the build; since Hugo 0.161.0 it needs the npm CLI rather than the standalone binary.",
+  "scripts": {
+    "dev": "hugo server -D",
+    "build": "hugo --minify",
+    "validate": "bash ../scripts/validate-site.sh .",
+    "lighthouse": "lhci autorun --config=lighthouserc.js",
+    "images": "python3 ../scripts/gen-example-images.py --out assets/images"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "@tailwindcss/forms": "0.5.11",
+    "@tailwindcss/typography": "0.5.20",
+    "tailwindcss": "4.3.3"
+  },
+  "devDependencies": {
+    "@lhci/cli": "0.15.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

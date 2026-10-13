@@ -6,7 +6,8 @@ Strata keeps everything site-agnostic inside the theme — layout, components
 and styling. Branding, copy, navigation and configuration stay in each site's
 own layer, so one theme can serve several sites without forking.
 
-**Status:** the rebuild is complete. Everything linked under [docs/](docs/README.md)
+**Status:** the rebuild is complete. The [exampleSite](exampleSite/) is the
+theme's own demo, and its [documentation section](exampleSite/content/docs/_index.md)
 describes shipped behaviour.
 
 ## Highlights
@@ -43,7 +44,7 @@ Alternatively, clone this repository into `themes/strata` and set
 `theme = "strata"`.
 
 Your site must declare the theme's taxonomy contract (Hugo does not inherit
-this from the theme — see [docs/installation.md](docs/installation.md)):
+this from the theme — see [the installation docs](exampleSite/content/docs/installation.md)):
 
 ```toml
 [taxonomies]
@@ -51,16 +52,46 @@ this from the theme — see [docs/installation.md](docs/installation.md)):
   tag = "tags"
 ```
 
+## Example site
+
+`exampleSite/` is the theme's own demo and its live documentation. Build it
+against this checkout:
+
+```sh
+cd exampleSite && npm install && hugo --minify
+```
+
+Every page exists to exercise a feature, and the demo assets regenerate
+from a single script with no third-party package:
+
+```sh
+python3 scripts/gen-example-images.py --out exampleSite/assets/images
+```
+
+A Lighthouse check ships with it, local only — there is no workflow for it,
+so the scores are laptop numbers and are not CI numbers:
+
+```sh
+cd exampleSite && npm run build && npm run lighthouse
+```
+
+It needs a system Chrome or Chromium; LHCI finds one through
+`chrome-launcher` instead of downloading its own ~150MB copy.
+
 ## Documentation
+
+The docs live in the example site, as pages, so they are built and
+validated with the theme rather than drift in a separate tree:
 
 | Document | Contents |
 |---|---|
-| [docs/installation.md](docs/installation.md) | Module setup, taxonomy contract, first build |
-| [docs/configuration.md](docs/configuration.md) | Site params, front matter keys, site hooks |
-| [docs/images.md](docs/images.md) | Image storage, ladder, cropping, roles |
-| [docs/typography.md](docs/typography.md) | Type scale, prose width, system fonts |
-| [docs/customization.md](docs/customization.md) | Colour schemes, CSS variables, custom CSS |
-| [docs/shortcodes.md](docs/shortcodes.md) | Shortcode reference and supported parameters |
+| [installation](exampleSite/content/docs/installation.md) | Module setup, taxonomy contract, first build |
+| [configuration](exampleSite/content/docs/configuration.md) | Site params, front matter keys, site hooks |
+| [images](exampleSite/content/docs/images.md) | Image storage, ladder, cropping, roles |
+| [typography](exampleSite/content/docs/typography.md) | Type scale, prose width, system fonts |
+| [customization](exampleSite/content/docs/customization.md) | Colour schemes, CSS variables, custom CSS |
+| [shortcodes](exampleSite/content/docs/shortcodes.md) | Shortcode reference and supported parameters |
+| [sitemap](exampleSite/content/docs/sitemap.md) | The sitemap, robots.txt, what gets listed |
 
 ## Development
 

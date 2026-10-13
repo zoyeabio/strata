@@ -1,4 +1,9 @@
-# Installation
+---
+title: "Installation"
+description: "Module setup, the taxonomy contract, and your first build."
+keywords: ["installation", "hugo", "setup"]
+weight: 10
+---
 
 ## Requirements
 

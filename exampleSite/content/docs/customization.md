@@ -1,4 +1,9 @@
-# Customization
+---
+title: "Customization"
+description: "Colour schemes, CSS variables, and adding your own CSS."
+keywords: ["customization", "colour schemes", "css"]
+weight: 50
+---
 
 ## Colour schemes
 

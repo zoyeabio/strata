@@ -1,0 +1,6 @@
+public/
+resources/_gen/
+hugo_stats.json
+node_modules/
+.lighthouseci/
+.DS_Store

@@ -1,0 +1,72 @@
+baseURL = "https://example.com/"
+enableRobotsTXT = true
+ignoreLogs = ['warning-goldmark-raw-html']
+
+# 7 posts over a 5-per-page pager gives two pages, so the demo exercises
+# pagination rather than a single flat list.
+[pagination]
+  pagerSize = 5
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[module]
+  proxy = "direct"
+
+  [[module.imports]]
+    path = "github.com/zoyeabio/strata"
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
+
+[related]
+  threshold = 80
+  toLower = false
+  includeNewer = true
+
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+
+  [[related.indices]]
+    name = "series"
+    weight = 50
+
+# Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the tailwindcss
+# script and its interpreter must both be allowed, and the addon needs its own
+# node policy
+[security.node]
+  [security.node.permissions]
+    allowAddons = ['tailwindcss']
+    allowChildProcess = ['tailwindcss']
+    allowRead = ['.']
+    allowWorker = ['tailwindcss']
+    allowWrite = []
+    disable = false
+
+[security.exec]
+  allow = ['go', 'node', 'tailwindcss']
+
+# Hugo docs css.TailwindCSS recipe: stats + watch wiring so server rebuilds
+# stay fresh (the pipeline scans @source files, not hugo_stats.json)
+[build.buildStats]
+  enable = true
+
+[[build.cachebusters]]
+  source = 'assets/notwatching/hugo_stats\.json'
+  target = 'css'
+
+[[module.mounts]]
+  source = 'assets'
+  target = 'assets'
+
+[[module.mounts]]
+  disableWatch = true
+  source = 'hugo_stats.json'
+  target = 'assets/notwatching/hugo_stats.json'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

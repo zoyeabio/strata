@@ -1,4 +1,9 @@
-# Configuration
+---
+title: "Configuration"
+description: "Site params, front matter keys, navigation, and the site hooks."
+keywords: ["configuration", "params", "front matter"]
+weight: 20
+---
 
 Everything a site configures lives in the site layer. The theme consumes only
 the keys listed here; anything else is ignored. The theme's own defaults —
@@ -162,7 +167,7 @@ warning instead of being rendered as a dead link.
 | `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |
-| `featureimage` | Page/card image; without it a bundle resource named `feature*`/`cover*`/`thumbnail*` is used (see [images.md](images.md)) |
+| `featureimage` | Page/card image; without it a bundle resource named `feature*`/`cover*`/`thumbnail*` is used (see [images.md](/docs/images/)) |
 | `featureimagealt` | Alt text for `featureimage`; fallback `Featured image for {title}` |
 | `showHero` | Page hero: shown when an image resolves (`featureimage` or a bundle cover), `false` suppresses it |
 | `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
@@ -176,7 +181,7 @@ warning instead of being rendered as a dead link.
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |
 | `author` | Byline for this page (falls back to `[author] name`) |
-| `images` | Image refs for Open Graph; `images[0]` is used only when `featureimage` is absent (see [images.md](images.md)) |
+| `images` | Image refs for Open Graph; `images[0]` is used only when `featureimage` is absent (see [images.md](/docs/images/)) |
 
 ## Consent and ads
 
@@ -188,7 +193,7 @@ theirs through two sanctioned points:
   measurement tag — typically from `partials/extend-head.html` — and flip
   to granted from the banner. What counts as consent is site law, not
   theme code.
-- `{{< ads slot="…" >}}` renders an AdSense unit; `static/ads.txt` must
+- <code>{{&lt; ads slot="…" &gt;}}</code> renders an AdSense unit; `static/ads.txt` must
   name the `[ads] client` ID or the build fails (check-build R11).
 
 ## Site hooks

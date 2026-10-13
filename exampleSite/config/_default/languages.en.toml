@@ -1,0 +1,8 @@
+# `description` sits at the top level on purpose: that is the language's own
+# description, which feeds the home page and anything without a page-level
+# value. Keep [params] description in params.toml for the site-wide fallback.
+title = "Strata"
+description = "Strata is a content-first Hugo theme for independent sites."
+
+[params]
+  dateFormat = "2 Jan 2006"

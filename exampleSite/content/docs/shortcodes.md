@@ -1,4 +1,9 @@
-# Shortcodes
+---
+title: "Shortcodes"
+description: "Every shortcode, with its parameters and the syntax that builds."
+keywords: ["shortcodes", "reference", "syntax"]
+weight: 60
+---
 
 All shortcodes ship with the theme; no JavaScript dependencies are bundled.
 Parameters marked **required** fail the build when missing (with the source
@@ -11,7 +16,7 @@ image runs through the responsive pipeline.
 
 | Parameter | Notes |
 |---|---|
-| `src` | **required** — image reference (see [images.md](images.md)) |
+| `src` | **required** — image reference (see [images.md](/docs/images/)) |
 | `alt` | Alt text; empty string marks a decorative image |
 | `title`, `caption`, `attr`, `attrlink` | Caption block, same semantics as the built-in |
 | `link`, `target`, `rel` | Wrap the image in a link |
