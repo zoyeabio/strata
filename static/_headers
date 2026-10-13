@@ -1,0 +1,39 @@
+# Deployment headers for Cloudflare Pages (also read by Netlify).
+#
+# Static files are copied to the output root verbatim, so this ships in the
+# theme rather than per site: security is the default, not a reminder.
+#
+# Why the policy is strict
+#   Every resource the theme ships is first-party, and every script and
+#   stylesheet carries an SRI `integrity` attribute, so no directive needs
+#   unsafe-inline, unsafe-eval or a third-party origin. js/carousel.js and
+#   js/contact.js were moved out of their shortcodes specifically so this
+#   could stay free of unsafe-inline; the JSON-LD blocks are exempt from
+#   script-src (a non-executable script type) and are unaffected.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+
+# Exceptions to this file, and why
+#
+#   style-src 'unsafe-inline'  The carousel writes a dynamic aspect-ratio
+#     attribute (aspect-ratio: W / H) that has no class equivalent. Inline
+#     style cannot execute code; removing this needs a nonce plan, and Hugo
+#     does not generate nonces.
+#
+#   frame-src google origins   The map shortcode is the theme's explicit
+#     opt-in to a third-party embed, documented with a Google Maps URL. Add
+#     your provider's origin here rather than widening to https:
+#
+#   Ads  site.Params.ads.client turns on the AdSense loader, which needs
+#     pagead2.googlesyndication.com and the doubleclick.net origins in
+#     script-src, connect-src, img-src and frame-src, plus 'unsafe-inline'
+#     in script-src per Google's current recommendation. Ads are a
+#     deliberate relaxation of this file, so adjust it knowingly.
+#
+#   frame-ancestors 'none'     Deletes if you want the site embeddable in an
+#     iframe; the theme assumes it is not.

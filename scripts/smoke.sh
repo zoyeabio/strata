@@ -343,8 +343,11 @@ assert 'section-a/shortcodes/index.html' 'action="/api/contact"' \
   'contact form posts to the default endpoint'
 assert 'section-a/shortcodes/index.html' 'name="hp_name"' \
   'contact form keeps the honeypot'
-assert 'section-a/shortcodes/index.html' 'var id = "contact-form-' \
-  'the contact script targets its own instance id'
+assert 'section-a/shortcodes/index.html' 'data-contact-form data-max-bytes="1000"' \
+  'the contact form publishes its byte limit as markup'
+assert 'section-a/shortcodes/index.html' \
+  'src="[^"]*js/contact\.[0-9a-f]+\.js" integrity="sha512-' \
+  'the contact script loads fingerprinted with SRI'
 assert 'section-a/shortcodes/index.html' 'data-interval="1500"' \
   'carousel carries the configured interval'
 assert 'section-a/shortcodes/index.html' 'aspect-ratio: 16 / 9' \
@@ -908,8 +911,8 @@ assert 'index.html' 'id="site-a11y" data-a11y-panel' 'a11y panel carries the nam
 count_assert 'index.html' 'data-a11y-setting="[^"]*"' 3 'three switches render'
 assert 'index.html' 'a11y\.[0-9a-f]+\.js' 'a11y script loads'
 if grep -q 'a11y-reduce-motion' "$ROOT/assets/js/scroll-top.js" &&
-   grep -q 'a11y-reduce-motion' "$ROOT/layouts/shortcodes/interactive/carousel.html" &&
-   grep -q 'if (calm())' "$ROOT/layouts/shortcodes/interactive/carousel.html"; then
+   grep -q 'a11y-reduce-motion' "$ROOT/assets/js/carousel.js" &&
+   grep -q 'if (calm())' "$ROOT/assets/js/carousel.js"; then
   pass 'motion switch is read live by scroll-to-top and the carousel'
 else
   fail 'motion switch is read live by scroll-to-top and the carousel'
@@ -1056,8 +1059,10 @@ fi
 #     reduced-motion guards, contact live region and invalid flag
 assert 'index.html' 'class="skip-link" href="#main-content"' 'skip link targets the main block'
 assert 'index.html' '<main id="main-content" tabindex="-1">' 'skip link lands on a focusable main'
-assert 'section-a/shortcodes/index.html' 'ArrowLeft' 'carousel handles arrow keys'
-assert 'section-a/shortcodes/index.html' 'prefers-reduced-motion' 'carousel honours reduced motion'
+assert_at "$ROOT/assets/js" 'carousel.js' 'ArrowLeft|ArrowRight' \
+  'carousel handles arrow keys'
+assert_at "$ROOT/assets/js" 'carousel.js' 'prefers-reduced-motion' \
+  'carousel honours reduced motion'
 assert 'section-a/shortcodes/index.html' 'role="status"' 'contact status is a live region'
 assert 'section-a/shortcodes/index.html' 'aria-describedby=' 'message field names its limit'
 assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes validity'
@@ -1474,6 +1479,49 @@ if ( eval "$CFG_DEV" && [ "$PAGE_IMAGES_KB" -eq 400 ] ) \
   pass 'build_config honours --environment the way Hugo does'
 else
   fail 'build_config honours --environment the way Hugo does'
+fi
+
+# 49. security: static/_headers ships a strict Content-Security-Policy and no
+#     page ships an executable inline script. Together they are what make the
+#     policy enforceable. Two deliberate exceptions, both documented in
+#     _headers: json-ld blocks carry a non-executable script type and are
+#     exempt from script-src, and the AdSense push runs the third-party loader
+#     the ads shortcode registers.
+assert_at "$ROOT/static" '_headers' "script-src 'self'" \
+  'headers ship a strict script-src with no unsafe-inline'
+assert_at "$ROOT/static" '_headers' 'X-Content-Type-Options: nosniff' \
+  'headers set nosniff'
+assert_at "$ROOT/static" '_headers' 'Referrer-Policy: strict-origin-when-cross-origin' \
+  'headers set a referrer policy'
+assert_at "$ROOT/static" '_headers' 'object-src .none' \
+  'headers deny plugins'
+# Comments are stripped first: the file documents the AdSense relaxation in
+# prose, and style-src legitimately keeps 'unsafe-inline' for the carousel's
+# dynamic aspect-ratio attribute.
+HDRS="$(grep -vE '^[[:space:]]*#' "$ROOT/static/_headers")"
+if printf '%s\n' "$HDRS" | grep -qE 'script-src[^;]*unsafe-inline'; then
+  fail 'no script-src relaxation sneaks into the policy'
+else
+  pass 'no script-src relaxation sneaks into the policy'
+fi
+if EXEC_INLINE=$(python3 - "$OUT" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+bad = []
+for page in Path(sys.argv[1]).rglob("*.html"):
+    for tag, body in re.findall(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", page.read_text(encoding="utf-8"), re.S):
+        if "ld+json" in tag or "adsbygoogle" in body:
+            continue
+        bad.append(f"{page.name}: {body.strip()[:48]}")
+print("\n".join(bad))
+PY
+) && [ -z "$EXEC_INLINE" ]; then
+  pass 'no page ships an executable inline script'
+else
+  printf '%s\n' "$EXEC_INLINE" >&2
+  fail 'no page ships an executable inline script'
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

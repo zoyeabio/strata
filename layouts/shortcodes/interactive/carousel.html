@@ -26,12 +26,17 @@
   Slide images fill their frame with object-cover by default, so intrinsic
   width and height come from the pipeline and the aspect ratio comes from the
   frame; fit="contain" fits the image inside the frame instead.
-  The first slide loads eagerly (it can be the page's LCP), the rest
-  lazily. The inline script initialises only its own instance; two
-  carousels on one page stay independent. The loop is seamless forward: a
-  hidden clone of the first slide sits at the end, so the last-to-first
-  step animates onto the clone and snaps back to the real first slide
-  without a visible jump.
+   The first slide loads eagerly (it can be the page's LCP), the rest
+   lazily. The loop is seamless forward: a
+   hidden clone of the first slide sits at the end, so the last-to-first
+   step animates onto the clone and snaps back to the real first slide
+   without a visible jump.
+
+   The script lives in js/carousel.js — one fingerprinted, SRI-checked copy
+   per page instead of one per instance — and selects every [data-carousel],
+   so two carousels on one page stay independent. Autoplay reads the step from
+   data-interval. Keeping it external is what lets static/_headers ship a
+   strict Content-Security-Policy with no unsafe-inline.
 
   Called by: content markdown
 */ -}}
@@ -144,99 +149,8 @@
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
   </button>
 </div>
-<script>
-(function () {
-  var id = {{ $id }};
-  var root = document.getElementById(id);
-  if (!root || root.getAttribute("data-carousel-ready")) return;
-  root.setAttribute("data-carousel-ready", "");
-  var track = root.querySelector("[data-carousel-track]");
-  var slides = track.children;
-  var dots = root.querySelectorAll("[data-slide-to]");
-  var count = dots.length;
-  var index = 0;
-  var timer = null;
-  var snap = null;
-  var interval = parseInt(root.getAttribute("data-interval"), 10) || 2000;
-  function calm() {
-    return document.documentElement.classList.contains("a11y-reduce-motion") ||
-      (typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }
-
-  function paint(n) {
-    for (var i = 0; i < dots.length; i++) {
-      if (i === n) {
-        dots[i].setAttribute("data-carousel-active", "");
-        dots[i].setAttribute("aria-current", "true");
-      } else {
-        dots[i].removeAttribute("data-carousel-active");
-        dots[i].removeAttribute("aria-current");
-      }
-    }
-    for (var j = 0; j < slides.length; j++) {
-      if (j === n) {
-        slides[j].setAttribute("data-carousel-active", "");
-      } else {
-        slides[j].removeAttribute("data-carousel-active");
-      }
-    }
-  }
-
-  function go(next) {
-    if (next === count) {
-      index = count;
-      track.style.transform = "translateX(-" + index * 100 + "%)";
-      paint(0);
-      clearTimeout(snap);
-      snap = setTimeout(function () {
-        track.style.transition = "none";
-        index = 0;
-        track.style.transform = "translateX(0)";
-        void track.offsetWidth;
-        track.style.transition = "transform 0.6s ease";
-      }, 650);
-    } else {
-      clearTimeout(snap);
-      index = (next + count) % count;
-      track.style.transform = "translateX(-" + index * 100 + "%)";
-      paint(index);
-    }
-  }
-
-  function start() {
-    stop();
-    if (!calm() && count > 1) {
-      timer = setInterval(function () {
-        if (calm()) { stop(); return; }
-        go(index + 1);
-      }, interval);
-    }
-  }
-
-  function stop() {
-    if (timer) { clearInterval(timer); timer = null; }
-  }
-
-  root.querySelector("[data-carousel-prev]").addEventListener("click", function () { go(index - 1); });
-  root.querySelector("[data-carousel-next]").addEventListener("click", function () { go(index + 1); });
-  root.addEventListener("keydown", function (event) {
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      go(index - 1);
-    } else if (event.key === "ArrowRight") {
-      event.preventDefault();
-      go(index + 1);
-    }
-  });
-  for (var k = 0; k < dots.length; k++) {
-    (function (n) { dots[k].addEventListener("click", function () { go(n); }); })(k);
-  }
-  root.addEventListener("pointerenter", stop);
-  root.addEventListener("pointerleave", start);
-  root.addEventListener("focusin", stop);
-  root.addEventListener("focusout", start);
-  start();
-})();
-</script>
+{{- with resources.Get "js/carousel.js" }}
+{{- $js := . | fingerprint "sha512" }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{- end }}
 {{- end -}}

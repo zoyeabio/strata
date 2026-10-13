@@ -10,16 +10,21 @@
     action   (string) — form endpoint, default "/api/contact"
     maxBytes (int)    — message limit shown by the counter, default 1000
 
-  Element ids carry the shortcode's occurrence number, so two forms on one
-  page do not collide — the source template used a single fixed id. The
-  script initialises only its own instance and is idempotent.
+   Element ids carry the shortcode's occurrence number, so two forms on one
+   page do not collide — the source template used a single fixed id.
+
+   The script lives in js/contact.js, loaded once per page with SRI; it
+   selects every form[data-contact-form], derives the field ids from the form
+   id, and reads the byte limit from data-max-bytes. Nothing is interpolated
+   into the script, which is what lets static/_headers ship a strict
+   Content-Security-Policy with no unsafe-inline.
 
   Called by: content markdown
 */ -}}
 {{- $action := .Get "action" | default "/api/contact" -}}
 {{- $maxBytes := int (default "1000" (.Get "maxBytes")) -}}
 {{- $id := printf "contact-form-%d" .Ordinal -}}
-<form class="contact-form not-prose" id="{{ $id }}" action="{{ $action }}" method="post" data-contact-form>
+<form class="contact-form not-prose" id="{{ $id }}" action="{{ $action }}" method="post" data-contact-form data-max-bytes="{{ $maxBytes }}">
   <div class="contact-form__row">
     <div class="contact-form__field">
       <label for="{{ $id }}-name">Name *</label>
@@ -45,61 +50,7 @@
     <input type="text" name="hp_name" tabindex="-1" autocomplete="off">
   </div>
 </form>
-<script>
-(function () {
-  var id = {{ $id }};
-  var form = document.getElementById(id);
-  if (!form || form.getAttribute("data-contact-ready")) return;
-  form.setAttribute("data-contact-ready", "");
-  var message = document.getElementById(id + "-message");
-  var byteEl = document.getElementById(id + "-bytes");
-  var charEl = document.getElementById(id + "-chars");
-  var status = document.getElementById(id + "-status");
-  var maxBytes = {{ $maxBytes }};
-
-  function recount() {
-    var text = message.value;
-    byteEl.textContent = new TextEncoder().encode(text).length;
-    charEl.textContent = text.length;
-    var over = Number(byteEl.textContent) > maxBytes;
-    message.closest(".contact-form__field").classList.toggle(
-      "contact-form__field--over", over);
-    message.setAttribute("aria-invalid", over ? "true" : "false");
-  }
-
-  function show(kind, text) {
-    status.textContent = text;
-    status.className = "contact-form__status contact-form__status--" + kind;
-  }
-
-  message.addEventListener("input", recount);
-
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    if (Number(byteEl.textContent) > maxBytes) {
-      show("error", "Message is too long. Maximum " + maxBytes + " bytes allowed.");
-      message.focus();
-      return;
-    }
-    show("neutral", "Sending...");
-    var button = form.querySelector('button[type="submit"]');
-    button.disabled = true;
-    form.setAttribute("aria-busy", "true");
-    fetch(form.action, { method: "POST", body: new FormData(form) })
-      .then(function (response) { return response.json().then(function (data) { return { ok: response.ok, data: data }; }); })
-      .then(function (result) {
-        if (result.ok && result.data.success) {
-          show("ok", "Thank you! Your message has been sent successfully.");
-          form.reset();
-          recount();
-        } else {
-          show("error", result.data.error || "Submission failed. Please try again.");
-        }
-      })
-      .catch(function () {
-        show("error", "Oops! Something went wrong. Please try again later.");
-      })
-      .then(function () { button.disabled = false; form.removeAttribute("aria-busy"); button.focus(); });
-  });
-})();
-</script>
+{{- with resources.Get "js/contact.js" }}
+{{- $js := . | fingerprint "sha512" }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{- end }}
