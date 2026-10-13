@@ -15,11 +15,17 @@
                 site.Params.allowRemoteImages allows them
     captions    (string, optional) — "{key: caption, ...}" keyed by file
                 name, base name or path; colons inside a caption are kept
+    alts        (string, optional) — same shape as captions, a per-slide
+                description for alt text. Falls back to the slide caption,
+                then to a positional label
+    fit         (string, optional) — "cover" (default) or "contain"; contain
+                keeps a chart's axes and legend on screen instead of cropping
     aspectRatio (string, optional) — "W-H", default "16-9"
     interval    (int, optional) — autoplay step in ms, default 2000
 
-  Slide images fill their frame with object-cover, so intrinsic width and
-  height come from the pipeline and the aspect ratio comes from the frame.
+  Slide images fill their frame with object-cover by default, so intrinsic
+  width and height come from the pipeline and the aspect ratio comes from the
+  frame; fit="contain" fits the image inside the frame instead.
   The first slide loads eagerly (it can be the page's LCP), the rest
   lazily. The inline script initialises only its own instance; two
   carousels on one page stay independent. The loop is seamless forward: a
@@ -48,6 +54,23 @@
 {{- end -}}
 {{- end -}}
 
+{{- /* alts: same shape as captions, a per-slide description */ -}}
+{{- $alts := dict -}}
+{{- $araw := default "" (.Get "alts") -}}
+{{- $araw = strings.TrimSuffix "}" (strings.TrimPrefix "{" $araw) -}}
+{{- if $araw }}
+{{- range split $araw "," }}
+{{- $pair := split . ":" -}}
+{{- if ge (len $pair) 2 -}}
+{{- $alts = merge $alts (dict (strings.TrimSpace (index $pair 0)) (strings.TrimSpace (delimit (after 1 $pair) ":"))) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* only cover and contain are wired; anything else is cover */ -}}
+{{- $fit := or (.Get "fit") "cover" -}}
+{{- if ne $fit "contain" }}{{ $fit = "cover" }}{{ end -}}
+
 {{- /* images: glob first, exact reference as fallback */ -}}
 {{- $refs := slice -}}
 {{- $iraw := strings.TrimSuffix "}" (strings.TrimPrefix "{" (default "" (.Get "images"))) -}}
@@ -75,7 +98,11 @@
 {{- range .keys -}}
 {{- if not $caption }}{{ with index $captions . }}{{ $caption = . }}{{ end }}{{ end -}}
 {{- end -}}
-{{- $slides = $slides | append (dict "img" $img "caption" $caption) -}}
+{{- $alt := "" -}}
+{{- range .keys -}}
+{{- if not $alt }}{{ with index $alts . }}{{ $alt = . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $slides = $slides | append (dict "img" $img "caption" $caption "alt" $alt) -}}
 {{- end -}}
 {{- end -}}
 
@@ -87,10 +114,12 @@
       {{- if gt (len $slides) 1 }}{{ with index $slides 0 }}{{ $all = $all | append . }}{{ end }}{{ end }}
       {{- range $i, $s := $all }}
       <div class="carousel__slide"{{ if lt $i (len $slides) }} data-carousel-slide{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}"{{ else }} aria-hidden="true" tabindex="-1"{{ end }}>
-        <div class="carousel__frame">
+        {{- $frame := "carousel__frame" -}}
+        {{- if eq $fit "contain" }}{{ $frame = printf "%s carousel__frame--contain" $frame }}{{ end -}}
+        <div class="{{ $frame }}">
           {{- partial "media/image.html" (dict
               "img" $s.img
-              "alt" (printf "carousel image %d" (add $i 1))
+              "alt" (or $s.alt $s.caption (printf "carousel image %d" (add $i 1)))
               "sizes" (partial "data/card-presets.html" "text").sizes
               "loading" (cond (eq $i 0) "eager" "lazy")
               "fetchpriority" (cond (eq $i 0) "" "low")

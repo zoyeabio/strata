@@ -94,8 +94,19 @@
 {{- if not $page.Lastmod.IsZero }}
 {{- $article = merge $article (dict "dateModified" ($page.Lastmod.Format "2006-01-02T15:04:05Z07:00")) }}
 {{- end }}
-{{- if $img.ok }}
-{{- $article = merge $article (dict "image" (slice ($img.url | absURL))) }}
+{{- /* The 1200x630 preview plus the widest hero variant. Google asks for a
+       high-resolution 16:9 representative image where one exists; the hero
+       variant is already built for the page, so no extra file is produced */ -}}
+{{- $hero := partial "data/image-resource.html" (dict
+    "ref" (partial "data/image-ref.html" (dict "page" $page))
+    "page" $page
+    "role" "hero"
+    "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
+{{- $images := slice -}}
+{{- if $img.ok }}{{ $images = $images | append ($img.url | absURL) }}{{ end -}}
+{{- if and $hero.ok $hero.url (ne $hero.url $img.url) }}{{ $images = $images | append ($hero.url | absURL) }}{{ end -}}
+{{- with $images }}
+{{- $article = merge $article (dict "image" $images) }}
 {{- end }}
 {{- $graph = append $article $graph }}
 {{- end }}

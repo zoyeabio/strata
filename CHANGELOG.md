@@ -71,6 +71,31 @@ be re-derived from the templates.
 - **The hero preload goes through `safeHTML`.** html/template URL-escapes the
   `imagesrcset` attribute, so a bare expression turned `url 480w` into one
   malformed URL and silently killed the preload.
+- **Image roles keep their own aspect ratio.** The card is `16 / 9` and the
+  hero is a fixed-height band (`--page-hero-height`), so a hero source is not
+  "16:9 for SEO" — it is cropped to whatever the column width and that height
+  give. `scripts/place-image.sh` never checked a ratio, only a minimum width.
+- **A figure without `quality=` follows `[params.image].quality`.** The
+  shortcode used to pin 78 before the call, so a site override reached the
+  pipeline for markdown images and not for figures. The pipeline already had
+  the right default; the shortcode just had to stop supplying one first.
+- **Carousel slides get a real alt, and charts can stop being cropped.** `alts`
+  is the same brace map as `captions`; a slide without one falls back to its
+  caption, then to a positional label. `fit="contain"` fits the image inside
+  the frame instead of `object-fit: cover`, so axes and legends survive. The
+  frame class is assembled in a variable rather than written inside the
+  `class` attribute, because the class-coverage gate tokenizes that attribute
+  and reads `{{ }}` as class names.
+- **Robots meta has a default, and page beats site.** Unset everywhere the
+  theme now emits `index, follow, max-image-preview:large`; a page value
+  overrides it, and a site value applies only where a page is silent. The
+  template read `or site.Params.robots .Params.robots`, which made the site
+  value win over the page— the opposite of what the docs promised.
+- **The Article image list carries the hero variant too.** Google asks for a
+  high-resolution 16:9 representative image where one exists. The widest hero
+  variant is already built for the page, so the schema points at both the
+  1200x630 preview and the hero with no new file, and deduplicates when they
+  happen to be the same URL.
 - **Summary truncation is CSS, not template.** The card emits the whole
   plainified summary; a 3-line clamp plus a `calc(3lh)` hard cap does the cut.
   Chromium without legacy `-webkit-box` computes even inline

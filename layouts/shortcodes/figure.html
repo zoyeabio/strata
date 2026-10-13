@@ -6,7 +6,8 @@
 
   Built-in parameters: src link target rel alt title caption attr attrlink
   class width height loading. strata extensions: quality (WebP quality
-  override) and role (image role, illustration by default).
+  override — absent means the site's [params.image].quality, applied by
+  data/image-resource) and role (image role, illustration by default).
   Missing src is an authoring error.
 
   Called by: content markdown
@@ -30,5 +31,5 @@
     "width" (.Get "width")
     "height" (.Get "height")
     "loading" (.Get "loading")
-    "quality" (int (default 78 (.Get "quality")))
+    "quality" (cond (.Get "quality") (int (.Get "quality")) "")
     "role" (.Get "role")) -}}

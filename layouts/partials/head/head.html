@@ -20,9 +20,15 @@
   {{- with $kw }}
   <meta name="keywords" content="{{ delimit $kw ", " }}">
   {{- end }}
-  {{ with or site.Params.robots .Params.robots }}
+  {{- /* Page beats site. Unset anywhere, default to indexing with the large
+       image preview — Google Discover asks for it and the theme's hero and
+       social preview are both wide enough to earn it */ -}}
+  {{- $robots := or .Params.robots site.Params.robots }}
+  {{- with $robots }}
   <meta name="robots" content="{{ . }}">
-  {{ end }}
+  {{- else }}
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  {{- end }}
   <link rel="canonical" href="{{ .Permalink }}">
   {{ range .AlternativeOutputFormats }}
   <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .RelPermalink }}" title="{{ site.Title }}">

@@ -14,6 +14,8 @@ WORK="$(mktemp -d)"
 OUT="$WORK/public"
 OUT_REMOTE="$WORK/public-remote"
 OUT_NOSITEDESC="$WORK/public-nositedesc"
+OUT_QUALITY="$WORK/public-quality"
+OUT_ROBOTS="$WORK/public-robots"
 OUT_DRAFTS="$WORK/public-drafts"
 trap 'rm -rf "$WORK"' EXIT
 FAILURES=0
@@ -281,10 +283,10 @@ assert 'section-a/shortcodes/index.html' 'title="Shanghai office map" loading="l
   'map frame carries its label and defers loading'
 assert 'section-a/shortcodes/index.html' 'src="https://maps.google.com/maps\?q=Shanghai' \
   'map passes the embed URL through'
-count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 6 \
-  'three figures, two slides and the loop clone carry the text sizes'
-count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 6 \
-  'five list cards plus the first slide load eagerly'
+count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 7 \
+  'three figures, three slides and the loop clone carry the text sizes'
+count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 7 \
+  'five list cards plus two first slides load eagerly'
 if qual_out=$(python3 - "$OUT" <<'PY'
 import re
 import sys
@@ -340,10 +342,49 @@ assert 'section-a/shortcodes/index.html' 'data-interval="1500"' \
   'carousel carries the configured interval'
 assert 'section-a/shortcodes/index.html' 'aspect-ratio: 16 / 9' \
   'carousel keeps the requested aspect ratio'
-count_assert 'section-a/shortcodes/index.html' 'data-slide-to="[0-9]"' 2 \
-  'carousel renders two indicator buttons'
+count_assert 'section-a/shortcodes/index.html' 'data-slide-to="[0-9]"' 3 \
+  'carousels render three indicator buttons'
 assert 'section-a/shortcodes/index.html' 'class="carousel__caption">Inline image' \
   'carousel captions match by file name'
+assert 'section-a/shortcodes/index.html' 'alt="A person working at a desk"' \
+  'carousel takes a per-slide alt from the alts map'
+assert 'section-a/shortcodes/index.html' 'alt="Flat photo"' \
+  'a carousel slide without an alt falls back to its caption'
+assert 'section-a/shortcodes/index.html' 'alt="carousel image 1"' \
+  'a carousel slide with neither falls back to a positional label'
+assert 'section-a/shortcodes/index.html' 'carousel__frame--contain' \
+  'fit="contain" marks the slide frame'
+assert 'section-a/shortcodes/index.html' 'aspect-ratio: 4 / 3' \
+  'a second carousel takes its own aspect ratio'
+# A figure with no quality= must follow [params.image].quality, while an
+# explicit value still wins. The variant fingerprint changes with quality, so
+# two builds of the same page separate the inheriting path from the pinned one.
+hugo --source "$ROOT/test/fixture" --environment quality \
+  --destination "$OUT_QUALITY" --quiet
+if FIGURE_Q="$(python3 - "$OUT" "$OUT_QUALITY" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+def fingerprint(out, alt):
+    page = (out / "section-a/shortcodes/index.html").read_text(encoding="utf-8")
+    m = re.search(r'<img[^>]*alt="%s"[^>]*>' % re.escape(alt), page)
+    src = re.search(r'src="([^"]+)"', m.group(0)).group(1)
+    return src.rsplit("_", 1)[-1]
+
+base, quality = Path(sys.argv[1]), Path(sys.argv[2])
+inherit = fingerprint(base, "Inline illustration") != fingerprint(quality, "Inline illustration")
+explicit = fingerprint(base, "Quality override") == fingerprint(quality, "Quality override")
+print("inherit=%s explicit=%s" % (inherit, explicit))
+PY
+)"; then
+  case "$FIGURE_Q" in
+    "inherit=True explicit=True") pass 'figure quality inherits [params.image].quality; an explicit value still wins' ;;
+    *) fail "figure quality inherits [params.image].quality; an explicit value still wins ($FIGURE_Q)" ;;
+  esac
+else
+  fail 'figure quality inherits [params.image].quality; an explicit value still wins'
+fi
 
 # 22. layout shortcodes: computed template and single class set
 assert 'section-a/shortcodes/index.html' 'class="mgrid"' \
@@ -420,8 +461,8 @@ css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
 css_assert '@media\(min-width:1024px\)\{:root\{--site-gutter:128px' \
   'gutter rung 128px sits at the 1024px breakpoint'
 css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
-count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 6 \
-  'text preset adds the 832px rung on every body image and the loop clone'
+count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 7 \
+  'text preset adds the 832px rung on every body image and the loop clones'
 
 # 27. every class token the templates emit is defined in the shipped CSS
 #     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
@@ -713,8 +754,8 @@ assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the 
 
 # 36. carousel loop is seamless: a hidden clone of the first slide closes
 #     the track so last-to-first animates instead of jumping
-count_assert 'section-a/shortcodes/index.html' 'data-carousel-slide' 2 \
-  'carousel keeps two real slides'
+count_assert 'section-a/shortcodes/index.html' 'data-carousel-slide' 3 \
+  'carousels keep three real slides'
 assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
   'carousel appends a hidden first-slide clone'
 
@@ -775,6 +816,8 @@ else
   fail 'moon glyph hides after the shared icon box rule'
 fi
 css_assert 'site-footer__link\[aria-current=page\]\{[^}]*font-weight:600' 'active footer item has a non-color cue'
+css_assert 'carousel__frame--contain img\{[^}]*object-fit:contain' \
+  'contain fit overrides cover for a slide frame'
 css_assert 'carousel__indicators\{[^}]*position:absolute' 'carousel dots overlay the image'
 css_assert 'carousel__indicators\{[^}]*bottom:10px' 'carousel dots sit at the image bottom'
 css_assert 'carousel__indicators button\{[^}]*width:32px' 'carousel dots are bars, not circles'
@@ -1072,6 +1115,22 @@ if grep -qE 'property="og:description" content="GIF pixel — Strata Fixture"' \
 else
   fail 'og:description falls back to the page title as well'
 fi
+
+# 42c. robots defaults to indexing with the large image preview, a page value
+#      overrides it, and a site value applies only where a page is silent. The
+#      last two need the config/robots/ overlay, which is where the theme can
+#      not ship a site-level value.
+assert 'section-a/flat/index.html' \
+  'name="robots" content="index, follow, max-image-preview:large"' \
+  'robots defaults to indexing with the large image preview'
+assert 'notice/index.html' 'name="robots" content="index, follow, noarchive"' \
+  'a page-level robots value overrides the default'
+hugo --source "$ROOT/test/fixture" --environment robots \
+  --destination "$OUT_ROBOTS" --quiet
+assert_at "$OUT_ROBOTS" 'section-a/flat/index.html' 'name="robots" content="noindex, nofollow"' \
+  'a site-level robots value applies where a page declares none'
+assert_at "$OUT_ROBOTS" 'notice/index.html' 'name="robots" content="index, follow, noarchive"' \
+  'a page-level robots value beats the site value'
 
 # 42b. Article description and keywords mirror the front matter, including its
 #      two fallbacks (summary -> description, tags -> keywords) and the "neither

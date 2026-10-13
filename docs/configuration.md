@@ -49,7 +49,7 @@ scripts, so a threshold you change in config is the threshold the gate checks.
 | `disableTextInHeader` | `false` | Hide the site title when (and only when) a logo is present |
 | `copyright` | — | Footer line; `{ year }` is replaced with the current year. Fallback: `© {year} {site title}` |
 | `description` | — | Default `<meta name="description">` (page description/summary wins) |
-| `robots` | — | Default `<meta name="robots">` (page-level `robots` wins) |
+| `robots` | `"index, follow, max-image-preview:large"` | Default `<meta name="robots">` (page-level `robots` wins). A site setting applies to every page; leave both unset for the default |
 | `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Declare it under a `[params]` table (the theme's `languages.en.toml` does this); a bare top-level key in `languages.<lang>.toml` is invisible to the theme |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |

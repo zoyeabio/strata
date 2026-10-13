@@ -35,7 +35,9 @@ output contract.
 
 {{< interactive/contact >}}
 
-{{< interactive/carousel images="images/section-a/*.png" captions="{inline.png: Inline image, photo-flat.png: Flat photo}" aspectRatio="16-9" interval="1500" >}}
+{{< interactive/carousel images="images/section-a/*.png" captions="{inline.png: Inline image, photo-flat.png: Flat photo}" alts="{inline.png: A person working at a desk}" aspectRatio="16-9" interval="1500" >}}
+
+{{< interactive/carousel images="images/section-a/inline.png" fit="contain" aspectRatio="4-3" interval="3000" >}}
 
 ## layout
 

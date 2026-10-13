@@ -1,0 +1,5 @@
+# Environment overlay for the robots precedence assertions in
+# scripts/smoke.sh. It sets a site-level robots value so the build can prove
+# that a page-level value wins and that the site value applies where a page
+[params]
+  robots = "noindex, nofollow"

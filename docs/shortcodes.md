@@ -18,7 +18,7 @@ image runs through the responsive pipeline.
 | `class` | Extra classes on the `<img>` (pass-through — not covered by the class-coverage test) |
 | `width`, `height` | Intrinsic size attributes |
 | `loading` | `lazy` (default) or `eager` |
-| `quality` | WebP quality 1–100, default 78 |
+| `quality` | WebP quality 1–100. Unset means the site's `[params.image].quality`, applied by the pipeline; an explicit value overrides it |
 | `role` | `card` / `illustration` (default) / `hero` — caps the variant width |
 
 ## map
@@ -77,11 +77,15 @@ Image carousel with prev/next buttons, indicators and optional autoplay.
 |---|---|
 | `images` | **required** — brace-wrapped list or globs: `"{gallery/a.webp, gallery/b*.webp}"` |
 | `captions` | `"{key: caption, ...}"` keyed by file name, base name or path |
+| `alts` | Same shape as `captions`; a per-slide description used as the slide's `alt`. A slide without one falls back to its caption, then to a positional label |
+| `fit` | `cover` (default) or `contain`. Use `contain` for charts, so axes, ticks and the legend are not cropped to the frame |
 | `aspectRatio` | `W-H`, default `16-9` |
 | `interval` | Autoplay step in ms, default `2000` |
 
 First slide loads eagerly (possible LCP), the rest lazily. Two carousels on
-one page stay independent.
+one page stay independent. Slides fill their frame with `object-fit: cover`,
+so keep a photo's subject inside the middle of the frame; a chart inside a
+`contain` frame is letterboxed instead of cropped.
 
 ## interactive/contact
 

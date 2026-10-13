@@ -79,6 +79,12 @@
   display: block;
 }
 
+/* fit="contain": a chart kept inside its frame instead of being cropped, so
+   axes, ticks and the legend stay readable */
+.carousel__frame--contain img {
+  object-fit: contain;
+}
+
 .carousel__caption {
   position: absolute;
   inset-inline: 0;
