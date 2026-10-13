@@ -1,6 +1,6 @@
-# Environment overlay for the figure-quality inheritance assertions in
-# scripts/smoke.sh. The pipeline reads [params.image].quality, and the figure
-# shortcode must let it through instead of pinning 78 first. scripts/smoke.sh
-# builds once more against this overlay and compares the variant fingerprints
+# Environment overlay for the quality-encoding assertion in scripts/smoke.sh.
+# The pipeline reads [params.image].quality and there is no per-figure
+# override, so a change here must re-encode every variant. scripts/smoke.sh
+# builds once more against this overlay and compares the variant fingerprints.
 [params.image]
   quality = 40

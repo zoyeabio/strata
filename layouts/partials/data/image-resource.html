@@ -8,8 +8,6 @@
     role  (string, optional) — "card" | "illustration" | "hero" | "og";
           caps the widest variant
     alt   (string, optional) — empty string means decorative
-    quality (int, optional) — WebP quality, defaults to [params.image].quality;
-          the figure shortcode's quality parameter passes it through
 
   Output dict
     ok     (bool) — false when nothing resolves; the caller renders nothing
@@ -32,11 +30,13 @@
   config — [params.image] in the theme's root config.toml, which a site
   overrides in its own. Each ladder step is capped by the
   source width and by the role cap, then de-duplicated, then a step less than
-  15% wider than its kept predecessor is dropped. The result is never more than
-  four files per image and never two near-identical widths — the largest variant
-  may sit a little below the source width, which is accepted in exchange for the
-  smaller payload. Everything is encoded at one quality so the same width is
-  never written twice. SVG, GIF and animated WebP bypass processing entirely —
+  15% wider than its kept predecessor is dropped. One role produces at most
+  four files and never two near-identical widths — the largest variant may sit
+  a little below the source width, which is accepted in exchange for the
+  smaller payload. Quality is site-wide and not overridable per call, so the
+  same width is never written twice at two qualities; a source used by several
+  roles carries each role's steps, which is why one image can exceed four
+  files in total. SVG, GIF and animated WebP bypass processing entirely —
   the imaging pipeline would fail on SVG and flatten animations to frame one.
 
   site.Params.disableImageOptimization = true hands back the original file
@@ -65,7 +65,7 @@
 {{- range $imgCfg.ladder | default (slice 480 800 1280 1920) -}}
   {{- $ladder = $ladder | append (int .) -}}
 {{- end -}}
-{{- $quality := .quality | default (int ($imgCfg.quality | default 78)) -}}
+{{- $quality := int ($imgCfg.quality | default 78) -}}
 {{- $ogWidth := int ($ogCfg.width | default 1200) -}}
 {{- $ogHeight := int ($ogCfg.height | default 630) -}}
 {{- $disable := site.Params.disableImageOptimization | default false }}

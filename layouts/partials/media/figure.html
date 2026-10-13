@@ -23,9 +23,8 @@
              variant size
     height   (string, optional) — height attribute, same override
     loading  (string, optional) — "lazy" (default: body images are lazy)
-             or "eager"
-    quality  (int, optional) — WebP quality, default 78
-    role     (string, optional) — image role, "illustration" by default
+              or "eager"
+    role     (string, optional) — image role, "illustration" by default;
 
   Outputs: <figure>…</figure>; nothing when the reference does not resolve
   (the resolver warns during hugo server, stays silent in production).
@@ -45,8 +44,7 @@
     "ref" $src
     "page" .page
     "role" (.role | default "illustration")
-    "alt" $alt
-    "quality" .quality) -}}
+    "alt" $alt) -}}
 {{- if $img.ok -}}
 {{- $sizes := (partial "data/card-presets.html" "text").sizes -}}
 <figure class="figure{{ with .class }} {{ . }}{{ end }}">

@@ -16,8 +16,8 @@
 [params.image]
   # Variant widths, smallest first. Each step is capped by the source width
   # and by the role cap below, de-duplicated, and a step under 15% wider than
-  # its kept predecessor is dropped. Four is the working maximum — one image
-  # is never more than four files.
+  # its kept predecessor is dropped. Four is the working maximum per role — a
+  # source used by several roles carries each role's steps.
   ladder = [480, 800, 1280, 1920]
 
   # One WebP quality for every width, so the same width is never written

@@ -13,7 +13,7 @@ output contract.
 
 {{< figure src="inline.png" alt="Inline illustration" title="With a title" width="400" height="300" link="/section-a/flat/" target="_blank" rel="noopener" class="extra" >}}
 
-{{< figure src="photo-flat.png" alt="Quality override" caption="q60" quality="60" >}}
+{{< figure src="photo-flat.png" alt="Card role" caption="Card-sized variants" role="card" >}}
 
 ## content
 

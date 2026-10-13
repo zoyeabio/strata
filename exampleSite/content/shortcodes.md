@@ -14,16 +14,16 @@ syntax it was written with.
 ## `figure`
 
 Images go through the responsive pipeline, so a figure carries a `srcset`
-and a `sizes`. `role` caps the widest variant, `quality` overrides the
-site's WebP quality.
+and a `sizes`. `role` caps the widest variant. Quality is a site-wide
+setting, so one width is never stored twice at two qualities.
 
-{{< figure src="images/diagram-nodes.png" alt="Five connected nodes of varying size" title="A figure, fully annotated" caption="**Caption** accepts *markdown*, as does the attribution." attr="Diagram by Strata Studio" attrlink="https://github.com/zoyeabio" link="/features/" target="_blank" rel="noopener" class="figure--annotated" loading="lazy" quality="82" role="illustration" >}}
+{{< figure src="images/diagram-nodes.png" alt="Five connected nodes of varying size" title="A figure, fully annotated" caption="**Caption** accepts *markdown*, as does the attribution." attr="Diagram by Strata Studio" attrlink="https://github.com/zoyeabio" link="/features/" target="_blank" rel="noopener" class="figure--annotated" loading="lazy" role="illustration" >}}
 
 <pre><code>{{&lt; figure src="images/diagram-nodes.png" alt="Five connected nodes"
   title="A figure, fully annotated" caption="**Markdown** in the caption."
   attr="Diagram by Strata Studio" attrlink="https://github.com/zoyeabio"
   link="/features/" target="_blank" rel="noopener"
-  class="figure--annotated" loading="lazy" quality="82" role="illustration" &gt;}}</code></pre>
+  class="figure--annotated" loading="lazy" role="illustration" &gt;}}</code></pre>
 
 | Parameter | Required | Notes |
 |---|---|---|
@@ -33,7 +33,6 @@ site's WebP quality.
 | `class` | | Appended to `figure` |
 | `width`, `height` | | Override the intrinsic variant size |
 | `loading` | | `lazy` by default, or `eager` |
-| `quality` | | WebP quality; inherits `[params.image].quality` |
 | `role` | | `hero`, `card`, `illustration`; caps the ladder |
 
 ---

@@ -263,7 +263,7 @@ else
 fi
 
 # 19. shortcodes: figure goes through the pipeline with the built-in's
-#     caption structure, and quality= produces its own variant set
+#     caption structure
 assert 'section-a/shortcodes/index.html' '<figure class="figure">' \
   'figure renders the base figure element'
 assert 'section-a/shortcodes/index.html' '<figure class="figure extra">' \
@@ -287,18 +287,25 @@ count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px
   'three figures, three slides and the loop clone carry the text sizes'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 7 \
   'five list cards plus two first slides load eagerly'
+# Quality is site-wide, so two figures sharing a role cannot write the same
+# width twice at two qualities. One file per (image, width) across the build.
 if qual_out=$(python3 - "$OUT" <<'PY'
 import re
 import sys
+from collections import defaultdict
 from pathlib import Path
 
-html = (Path(sys.argv[1]) / "section-a/shortcodes/index.html").read_text()
-urls = set(re.findall(r'(photo-flat_hu_[a-f0-9]+\.webp) 1280w', html))
-if len(urls) == 2:
-    print("ok   figure quality= writes its own variant set")
-    sys.exit(0)
-print(f"FAIL figure quality= writes its own variant set (got {sorted(urls)})")
-sys.exit(1)
+pairs = defaultdict(set)
+for page in Path(sys.argv[1]).rglob("*.html"):
+    for srcset in re.findall(r'srcset="([^"]+)"', page.read_text(encoding="utf-8")):
+        for url, w in re.findall(r'([^\s",]*?_hu_[a-f0-9]+\.[a-z0-9]+)\s+(\d+)w', srcset):
+            base = re.sub(r'_hu_[a-f0-9]+\.[a-z0-9]+$', '', url.split("/")[-1])
+            pairs[(base, int(w))].add(url)
+dupes = {f"{b} {w}w": sorted(v) for (b, w), v in pairs.items() if len(v) > 1}
+if dupes:
+    print(f"FAIL a width is stored twice ({dupes})")
+    sys.exit(1)
+print(f"ok   one file per image and width ({len(pairs)} pairs, no duplicates)")
 PY
 ); then
   printf '%s\n' "$qual_out"
@@ -356,9 +363,8 @@ assert 'section-a/shortcodes/index.html' 'carousel__frame--contain' \
   'fit="contain" marks the slide frame'
 assert 'section-a/shortcodes/index.html' 'aspect-ratio: 4 / 3' \
   'a second carousel takes its own aspect ratio'
-# A figure with no quality= must follow [params.image].quality, while an
-# explicit value still wins. The variant fingerprint changes with quality, so
-# two builds of the same page separate the inheriting path from the pinned one.
+# Quality is site-wide config and there is no per-figure override, so an
+# [params.image].quality overlay must re-encode every variant of every figure.
 hugo --source "$ROOT/test/fixture" --environment quality \
   --destination "$OUT_QUALITY" --quiet
 if FIGURE_Q="$(python3 - "$OUT" "$OUT_QUALITY" <<'PY'
@@ -366,24 +372,23 @@ import re
 import sys
 from pathlib import Path
 
-def fingerprint(out, alt):
+def variants(out, alt):
     page = (out / "section-a/shortcodes/index.html").read_text(encoding="utf-8")
-    m = re.search(r'<img[^>]*alt="%s"[^>]*>' % re.escape(alt), page)
-    src = re.search(r'src="([^"]+)"', m.group(0)).group(1)
-    return src.rsplit("_", 1)[-1]
+    tag = re.search(r'<img[^>]*alt="%s"[^>]*>' % re.escape(alt), page).group(0)
+    srcset = re.search(r'srcset="([^"]+)"', tag)
+    return frozenset(re.findall(r'([\w.-]+_hu_[a-f0-9]+\.[a-z0-9]+)', srcset.group(1))) if srcset else frozenset()
 
 base, quality = Path(sys.argv[1]), Path(sys.argv[2])
-inherit = fingerprint(base, "Inline illustration") != fingerprint(quality, "Inline illustration")
-explicit = fingerprint(base, "Quality override") == fingerprint(quality, "Quality override")
-print("inherit=%s explicit=%s" % (inherit, explicit))
+changed = variants(base, "Inline illustration") != variants(quality, "Inline illustration")
+print("changed=%s" % changed)
 PY
 )"; then
   case "$FIGURE_Q" in
-    "inherit=True explicit=True") pass 'figure quality inherits [params.image].quality; an explicit value still wins' ;;
-    *) fail "figure quality inherits [params.image].quality; an explicit value still wins ($FIGURE_Q)" ;;
+    "changed=True") pass 'an [params.image].quality overlay re-encodes every figure variant' ;;
+    *) fail "an [params.image].quality overlay re-encodes every figure variant ($FIGURE_Q)" ;;
   esac
 else
-  fail 'figure quality inherits [params.image].quality; an explicit value still wins'
+  fail 'an [params.image].quality overlay re-encodes every figure variant'
 fi
 
 # 22. layout shortcodes: computed template and single class set

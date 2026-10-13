@@ -4,11 +4,12 @@
   (data/image-resource → media/image) instead of being emitted as a single
   fixed-size file.
 
-  Built-in parameters: src link target rel alt title caption attr attrlink
-  class width height loading. strata extensions: quality (WebP quality
-  override — absent means the site's [params.image].quality, applied by
-  data/image-resource) and role (image role, illustration by default).
-  Missing src is an authoring error.
+   Built-in parameters: src link target rel alt title caption attr attrlink
+   class width height loading. strata extension: role (image role,
+   illustration by default) caps the widest variant. Missing src is an
+   authoring error. Quality is not a parameter — it is the site-wide
+   [params.image].quality, so one width is never written twice at two
+   qualities.
 
   Called by: content markdown
 */ -}}
@@ -31,5 +32,4 @@
     "width" (.Get "width")
     "height" (.Get "height")
     "loading" (.Get "loading")
-    "quality" (cond (.Get "quality") (int (.Get "quality")) "")
     "role" (.Get "role")) -}}

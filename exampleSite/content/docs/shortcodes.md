@@ -23,7 +23,6 @@ image runs through the responsive pipeline.
 | `class` | Extra classes on the `<img>` (pass-through — not covered by the class-coverage test) |
 | `width`, `height` | Intrinsic size attributes |
 | `loading` | `lazy` (default) or `eager` |
-| `quality` | WebP quality 1–100. Unset means the site's `[params.image].quality`, applied by the pipeline; an explicit value overrides it |
 | `role` | `card` / `illustration` (default) / `hero` — caps the variant width |
 
 ## map

@@ -60,10 +60,13 @@ Bitmap images (JPEG/PNG) are encoded as WebP at the ladder widths —
 by the source width and by the image role, de-duplicated, and a step less than
 15% wider than its predecessor is dropped. Results:
 
-- at most four files per image
+- at most four files per image per role
 - never two near-identical widths
 - one quality everywhere (`[params.image].quality`, WebP q78 by default), so
   one width is never stored twice at two qualities
+
+A source used by several roles carries each role's steps, so it can hold more
+than four files in total.
 
 SVG, GIF and animated WebP bypass processing entirely (the pipeline would
 flatten animations to frame one). `disableImageOptimization = true` returns
@@ -93,11 +96,12 @@ any aspect ratio fills its frame. The height is `--page-hero-height`
 | `featureimagealt` | Alt text; fallback `Featured image for {title}` |
 | `showHero: false` | Keep the card image, suppress the hero on the single page |
 
-## Shortcode quality
+## Per-figure role
 
-The `figure` shortcode accepts `quality` (1–100, default 78) and `role`
-(`card` / `illustration` / `hero`) to override the defaults for scientific
-figures that need sharper text.
+The `figure` shortcode's `role` parameter caps one figure's widest variant
+without changing the site-wide caps. Quality has no such override — it is
+`[params.image].quality` everywhere, which is what keeps a width from being
+stored twice.
 
 ## Focus / cropping
 

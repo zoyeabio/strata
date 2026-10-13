@@ -63,7 +63,7 @@ are invisible in a narrow column, so they are simply not generated.
 
 {{< figure src="images/texture-weave.png" alt="A woven texture of small marks over a gradient" caption="An illustration: capped at 1280px, three variants on the ladder." role="illustration" loading="lazy" >}}
 
-{{< figure src="images/chart-bars.png" alt="A bar chart with eight ascending bars" caption="A chart, contained. The axes survive the narrow frame." role="illustration" loading="lazy" quality="84" >}}
+{{< figure src="images/chart-bars.png" alt="A bar chart with eight ascending bars" caption="A chart, contained. The axes survive the narrow frame." role="illustration" loading="lazy" >}}
 
 ---
 
