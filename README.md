@@ -97,25 +97,19 @@ validated with the theme rather than drift in a separate tree:
 | [customization](exampleSite/content/docs/customization.md) | Colour schemes, CSS variables, custom CSS |
 | [shortcodes](exampleSite/content/docs/shortcodes.md) | Shortcode reference and supported parameters |
 | [sitemap](exampleSite/content/docs/sitemap.md) | The sitemap, robots.txt, what gets listed |
+| [security](exampleSite/content/docs/security.md) | Response headers, the strict CSP, Cloudflare limits |
 
 ## Development
 
-The theme repo carries its own gates. After any change:
+The build steps, the four gate scripts and the conventions for templates,
+CSS and commits are in [CONTRIBUTING.md](CONTRIBUTING.md). Two tools set up
+a new site against this theme:
 
 ```sh
-# once — Hugo 0.161.0+ runs the Tailwind CSS CLI through node
-npm install
-./scripts/smoke.sh     # fixture contract assertions
-./scripts/validate-theme.sh
-./scripts/audit-partials.sh   # partial call-graph audit (missing/orphan)
-./scripts/validate-site.sh /path/to/site   # e.g. your site checkout
 ./scripts/new-site.sh --name "My Site" --domain example.com --out ../mysite
-./scripts/place-image.sh --section journal --post slug --file photo.png --role illustration --site ../mysite
+./scripts/place-image.sh --section journal --post slug --file photo.png \
+  --role illustration --site ../mysite
 ```
-
-CSS compiles in-process via `css.TailwindCSS` on every build — there is no
-committed bundle. Component files carry their own `@layer` wrappers and the
-concatenation order lives in `layouts/partials/head/head.html`.
 
 ## License
 
