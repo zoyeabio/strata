@@ -64,6 +64,22 @@ be re-derived from the templates.
 - **The prose measure is for prose.** Sections, terms and the home page ride
   the full content column, so a landing page never leaves dead air at the right
   edge. The article cap itself is `params.readingMeasure`.
+- **Colour is chosen, not written.** A site sets `params.colorScheme` and the
+  theme resolves it to `assets/css/schemes/<name>.css` — seven variables strong,
+  `--site-accent` plus `-strong`, `-soft`, `--site-surface-tint`,
+  `--site-text-strong`, `--site-link` and `--site-ring`, each with a `:root.dark`
+  twin. Seven palettes ship: blue (`default`, `slate`, `ocean`, `navy`), green
+  (`forest`), wine and gold. The interface is the seven variables and nothing
+  wider, so a brand change never reaches into a scheme file — a site picks a
+  palette, and if none fits the theme grows one. Names are short colour
+  descriptors, not product categories: a general theme should not carry a
+  business context in a scheme name. That closes the gap the reference theme
+  left open: zoyclaw documented this same seven-variable contract in
+  `site-network-skeleton.md` but never defined or consumed it, so per-site
+  `colors.css` overrides set variables nothing read. The contrast floor is gate
+  39: white-on-accent and white-on-strong at 4.5:1, link on background at 4.5:1
+  and ring on background at 3:1, both modes, over every file the glob finds —
+  a new palette has to pass rather than merely ship.
 
 ### Behaviour notes
 

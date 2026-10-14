@@ -1,0 +1,19 @@
+:root {
+  --site-accent: #8a6428;
+  --site-accent-strong: #5a401a;
+  --site-accent-soft: #f2ead6;
+  --site-surface-tint: #faf6ee;
+  --site-text-strong: #2b2419;
+  --site-link: #7a5720;
+  --site-ring: #a8874a;
+}
+
+:root.dark {
+  --site-accent: #94682c;
+  --site-accent-strong: #7a5624;
+  --site-accent-soft: #2a2214;
+  --site-surface-tint: #1a160f;
+  --site-text-strong: #f0e6d2;
+  --site-link: #d9bc85;
+  --site-ring: #bfa062;
+}

@@ -58,7 +58,7 @@ you change in config is the threshold the gate checks.
 
 | Key | Type / default | Effect |
 |---|---|---|
-| `colorScheme` | `"strata-default"` | Colour scheme file name under `assets/css/schemes/`. A missing file fails the build and names the scheme |
+| `colorScheme` | `"default"` | Colour scheme file name under `assets/css/schemes/`. A missing file fails the build and names the scheme |
 | `defaultAppearance` | `"light"` | Initial colour scheme before the stored preference is read (`light` or `dark`) |
 | `autoSwitchAppearance` | `true` | Follow the OS preference until the visitor toggles |
 | `logo` | — | Asset path to a logo image; rendered in the header. The site title always renders when no logo resolves |

@@ -7,19 +7,22 @@ weight: 50
 
 ## Colour schemes
 
-Four schemes ship, each with light and dark variants. Select one with:
+Seven schemes ship, each with light and dark variants. Select one with:
 
 ```toml
 # params.toml
-colorScheme = "strata-ocean"
+colorScheme = "ocean"
 ```
 
 | Scheme | Character |
 |---|---|
-| `strata-default` (default) | Neutral blue-grey |
-| `strata-forest` | Deep green |
-| `strata-ocean` | Cool blue |
-| `strata-slate` | Warm grey |
+| `default` (default) | Blue, general purpose |
+| `navy` | Deep navy, formal |
+| `slate` | Grey-blue, editorial |
+| `ocean` | Teal, calm |
+| `forest` | Green, health and nature |
+| `wine` | Burgundy, warm |
+| `gold` | Amber, artisanal |
 
 A typo in `colorScheme` fails the build and prints the name you wrote — it
 never falls back silently. Every scheme defines both `:root` and
@@ -67,10 +70,11 @@ Layout variables (rarely overridden) live in `assets/css/base/reset.css`:
 | `--site-gutter` | 24 → 56 → 96 → 128px | Page gutter ladder at 640/853/1024px |
 | `--site-content` | `1024px` | Content column cap |
 
-To build a new scheme, copy `assets/css/schemes/strata-default.css`,
+To build a new scheme, copy `assets/css/schemes/default.css`,
 rename it, adjust both light and dark blocks, and set `colorScheme` in the
-site. Prefer `customCSS` overrides for small tweaks instead of forking a
-scheme file.
+site. Gate 39 checks contrast in both modes for every scheme, so a new
+palette has to earn its colour rather than merely ship it. Prefer `customCSS`
+overrides for small tweaks instead of forking a scheme file.
 
 ## Logo and header
 

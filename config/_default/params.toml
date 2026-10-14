@@ -18,7 +18,7 @@
 # A bare top-level key in languages.<lang>.toml is invisible to the theme:
 # dateFormat and the like must sit under a [params] table, as they do here.
 
-colorScheme = "strata-default"
+colorScheme = "default"
 defaultAppearance = "light"
 autoSwitchAppearance = true
 dateFormat = "2006-01-02"

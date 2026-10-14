@@ -209,7 +209,7 @@ EOF
 
 # config/_default/params.toml — only keys emitted by the theme
 cat > "$OUT/config/_default/params.toml" <<EOF
-colorScheme = "strata-default"
+colorScheme = "default"
 defaultAppearance = "light"
 autoSwitchAppearance = true
 
