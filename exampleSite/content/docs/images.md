@@ -60,13 +60,14 @@ Bitmap images (JPEG/PNG) are encoded as WebP at the ladder widths —
 by the source width and by the image role, de-duplicated, and a step less than
 15% wider than its predecessor is dropped. Results:
 
-- at most four files per image per role
+- at most four responsive WebP files per source
 - never two near-identical widths
 - one quality everywhere (`[params.image].quality`, WebP q78 by default), so
   one width is never stored twice at two qualities
 
-A source used by several roles carries each role's steps, so it can hold more
-than four files in total.
+A source reused across roles shares those transforms. A feature image may add
+one fixed 1200×630 social JPEG, so the build gate allows no more than five
+derived files per source in total.
 
 SVG, GIF and animated WebP bypass processing entirely (the pipeline would
 flatten animations to frame one). `disableImageOptimization = true` returns
@@ -78,7 +79,7 @@ the original file for every role.
 |---|---|---|
 | `card` | 800 | list/term cards |
 | `illustration` (default) | 1600 | body figures, markdown images |
-| `hero` | 1920 | article hero, with preload |
+| `hero` | 1600 | article hero, with preload |
 | `og` | 1200×630 JPEG fill | Open Graph / Twitter card |
 
 The caps are `[params.image].caps.*` and the preview size is

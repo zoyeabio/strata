@@ -41,7 +41,7 @@ The image and build thresholds get their own table because the build scripts and
 | `[params.image].quality` | `78` | One WebP quality for every width, so a width is never stored twice |
 | `[params.image].caps.card` | `800` | Widest variant for a card |
 | `[params.image].caps.illustration` | `1600` | Widest illustration variant; matches the SciVisual source profile and leaves density headroom at the default reading measure |
-| `[params.image].caps.hero` | `1920` | Widest variant for a hero |
+| `[params.image].caps.hero` | `1600` | Widest hero variant; aligns with the SciVisual 1600×900 source contract and shares the illustration ladder |
 | `[params.image].og.width` / `.height` | `1200` / `630` | Fixed preview size — what Facebook, LinkedIn and Google request. `scripts/place-image.sh` lints the source against the same pair |
 | `[params.build].pageimageskb` | `600` | Largest rendered image payload on one browser visit, in KiB — `check-build` R5; social metadata is excluded because a page visit does not download it |
 | `[params.build].minwidth.hero` | `1600` | Minimum source width per role, linted by `scripts/place-image.sh` |
@@ -52,6 +52,19 @@ The image and build thresholds get their own table because the build scripts and
 `scripts/lib/build_config.py` reads the theme's `config/_default/*.toml` in the
 same order Hugo does, then layers your site's config over it — so a threshold
 you change in config is the threshold the gate checks.
+
+The production command is `hugo --minify`. Keep HTML attribute quotes in the
+site's `hugo.toml` so `validate-site.sh` audits the exact deployable artifact,
+not a less-compressed surrogate:
+
+```toml
+[minify.tdewolff.html]
+  keepQuotes = true
+```
+
+`new-site.sh`, the example site and the test fixture already carry this setting.
+It changes markup bytes only; image variants and image compression are
+unaffected.
 
 ## Site params (`params.toml`)
 
@@ -220,6 +233,35 @@ warning instead of being rendered as a dead link.
 | `author` | Byline for this page (falls back to `[author] name`). Emits the schema `Person.name` |
 | `authorurl` | `"/about/"` — turns the byline into a link and emits the schema `Person.url`. Page-level; falls back to `[author] url`. Set neither and the byline is plain text |
 | `images` | Image refs for Open Graph; `images[0]` is used only when `featureimage` is absent (see [images.md](/docs/images/)) |
+
+A production article can start from this compact front matter. Fill every empty
+value before changing `draft` to `false`; the content lint enforces the fields
+that feed search and structured data.
+
+```yaml
+---
+title: ""
+description: ""
+summary: ""
+keywords: []
+author: ""
+date: 2026-01-01
+lastmod: 2026-01-01
+draft: true
+tags: []
+featureimage: ""
+featureimagealt: ""
+showHero: true
+showSummary: true
+weight: 0
+---
+```
+
+`description` is the search snippet; `summary` is the reader-facing standfirst
+and its metadata fallback. Update `lastmod` only for a substantive revision.
+`layout` is intentionally absent: Strata has one single-page template, so a
+front matter `layout` value is accepted for Hugo compatibility but has no theme
+effect.
 
 ## Consent and ads
 

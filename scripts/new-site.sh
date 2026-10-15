@@ -85,6 +85,9 @@ enableRobotsTXT = true
 summaryLength = 30
 enableEmoji = false
 
+[minify.tdewolff.html]
+  keepQuotes = true
+
 [module]
   proxy = "direct"
 
@@ -235,10 +238,20 @@ mkdir -p "$OUT/archetypes/default"
 cat > "$OUT/archetypes/default/index.md" <<'EOF'
 ---
 title: "{{ replace .File.ContentBaseName "-" " " | title }}"
+description: ""
+summary: ""
+keywords: []
+author: ""
 date: {{ .Date }}
+lastmod: {{ .Date }}
 draft: true
 tags: []
 series: []
+featureimage: ""
+featureimagealt: ""
+showHero: true
+showSummary: true
+weight: 0
 ---
 EOF
 
@@ -383,7 +396,7 @@ npm run build    # hugo --minify
 \`\`\`
 
 The required security.exec and security.node sections are already in
-`config/_default/hugo.toml`.
+\`config/_default/hugo.toml\`.
 
 Articles are page bundles:
 

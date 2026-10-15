@@ -212,7 +212,7 @@ for path in pages():
     published = as_date(fm.get("date"))
     if published:
         dated += 1
-        if not (fm.get("description") or param_of(params, "summary")):
+        if not (fm.get("description") or fm.get("summary") or param_of(params, "summary")):
             bad("a dated page needs a description",
                 "%s: meta description, og:description and Article.description all "
                 "fall back to the site default or the bare title" % where)

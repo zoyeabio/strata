@@ -12,12 +12,12 @@ a phone and a desktop.
 
 ## The frame decides
 
-A hero is a wide band, not a rectangle. The theme caps the widest variant
-at 1920px, because a hero that would be 3840px wide is still shown at
-1920px: it only costs bytes.
+A hero is a wide band, not a rectangle. The theme caps its widest variant at
+1600px, which aligns with the source handed off by SciVisual and prevents an
+oversized input from adding another output rung.
 
 ```
-cap:  hero 1920  ·  illustration 1600  ·  card 800
+cap:  hero 1600  ·  illustration 1600  ·  card 800
 ladder: 480 800 1280 1920
 steps within 15% of their predecessor are dropped
 ```

@@ -10,8 +10,8 @@ Composition notes, all of them driven by file size:
     (a 1920x620 gradient is 31KB clean, 131KB with 12x12 block noise). Soft
     disc edges carry the visual interest instead.
   - No exp() radial glow for the same reason: it varies at every pixel.
-  - Sources sit at 1920px wide because caps.hero is 1920; anything wider just
-    costs bytes, since the widest variant is capped there.
+  - Demo hero sources sit at 1920px to exercise the production cap: output
+    stops at 1600px even when an oversized input is supplied.
 
 Usage:
   python3 scripts/gen-example-images.py [--out exampleSite/assets/images]

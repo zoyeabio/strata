@@ -13,7 +13,7 @@ you should not have to remember to turn it on.
 ## Responsive images, resolved at build time
 
 A single source becomes a ladder of WebP variants, capped by role. A card
-never asks for more than 800px, an illustration 1600px, a hero 1920px.
+never asks for more than 800px; an illustration or hero stops at 1600px.
 Steps that would land within 15% of the one before them are dropped, so a
 page never ships two near-identical widths, and never more than four
 files per image.

@@ -67,6 +67,8 @@ IMG_EXT = {'.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.avif', '.ico'}
 FAVICON_RE = re.compile(r'(favicon|apple-touch-icon|android-chrome|safari-pinned-tab|mstile|browserconfig)', re.I)
 # [params.build.pageimageskb] from config, via scripts/lib/build_config.py
 PAGE_BUDGET = int(os.environ.get('PAGE_IMAGES_KB', 600)) * 1024
+MAX_SRCSET_CANDIDATES = 4
+MAX_DERIVATIVES_PER_SOURCE = MAX_SRCSET_CANDIDATES + 1
 
 problems = []
 
@@ -151,6 +153,8 @@ files = [p for p in pub.rglob('*') if p.is_file()]
 texts = [p for p in files if p.suffix.lower() in TEXT_EXT]
 images = [p for p in files if p.suffix.lower() in IMG_EXT]
 htmls = [p for p in files if p.suffix == '.html']
+print(f'info build output: {len(files)} files, {len(htmls)} HTML, '
+      f'{len(images)} images, {sum(p.stat().st_size for p in files) // 1024}KB total')
 
 src_attr = re.compile(r'\b(?:src|href|content|url)=["\x27]([^"\x27]+)["\x27]', re.I)
 srcset_attr = re.compile(r'\b(?:srcset|imagesrcset)=["\x27]([^"\x27]+)["\x27]', re.I)
@@ -224,7 +228,7 @@ for t, text in ((t, t.read_text(errors='ignore')) for t in htmls):
         srcset = re.search(r'\bsrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
         if ext in {'.jpg', '.jpeg', '.png'} and '_hu_' in base and not srcset:
             bad_imgs.append(f'{t.relative_to(pub)}: no srcset ({src.group(1)})')
-        elif srcset and len(expand_srcset(srcset.group(1))) > 4:
+        elif srcset and len(expand_srcset(srcset.group(1))) > MAX_SRCSET_CANDIDATES:
             bad_imgs.append(f'{t.relative_to(pub)}: more than four srcset candidates ({src.group(1)})')
         alt = re.search(r'\balt=["\x27]([^"\x27]*)["\x27]', tag, re.I)
         if alt is None:
@@ -267,6 +271,26 @@ if orphans:
     bad('no orphan images', '\n'.join(f'  {o}' for o in orphans))
 else:
     ok('no orphan images')
+
+# R4b one source may create at most four responsive WebP candidates plus one
+# fixed 1200x630 social JPEG. Role reuse does not earn another allowance:
+# identical widths share Hugo transforms because every role uses one quality.
+derivatives = {}
+for image in images:
+    match = re.match(r'(.+)_hu_[0-9a-f]+$', image.stem)
+    if match:
+        key = (image.parent.relative_to(pub), match.group(1))
+        derivatives.setdefault(key, []).append(image)
+expanded = []
+for (parent, source), variants in sorted(derivatives.items()):
+    if len(variants) > MAX_DERIVATIVES_PER_SOURCE:
+        expanded.append(f'{parent / source}: {len(variants)} files')
+if expanded:
+    bad(f'each source creates at most {MAX_DERIVATIVES_PER_SOURCE} image files',
+        '\n'.join(f'  {item}' for item in expanded))
+else:
+    largest = max((len(variants) for variants in derivatives.values()), default=0)
+    ok(f'each source creates at most {MAX_DERIVATIVES_PER_SOURCE} image files (max {largest})')
 
 # R5 per-page image payload stays inside the budget. Each candidate group
 # counts its largest rung: that is the most one element can ever download.

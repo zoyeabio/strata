@@ -81,6 +81,17 @@ re-derived from the templates.
 
 ### Behaviour notes
 
+- **Image output has a per-source ceiling.** A source may produce no more than
+  four responsive candidates plus one fixed social-preview JPEG. The build
+  gate reports total files, HTML, images and output size, then fails if role
+  reuse or another transform expands that set beyond five files.
+- **The output gate judges the deployable build.** Site and fixture validation
+  now run `hugo --minify`; generated sites retain HTML attribute quotes so the
+  same canonical, schema, link and image checks operate on the exact artifact
+  that is published.
+- **Top-level `summary` satisfies the article metadata contract.** The content
+  lint now matches the templates and accepts it when `description` is absent;
+  generated site archetypes expose the recommended SEO fields up front.
 - **Unknown image roles fail the build.** A misspelled or site-specific
   `role=` no longer falls through to an arbitrary 1280px cap. Sites that add a
   role must map it to the shared image contract instead of receiving a

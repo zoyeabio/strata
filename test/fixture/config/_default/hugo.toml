@@ -1,5 +1,8 @@
 enableRobotsTXT = true
 
+[minify.tdewolff.html]
+  keepQuotes = true
+
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 

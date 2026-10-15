@@ -57,7 +57,7 @@ paying for the near-duplicates.
 
 ```text
 ladder  480  800  1280  1920
-cap     card 800  illustration 1600  hero 1920
+cap     card 800  illustration 1600  hero 1600
 ```
 
 ## WebP is not the argument

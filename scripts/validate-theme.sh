@@ -3,7 +3,7 @@
 #
 # Usage: ./scripts/validate-theme.sh
 #
-# Builds test/fixture in production mode twice: without drafts the build
+# Builds test/fixture in minified production mode twice: without drafts the build
 # must be silent and the output must satisfy scripts/check-build.sh; with
 # drafts the known missing-image page must fail the build (a silent skip
 # in production is how dead references survive for years).
@@ -23,13 +23,13 @@ FAILURES=0
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
-if ! hugo --source "$ROOT/test/fixture" --environment production \
+if ! hugo --source "$ROOT/test/fixture" --environment production --minify \
     --destination "$WORK/public" 2>"$WORK/build.stderr" >/dev/null; then
   fail 'fixture builds in production mode'
   cat "$WORK/build.stderr" >&2
   exit 1
 fi
-pass 'fixture builds in production mode'
+pass 'fixture builds a minified production artifact'
 
 if [ -s "$WORK/build.stderr" ]; then
   fail 'production build is silent'
@@ -157,7 +157,7 @@ else
 fi
 
 # the draft missing.md declares an unresolvable featureimage on purpose
-if hugo --source "$ROOT/test/fixture" --environment production --buildDrafts \
+if hugo --source "$ROOT/test/fixture" --environment production --buildDrafts --minify \
     --destination "$WORK/public-drafts" 2>"$WORK/drafts.stderr" >/dev/null; then
   fail 'a missing image must fail the production build'
 elif grep -q 'image not found' "$WORK/drafts.stderr"; then
@@ -208,6 +208,30 @@ else
   fail 'exampleSite front matter is complete'
 fi
 
+# Summary is a documented description fallback and Hugo exposes a top-level
+# summary through .Params. Pin that spelling so the lint cannot accidentally
+# require the nested params form while the templates accept both.
+mkdir -p "$WORK/summary-site/config/_default" "$WORK/summary-site/content/posts"
+cat >"$WORK/summary-site/config/_default/hugo.toml" <<'TOML'
+[taxonomies]
+  tag = "tags"
+TOML
+cat >"$WORK/summary-site/content/posts/example.md" <<'MD'
+---
+title: "Summary-only example"
+summary: "A reader-facing standfirst that also supplies the metadata fallback."
+date: 2026-01-05
+keywords: ["example"]
+---
+Body.
+MD
+if "$ROOT/scripts/validate-content.sh" "$WORK/summary-site" >"$WORK/summary.out" 2>&1; then
+  pass 'a top-level summary satisfies the dated-page description contract'
+else
+  fail 'a top-level summary satisfies the dated-page description contract'
+  cat "$WORK/summary.out" >&2
+fi
+
 # A lint that only ever passes is a comment, not a gate. A scratch site carries
 # an unknown key and a lastmod before the date — the pair that publishes
 # dateModified before datePublished into JSON-LD with every gate green.
@@ -234,6 +258,33 @@ else
     fail 'the content lint failure names the bad keys'
     cat "$WORK/content.out" >&2
   fi
+fi
+
+if "$ROOT/scripts/new-site.sh" --name "Fixture Site" --slug fixture-site \
+    --domain fixture.example --out "$WORK/scaffold" --sections "science" \
+    >"$WORK/scaffold.out" 2>"$WORK/scaffold.stderr" \
+    && [ ! -s "$WORK/scaffold.stderr" ] \
+    && python3 - "$WORK/scaffold" <<'PY'
+import pathlib
+import sys
+import tomllib
+
+root = pathlib.Path(sys.argv[1])
+with (root / "config/_default/hugo.toml").open("rb") as fh:
+    config = tomllib.load(fh)
+assert config["minify"]["tdewolff"]["html"]["keepQuotes"] is True
+
+front = (root / "archetypes/default/index.md").read_text()
+keys = ("title:", "description:", "summary:", "keywords:", "author:",
+        "date:", "lastmod:", "tags:", "featureimage:",
+        "featureimagealt:", "showHero:", "showSummary:", "weight:")
+assert all(key in front for key in keys)
+PY
+then
+  pass 'new sites retain auditable minified HTML and the article metadata scaffold'
+else
+  fail 'new sites retain auditable minified HTML and the article metadata scaffold'
+  cat "$WORK/scaffold.out" "$WORK/scaffold.stderr" >&2
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

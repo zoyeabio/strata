@@ -117,7 +117,7 @@ quality = 78
 [image.caps]
 card = 800
 illustration = 1600
-hero = 1920
+hero = 1600
 
 # The social preview is generated at a fixed size: 1200x630 is what Facebook,
 # LinkedIn and Google request. scripts/place-image.sh lints the source against
