@@ -1,0 +1,14 @@
+{{- /*
+  Reports whether a page uses the capped article reading column.
+
+  A regular page is an article when mainSections is unset, matching the
+  single template's historical default. With mainSections set, only pages in
+  those sections are articles. Home, taxonomy and other node pages are wide.
+
+  Called by: _default/single.html, data/content-image-sizes.html
+*/ -}}
+{{- $isArticle := .IsPage -}}
+{{- if and $isArticle site.Params.mainSections -}}
+  {{- $isArticle = in (apply site.Params.mainSections "lower" ".") (lower .Section) -}}
+{{- end -}}
+{{- return $isArticle -}}

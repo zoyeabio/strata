@@ -3,8 +3,7 @@
 {{- $dateFormat := site.Params.dateFormat }}
 {{- $terms := .GetTerms "tags" }}
 {{- $authorURL := .Params.authorurl | default site.Params.author.url }}
-{{- $isArticle := true }}
-{{- with site.Params.mainSections }}{{ $isArticle = in (apply . "lower" ".") (lower $.Section) }}{{ end }}
+{{- $isArticle := partial "data/is-article.html" . }}
 {{- $articleParams := site.Params.article }}
 {{- $author := .Params.author | default site.Params.author.name }}
 {{- $showAuthor := false }}

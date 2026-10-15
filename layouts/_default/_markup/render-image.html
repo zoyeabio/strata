@@ -12,7 +12,7 @@
     "page" .Page
     "role" "illustration"
     "alt" $alt) }}
-{{- $sizes := (partial "data/card-presets.html" "text").sizes }}
+{{- $sizes := partial "data/content-image-sizes.html" .Page }}
 {{- partial "media/image.html" (dict
     "img" $img
     "alt" $alt

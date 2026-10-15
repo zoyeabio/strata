@@ -85,6 +85,10 @@ re-derived from the templates.
   `role=` no longer falls through to an arbitrary 1280px cap. Sites that add a
   role must map it to the shared image contract instead of receiving a
   plausible but unintended transform.
+- **Content-image `sizes` follows the actual page width.** Figures, Markdown
+  images and carousels use the reading measure on article pages and the full
+  content frame on standalone pages. This changes only which existing ladder
+  candidate the browser downloads; it creates no additional variants.
 - **One image resolver.** `data/image-ref.html` serves cards, term cards,
   heroes and social output. Cards and heroes take `featureimage`, else a page
   bundle resource whose name contains `feature`, `cover` or `thumbnail`, so a

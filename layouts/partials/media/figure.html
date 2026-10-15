@@ -46,7 +46,7 @@
     "role" (.role | default "illustration")
     "alt" $alt) -}}
 {{- if $img.ok -}}
-{{- $sizes := (partial "data/card-presets.html" "text").sizes -}}
+{{- $sizes := partial "data/content-image-sizes.html" .page -}}
 <figure class="figure{{ with .class }} {{ . }}{{ end }}">
   {{- if .link }}
   {{- $blank := eq (.target | default "") "_blank" }}

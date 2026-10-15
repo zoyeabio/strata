@@ -125,7 +125,7 @@
           {{- partial "media/image.html" (dict
               "img" $s.img
               "alt" (or $s.alt $s.caption (printf "carousel image %d" (add $i 1)))
-              "sizes" (partial "data/card-presets.html" "text").sizes
+              "sizes" (partial "data/content-image-sizes.html" $.Page)
               "loading" (cond (eq $i 0) "eager" "lazy")
               "fetchpriority" (cond (eq $i 0) "" "low")
               "class" "carousel__image") }}

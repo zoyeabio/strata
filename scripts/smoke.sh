@@ -270,6 +270,10 @@ fi
 
 # 19. shortcodes: figure goes through the pipeline with the built-in's
 #     caption structure
+assert 'notice/index.html' 'sizes="\(min-width:1280px\) 1024px' \
+  'wide-page content images declare the full content frame'
+assert_not 'notice/index.html' 'sizes="[^\"]*min\(calc\([^\"]*, 720px\)' \
+  'wide-page content images do not advertise the article reading measure'
 assert 'section-a/shortcodes/index.html' '<figure class="figure">' \
   'figure renders the base figure element'
 assert 'section-a/shortcodes/index.html' '<figure class="figure extra">' \

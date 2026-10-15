@@ -1,0 +1,12 @@
+{{- /*
+  Returns responsive sizes for an image inside rendered page content.
+
+  Article content follows the configured reading measure. Wide standalone
+  pages use the full content frame. Both presets share the same image ladder;
+  this only lets the browser choose the correct existing candidate.
+
+  Called by: _markup/render-image.html, media/figure.html,
+             shortcodes/interactive/carousel.html
+*/ -}}
+{{- $preset := cond (partial "data/is-article.html" .) "text" "hero" -}}
+{{- return (partial "data/card-presets.html" $preset).sizes -}}
