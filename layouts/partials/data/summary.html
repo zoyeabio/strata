@@ -1,0 +1,17 @@
+{{- /*
+  Partial: data/summary.html
+  Role:     Resolve the page's reader-facing standfirst. It is deliberately a
+            different resolver from data/description.html: description feeds
+            the meta tag, Open Graph and JSON-LD, summary sits under the title
+            for a person. A page may set either, both, or neither, and when
+            both are set they are allowed to differ, because one is written for
+            a search snippet and the other for a reader.
+            Nothing is generated. Slicing .Plain is not a standfirst, it is a
+            fragment that competes with a <!-- more --> cut, and a line a
+            reader is meant to trust should be written rather than cut.
+  Params:   page (Page, required)
+  Outputs:  string (may be empty)
+  Called by: _default/single.html
+*/ -}}
+{{- $page := . -}}
+{{- return ($page.Params.summary | plainify | replaceRE "^\\s+|\\s+$" "") -}}

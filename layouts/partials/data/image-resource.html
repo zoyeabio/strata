@@ -54,12 +54,16 @@
 {{- $imgCfg := site.Params.image -}}
 {{- $capsCfg := $imgCfg.caps -}}
 {{- $ogCfg := $imgCfg.og -}}
+{{- $validRoles := slice "card" "illustration" "hero" "og" -}}
+{{- if not (in $validRoles $role) -}}
+  {{- errorf "strata: unknown image role %q" $role -}}
+{{- end -}}
 {{- $caps := dict
   "card" (int $capsCfg.card)
   "illustration" (int $capsCfg.illustration)
   "hero" (int $capsCfg.hero)
-  "og" (int $capsCfg.og) -}}
-{{- $cap := index $caps $role | default 1280 -}}
+  "og" 0 -}}
+{{- $cap := index $caps $role -}}
 {{- $ladder := slice -}}
 {{- range $imgCfg.ladder -}}
   {{- $ladder = $ladder | append (int .) -}}

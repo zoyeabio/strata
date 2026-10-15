@@ -13,16 +13,18 @@ re-derived from the templates.
 
 ### Deliberate choices
 
-- **No external requests**, build time or runtime: no CDNs, webfonts,
-  analytics or third-party scripts. Fonts are system stacks. No gate asserts
-  this — it is a standing rule, not a check.
+- **No implicit external requests**, build time or runtime: no CDNs, webfonts
+  or analytics. Fonts are system stacks. Maps, AdSense and site hooks are
+  explicit, documented opt-ins rather than hidden theme traffic.
 - **Config is data, not code, and it is the only place defaults live.** Every
   key the theme reads from `site.Params` has a default in
   `config/_default/params.toml` — the variant ladder, role caps, WebP quality,
   social preview size, page image budget, per-role minimum source width and the
   UI switches alongside. Hugo merges it underneath a site's config, and
   `scripts/lib/build_config.py` resolves that same file pair, so a threshold
-  changed in config is the threshold the gate checks. Templates no longer carry
+  changed in config is the threshold the gate checks. The resolver understands
+  Hugo's `params.toml` namespace and fails on a missing key instead of hiding it
+  behind a copied fallback number. Templates no longer carry
   a `| default` for a key the config already defines, so there is one place to
   look and a site can never resolve a key to nothing. `validate-theme.sh`
   asserts the invariant by diffing every `site.Params.<key>` the templates read
@@ -36,7 +38,9 @@ re-derived from the templates.
   copy rode the 1024px frame — 108 characters at 17px, against the 45–75 that
   the prose stylesheet's own comment asked for. The value ships as a CSS custom
   property in `<head>` before the stylesheet, so a site can set `800` or the
-  string `"none"` without touching CSS. The title block rides the same measure
+  string `"none"` without touching CSS. Responsive body-image `sizes` reads the
+  same value, so a wider column does not silently receive a smaller candidate.
+  The title block rides the same measure
   — a centred body under a full-frame h1 reads as a 152px misalignment at 1440,
   not as an intentional column. The hero stays full-frame: an image edge does
   not anchor the text grid. `.series` tracks the measure too, so one knob moves
@@ -77,6 +81,10 @@ re-derived from the templates.
 
 ### Behaviour notes
 
+- **Unknown image roles fail the build.** A misspelled or site-specific
+  `role=` no longer falls through to an arbitrary 1280px cap. Sites that add a
+  role must map it to the shared image contract instead of receiving a
+  plausible but unintended transform.
 - **One image resolver.** `data/image-ref.html` serves cards, term cards,
   heroes and social output. Cards and heroes take `featureimage`, else a page
   bundle resource whose name contains `feature`, `cover` or `thumbnail`, so a
@@ -198,10 +206,53 @@ re-derived from the templates.
   text is passed rather than the shortcode's `.` because Hugo refuses a
   closing tag unless the shortcode template itself reads `.Inner`.
 
+- **`summary` is its own resolver, and it is visible.** `description` feeds the
+  meta tag and `Article.description`; `summary` fed the same two as a fallback
+  and appeared nowhere on the page. `data/summary.html` now renders it as a
+  standfirst above the meta line, gated by `[article] showSummary` (default
+  `true`) with the usual page-level override. The two stay separate resolvers:
+  a page may set both with different wording, since one is written for a search
+  snippet and the other for a reader. A standfirst is never generated — slicing
+  the body would compete with a `<!-- more -->` cut, and a line a reader is
+  meant to trust should be written rather than cut.
+- **The author is an addressable person.** An `authorurl` on a page, or
+  `[author] url` for a site, turns the byline into a link and emits
+  `Person.url`; `author.links` remains `Person.sameAs`. The theme takes a URL
+  rather than registering an `author` taxonomy: Hugo reserves the `author` key
+  for authorship, so `author = "authors"` under `[taxonomies]` is accepted and
+  then ignored, and no term page is ever built for it — a taxonomy that looks
+  configured but produces nothing is worse than no taxonomy. Without a URL the
+  byline stays plain text; the theme will not invent a destination.
+- **Series is a graph node.** A page with a `series` term emits a `Series` node
+  whose `hasPart` holds each member with its `position`, and the `Article`
+  points back through `isPartOfSeries`. Members sort by `weight`, the same call
+  `page/series.html` uses, so the graph and the on-page navigation cannot
+  disagree about where a piece sits. Positions are pinned in `smoke.sh`, so a
+  reorder shows up as a failure rather than as a wrong crawl.
+- **The HTML trail and the JSON-LD trail name a page differently, on purpose.**
+  A breadcrumb crumb takes its menu entry's short label, because a reader
+  scanning a trail does not need "Feature Images, Formats and Optimization" to
+  reach a page. The `BreadcrumbList` keeps the real title, because that field
+  identifies the entity. They look like the same logic in two places, but they
+  are two policies over the same data, so there is nothing to factor out — and
+  unifying them would make the JSON-LD lose the title a search engine indexes.
+
 ### Gates
 
 `smoke.sh` (fixture assertions, rebuilt and re-verified on every run),
 `check-build.sh` (R1–R15), `validate-theme.sh`, `validate-site.sh`,
-`audit-partials.sh` (missing/orphan partial call graph), `new-site.sh` and
-`place-image.sh`. A behaviour change ships with its assertion; the standing
-rules live in `CONTRIBUTING.md`.
+`validate-content.sh`, `audit-partials.sh` (missing/orphan partial call
+graph), `new-site.sh` and `place-image.sh`. A behaviour change ships with its
+assertion; the standing rules live in `CONTRIBUTING.md`.
+
+`validate-content.sh` exists because the build cannot see a failure that
+happened before it. An unknown front matter key, a missing description, a
+`featureimage` without an alt and a `lastmod` earlier than `date` all build
+cleanly, and the last one publishes as `dateModified` before `datePublished` in
+the JSON-LD — a contradiction a search engine may read as a fabricated history.
+The script reads the source instead of the output. Its list of allowed keys is
+derived from the templates rather than written by hand, so there is one source
+of truth and it cannot rot; it runs on `exampleSite` from `validate-theme.sh`
+and on a consuming site from `validate-site.sh`. `test/fixture` is a gate
+harness with deliberately minimal front matter, so it does not pass this lint
+and is not judged by it.

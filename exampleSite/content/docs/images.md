@@ -77,7 +77,7 @@ the original file for every role.
 | Role | Widest variant | Used by |
 |---|---|---|
 | `card` | 800 | list/term cards |
-| `illustration` (default) | 1280 | body figures, markdown images |
+| `illustration` (default) | 1600 | body figures, markdown images |
 | `hero` | 1920 | article hero, with preload |
 | `og` | 1200×630 JPEG fill | Open Graph / Twitter card |
 
@@ -87,6 +87,26 @@ The caps are `[params.image].caps.*` and the preview size is
 The hero is cropped to a fixed height rather than letterboxed, so an image of
 any aspect ratio fills its frame. The height is `--page-hero-height`
 (200 / 260 / 300px by breakpoint); override the variable to change the crop.
+
+## SciVisual handoff
+
+Use one 1600×900 Hero source for the article hero, 16:9 cards and the generated
+1200×630 social preview. The article hero is a shallower centre crop, so keep
+the essential subject in the central horizontal band and do not place text or
+critical anatomy near the top or bottom edge.
+
+The example posts demonstrate this contract with the 1600×900 `features-*.png`
+sources. The wider, shallower `hero-*.png` files belong to section and docs
+banners; they demonstrate that the renderer also accepts purpose-built banner
+art, not a second required article-Hero size.
+
+SciVisual article illustrations also arrive at 1600×900 by default. Strata
+preserves their aspect ratio and emits WebP variants up to 1600px; 16:9 is the
+common production profile, not a requirement for mechanisms, charts or taller
+figures. Keep generated sources as PNG when they contain labels or precise
+graphics, and use high-quality JPEG for photographic work. The deployed page
+still receives responsive WebP, while the source format remains an authoring
+choice.
 
 ## Front matter
 

@@ -24,21 +24,16 @@ THEME = Path(__file__).resolve().parents[2]
 # a different one: Hugo then skips config/production/ and so do these scripts.
 ENV = 'production'
 
-# name -> (default, path under [params])
+# name -> path under [params]. The theme config is mandatory: keeping fallback
+# numbers here would create a second, drift-prone source of truth.
 KEYS = {
-    'IMAGE_LADDER': ([480, 800, 1280, 1920], ('image', 'ladder')),
-    'IMAGE_QUALITY': (78, ('image', 'quality')),
-    'IMAGE_CAP_CARD': (800, ('image', 'caps', 'card')),
-    'IMAGE_CAP_ILLUSTRATION': (1280, ('image', 'caps', 'illustration')),
-    'IMAGE_CAP_HERO': (1920, ('image', 'caps', 'hero')),
-    'IMAGE_CAP_OG': (1920, ('image', 'caps', 'og')),
-    'OG_WIDTH': (1200, ('image', 'og', 'width')),
-    'OG_HEIGHT': (630, ('image', 'og', 'height')),
-    'PAGE_IMAGES_KB': (600, ('build', 'pageimageskb')),
-    'MIN_WIDTH_HERO': (1600, ('build', 'minwidth', 'hero')),
-    'MIN_WIDTH_ILLUSTRATION': (1280, ('build', 'minwidth', 'illustration')),
-    'MIN_WIDTH_CARD': (1200, ('build', 'minwidth', 'card')),
-    'MIN_WIDTH_OG': (1200, ('build', 'minwidth', 'og')),
+    'OG_WIDTH': ('image', 'og', 'width'),
+    'OG_HEIGHT': ('image', 'og', 'height'),
+    'PAGE_IMAGES_KB': ('build', 'pageimageskb'),
+    'MIN_WIDTH_HERO': ('build', 'minwidth', 'hero'),
+    'MIN_WIDTH_ILLUSTRATION': ('build', 'minwidth', 'illustration'),
+    'MIN_WIDTH_CARD': ('build', 'minwidth', 'card'),
+    'MIN_WIDTH_OG': ('build', 'minwidth', 'og'),
 }
 
 
@@ -69,6 +64,13 @@ def _load(path):
         return {}
 
 
+def _load_config(path):
+    data = _load(path)
+    if path.name == 'params.toml':
+        return {'params': data.get('params', data)}
+    return data
+
+
 def _get(mapping, path):
     node = mapping
     for key in path:
@@ -81,20 +83,17 @@ def _get(mapping, path):
 def load(site=None, environment=ENV):
     cfg = {}
     for theme_cfg in sorted((THEME / 'config' / '_default').glob('*.toml')):
-        cfg = _merge(cfg, _load(theme_cfg))
+        cfg = _merge(cfg, _load_config(theme_cfg))
     if site:
         for path in _toml_files(Path(site), environment):
-            cfg = _merge(cfg, _load(path))
+            cfg = _merge(cfg, _load_config(path))
     params = cfg.get('params', {})
     out = {}
-    for name, (default, path) in KEYS.items():
+    for name, path in KEYS.items():
         value = _get(params, path)
         if value is None:
-            out[name] = default
-        elif isinstance(default, list):
-            out[name] = [int(v) for v in value]
-        else:
-            out[name] = int(value)
+            raise SystemExit(f'missing required config key: params.{".".join(path)}')
+        out[name] = int(value)
     return out
 
 
@@ -104,7 +103,4 @@ if __name__ == '__main__':
     parser.add_argument('--environment', default=ENV)
     args = parser.parse_args()
     for name, value in load(args.site, args.environment).items():
-        if isinstance(value, list):
-            value = ' '.join(str(v) for v in value)
-        # Single-quoted so a list like 480 800 1280 1920 evals as one value.
         print(f"{name}='{value}'")

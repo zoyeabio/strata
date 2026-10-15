@@ -3,9 +3,8 @@
 
   Single source of truth: every number lives in the parameter block below and
   each string is computed from it, so a padding or breakpoint change is made
-  once. Viewport-bound ranges use calc() (exact at every width); constants
-   appear only where the layout is capped (container 1280px, prose 720px) or
-   fixed (240px row thumb).
+  once. Viewport-bound ranges use calc() (exact at every width); min() applies
+  the configured prose cap, and constants remain only where layout is fixed.
 
   Parameters mirror the container of the grid in page/page-collection.html
   and the hero container: per-side padding 24 / 56 / 96 / 128 below 640 /
@@ -14,13 +13,12 @@
   640 / 853 / 1024), container cap 1280 above, gap 16, columns 1 / 2
   / 3 (3 from the 853px md breakpoint). The content cap ($cap) must equal
   --site-content in base/reset.css (both 1024); $container = content + 2×lg
-  padding is only the viewport where the container stops growing. A rung
+  padding is only the viewport where the container stops growing. The prose
+  cap comes from params.readingMeasure and is clamped to the content cap;
+  "none" means the full content cap. A rung
   that does not equal the rendered ladder moves the pick across a candidate
   step (480 / 800: up to 1.7× bytes), so each rung must match the CSS; smoke
-  asserts sizes against the CSS and re-derives them when the
-  ladder changes. The text preset's 832 and 912 rungs are where the viewport
-  calc() crosses the 720px prose cap on the low (640–852, pad 112) and high
-  (853–1023, pad 192) side respectively.
+  asserts sizes against the CSS and re-derives them when the ladder changes.
 
   cardViewScreenWidth (w-screen 1600px / padding 30) is not parameterised
   here: no target site enables it yet.
@@ -39,7 +37,11 @@
 {{- $padLg := 256 -}}   {{/* 128 per side, 1024 and up */}}
 {{- $container := 1280 -}}
 {{- $cap := sub $container $padLg -}}
-{{- $prose := 720 -}}   {{/* body copy is at most 720 wide */}}
+{{- $reading := printf "%v" site.Params.readingMeasure -}}
+{{- $prose := $cap -}}
+{{- if ne $reading "none" -}}
+  {{- $prose = int (math.Min (int $reading) $cap) -}}
+{{- end -}}
 {{- $row := 240 -}}
 
 {{- $grid := delimit (slice
@@ -54,11 +56,10 @@
     (printf "calc(100vw - %dpx)" $padBase)
   ) ", " -}}
 {{- $text := delimit (slice
-    (printf "(min-width:%dpx) %dpx" (add $prose $padMd) $prose)
-    (printf "(min-width:853px) calc(100vw - %dpx)" $padMd)
-    (printf "(min-width:832px) %dpx" $prose)
-    (printf "(min-width:640px) calc(100vw - %dpx)" $padSm)
-    (printf "calc(100vw - %dpx)" $padBase)
+    (printf "(min-width:1024px) min(calc(100vw - %dpx), %dpx)" $padLg $prose)
+    (printf "(min-width:853px) min(calc(100vw - %dpx), %dpx)" $padMd $prose)
+    (printf "(min-width:640px) min(calc(100vw - %dpx), %dpx)" $padSm $prose)
+    (printf "min(calc(100vw - %dpx), %dpx)" $padBase $prose)
   ) ", " -}}
 {{- $hero := delimit (slice
     (printf "(min-width:1280px) %dpx" $cap)

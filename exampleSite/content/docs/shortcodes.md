@@ -5,7 +5,8 @@ keywords: ["shortcodes", "reference", "syntax"]
 weight: 60
 ---
 
-All shortcodes ship with the theme; no JavaScript dependencies are bundled.
+All shortcodes ship with the theme. Carousel and contact use small first-party
+scripts; no third-party JavaScript library is bundled.
 Parameters marked **required** fail the build when missing (with the source
 position in the error).
 
@@ -20,15 +21,15 @@ image runs through the responsive pipeline.
 | `alt` | Alt text; empty string marks a decorative image |
 | `title`, `caption`, `attr`, `attrlink` | Caption block, same semantics as the built-in |
 | `link`, `target`, `rel` | Wrap the image in a link |
-| `class` | Extra classes on the `<img>` (pass-through — not covered by the class-coverage test) |
+| `class` | Extra classes on the `<figure>` (pass-through — not covered by the class-coverage test) |
 | `width`, `height` | Intrinsic size attributes |
 | `loading` | `lazy` (default) or `eager` |
 | `role` | `card` / `illustration` (default) / `hero` — caps the variant width |
 
 ## map
 
-Embedded third-party map frame. The theme itself ships zero external
-requests — this shortcode is the explicit opt-in: nothing renders unless
+Embedded third-party map frame. The theme makes no implicit external
+requests — this shortcode is an explicit opt-in: nothing renders unless
 the page passes an `https` embed URL.
 
 | Parameter | Notes |

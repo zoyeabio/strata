@@ -5,7 +5,26 @@
   color: var(--text-muted);
 }
 
+/* A standfirst sits between the title and the body: set larger than the
+   reading text so a reader can pick it up, muted so the h1 stays the anchor.
+   It rides the header's measure, so it never breaks the article's left edge. */
+.article__standfirst {
+  margin: 22px 0 0;
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
 .article__tag {
+  display: inline-block;
+  padding-block: 2px;
+  color: var(--site-link);
+}
+
+/* Same treatment as the tag links beside it. The byline stays plain text when
+   no author taxonomy is registered: a byline that cannot go anywhere should
+   not look clickable. */
+.article__author {
   display: inline-block;
   padding-block: 2px;
   color: var(--site-link);

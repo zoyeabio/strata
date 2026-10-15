@@ -17,7 +17,7 @@ at 1920px, because a hero that would be 3840px wide is still shown at
 1920px: it only costs bytes.
 
 ```
-cap:  hero 1920  ·  illustration 1280  ·  card 800
+cap:  hero 1920  ·  illustration 1600  ·  card 800
 ladder: 480 800 1280 1920
 steps within 15% of their predecessor are dropped
 ```
@@ -58,10 +58,10 @@ A 9:16 source, asked to sit in the same frame.
 
 ## The illustration role
 
-Body figures are capped at 1280px. Wider than that and the extra pixels
-are invisible in a narrow column, so they are simply not generated.
+Body figures are capped at 1600px. A smaller source stays at its intrinsic
+width and is never enlarged merely to reach that cap.
 
-{{< figure src="images/texture-weave.png" alt="A woven texture of small marks over a gradient" caption="An illustration: capped at 1280px, three variants on the ladder." role="illustration" loading="lazy" >}}
+{{< figure src="images/texture-weave.png" alt="A woven texture of small marks over a gradient" caption="An illustration: its 1280px source yields three variants on the ladder." role="illustration" loading="lazy" >}}
 
 {{< figure src="images/chart-bars.png" alt="A bar chart with eight ascending bars" caption="A chart, contained. The axes survive the narrow frame." role="illustration" loading="lazy" >}}
 

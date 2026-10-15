@@ -2,8 +2,9 @@
 
 ## Ground rules
 
-- **No external requests** at build time or runtime — no CDNs, webfonts,
-  analytics or third-party scripts.
+- **No implicit external requests** at build time or runtime — no CDNs,
+  webfonts or analytics. Only documented map, AdSense and site-hook opt-ins
+  may add third-party requests.
 - **No placeholder or site-specific content** in the theme: no brand names,
   no sample marketing copy, no dead links.
 - **Configuration is externalised**: nothing site-shaped is hard-coded in
@@ -33,7 +34,8 @@ All four must pass. New behaviour means a new assertion, not a comment.
 
 ## Templates
 
-- Partials: `data/` returns dicts (no HTML), `media/` emits elements,
+- Partials: `data/` returns values via `return` (strings, slices or dicts —
+  never HTML), `media/` emits elements,
   `page/` composes blocks, `frame/` is the page shell, `head/` is `<head>`.
 - Every partial header lists purpose, parameters and callers.
 - Site hooks use `templates.Exists` so a site can extend without forking.

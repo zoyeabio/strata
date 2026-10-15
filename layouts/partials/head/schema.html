@@ -1,7 +1,9 @@
 {{- /*
   Partial: head/schema.html
   Role:     JSON-LD graph: WebSite (home), WebPage (every rendered page),
-            Article (dated content — the same condition as og:type=article).
+            Article (dated content — the same condition as og:type=article),
+            Series (a page's series term, members in the same order as the
+            page/series.html navigation).
   Params:   page (Page, required)
   Outputs:  <script type="application/ld+json"> with a @graph
   Called by: head/head.html
@@ -49,6 +51,9 @@
 {{- $ancestors := slice }}
 {{- $p := $page.Parent }}
 {{- range seq 10 }}{{ if and $p (not $p.IsHome) }}{{ $ancestors = $ancestors | append $p }}{{ $p = $p.Parent }}{{ end }}{{ end }}
+{{- /* Crumb names are the real LinkTitle, not the menu label the HTML trail
+       uses: over there the label is for a reader scanning a trail, here it
+       identifies the entity. A deliberate divergence, pinned in smoke.sh. */ -}}
 {{- range $ancestors | collections.Reverse }}
 {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" .LinkTitle "item" .Permalink) }}
 {{- end }}
@@ -74,8 +79,12 @@
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
     "publisher" (dict "@id" $orgID) }}
 {{- $author := $page.Params.author | default site.Params.author.name }}
+{{- $authorURL := $page.Params.authorurl | default site.Params.author.url }}
 {{- if $author }}
 {{- $person := dict "@type" "Person" "name" $author }}
+{{- with $authorURL }}
+{{- $person = merge $person (dict "url" (. | absURL)) }}
+{{- end }}
 {{- with site.Params.author.links }}
 {{- $person = merge $person (dict "sameAs" (apply . "index" "." "url")) }}
 {{- end }}
@@ -107,6 +116,31 @@
 {{- if and $hero.ok $hero.url (ne $hero.url $img.url) }}{{ $images = $images | append ($hero.url | absURL) }}{{ end -}}
 {{- with $images }}
 {{- $article = merge $article (dict "image" $images) }}
+{{- end }}
+{{- /* Series is emitted as its own node rather than a string on the article:
+       it is a real page with its own members, so a search engine can walk it
+       and see where this piece sits. Positions follow the same
+       weight-then-date order as the page/series.html navigation, so the graph
+       and the nav cannot disagree. */ -}}
+{{- range $term := $page.GetTerms "series" }}
+{{- $parts := slice }}
+{{- range $i, $part := sort $term.Pages "Weight" }}
+{{- $parts = $parts | append (dict
+    "@type" "Article"
+    "@id" (printf "%s#article" $part.Permalink)
+    "position" (add $i 1)
+    "url" $part.Permalink
+    "name" $part.Title) }}
+{{- end }}
+{{- $seriesID := printf "%s#series" $term.Permalink }}
+{{- $graph = append (dict
+    "@context" "https://schema.org"
+    "@type" "Series"
+    "@id" $seriesID
+    "name" $term.LinkTitle
+    "url" $term.Permalink
+    "hasPart" $parts) $graph }}
+{{- $article = merge $article (dict "isPartOfSeries" (dict "@id" $seriesID)) }}
 {{- end }}
 {{- $graph = append $article $graph }}
 {{- end }}

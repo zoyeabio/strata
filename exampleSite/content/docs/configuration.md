@@ -40,13 +40,12 @@ The image and build thresholds get their own table because the build scripts and
 | `[params.image].ladder` | `[480, 800, 1280, 1920]` | Variant widths, smallest first. Each is capped by the source width and the role cap, de-duplicated, and dropped if less than 15% wider than its kept predecessor |
 | `[params.image].quality` | `78` | One WebP quality for every width, so a width is never stored twice |
 | `[params.image].caps.card` | `800` | Widest variant for a card |
-| `[params.image].caps.illustration` | `1280` | Widest variant for an illustration |
+| `[params.image].caps.illustration` | `1600` | Widest illustration variant; matches the SciVisual source profile and leaves density headroom at the default reading measure |
 | `[params.image].caps.hero` | `1920` | Widest variant for a hero |
-| `[params.image].caps.og` | `1920` | Widest variant for the social preview |
 | `[params.image].og.width` / `.height` | `1200` / `630` | Fixed preview size — what Facebook, LinkedIn and Google request. `scripts/place-image.sh` lints the source against the same pair |
-| `[params.build].pageimageskb` | `600` | Largest total image payload on a page, in KiB — `check-build` R5 |
+| `[params.build].pageimageskb` | `600` | Largest rendered image payload on one browser visit, in KiB — `check-build` R5; social metadata is excluded because a page visit does not download it |
 | `[params.build].minwidth.hero` | `1600` | Minimum source width per role, linted by `scripts/place-image.sh` |
-| `[params.build].minwidth.illustration` | `1280` | Same |
+| `[params.build].minwidth.illustration` | `1600` | Same; matches SciVisual's article-illustration output |
 | `[params.build].minwidth.card` | `1200` | Same |
 | `[params.build].minwidth.og` | `1200` | Same |
 
@@ -84,11 +83,13 @@ you change in config is the threshold the gate checks.
 | `article.showAuthor` | `false` | `By` line on articles (page `author` wins, then `[author] name`) |
 | `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
 | `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
+| `article.showSummary` | `true` | A page's `summary` as a standfirst above the meta line. Unlike `list.showSummary`, which is about cards, a page's own summary is written for a reader, so one that is supplied is shown. Page `showsummary: false` suppresses it |
 | `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
 | `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
 | `author.name` | `""` | Site-wide author fallback |
+| `author.url` | `""` | The author's own page. Turns the byline into a link and is emitted as the schema `Person.url`; page `authorurl` wins. A URL, not a taxonomy — Hugo reserves the `author` key for authorship, so `author = "authors"` under `[taxonomies]` is ignored and builds no term page |
 | `author.links` | `[]` | `[{name, url}]` author profile links, emitted as schema `sameAs` |
 | `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
@@ -145,6 +146,28 @@ a trail of just "Home" would be decoration.
 
 Page-level override: `showBreadcrumbs: false` in front matter.
 
+## Structured data
+
+Every rendered page emits one `<script type="application/ld+json">` carrying a
+single `@graph`. Nodes reference each other by `@id`, so a crawler walks from a
+page to its site, its organisation, its author and its series without guessing:
+
+| Node | When | Fields |
+|---|---|---|
+| `WebSite` | Home only | `name`, `url`, `inLanguage` |
+| `Organization` | Every page | `name` (footer company name, else the site title), `url`, `sameAs` from `[footer] social links`, `logo` |
+| `WebPage` | Every page | `name`, `url`, `isPartOf` → `WebSite`, `inLanguage` |
+| `BreadcrumbList` | Non-home | `itemListElement` of `ListItem`, position ordered |
+| `Article` | Dated pages | `headline`, `mainEntityOfPage` → `WebPage`, `publisher` → `Organization`, `author` → `Person`, `description`, `keywords`, `image`, `datePublished`, `dateModified`, `isPartOfSeries` → `Series` |
+| `Series` | A page with a `series` term | `name`, `url`, `hasPart` — each member as an `Article` ref with its `position`, in the same `weight` order as the series navigation |
+| `Person` | A byline exists | `name`, `url` when `authorurl` or `[author] url` is set, `sameAs` from `[author] links` |
+
+`datePublished` and `dateModified` always mirror the front matter. A page whose
+`lastmod` is earlier than `date` therefore publishes a modified date before its
+published date — a contradiction a search engine may treat as fabricated. Hugo
+builds that without complaint, so `scripts/validate-content.sh` rejects it in
+the source instead of relying on the build to catch it.
+
 ## Footer (`params.toml [footer]`)
 
 Without this table the footer is identity, footer menu, copyright. With
@@ -175,7 +198,8 @@ warning instead of being rendered as a dead link.
 | `title` | Required |
 | `date` | Card and article date; articles without a date show no `<time>` and no `Article` node |
 | `weight` | Ordering when `orderByWeight` is on; series order |
-| `description` / `summary` | Page meta description; both also feed `Article.description` (description wins) |
+| `description` | Page meta description; also feeds `Article.description`. Wins over `summary` for every machine-readable field |
+| `summary` | Fallback meta description when `description` is absent, and the only source of the visible standfirst rendered above the meta line (see `article.showSummary`). Kept as a separate resolver from `description`, so a page can set both with different wording — one for a snippet, one for a reader |
 | `keywords` | `["Prebiotic", "Bifidobacterium"]` — feeds both `<meta name="keywords">` and `Article.keywords` from one resolver; falls back to `tags`, which may be a list or a bare comma string. Items are trimmed, deduplicated and blank-dropped, and with no source at all no tag is emitted |
 | `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
@@ -193,13 +217,15 @@ warning instead of being rendered as a dead link.
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |
-| `author` | Byline for this page (falls back to `[author] name`) |
+| `author` | Byline for this page (falls back to `[author] name`). Emits the schema `Person.name` |
+| `authorurl` | `"/about/"` — turns the byline into a link and emits the schema `Person.url`. Page-level; falls back to `[author] url`. Set neither and the byline is plain text |
 | `images` | Image refs for Open Graph; `images[0]` is used only when `featureimage` is absent (see [images.md](/docs/images/)) |
 
 ## Consent and ads
 
-The theme ships no consent UI and no ad loader of its own. Sites wire
-theirs through two sanctioned points:
+The theme ships no consent UI. Its AdSense loader is dormant unless a page
+uses the `ads` shortcode and the site provides `[ads] client`; sites wire
+consent and ads through two sanctioned points:
 
 - `partials/cookie-consent.html` (hook above) renders site-owned banner or
   CMP markup before `</body>`. Load Consent Mode defaults before any
@@ -235,11 +261,12 @@ accident:
   level, so the value is never read
 - page front matter `series_order` — series navigation sorts by `weight`; set
   only `weight` and drop `series_order`
-- site `[article] showSummary`, `[article]` / `[term]` `showHero`, and
-  `[taxonomy] showHero` / `orderByWeight` / `showSummary` — read by nothing: an
-  article renders its body rather than cards, `/tags/` and `/tags/x/` list terms
-  rather than pages, and Strata shows a hero whenever an image resolves. Only
-  `[list] showHero` is read, for a section banner
+- site `[article]` / `[term]` `showHero`, and `[taxonomy] showHero` /
+  `orderByWeight` / `showSummary` — read by nothing: an article renders its body
+  rather than cards, `/tags/` and `/tags/x/` list terms rather than pages, and
+  Strata shows a hero whenever an image resolves. Only `[list] showHero` is
+  read, for a section banner. `showSummary` is read under `[list]` and `[article]`
+  only — card summaries and the article standfirst
 - site `showDraftLabel` — Strata has no draft badge
 - `[params] backgroundImageWidth` — superseded by the pipeline's own widths
 

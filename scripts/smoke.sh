@@ -15,6 +15,8 @@ OUT="$WORK/public"
 OUT_REMOTE="$WORK/public-remote"
 OUT_NOSITEDESC="$WORK/public-nositedesc"
 OUT_QUALITY="$WORK/public-quality"
+OUT_MEASURE="$WORK/public-measure"
+OUT_NOSUMMARY="$WORK/public-nosummary"
 OUT_ROBOTS="$WORK/public-robots"
 OUT_DRAFTS="$WORK/public-drafts"
 trap 'rm -rf "$WORK"' EXIT
@@ -35,6 +37,10 @@ if ! command -v tailwindcss >/dev/null 2>&1; then
 fi
 
 hugo --source "$ROOT/test/fixture" --destination "$OUT" --quiet 2>"$WORK/build.stderr"
+hugo --source "$ROOT/test/fixture" --environment measure \
+  --destination "$OUT_MEASURE" --quiet
+hugo --source "$ROOT/test/fixture" --environment nosummary \
+  --destination "$OUT_NOSUMMARY" --quiet
 
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
@@ -283,8 +289,6 @@ assert 'section-a/shortcodes/index.html' 'title="Shanghai office map" loading="l
   'map frame carries its label and defers loading'
 assert 'section-a/shortcodes/index.html' 'src="https://maps.google.com/maps\?q=Shanghai' \
   'map passes the embed URL through'
-count_assert 'section-a/shortcodes/index.html' 'sizes="\(min-width:912px\) 720px' 7 \
-  'three figures, three slides and the loop clone carry the text sizes'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 7 \
   'five list cards plus two first slides load eagerly'
 # Quality is site-wide, so two figures sharing a role cannot write the same
@@ -470,8 +474,12 @@ css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
 css_assert '@media\(min-width:1024px\)\{:root\{--site-gutter:128px' \
   'gutter rung 128px sits at the 1024px breakpoint'
 css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
-count_assert 'section-a/shortcodes/index.html' '\(min-width:832px\) 720px' 7 \
-  'text preset adds the 832px rung on every body image and the loop clones'
+count_assert 'section-a/shortcodes/index.html' \
+  'min\(calc\(100vw - 112px\), 720px\)' 7 \
+  'text preset caps every body image and loop clone at the reading measure'
+assert_at "$OUT_MEASURE" 'section-a/shortcodes/index.html' \
+  'min\(calc\(100vw - 112px\), 800px\)' \
+  'text image sizes follow an 800px readingMeasure override'
 
 # 27. every class token the templates emit is defined in the shipped CSS
 #     (accepts .token or [class~="token"]; {{ }} inside class attrs is cut
@@ -578,6 +586,11 @@ for page in out.rglob('*.html'):
         checked += 1
         if not (out / href.lstrip('/') / 'index.html').exists():
             missing.append(f'{page.relative_to(out)}: series {href}')
+    for m in re.finditer(r'class="article__author" href="([^"]+)"', text):
+        href = urllib.parse.urlparse(m.group(1)).path
+        checked += 1
+        if not (out / href.lstrip('/') / 'index.html').exists():
+            missing.append(f'{page.relative_to(out)}: author {href}')
 if missing:
     for line in missing:
         print('FAIL', line, file=sys.stderr)
@@ -588,9 +601,9 @@ if checked == 0:
 print(f'{checked} taxonomy links')
 PY
 ); then
-  pass "every tag and series link points at a built page ($tax_out)"
+  pass "every tag, series and author link points at a built page ($tax_out)"
 else
-  fail 'every tag and series link points at a built page'
+  fail 'every tag, series and author link points at a built page'
 fi
 
 # 31. shortcode parameter whitelist: content may only use parameters the
@@ -757,8 +770,10 @@ else
 fi
 
 # 35. article author: page front matter wins, site [author] is the fallback,
-#     both gated by showAuthor
-assert 'section-a/flat/index.html' 'By Flat Author' 'page author renders'
+#     both gated by showAuthor. An authorurl turns the byline into a link, but
+#     without one it stays plain text — neither form invents a destination.
+assert 'section-a/flat/index.html' 'By <a class="article__author"[^>]*>Flat Author</a>' \
+  'a page author with a url renders as a link'
 assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the fallback'
 
 # 36. carousel loop is seamless: a hidden clone of the first slide closes
@@ -1250,6 +1265,58 @@ assert_at "$OUT_DRAFTS" 'section-a/strtags/index.html' 'name="keywords" content=
 assert_at "$OUT_DRAFTS" 'section-a/strtags/index.html' '"keywords":\["bare","string"\]' \
   'a bare string tags value yields exactly two items'
 
+# 42d. Series is its own graph node with its members in the same weight order
+#      as the page/series.html navigation, and the Article points back at it.
+#      Positions and ids are pinned, so a reorder or an id drift shows up here
+#      instead of in a search engine's crawl.
+if series_out=$(python3 - "$OUT" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+out = Path(sys.argv[1])
+failed = []
+for rel in ("section-a/series-a", "section-a/series-b"):
+    text = (out / rel / "index.html").read_text(encoding="utf-8")
+    m = re.search(r'<script type="application/ld\+json">(.*?)</script>', text, re.S)
+    if not m:
+        failed.append("%s renders no JSON-LD" % rel)
+        continue
+    nodes = json.loads(m.group(1))
+    nodes = nodes.get("@graph", nodes) if isinstance(nodes, dict) else nodes
+    series = [n for n in nodes if n.get("@type") == "Series"]
+    if len(series) != 1:
+        failed.append("%s renders %d Series nodes" % (rel, len(series)))
+        continue
+    s = series[0]
+    if s.get("name") != "Smoke Series":
+        failed.append("%s Series name is %r" % (rel, s.get("name")))
+    parts = s.get("hasPart") or []
+    positions = [p.get("position") for p in parts]
+    if positions != [1, 2]:
+        failed.append("%s hasPart positions are %r, want [1, 2]" % (rel, positions))
+    if any(not str(p.get("@id", "")).endswith("#article") for p in parts):
+        failed.append("%s has a non-article hasPart id: %r" % (rel, parts))
+    art = [n for n in nodes if n.get("@type") == "Article"]
+    if len(art) != 1:
+        failed.append("%s renders %d Article nodes" % (rel, len(art)))
+        continue
+    got = art[0].get("isPartOfSeries")
+    if got != {"@id": s.get("@id")}:
+        failed.append("%s isPartOfSeries is %r, want the Series node id" % (rel, got))
+if failed:
+    for line in failed:
+        print("FAIL " + line, file=sys.stderr)
+    sys.exit(1)
+print("series nodes carry their members and the article points back")
+PY
+); then
+  pass "series schema ($series_out)"
+else
+  fail 'series schema'
+fi
+
 # 48. article chrome: the hero crops to its configured height instead of
 #     letterboxing, the body keeps the reading measure, related content reuses the
 #     card grid with lazy images, sharing links are centred icon tiles, and
@@ -1448,18 +1515,19 @@ CFG_DEFAULT="$(python3 "$ROOT/scripts/lib/build_config.py")"
 CFG_DIR="$(mktemp -d)"
 mkdir -p "$CFG_DIR/config/_default"
 cat > "$CFG_DIR/config/_default/params.toml" <<'EOF'
-[params.image]
-  ladder = [560, 900]
-  quality = 71
-  [params.image.caps]
-    card = 760
+[params.image.og]
+  width = 1400
+[params.build]
+  pageimageskb = 450
+[params.build.minwidth]
+  illustration = 1500
 EOF
 CFG_SITE="$(python3 "$ROOT/scripts/lib/build_config.py" --site "$CFG_DIR")"
 rm -rf "$CFG_DIR"
-CFG_OWN='^(IMAGE_LADDER|IMAGE_QUALITY|IMAGE_CAP_CARD)='
+CFG_OWN='^(OG_WIDTH|PAGE_IMAGES_KB|MIN_WIDTH_ILLUSTRATION)='
 
-if ( eval "$CFG_SITE" && [ "$IMAGE_LADDER" = '560 900' ] && [ "$IMAGE_QUALITY" -eq 71 ] \
-     && [ "$IMAGE_CAP_CARD" -eq 760 ] && [ "$IMAGE_CAP_HERO" -eq 1920 ] ); then
+if ( eval "$CFG_SITE" && [ "$OG_WIDTH" -eq 1400 ] && [ "$PAGE_IMAGES_KB" -eq 450 ] \
+     && [ "$MIN_WIDTH_ILLUSTRATION" -eq 1500 ] && [ "$MIN_WIDTH_HERO" -eq 1600 ] ); then
   pass 'build_config applies a site override over the theme defaults'
 else
   fail 'build_config applies a site override over the theme defaults'
@@ -1533,6 +1601,33 @@ else
   printf '%s\n' "$EXEC_INLINE" >&2
   fail 'no page ships an executable inline script'
 fi
+
+# 53. A page summary renders as a standfirst, only when the page supplies one.
+#     [article].showSummary defaults to true: a page's own summary is written
+#     for a reader, unlike [list].showSummary which is about cards.
+assert 'section-a/inline/index.html' \
+  '<p class="article__standfirst">Inline illustration summary</p>' \
+  'a page summary renders as a standfirst'
+assert_not 'section-a/flat/index.html' 'article__standfirst' \
+  'a page without a summary ships no standfirst'
+if grep -q 'article__standfirst' "$OUT_NOSUMMARY/section-a/inline/index.html"; then
+  fail '[article].showSummary = false still renders a standfirst'
+else
+  pass '[article].showSummary = false removes the standfirst'
+fi
+
+# 54. An author url turns the byline into a link and reaches the JSON-LD
+#     Person. The theme takes a URL rather than a taxonomy because Hugo
+#     reserves the author key for authorship, so `author = "authors"` under
+#     [taxonomies] is ignored and no term page is ever built.
+assert 'section-a/flat/index.html' \
+  '<a class="article__author" href="/notice/">Flat Author</a>' \
+  'an author url turns the byline into a link'
+assert 'section-a/flat/index.html' \
+  '"author":\{[^}]*"url":"[^"]*notice/"' \
+  'the Person entity carries the author url'
+assert_not 'section-a/inline/index.html' 'article__author' \
+  'a page without an author url keeps a plain-text byline'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

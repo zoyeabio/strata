@@ -2,6 +2,7 @@
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat }}
 {{- $terms := .GetTerms "tags" }}
+{{- $authorURL := .Params.authorurl | default site.Params.author.url }}
 {{- $isArticle := true }}
 {{- with site.Params.mainSections }}{{ $isArticle = in (apply . "lower" ".") (lower $.Section) }}{{ end }}
 {{- $articleParams := site.Params.article }}
@@ -16,6 +17,11 @@
 {{- $dateDay := .Date.Format "2006-01-02" }}
 {{- $modDay := .Lastmod.Format "2006-01-02" }}
 {{- $updatedShown := and $showDateUpdated (not .Lastmod.IsZero) (gt $modDay $dateDay) }}
+{{- $showSummary := false }}
+{{- if isset .Params "showsummary" }}{{ $showSummary = .Params.showsummary }}
+{{- else }}{{ $showSummary = $articleParams.showSummary }}{{ end }}
+{{- $summary := partial "data/summary.html" . }}
+{{- $summaryShown := and $showSummary $summary }}
 <article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -23,6 +29,9 @@
   <header class="article__header">
     {{ partial "page/breadcrumbs.html" . }}
     <h1>{{ .Title | emojify }}</h1>
+    {{- if $summaryShown }}
+    <p class="article__standfirst">{{ $summary }}</p>
+    {{- end }}
     {{- if or $dateShown $updatedShown $terms (and $showAuthor $author) }}
     {{- $sep := false }}
     <p class="article__meta">
@@ -40,7 +49,7 @@
       {{- $sep = true }}
       {{- end }}
       {{- if and $showAuthor $author }}
-      {{- if $sep }} · {{ end }}By {{ $author }}
+      {{- if $sep }} · {{ end }}By {{ with $authorURL }}<a class="article__author" href="{{ . }}">{{ $author }}</a>{{ else }}{{ $author }}{{ end }}
       {{- end }}
     </p>
     {{- end }}

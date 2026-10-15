@@ -1,0 +1,6 @@
+# Environment overlay for the [article].showSummary assertions in
+# scripts/smoke.sh. Flipping it off proves the standfirst is driven by the
+# theme's config rather than by the presence of a summary alone.
+[params]
+[params.article]
+  showSummary = false

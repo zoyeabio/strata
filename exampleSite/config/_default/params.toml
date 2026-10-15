@@ -36,6 +36,7 @@ defaultAppearance = "auto"
 
 [author]
   name = "Strata Studio"
+  url = "/about/"
   links = [{ name = "GitHub", url = "https://example.com/" }]
 
 [taxonomy]

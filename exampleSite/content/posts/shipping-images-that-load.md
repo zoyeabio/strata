@@ -1,9 +1,11 @@
 ---
 title: "Shipping images that load"
 description: "Images are the bottleneck. The fix is not lazy-loading; it is deciding what the image is for before you optimise it."
+summary: "Lazy-loading is the wrong answer to slow pages. The right one is deciding, before you optimise anything, what each image is actually there for."
 date: 2026-05-21
 tags: ["images", "performance"]
 keywords: ["images", "performance", "webp", "responsive"]
+author: "Strata Studio"
 featureimage: "images/features-images.png"
 featureimagealt: "An illustration with generous margins"
 ---
@@ -35,7 +37,7 @@ There are three jobs, and each one has a different answer.
 - **A card image** is a thumbnail. It is 400 to 600 pixels wide and
   nobody is reading it. Serve something small.
 - **An illustration** is something the reader might actually look at.
-  Around 1280 pixels, and a quality that survives a second glance.
+  Start with a 1600-pixel-wide source so it stays clear in the reading column.
 - **A hero** is a band of atmosphere behind text. It does not need to be
   sharp. It needs to be fast, because it is the first thing painted.
 
@@ -55,7 +57,7 @@ paying for the near-duplicates.
 
 ```text
 ladder  480  800  1280  1920
-cap     card 800  illustration 1280  hero 1920
+cap     card 800  illustration 1600  hero 1920
 ```
 
 ## WebP is not the argument

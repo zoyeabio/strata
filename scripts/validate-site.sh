@@ -84,6 +84,16 @@ else
   fail "site is missing [taxonomies] values:$missing_tax — tag links or series nav will vanish silently"
 fi
 
+# Front matter is upstream of everything the build reports. An unknown key, an
+# empty description and a lastmod before date all build cleanly and only show
+# up in the JSON-LD, so the source is linted rather than the output.
+if "$ROOT/scripts/validate-content.sh" "$SITE"
+then
+  pass 'the site front matter is complete and free of unknown keys'
+else
+  fail 'the site front matter is complete and free of unknown keys'
+fi
+
 # A site's own data/sharing.json merges over the theme's, and Hugo's printf
 # does not error on a share URL with the wrong verb count: it appends
 # %!N(EXTRA ...) into the link and the button silently stops working. The

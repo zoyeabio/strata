@@ -175,6 +175,67 @@ else
   cat "$WORK/drafts.stderr" >&2
 fi
 
+mkdir -p "$WORK/image-site"
+if "$ROOT/scripts/place-image.sh" --section journal --post undersized \
+    --file "$ROOT/test/fixture/assets/images/section-a/inline.png" \
+    --role illustration --site "$WORK/image-site" \
+    >"$WORK/place-small.out" 2>&1; then
+  fail 'place-image rejects an undersized illustration source'
+elif grep -q 'at least 1600px wide' "$WORK/place-small.out"; then
+  pass 'place-image rejects an undersized illustration source'
+else
+  fail 'the illustration size failure names the 1600px minimum'
+  cat "$WORK/place-small.out" >&2
+fi
+
+if "$ROOT/scripts/place-image.sh" --section journal --post production \
+    --file "$ROOT/test/fixture/assets/images/section-a/photo-flat.png" \
+    --role illustration --site "$WORK/image-site" \
+    >"$WORK/place-large.out" 2>&1 \
+    && [ -f "$WORK/image-site/assets/images/journal/production/photo-flat.png" ]; then
+  pass 'place-image accepts a production-size illustration source'
+else
+  fail 'place-image accepts a production-size illustration source'
+  cat "$WORK/place-large.out" >&2
+fi
+
+# The theme's own example site is the content contract: it must pass the
+# front matter lint the consuming sites are held to.
+if "$ROOT/scripts/validate-content.sh" "$ROOT/exampleSite"
+then
+  pass 'exampleSite front matter is complete'
+else
+  fail 'exampleSite front matter is complete'
+fi
+
+# A lint that only ever passes is a comment, not a gate. A scratch site carries
+# an unknown key and a lastmod before the date — the pair that publishes
+# dateModified before datePublished into JSON-LD with every gate green.
+mkdir -p "$WORK/bad-site/config/_default" "$WORK/bad-site/content/posts"
+cat >"$WORK/bad-site/config/_default/hugo.toml" <<'TOML'
+[taxonomies]
+  tag = "tags"
+TOML
+cat >"$WORK/bad-site/content/posts/example.md" <<'MD'
+---
+title: "Example"
+date: 2026-01-05
+lastmod: 2025-01-01
+heroStyle: "basic"
+---
+MD
+if "$ROOT/scripts/validate-content.sh" "$WORK/bad-site" >"$WORK/content.out" 2>&1; then
+  fail 'the content lint reports an unknown key and an inverted date'
+else
+  if grep -q 'unknown front matter key' "$WORK/content.out" \
+    && grep -q 'lastmod is not before date' "$WORK/content.out"; then
+    pass 'the content lint reports an unknown key and an inverted date'
+  else
+    fail 'the content lint failure names the bad keys'
+    cat "$WORK/content.out" >&2
+  fi
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   printf 'validate-theme: %s failure(s)\n' "$FAILURES" >&2
   exit 1

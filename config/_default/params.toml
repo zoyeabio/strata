@@ -61,6 +61,10 @@ showBreadcrumbs = false
 showAuthor = false
 showDate = true
 showDateUpdated = true
+# true, unlike [list].showSummary: that one is about cards, where a summary
+# competes with the title. A page's own summary is written for a reader, so a
+# page that supplies one shows it under the h1.
+showSummary = true
 showRelatedContent = false
 relatedContentLimit = 3
 showPagination = true
@@ -68,6 +72,9 @@ sharingLinks = []
 
 [author]
 name = ""
+# The author's own page. Emits the byline link and the JSON-LD Person url;
+# Hugo's authorship is a reserved key, so this is a URL rather than a taxonomy.
+url = ""
 links = []
 
 [taxonomy]
@@ -109,9 +116,8 @@ quality = 78
 
 [image.caps]
 card = 800
-illustration = 1280
+illustration = 1600
 hero = 1920
-og = 1920
 
 # The social preview is generated at a fixed size: 1200x630 is what Facebook,
 # LinkedIn and Google request. scripts/place-image.sh lints the source against
@@ -126,6 +132,6 @@ pageimageskb = 600
 
 [build.minwidth]
 hero = 1600
-illustration = 1280
+illustration = 1600
 card = 1200
 og = 1200

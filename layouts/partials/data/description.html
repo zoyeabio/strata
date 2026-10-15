@@ -13,9 +13,13 @@
             is what lands in a search snippet. On the home page the two collapse
             into "Title — Title", but only for a site that cleared its own
             description, so the trade stays acceptable.
-            .Description is deliberately not consulted either: Hugo fills it from
-            the same `description` front matter key as .Params.description, so it
-            can never win the fallback.
+             .Description is deliberately not consulted either: Hugo fills it from
+             the same `description` front matter key as .Params.description, so it
+             can never win the fallback.
+             summary also feeds data/summary.html, which renders it as the
+             reader-facing standfirst. A page may therefore set description,
+             summary, both, or neither, and when both are set they may differ:
+             one is written for a search snippet, the other for a reader.
   Params:   page (Page, required)
   Outputs:  string (may be empty when the page supplies neither source)
   Called by: head/head.html, head/schema.html, opengraph.html

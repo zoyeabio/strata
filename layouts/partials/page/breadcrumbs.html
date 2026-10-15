@@ -13,6 +13,10 @@
   that whole string as a single crumb. Matched against both the relative and
   the baseURL-prefixed URL, since Hugo resolves a menu URL to one or the other
   depending on how baseURL is set.
+  Deliberately the opposite of head/schema.html, which keeps the real title:
+  here the label is for a reader scanning a trail, there it identifies the
+  entity. Two policies over the same data, not one duplicated, so there is
+  nothing to factor out.
 
   Visibility is the page's own showBreadcrumbs when set (isset, so an explicit
   false wins), otherwise the table matching its Kind: article, list, taxonomy,

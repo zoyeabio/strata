@@ -115,7 +115,9 @@ def expand_srcset(attr):
 # passed. A group contained in another never adds a download either — the hero
 # <img> and the <link rel="preload" imagesrcset> that accelerates it carry the
 # same rungs (R3 checks the preload is such a subset) — so those collapse too.
-IMG_CARRIERS = re.compile(r'<(?:img|link|meta)\b[^>]*>', re.I)
+# Social metadata names files for crawlers but is not downloaded during a
+# page visit, so it belongs to existence/orphan checks, not the page payload.
+IMG_CARRIERS = re.compile(r'<(?:img|link)\b[^>]*>', re.I)
 ATTR_URL = re.compile(r'\b(?:src|href|content)=["\x27]([^"\x27]*)["\x27]', re.I)
 
 
@@ -219,18 +221,20 @@ for t, text in ((t, t.read_text(errors='ignore')) for t in htmls):
             continue
         base = Path(local_path(src.group(1))).name
         ext = Path(local_path(src.group(1))).suffix.lower()
-        if (ext in {'.jpg', '.jpeg', '.png'} and '_hu_' in base
-                and not re.search(r'\bsrcset=["\x27][^"\x27]+["\x27]', tag, re.I)):
+        srcset = re.search(r'\bsrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
+        if ext in {'.jpg', '.jpeg', '.png'} and '_hu_' in base and not srcset:
             bad_imgs.append(f'{t.relative_to(pub)}: no srcset ({src.group(1)})')
+        elif srcset and len(expand_srcset(srcset.group(1))) > 4:
+            bad_imgs.append(f'{t.relative_to(pub)}: more than four srcset candidates ({src.group(1)})')
         alt = re.search(r'\balt=["\x27]([^"\x27]*)["\x27]', tag, re.I)
         if alt is None:
             bad_imgs.append(f'{t.relative_to(pub)}: no alt ({src.group(1)})')
         elif alt.group(1) == '' and 'aria-hidden="true"' not in tag:
             bad_imgs.append(f'{t.relative_to(pub)}: empty alt without aria-hidden ({src.group(1)})')
 if bad_imgs:
-    bad('local images carry srcset and alt', '\n'.join(f'  {b}' for b in bad_imgs))
+    bad('local images carry srcset, alt and at most four candidates', '\n'.join(f'  {b}' for b in bad_imgs))
 else:
-    ok('local images carry srcset and alt')
+    ok('local images carry srcset, alt and at most four candidates')
 
 # R3 preload imagesrcset is a subset of some <img> srcset on the same page
 subset_bad = []

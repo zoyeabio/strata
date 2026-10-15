@@ -1,12 +1,12 @@
 ---
 title: "Strata"
-description: "A content-first Hugo theme for independent sites. One theme, many brands, and no external requests."
+description: "A content-first Hugo theme for independent sites. One theme, many brands, and no implicit external requests."
 robots: "index, follow, max-image-preview:large"
 keywords: ["hugo theme", "responsive images", "dark mode", "json-ld schema"]
 ---
 
 A content-first Hugo theme for independent sites. One theme, many brands,
-every image responsive, and no external requests in the head.
+every image responsive, and no implicit external requests in the head.
 
 This is the theme's own example site. Each page below exists to exercise a
 real feature rather than to sell one, so the content is deliberately
