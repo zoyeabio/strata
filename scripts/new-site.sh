@@ -30,8 +30,7 @@ DOMAIN=""
 OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
-MODULE_VERSION="v0.1.0"
-ORG="zoyeabio"
+MODULE_VERSION="v0.0.0"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -42,7 +41,6 @@ while [ "$#" -gt 0 ]; do
     --accent) ACCENT="$2"; shift 2 ;;
     --sections) SECTIONS="$2"; shift 2 ;;
     --module-version) MODULE_VERSION="$2"; shift 2 ;;
-    --org) ORG="$2"; shift 2 ;;
     *) printf 'ERROR: unknown option %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -91,7 +89,7 @@ enableEmoji = false
   proxy = "direct"
 
   [[module.imports]]
-    path = "github.com/zoyeabio/strata"
+    path = "example.com/strata"
 
 [module.hugoVersion]
   extended = true
@@ -323,13 +321,13 @@ EOF
 # go.mod pins the theme version; the replace keeps local development
 # working before the theme tag exists
 cat > "$OUT/go.mod" <<EOF
-module github.com/${ORG}/${SLUG}
+module example.com/${SLUG}
 
 go 1.22
 
-require github.com/zoyeabio/strata ${MODULE_VERSION}
+require example.com/strata ${MODULE_VERSION}
 
-replace github.com/zoyeabio/strata => $ROOT
+replace example.com/strata => $ROOT
 EOF
 
 # package.json — Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the

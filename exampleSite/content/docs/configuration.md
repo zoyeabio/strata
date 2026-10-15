@@ -229,11 +229,10 @@ accident:
 
 - page front matter `compactSummary` — silently ignored by every
   template; the fixture smoke gate fails on it so it never sneaks back in
-- page front matter `layout` — a Jekyll/zoyclaw leftover (e.g.
+- page front matter `layout` — a Jekyll leftover (e.g.
   `layout: "single"`); Strata has one single layout, so the value is never read
 - page front matter or site `heroStyle` — Strata renders one hero at every
-  level. zoyclaw only honoured it when a `partials/hero/<style>.html` file
-  existed, so `"basic"` was already a silent no-op there
+  level, so the value is never read
 - page front matter `series_order` — series navigation sorts by `weight`; set
   only `weight` and drop `series_order`
 - site `[article] showSummary`, `[article]` / `[term]` `showHero`, and

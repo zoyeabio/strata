@@ -23,14 +23,18 @@ a `replace`:
   proxy = "direct"
 
   [[module.imports]]
-    path = "github.com/zoyeabio/strata"
+    path = "example.com/strata"
 ```
 
 ```go
-require github.com/zoyeabio/strata v0.1.0
+require example.com/strata v0.0.0
 
-replace github.com/zoyeabio/strata => /absolute/path/to/strata
+replace example.com/strata => /absolute/path/to/strata
 ```
+
+The `replace` wins, so the version does not need to exist yet. `example.com`
+is Go's reserved documentation domain, so the path is never fetchable — it is
+a placeholder for wherever you actually host the theme.
 
 Then run:
 
@@ -38,8 +42,9 @@ Then run:
 hugo mod tidy
 ```
 
-Once a release tag exists, remove the `replace` and pin the version with
-`go get github.com/zoyeabio/strata@v0.1.0`.
+Once a release tag exists, replace `example.com/strata` with the published
+module path, remove the `replace`, and pin the version with
+`go get <module-path>@<tag>`.
 
 ## Git clone
 
@@ -105,9 +110,8 @@ use in the page (the bare filename, for a page bundle at
 ## Upgrading
 
 While on the `replace` flow, pull the theme checkout and re-run the
-validators. Once a release tag exists, `hugo mod get -u
-github.com/zoyeabio/strata && hugo mod tidy` pins the new version, then
-rebuild and run the validator.
+validators. Once a release tag exists, `hugo mod get -u <module-path> &&
+hugo mod tidy` pins the new version, then rebuild and run the validator.
 
 Bumping Hugo changes how the stylesheet is compiled. Below 0.161.0 Hugo
 calls the standalone Tailwind binary directly; from 0.161.0 it runs the

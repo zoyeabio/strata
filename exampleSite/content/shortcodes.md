@@ -17,11 +17,11 @@ Images go through the responsive pipeline, so a figure carries a `srcset`
 and a `sizes`. `role` caps the widest variant. Quality is a site-wide
 setting, so one width is never stored twice at two qualities.
 
-{{< figure src="images/diagram-nodes.png" alt="Five connected nodes of varying size" title="A figure, fully annotated" caption="**Caption** accepts *markdown*, as does the attribution." attr="Diagram by Strata Studio" attrlink="https://github.com/zoyeabio" link="/features/" target="_blank" rel="noopener" class="figure--annotated" loading="lazy" role="illustration" >}}
+{{< figure src="images/diagram-nodes.png" alt="Five connected nodes of varying size" title="A figure, fully annotated" caption="**Caption** accepts *markdown*, as does the attribution." attr="Diagram by Strata Studio" attrlink="https://example.com" link="/features/" target="_blank" rel="noopener" class="figure--annotated" loading="lazy" role="illustration" >}}
 
 <pre><code>{{&lt; figure src="images/diagram-nodes.png" alt="Five connected nodes"
   title="A figure, fully annotated" caption="**Markdown** in the caption."
-  attr="Diagram by Strata Studio" attrlink="https://github.com/zoyeabio"
+  attr="Diagram by Strata Studio" attrlink="https://example.com"
   link="/features/" target="_blank" rel="noopener"
   class="figure--annotated" loading="lazy" role="illustration" &gt;}}</code></pre>
 

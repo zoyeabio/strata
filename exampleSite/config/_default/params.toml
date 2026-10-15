@@ -36,7 +36,7 @@ defaultAppearance = "auto"
 
 [author]
   name = "Strata Studio"
-  links = [{ name = "GitHub", url = "https://github.com/zoyeabio/" }]
+  links = [{ name = "GitHub", url = "https://example.com/" }]
 
 [taxonomy]
   showBreadcrumbs = true

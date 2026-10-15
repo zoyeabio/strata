@@ -1,12 +1,12 @@
 name = "Strata"
 license = "MIT"
-licenselink = "https://github.com/zoyeabio/strata/blob/main/LICENSE"
+licenselink = "https://example.com/strata/blob/main/LICENSE"
 description = "A content-first Hugo theme for independent sites: one theme, many brands."
-homepage = "https://github.com/zoyeabio/strata"
+homepage = "https://example.com/strata"
 tags = ["blog", "responsive", "dark mode", "clean", "minimal", "personal", "cms"]
 features = ["responsive images", "dark mode", "taxonomy navigation", "json-ld schema", "zero external requests"]
 min_version = "0.161.0"
 
 [author]
   name = "ZH Gai"
-  homepage = "https://github.com/zoyeabio"
+  homepage = "https://example.com"

@@ -35,7 +35,7 @@ As a Hugo Module, in your site's `config/_default/hugo.toml`:
   proxy = "direct"
 
   [[module.imports]]
-    path = "github.com/zoyeabio/strata"
+    path = "example.com/strata"
 ```
 
 Then run `hugo mod tidy`.

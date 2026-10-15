@@ -1,0 +1,13 @@
+{{- /*
+  One column of a layout/multi-col grid.
+
+  The three col-* shortcodes exist only so an author can write which side of
+  the grid they mean; the rendered output is identical, so the markup lives
+  here and the shortcodes stay one line each.
+
+  Param: . (string) — the column's markdown, markdownified rather than
+  trusted HTML, so nested shortcodes do not work inside a column.
+
+  Called by: layout/col-left, layout/col-mid, layout/col-right
+*/ -}}
+<div class="mcol">{{ . | markdownify }}</div>

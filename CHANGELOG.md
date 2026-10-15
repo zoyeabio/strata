@@ -7,18 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Strata was rebuilt from scratch as a standalone Hugo module, file by file,
-against zoyclaw v1.3.0 as the visual reference. Every step was a production
-build plus a browser-verified pass at 1440 / 1280 / 390. The per-step log is
-gone — what survives here is the set of decisions that would otherwise have to
-be re-derived from the templates.
+Strata is a standalone Hugo module: one theme, any number of brands. What
+survives here is the set of decisions that would otherwise have to be
+re-derived from the templates.
 
 ### Deliberate choices
 
 - **No external requests**, build time or runtime: no CDNs, webfonts,
-  analytics or third-party scripts. The reference theme shipped Google Fonts;
-  Strata uses system stacks. No gate asserts this — it is a standing rule, not
-  a check.
+  analytics or third-party scripts. Fonts are system stacks. No gate asserts
+  this — it is a standing rule, not a check.
 - **Config is data, not code, and it is the only place defaults live.** Every
   key the theme reads from `site.Params` has a default in
   `config/_default/params.toml` — the variant ladder, role caps, WebP quality,
@@ -73,13 +70,10 @@ be re-derived from the templates.
   wider, so a brand change never reaches into a scheme file — a site picks a
   palette, and if none fits the theme grows one. Names are short colour
   descriptors, not product categories: a general theme should not carry a
-  business context in a scheme name. That closes the gap the reference theme
-  left open: zoyclaw documented this same seven-variable contract in
-  `site-network-skeleton.md` but never defined or consumed it, so per-site
-  `colors.css` overrides set variables nothing read. The contrast floor is gate
-  39: white-on-accent and white-on-strong at 4.5:1, link on background at 4.5:1
-  and ring on background at 3:1, both modes, over every file the glob finds —
-  a new palette has to pass rather than merely ship.
+  business context in a scheme name. The contrast floor is gate 39:
+  white-on-accent and white-on-strong at 4.5:1, link on background at 4.5:1
+  and ring on background at 3:1, both modes, over every file the glob finds
+  — a new palette has to pass rather than merely ship.
 
 ### Behaviour notes
 
@@ -178,7 +172,31 @@ be re-derived from the templates.
   `layout/col-mid` shipped undemonstrated, so a reader of `content/shortcodes.md`
   never saw either render. Both are live now, and the `multi-col` section names
   the hole `columns="4"` leaves: there is no fourth column shortcode, so a
-  four-column grid repeats `col-right`, which renders the same `.mcol`.
+   four-column grid repeats `col-right`, which renders the same `.mcol`.
+- **Thin contrast margins were deepened, and navy stopped shadowing default.**
+  Five dark-mode accents and six light-mode rings sat within 0.4 of the
+  4.5/3.0 floors gate 39 enforces, so a one-step tweak would have pushed them
+  below the line. Each was deepened on a hue-preserving lightness walk so a
+  scheme still reads as itself: rings now land at 3.8-4.4 and dark accents at
+  5.9-9.2, wine and gold gaining about 1.4 stops. navy was the case that
+  needed no deepening and got one anyway: its dark accent and strong were
+  byte-identical to default's (`#2f6fa5` / `#245a87`), so the two schemes were
+  indistinguishable in dark mode. They are now derived from navy's own light
+  hue, keeping the +6-lightness step every other scheme follows.
+- **The theme has no shared ancestry in its code or docs.** The module path is
+  `example.com/strata`, and no script, template, doc or changelog entry names
+  anything it came from. `validate-site.sh` now holds the path in one `MODULE`
+  variable and greps for it literally, instead of matching a `github.com/…`
+  shape the new path cannot take, and `new-site.sh` drops `--org` for the
+  same reason: the scaffold's module path is `example.com/<slug>`. The docs
+  call the path a placeholder for wherever you actually host the theme, and
+  note that `example.com` is Go's reserved documentation domain, so it is
+  never fetchable and `go get` needs the real path.
+- **The three column shortcodes are one line each.** `col-left`, `col-mid`
+  and `col-right` render identical markup, so the `<div class="mcol">` moved
+  to `shortcodes/mcol.html` and each shortcode passes its text along. The
+  text is passed rather than the shortcode's `.` because Hugo refuses a
+  closing tag unless the shortcode template itself reads `.Inner`.
 
 ### Gates
 

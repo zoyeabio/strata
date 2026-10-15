@@ -11,6 +11,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SITE="${1:?Usage: ./scripts/validate-site.sh /path/to/site}"
+MODULE="example.com/strata"
 if [ ! -d "$SITE" ]; then
   printf 'ERROR: no such site directory: %s\n' "$SITE" >&2
   exit 2
@@ -36,18 +37,18 @@ trap 'rm -rf "$WORK"' EXIT
 # Hugo's default scaffold keeps config at the repository root instead of in
 # config/, so both places are searched; a glob with no match is skipped by
 # grep rather than aborting the check.
-found="$(grep -rhoE 'github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' \
+found="$(grep -rhoE '"[^"]*\.[a-z]{2,}/[^"]*"' \
   "$SITE/config" "$SITE"/hugo*.toml "$SITE"/config*.toml 2>/dev/null | sort -u || true)"
-if ! printf '%s\n' "$found" | grep -q 'zoyeabio/strata'; then
-  have="$(printf '%s\n' "$found" | grep -v 'zoyeabio/strata' | paste -sd, - || true)"
-  printf 'ERROR: %s does not import github.com/zoyeabio/strata\n' "$SITE" >&2
+if ! printf '%s\n' "$found" | grep -qF "$MODULE"; then
+  have="$(printf '%s\n' "$found" | grep -vF "$MODULE" | paste -sd, - || true)"
+  printf 'ERROR: %s does not import %s\n' "$SITE" "$MODULE" >&2
   printf '  searched: config/, hugo*.toml, config*.toml\n' >&2
   printf '  found: %s\n' "${have:-no module imports}" >&2
   printf 'these rules judge strata output; migrate the site first\n' >&2
   exit 3
 fi
 
-if ! HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \
+if ! HUGO_MODULE_REPLACEMENTS="$MODULE -> $ROOT" \
     HUGO_CACHEDIR="$WORK/cache" \
     hugo --source "$SITE" --environment production \
       --destination "$WORK/public" 2>"$WORK/build.stderr" >/dev/null; then
@@ -69,7 +70,7 @@ fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 # read the "tags" and "series" taxonomies. Hugo does not inherit a theme's
 # [taxonomies], so the host site must declare them; a missing one does not
 # fail the build, it just silently drops tag links or series navigation.
-cfg="$(HUGO_MODULE_REPLACEMENTS="github.com/zoyeabio/strata -> $ROOT" \
+cfg="$(HUGO_MODULE_REPLACEMENTS="$MODULE -> $ROOT" \
   HUGO_CACHEDIR="$WORK/cache" hugo config --source "$SITE" 2>/dev/null \
   | tr -d "'" | awk '/^\[taxonomies\]/{f=1;next} /^\[/{f=0} f' | sed 's/^[[:space:]]*//' \
   | sed -n 's/^[^=]*=[[:space:]]*//p')"

@@ -1008,7 +1008,9 @@ fi
 
 # 39. scheme contrast: every colour scheme keeps white-on-accent/strong
 #     at 4.5:1 and ring at 3:1 in both modes (a pale dark-mode accent once
-#     shipped below 2:1 on real buttons)
+#     shipped below 2:1 on real buttons). The shipped values sit well above
+#     these floors - dark accents 5.9-9.2, rings 3.8-4.4 - so a palette
+#     tweak has headroom before it reaches the gate.
 if contrast_out=$(python3 - "$ROOT" <<'PY'
 import re, sys, pathlib
 root = pathlib.Path(sys.argv[1])

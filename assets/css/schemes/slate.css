@@ -5,11 +5,11 @@
   --site-surface-tint: #f4f7fa;
   --site-text-strong: #17212b;
   --site-link: #3d5877;
-  --site-ring: #758fa9;
+  --site-ring: #6885a1;
 }
 
 :root.dark {
-  --site-accent: #4a6a8c;
+  --site-accent: #486789;
   --site-accent-strong: #3a5573;
   --site-accent-soft: #1b2632;
   --site-surface-tint: #171e26;

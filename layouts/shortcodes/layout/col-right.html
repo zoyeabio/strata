@@ -1,7 +1,10 @@
 {{- /*
-  Last column of a layout/multi-col grid. Inner is markdown (source
-  behaviour kept).
+  Last column of a layout/multi-col grid.
+
+  All three col-* shortcodes render the same .mcol, the difference being the
+  side they name, so the markup lives in partials/shortcodes/mcol.html and
+  each shortcode stays one line.
 
   Called by: content markdown, inside layout/multi-col
 */ -}}
-<div class="mcol">{{ .Inner | markdownify }}</div>
+{{- partial "shortcodes/mcol.html" .Inner -}}
