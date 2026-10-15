@@ -66,22 +66,53 @@ FAILURES=0
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
-# The theme's taxonomy contract: the header tag links and the series nav
-# read the "tags" and "series" taxonomies. Hugo does not inherit a theme's
-# [taxonomies], so the host site must declare them; a missing one does not
-# fail the build, it just silently drops tag links or series navigation.
-cfg="$(HUGO_MODULE_REPLACEMENTS="$MODULE -> $ROOT" \
-  HUGO_CACHEDIR="$WORK/cache" hugo config --source "$SITE" 2>/dev/null \
-  | tr -d "'" | awk '/^\[taxonomies\]/{f=1;next} /^\[/{f=0} f' | sed 's/^[[:space:]]*//' \
-  | sed -n 's/^[^=]*=[[:space:]]*//p')"
-missing_tax=""
-for plural in tags series; do
-  printf '%s\n' "$cfg" | grep -qx "$plural" || missing_tax="$missing_tax $plural"
-done
-if [ -z "$missing_tax" ]; then
-  pass 'site declares the tags and series taxonomies'
+# Taxonomies are site-owned. A content site can declare tags/series; a compact
+# brochure site can explicitly disable them with an empty [taxonomies] table.
+# Requiring the table to exist avoids Hugo's implicit tags/categories defaults.
+if taxonomy_mode=$(python3 - "$ROOT" "$SITE" <<'PY'
+import pathlib
+import sys
+
+theme_root = pathlib.Path(sys.argv[1])
+site_root = pathlib.Path(sys.argv[2])
+sys.path.insert(0, str(theme_root / "scripts" / "lib"))
+from build_config import _load_config, _toml_files
+
+seen = False
+taxonomies = {}
+disabled = set()
+for path in _toml_files(site_root):
+    data = _load_config(path)
+    if "taxonomies" in data:
+        seen = True
+        taxonomies = data["taxonomies"] or {}
+    if "disableKinds" in data or "disablekinds" in data:
+        values = data.get("disableKinds", data.get("disablekinds")) or []
+        disabled = {str(value).lower() for value in values}
+
+if {"taxonomy", "term"} <= disabled:
+    print("site explicitly disables taxonomy and term pages")
+elif not seen:
+    print("site must declare [taxonomies] or an empty [taxonomies] table; "
+          "otherwise Hugo enables tags and categories implicitly")
+    sys.exit(1)
+elif not taxonomies:
+    print("site explicitly disables taxonomies with an empty [taxonomies] table")
+else:
+    expected = {"tag": "tags", "series": "series"}
+    wrong = [f"{key}={taxonomies[key]!r} (want {plural!r})"
+             for key, plural in expected.items()
+             if key in taxonomies and str(taxonomies[key]) != plural]
+    if wrong:
+        print("unsupported Strata taxonomy mapping: " + ", ".join(wrong))
+        sys.exit(1)
+    active = [plural for key, plural in expected.items() if key in taxonomies]
+    print("site enables " + (" and ".join(active) if active else "custom taxonomies"))
+PY
+); then
+  pass "$taxonomy_mode"
 else
-  fail "site is missing [taxonomies] values:$missing_tax — tag links or series nav will vanish silently"
+  fail "$taxonomy_mode"
 fi
 
 # Front matter is upstream of everything the build reports. An unknown key, an

@@ -2,8 +2,9 @@ baseURL = "https://example.com/"
 enableRobotsTXT = true
 ignoreLogs = ['warning-goldmark-raw-html']
 
-[minify.tdewolff.html]
-  keepQuotes = true
+[[cascade]]
+  [cascade.build]
+    publishResources = false
 
 # 7 posts over a 5-per-page pager gives two pages, so the demo exercises
 # pagination rather than a single flat list.

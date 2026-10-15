@@ -45,14 +45,23 @@ Then run `hugo mod tidy`.
 Alternatively, clone this repository into `themes/strata` and set
 `theme = "strata"`.
 
-Your site must declare the theme's taxonomy contract (Hugo does not inherit
-this from the theme — see [the installation docs](exampleSite/content/docs/installation.md)):
+Taxonomies are a site-level choice because Hugo does not inherit them from a
+theme. Enable Strata's tag and series features explicitly:
 
 ```toml
 [taxonomies]
   series = "series"
   tag = "tags"
 ```
+
+Or explicitly disable taxonomy pages for a compact site:
+
+```toml
+[taxonomies]
+```
+
+Do not omit the table: Hugo then enables its implicit `tags` and `categories`
+taxonomies. See the [installation docs](exampleSite/content/docs/installation.md).
 
 ## Example site
 

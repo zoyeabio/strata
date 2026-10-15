@@ -1,7 +1,8 @@
 enableRobotsTXT = true
 
-[minify.tdewolff.html]
-  keepQuotes = true
+[[cascade]]
+  [cascade.build]
+    publishResources = false
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]

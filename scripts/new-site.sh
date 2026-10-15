@@ -85,8 +85,9 @@ enableRobotsTXT = true
 summaryLength = 30
 enableEmoji = false
 
-[minify.tdewolff.html]
-  keepQuotes = true
+[[cascade]]
+  [cascade.build]
+    publishResources = false
 
 [module]
   proxy = "direct"

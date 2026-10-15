@@ -86,9 +86,13 @@ re-derived from the templates.
   gate reports total files, HTML, images and output size, then fails if role
   reuse or another transform expands that set beyond five files.
 - **The output gate judges the deployable build.** Site and fixture validation
-  now run `hugo --minify`; generated sites retain HTML attribute quotes so the
-  same canonical, schema, link and image checks operate on the exact artifact
-  that is published.
+  run `hugo --minify`; the parser accepts quoted and standards-compliant
+  unquoted attributes, so canonical, schema, link and image checks need no
+  site-specific minifier setting.
+- **Unused bundle originals do not ship.** Generated sites set
+  `cascade.build.publishResources = false`; resources touched by the image
+  pipeline still publish, while source JPEG/PNG files do not sit beside their
+  responsive WebP transforms and double the image payload.
 - **Top-level `summary` satisfies the article metadata contract.** The content
   lint now matches the templates and accepts it when `description` is absent;
   generated site archetypes expose the recommended SEO fields up front.
@@ -121,11 +125,11 @@ re-derived from the templates.
   theme's string instead of the site's, in `name=description`, `og:description`
   and `twitter:description`. Only `isoCode` stays in the language file, because
   an ISO code belongs with the language it names.
-- **The taxonomy contract is enforced at validation, not declared.** Hugo does
-  not inherit a theme's `[taxonomies]`, so a theme `hugo.toml` declaring them
-  would be read by nobody. `validate-site.sh` asserts the host site declares
-  `tags` and `series`; tag and series links resolve through `GetTerms`, so a
-  tag with no built term page renders no link instead of a dead one.
+- **Taxonomies are explicit but optional.** Hugo does not inherit a theme's
+  `[taxonomies]`, so the site either enables Strata's `tags`/`series` features
+  or supplies an empty table to disable Hugo's implicit taxonomies. The site
+  gate accepts both modes, rejects an omitted table and catches mappings that
+  the theme's `GetTerms` calls cannot resolve.
 - **Hugo 0.161.0+ compiles the stylesheet through node.** Hugo dropped the
   standalone Tailwind binary in 0.161.0, so the theme ships a `package.json`
   naming the four Tailwind packages and `scripts/new-site.sh` writes one into

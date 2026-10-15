@@ -69,6 +69,30 @@ A source reused across roles shares those transforms. A feature image may add
 one fixed 1200×630 social JPEG, so the build gate allows no more than five
 derived files per source in total.
 
+### Why unused originals stay out
+
+Hugo publishes every page-bundle resource by default. Processing a 1600px JPEG
+into responsive WebP files does not replace that source: without an explicit
+build rule, `public/` receives both the unused JPEG and the WebP ladder. A
+19-page production migration measured about 8.4MB of images in that state;
+suppressing automatic source publication reduced it to about 4.4MB without
+changing any image rendered by a page.
+
+The site-level rule is:
+
+```toml
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+```
+
+This is not another compression pass. It tells Hugo not to copy bundle files
+merely because they exist. Accessing a resource through Strata's image pipeline
+still publishes its responsive transforms; SVG, GIF, animated WebP and any
+other directly referenced original still publish normally. The scaffold and
+example config include the rule, and the no-orphan build gate catches a source
+that starts leaking into output again.
+
 SVG, GIF and animated WebP bypass processing entirely (the pipeline would
 flatten animations to frame one). `disableImageOptimization = true` returns
 the original file for every role.

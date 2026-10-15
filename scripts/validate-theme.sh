@@ -272,7 +272,7 @@ import tomllib
 root = pathlib.Path(sys.argv[1])
 with (root / "config/_default/hugo.toml").open("rb") as fh:
     config = tomllib.load(fh)
-assert config["minify"]["tdewolff"]["html"]["keepQuotes"] is True
+assert config["cascade"][0]["build"]["publishResources"] is False
 
 front = (root / "archetypes/default/index.md").read_text()
 keys = ("title:", "description:", "summary:", "keywords:", "author:",
@@ -281,9 +281,9 @@ keys = ("title:", "description:", "summary:", "keywords:", "author:",
 assert all(key in front for key in keys)
 PY
 then
-  pass 'new sites retain auditable minified HTML and the article metadata scaffold'
+  pass 'new sites suppress unused bundle originals and carry the article metadata scaffold'
 else
-  fail 'new sites retain auditable minified HTML and the article metadata scaffold'
+  fail 'new sites suppress unused bundle originals and carry the article metadata scaffold'
   cat "$WORK/scaffold.out" "$WORK/scaffold.stderr" >&2
 fi
 

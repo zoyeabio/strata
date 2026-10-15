@@ -53,18 +53,22 @@ The image and build thresholds get their own table because the build scripts and
 same order Hugo does, then layers your site's config over it — so a threshold
 you change in config is the threshold the gate checks.
 
-The production command is `hugo --minify`. Keep HTML attribute quotes in the
-site's `hugo.toml` so `validate-site.sh` audits the exact deployable artifact,
-not a less-compressed surrogate:
+The production command is `hugo --minify`. `validate-site.sh` audits that exact
+artifact and accepts both quoted attributes and Hugo's smaller, unquoted
+minifier output. No HTML-minifier override is required.
+
+Disable automatic publication of unused page-bundle originals in the site's
+`hugo.toml`:
 
 ```toml
-[minify.tdewolff.html]
-  keepQuotes = true
+[[cascade]]
+  [cascade.build]
+    publishResources = false
 ```
 
-`new-site.sh`, the example site and the test fixture already carry this setting.
-It changes markup bytes only; image variants and image compression are
-unaffected.
+Referenced resources and their responsive transforms still publish. This only
+prevents an unused source JPEG or PNG from travelling beside its WebP ladder.
+`new-site.sh`, the example site and the test fixture carry this setting.
 
 ## Site params (`params.toml`)
 
@@ -112,6 +116,10 @@ unaffected.
 | `taxonomy.cardView` | `false` | Card vs. row on the taxonomy overview (`/tags/`). False here and true in `[list]`: `/tags/` lists terms, not articles, so it starts as a plain row list |
 | `taxonomy.showTermCount` | `true` | Article count beside each term link on the taxonomy overview |
 | `term.cardView` / `term.orderByWeight` / `term.showSummary` | `false` | The same three defaults for a taxonomy term page (`/tags/x/`) |
+
+The `taxonomy` and `term` parameter tables only style taxonomy pages; they do
+not create them. Site-level `[taxonomies]` controls whether Hugo builds those
+pages. Use an empty `[taxonomies]` table when a site intentionally has none.
 
 ## Navigation (`menus.en.toml`)
 

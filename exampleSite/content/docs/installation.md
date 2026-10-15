@@ -50,11 +50,10 @@ module path, remove the `replace`, and pin the version with
 
 Clone this repository into `themes/strata` and set `theme = "strata"`.
 
-## Taxonomy contract (required)
+## Taxonomies
 
 Strata resolves article tag links and series navigation through Hugo's
-`GetTerms`. That reads the site's taxonomy configuration, so the site must
-declare both taxonomies:
+`GetTerms`. A content site enables those features explicitly:
 
 ```toml
 [taxonomies]
@@ -62,10 +61,20 @@ declare both taxonomies:
   tag = "tags"
 ```
 
-Hugo does **not** inherit `[taxonomies]` from a theme, and a missing
-declaration does not fail the build — tag links or the series nav simply
-stop appearing. `scripts/validate-site.sh` fails when either entry is
-missing.
+For a compact site that needs neither feature, disable Hugo's implicit
+taxonomies with an empty table:
+
+```toml
+[taxonomies]
+```
+
+Hugo does **not** inherit this table from a theme. Omitting it is different
+from leaving it empty: omission enables Hugo's default `tags` and `categories`.
+`scripts/validate-site.sh` accepts the enabled and explicitly disabled modes,
+and rejects an omitted table or a `tag`/`series` mapping Strata cannot resolve.
+
+`disableKinds = ["taxonomy", "term"]` also suppresses those output kinds, but
+the empty table is clearer when the site does not use taxonomy data at all.
 
 ## New site from the scaffold
 
@@ -78,7 +87,7 @@ missing.
 ```
 
 The scaffold writes the minimal site layer the theme consumes: config with
-the taxonomy contract, sections and menus, archetype, content skeleton,
+tags and series enabled, sections and menus, archetype, content skeleton,
 image directories, static files, `go.mod`, `.gitignore` and a site README.
 Place images with:
 

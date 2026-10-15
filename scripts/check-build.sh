@@ -65,12 +65,44 @@ pub = Path(sys.argv[1])
 TEXT_EXT = {'.html', '.xml', '.json', '.css', '.txt', '.webmanifest'}
 IMG_EXT = {'.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.avif', '.ico'}
 FAVICON_RE = re.compile(r'(favicon|apple-touch-icon|android-chrome|safari-pinned-tab|mstile|browserconfig)', re.I)
+ATTR_RE = re.compile(
+    r'''(?<![\w:-])([:\w-]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>\x60]+))?''',
+    re.I,
+)
 # [params.build.pageimageskb] from config, via scripts/lib/build_config.py
 PAGE_BUDGET = int(os.environ.get('PAGE_IMAGES_KB', 600)) * 1024
 MAX_SRCSET_CANDIDATES = 4
 MAX_DERIVATIVES_PER_SOURCE = MAX_SRCSET_CANDIDATES + 1
 
 problems = []
+
+
+def attrs_of(tag):
+    """HTML attributes from quoted or minifier-safe unquoted markup."""
+    body = re.sub(r'^<\s*/?\s*[\w:-]+', '', tag, count=1)
+    attrs = {}
+    for match in ATTR_RE.finditer(body):
+        value = match.group(2)
+        if value and value[:1] in {'"', "'"}:
+            value = value[1:-1]
+        attrs[match.group(1).lower()] = value
+    return attrs
+
+
+def tags_of(text, name):
+    return re.findall(rf'<{name}\b[^>]*>', text, re.I)
+
+
+def meta_content(text, attr, value):
+    for tag in tags_of(text, 'meta'):
+        attrs = attrs_of(tag)
+        if attrs.get(attr) == value:
+            return attrs.get('content')
+    return None
+
+
+def is_refresh(text):
+    return meta_content(text, 'http-equiv', 'refresh') is not None
 
 
 def ok(label):
@@ -120,13 +152,13 @@ def expand_srcset(attr):
 # Social metadata names files for crawlers but is not downloaded during a
 # page visit, so it belongs to existence/orphan checks, not the page payload.
 IMG_CARRIERS = re.compile(r'<(?:img|link)\b[^>]*>', re.I)
-ATTR_URL = re.compile(r'\b(?:src|href|content)=["\x27]([^"\x27]*)["\x27]', re.I)
-
-
 def groups_for(tag):
     """The candidate sets one element can download."""
-    ladders = [expand_srcset(a) for a in srcset_attr.findall(tag)]
-    singles = [m for m in ATTR_URL.findall(tag) if m.strip()]
+    attrs = attrs_of(tag)
+    ladders = [expand_srcset(attrs[name]) for name in ('srcset', 'imagesrcset')
+               if attrs.get(name)]
+    singles = [attrs[name] for name in ('src', 'href', 'content')
+               if attrs.get(name)]
     if ladders:
         ladder = set()
         for cand in ladders:
@@ -156,13 +188,22 @@ htmls = [p for p in files if p.suffix == '.html']
 print(f'info build output: {len(files)} files, {len(htmls)} HTML, '
       f'{len(images)} images, {sum(p.stat().st_size for p in files) // 1024}KB total')
 
-src_attr = re.compile(r'\b(?:src|href|content|url)=["\x27]([^"\x27]+)["\x27]', re.I)
-srcset_attr = re.compile(r'\b(?:srcset|imagesrcset)=["\x27]([^"\x27]+)["\x27]', re.I)
+src_attr = re.compile(r'''\b(?:src|href|content|url)\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>\x60]+)''', re.I)
+srcset_attr = re.compile(r'''\b(?:srcset|imagesrcset)\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>\x60]+)''', re.I)
 css_url = re.compile(r'url\(["\x27]?([^"\x27)]+)["\x27]?\)')
 json_url = re.compile(r':"((?:https?://)[^"]+)"')
 
 referenced = set()
 per_page = {}
+
+
+def attr_tokens(pattern, text):
+    values = []
+    for token in pattern.findall(text):
+        if token[:1] in {'"', "'"}:
+            token = token[1:-1]
+        values.append(token)
+    return values
 
 # Site host from the home canonical: only same-host absolute URLs resolve
 # into the output tree; anything else (ad loaders, verification files) is
@@ -170,10 +211,11 @@ per_page = {}
 site_host = ''
 home_page = pub / 'index.html'
 if home_page.is_file():
-    m = re.search(r'rel=["\x27]canonical["\x27]\s+href=["\x27]([^"\x27]*)',
-                  home_page.read_text(errors='ignore'))
-    if m:
-        hm = re.match(r'^https?://([^/]+)', m.group(1))
+    home_text = home_page.read_text(errors='ignore')
+    canonical = next((attrs_of(tag).get('href') for tag in tags_of(home_text, 'link')
+                      if attrs_of(tag).get('rel') == 'canonical'), None)
+    if canonical:
+        hm = re.match(r'^https?://([^/]+)', canonical)
         if hm:
             site_host = hm.group(1).lower()
 
@@ -190,9 +232,9 @@ for t in texts:
     text = t.read_text(errors='ignore')
     urls = set()
     dl = []
-    for attr in srcset_attr.findall(text):
+    for attr in attr_tokens(srcset_attr, text):
         urls |= expand_srcset(attr)
-    for m in src_attr.findall(text):
+    for m in attr_tokens(src_attr, text):
         urls.add(m.strip().split()[0] if m.strip() else m)
     for m in css_url.findall(text):
         urls.add(m)
@@ -219,22 +261,22 @@ else:
 #    through with their original names and legitimately have no srcset.
 bad_imgs = []
 for t, text in ((t, t.read_text(errors='ignore')) for t in htmls):
-    for tag in re.findall(r'<img\b[^>]*>', text, re.I):
-        src = re.search(r'\bsrc=["\x27]([^"\x27]*)["\x27]', tag, re.I)
-        if not src or not local_path(src.group(1)):
+    for tag in tags_of(text, 'img'):
+        attrs = attrs_of(tag)
+        src = attrs.get('src')
+        if not src or not local_path(src):
             continue
-        base = Path(local_path(src.group(1))).name
-        ext = Path(local_path(src.group(1))).suffix.lower()
-        srcset = re.search(r'\bsrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
+        base = Path(local_path(src)).name
+        ext = Path(local_path(src)).suffix.lower()
+        srcset = attrs.get('srcset')
         if ext in {'.jpg', '.jpeg', '.png'} and '_hu_' in base and not srcset:
-            bad_imgs.append(f'{t.relative_to(pub)}: no srcset ({src.group(1)})')
-        elif srcset and len(expand_srcset(srcset.group(1))) > MAX_SRCSET_CANDIDATES:
-            bad_imgs.append(f'{t.relative_to(pub)}: more than four srcset candidates ({src.group(1)})')
-        alt = re.search(r'\balt=["\x27]([^"\x27]*)["\x27]', tag, re.I)
-        if alt is None:
-            bad_imgs.append(f'{t.relative_to(pub)}: no alt ({src.group(1)})')
-        elif alt.group(1) == '' and 'aria-hidden="true"' not in tag:
-            bad_imgs.append(f'{t.relative_to(pub)}: empty alt without aria-hidden ({src.group(1)})')
+            bad_imgs.append(f'{t.relative_to(pub)}: no srcset ({src})')
+        elif srcset and len(expand_srcset(srcset)) > MAX_SRCSET_CANDIDATES:
+            bad_imgs.append(f'{t.relative_to(pub)}: more than four srcset candidates ({src})')
+        if 'alt' not in attrs:
+            bad_imgs.append(f'{t.relative_to(pub)}: no alt ({src})')
+        elif attrs['alt'] == '' and attrs.get('aria-hidden') != 'true':
+            bad_imgs.append(f'{t.relative_to(pub)}: empty alt without aria-hidden ({src})')
 if bad_imgs:
     bad('local images carry srcset, alt and at most four candidates', '\n'.join(f'  {b}' for b in bad_imgs))
 else:
@@ -244,17 +286,18 @@ else:
 subset_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
-    preloads = re.findall(r'<link\b[^>]*rel=["\x27]preload["\x27][^>]*>', text, re.I)
+    preloads = [tag for tag in tags_of(text, 'link')
+                if attrs_of(tag).get('rel') == 'preload']
     img_sets = []
-    for tag in re.findall(r'<img\b[^>]*>', text, re.I):
-        m = re.search(r'\bsrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
-        if m:
-            img_sets.append(expand_srcset(m.group(1)))
+    for tag in tags_of(text, 'img'):
+        srcset = attrs_of(tag).get('srcset')
+        if srcset:
+            img_sets.append(expand_srcset(srcset))
     for tag in preloads:
-        m = re.search(r'\bimagesrcset=["\x27]([^"\x27]+)["\x27]', tag, re.I)
-        if not m:
+        imagesrcset = attrs_of(tag).get('imagesrcset')
+        if not imagesrcset:
             continue
-        urls = {local_path(u) for u in expand_srcset(m.group(1))}
+        urls = {local_path(u) for u in expand_srcset(imagesrcset)}
         if not any(urls <= {local_path(u) for u in s} for s in img_sets):
             subset_bad.append(str(t.relative_to(pub)))
 if subset_bad:
@@ -318,10 +361,11 @@ else:
 canon_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
-    m = re.search(r'<link\b[^>]*rel=["\x27]canonical["\x27][^>]*href=["\x27]([^"\x27]+)["\x27]', text, re.I)
+    canonical = next((attrs_of(tag).get('href') for tag in tags_of(text, 'link')
+                      if attrs_of(tag).get('rel') == 'canonical'), None)
     if t.name == '404.html':
         continue
-    if not m:
+    if not canonical:
         canon_bad.append(f'{t.relative_to(pub)}: no canonical')
         continue
     rel = t.relative_to(pub)
@@ -335,7 +379,7 @@ for t in htmls:
     # permalink — the canonical rightly points at the base. For page 2+
     # hugo canonicalizes .Permalink to the listing base by design, which
     # keeps pagination from duplicating content in search engines.
-    got = local_path(m.group(1))
+    got = local_path(canonical)
     base_want = re.sub(r'/page/\d+/', '/', want, count=1)
     base_got = re.sub(r'/page/\d+/', '/', got, count=1)
     if got != want and base_got != base_want:
@@ -351,10 +395,14 @@ schema_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
     # /page/1/ outputs are meta-refresh stubs pointing at the base URL
-    if 'http-equiv="refresh"' in text:
+    if is_refresh(text):
         continue
     types = set()
-    for blob in re.findall(r'application/ld\+json["\x27][^>]*>([^<]+)', text):
+    scripts = re.findall(r'(<script\b[^>]*>)(.*?)</script\s*>', text,
+                         re.I | re.S)
+    for tag, blob in scripts:
+        if attrs_of(tag).get('type') != 'application/ld+json':
+            continue
         try:
             data = json.loads(blob)
         except json.JSONDecodeError:
@@ -366,14 +414,14 @@ for t in htmls:
                 types.add(node['@type'])
     is_home = t.relative_to(pub).as_posix() == 'index.html'
     is_404 = t.name == '404.html'
-    og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
+    og = meta_content(text, 'property', 'og:type')
     if is_home and 'WebSite' not in types:
         schema_bad.append(f'{t.relative_to(pub)}: home lacks WebSite')
     if not is_404 and 'WebPage' not in types:
         schema_bad.append(f'{t.relative_to(pub)}: lacks WebPage')
-    if og and og.group(1) == 'article' and 'Article' not in types:
+    if og == 'article' and 'Article' not in types:
         schema_bad.append(f'{t.relative_to(pub)}: og:type=article but no Article')
-    if og and og.group(1) == 'website' and 'Article' in types:
+    if og == 'website' and 'Article' in types:
         schema_bad.append(f'{t.relative_to(pub)}: og:type=website but Article present')
 if schema_bad:
     bad('schema graph matches the page kinds', '\n'.join(f'  {b}' for b in schema_bad))
@@ -389,16 +437,16 @@ for t in htmls:
     if 'data-image-missing' in text:
         link_bad.append(f'{rel}: dev image placeholder leaked into the build')
     for tag in re.findall(r'<(?:a|img|script|link)\b[^>]*>', text, re.I):
+        attrs = attrs_of(tag)
         for attr in ('href', 'src'):
-            m = re.search(rf'\b{attr}=["\x27]([^"\x27]*)["\x27]', tag, re.I)
-            if not m:
-                # A bare attribute (href with no value) is a broken link too,
-                # and it renders without the "=" the check above needs.
-                if re.search(rf'(?<![\w-]){attr}(?![\w-])', tag, re.I):
-                    link_bad.append(f'{rel}: bare {attr} attribute on {tag[:60]}')
+            if attr not in attrs:
                 continue
-            v = m.group(1).strip()
-            if v == '' or v.lower().startswith('javascript:'):
+            value = attrs[attr]
+            if value is None:
+                link_bad.append(f'{rel}: bare {attr} attribute on {tag[:60]}')
+                continue
+            v = value.strip()
+            if not v or v.lower().startswith('javascript:'):
                 link_bad.append(f'{rel}: {attr}={v!r} on {tag[:60]}')
 for p in files:
     if p.name == '.DS_Store':
@@ -428,17 +476,25 @@ else:
 social_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
-    if 'http-equiv="refresh"' in text:
+    if is_refresh(text):
         continue
     rel = t.relative_to(pub)
-    og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
+    og = meta_content(text, 'property', 'og:type')
     # Match a real meta tag, not the substring anywhere: a docs page that
     # names the tag in prose or a table is not carrying it.
-    if (not og or og.group(1) != 'article') and re.search(r'<meta[^>]*(?:property|name)=["\x27]article:(?:published|modified)_time["\x27]', text):
-        social_bad.append(f'{rel}: article:* time on og:type={og.group(1) if og else "?"}')
+    has_article_time = any(
+        (attrs_of(tag).get('property') or attrs_of(tag).get('name'))
+        in {'article:published_time', 'article:modified_time'}
+        for tag in tags_of(text, 'meta')
+    )
+    if og != 'article' and has_article_time:
+        social_bad.append(f'{rel}: article:* time on og:type={og or "?"}')
     for prop in ('og:image', 'twitter:image'):
-        for m in re.findall(rf'(?:property|name)=["\x27]{prop}["\x27] content=["\x27]([^"\x27]*)["\x27]', text):
-            if re.fullmatch(r'https?://[^/]+/?', m.strip()):
+        values = [attrs.get('content') for tag in tags_of(text, 'meta')
+                  if (attrs := attrs_of(tag)).get('property') == prop
+                  or attrs.get('name') == prop]
+        for value in values:
+            if value and re.fullmatch(r'https?://[^/]+/?', value.strip()):
                 social_bad.append(f'{rel}: {prop} points at the site root')
 if social_bad:
     bad('social tags match the page kind', '\n'.join(f'  {b}' for b in social_bad))
@@ -455,7 +511,7 @@ STRUCT_TAGS = ('div', 'ul', 'ol', 'dl', 'nav', 'footer', 'header', 'main',
 bal_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
-    if 'http-equiv="refresh"' in text:
+    if is_refresh(text):
         continue
     rel = t.relative_to(pub)
     clean = re.sub(r'<!--.*?-->', '', text, flags=re.S)
@@ -475,8 +531,10 @@ else:
 ad_clients = set()
 for t in htmls:
     text = t.read_text(errors='ignore')
-    for m in re.findall(r'data-ad-client=["\x27]([^"\x27]*)["\x27]', text):
-        ad_clients.add(m)
+    for tag in re.findall(r'<[^>]+\bdata-ad-client\b[^>]*>', text, re.I):
+        client = attrs_of(tag).get('data-ad-client')
+        if client:
+            ad_clients.add(client)
 if ad_clients:
     ads_txt = pub / 'ads.txt'
     if not ads_txt.is_file():
@@ -532,10 +590,9 @@ class BodyWords(HTMLParser):
 thin = []
 for t in htmls:
     text = t.read_text(errors='ignore')
-    if 'http-equiv="refresh"' in text:
+    if is_refresh(text):
         continue
-    og = re.search(r'property=["\x27]og:type["\x27] content=["\x27](\w+)["\x27]', text)
-    if not og or og.group(1) != 'article':
+    if meta_content(text, 'property', 'og:type') != 'article':
         continue
     parser = BodyWords()
     try:
