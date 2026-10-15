@@ -4,7 +4,7 @@
 
   Input dict
     ref   (string, required) — front matter value or markdown destination
-    page  (Page, optional) — page bundle lookups and section fallbacks
+    page  (Page, optional) — legacy bundle lookup and asset-path fallbacks
     role  (string, optional) — "card" | "illustration" | "hero" | "og";
           caps the widest variant
     alt   (string, optional) — empty string means decorative
@@ -17,7 +17,7 @@
     height (int) — 0 when unknown (svg, passthrough)
     alt    (string) — echoed from the input
 
-  Resolution order: page resource → the reference as written → assets path
+  Resolution order: legacy page resource → the reference as written → assets path
   under images/{pageDir}/ (the article's own directory, so a section-flat
   assets/images/{section}/file.png and a per-page assets/images/{section}/{slug}/file.png
   both resolve) → images/ → static/ → not found: a declared reference that

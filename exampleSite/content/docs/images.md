@@ -7,26 +7,28 @@ weight: 30
 
 ## Page layout
 
-Articles are **page bundles**: `content/{section}/{slug}/index.md`. That is
-the layout `place-image.sh` and the image resolver assume. A leaf page
-`content/{section}/post.md` is supported by the resolver too, but its images
-resolve to `assets/images/{section}/`, not to a `{slug}/` subdirectory.
+Article Markdown uses Hugo's **leaf-bundle directory layout**:
+`content/{section}/{slug}/index.md`. This is a content-organisation choice; it
+does not mean image files belong beside `index.md`. Production images live in
+the separate asset tree described below.
 
 ## Storage
 
 - Site-wide images: `assets/images/…`
 - Section-owned images: `assets/images/{section}/…`
-- Per-article bundle images: `assets/images/{section}/{slug}/…` (the
+- Per-article images: `assets/images/{section}/{slug}/…` (the
   `place-image.sh` target for `content/{section}/{slug}/index.md`)
-- Or inside the page bundle as a sibling of `index.md` — discovered by name
-  when no `featureimage` is declared, see [Which image a page renders](#which-image-a-page-renders)
+
+New content does not put images under `content/`. A sibling image beside
+`index.md` remains readable only for migration compatibility with older sites;
+the scaffold and `place-image.sh` never create one.
 
 ## Resolution order
 
 Every reference (`featureimage`, figure shortcode, markdown image) resolves
 in this order:
 
-1. Page bundle resource
+1. Legacy page-bundle resource
 2. The reference as written (assets path or relative path)
 3. `assets/images/{pageDir}/…` — the article's own directory
 4. `assets/images/…`
@@ -39,17 +41,17 @@ otherwise they are skipped with a development warning.
 
 ## Which image a page renders
 
-A page declares `featureimage`. Without it, the theme still finds an image
-when the page bundle holds a resource whose name contains `feature`, `cover`
-or `thumbnail` — so `content/science/manufacturing/index.md` plus a sibling
-`featured.jpg` needs no front matter key at all. The chain is:
+A page declares `featureimage`; new content should always use this explicit
+reference to an image under `assets/images/`. For migration compatibility, a
+legacy page bundle with a resource whose name contains `feature`, `cover` or
+`thumbnail` still resolves when that key is absent. The chain is:
 
 1. `featureimage`
-2. bundle resource named `feature*`, `cover*`, `thumbnail*`
+2. legacy bundle resource named `feature*`, `cover*`, `thumbnail*`
 
 Cards, term cards and page heroes all take the same reference. Open Graph and
 schema take it too, with `images` a social-only fallback: `images[0]` is used
-only when `featureimage` is absent, then the bundle resource, then
+only when `featureimage` is absent, then the legacy bundle resource, then
 `site.Params.defaultSocialImage`. `featureimage` still beats `images` so the
 picture a page shows is the picture it advertises.
 

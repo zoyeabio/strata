@@ -12,8 +12,8 @@
 #     --environment production
 #
 # Copies --file to assets/images/{section}/{slug}/{filename} and prints the
-# front matter reference (the bare filename) for a page bundle at
-# content/{section}/{slug}/index.md.
+# front matter reference (the bare filename) for Markdown at
+# content/{section}/{slug}/index.md. Images never enter the content tree.
 #
 # The size lint is config, not code: [params.build.minwidth] per role, and
 # [params.image.og] for the social preview, which must be an exact match.

@@ -101,8 +101,9 @@ Place images with:
 `place-image.sh` lints the source width before copying: hero ≥1600px,
 illustration ≥1600px, card ≥1200px, og exactly 1200×630. A failing lint
 exits non-zero and writes nothing. It prints the front matter reference to
-use in the page (the bare filename, for a page bundle at
-`content/{section}/{slug}/index.md`).
+use in the page. For `content/{section}/{slug}/index.md`, the file itself is
+stored separately at `assets/images/{section}/{slug}/{filename}` and the
+printed reference is the bare filename.
 
 ## First build
 

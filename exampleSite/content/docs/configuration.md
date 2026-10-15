@@ -225,9 +225,9 @@ warning instead of being rendered as a dead link.
 | `url` | `"/solutions/infant-nutrition/"` — Hugo serves the page here and `canonical`/Open Graph follow it. It creates no redirect, so the path the file would otherwise have returns 404 |
 | `tags` | `["alpha", "beta"]` — rendered as tag links via `GetTerms` |
 | `series` | `["series-a"]` — first entry drives series navigation via `GetTerms` |
-| `featureimage` | Page/card image; without it a bundle resource named `feature*`/`cover*`/`thumbnail*` is used (see [images.md](/docs/images/)) |
+| `featureimage` | Page/card image under `assets/images/`; a legacy bundle resource named `feature*`/`cover*`/`thumbnail*` remains a migration fallback (see [images.md](/docs/images/)) |
 | `featureimagealt` | Alt text for `featureimage`; fallback `Featured image for {title}` |
-| `showHero` | Page hero: shown when an image resolves (`featureimage` or a bundle cover), `false` suppresses it |
+| `showHero` | Page hero: shown when an image resolves (`featureimage` or a legacy bundle cover), `false` suppresses it |
 | `showAuthor` | Page-level `By` line override (falls back to `[article] showAuthor`) |
 | `showDate` | Page-level date override (falls back to `[article] showDate`, explicit `false` wins) |
 | `showDateUpdated` | Page-level `Updated` override (falls back to `[article] showDateUpdated`) |

@@ -93,6 +93,11 @@ re-derived from the templates.
   `cascade.build.publishResources = false`; resources touched by the image
   pipeline still publish, while source JPEG/PNG files do not sit beside their
   responsive WebP transforms and double the image payload.
+- **Content layout and image storage are separate contracts.** Article Markdown
+  uses `content/{section}/{slug}/index.md`, while every new image goes to
+  `assets/images/{section}/{slug}/`. Bundle-local images remain readable only
+  as a migration fallback; neither the scaffold nor `place-image.sh` creates
+  them.
 - **Top-level `summary` satisfies the article metadata contract.** The content
   lint now matches the templates and accepts it when `description` is absent;
   generated site archetypes expose the recommended SEO fields up front.
@@ -106,8 +111,8 @@ re-derived from the templates.
   candidate the browser downloads; it creates no additional variants.
 - **One image resolver.** `data/image-ref.html` serves cards, term cards,
   heroes and social output. Cards and heroes take `featureimage`, else a page
-  bundle resource whose name contains `feature`, `cover` or `thumbnail`, so a
-  page bundle with a sibling `featured.jpg` needs no front matter key. Social
+  bundle resource whose name contains `feature`, `cover` or `thumbnail` as a
+  legacy migration fallback. Social
   falls back to `images[0]`, then `site.Params.defaultSocialImage`, and
   `featureimage` still beats `images` — the picture a page shows is the picture
    it advertises.

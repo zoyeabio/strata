@@ -233,8 +233,8 @@ EOF
 fi
 
 # archetypes/default/index.md — directory archetype, so `hugo new
-# section/slug` creates a page bundle content/section/slug/index.md; the
-# image resolver and place-image.sh both expect the bundle layout
+# section/slug` creates content/section/slug/index.md. Images stay outside the
+# content tree in assets/images/section/slug/.
 mkdir -p "$OUT/archetypes/default"
 cat > "$OUT/archetypes/default/index.md" <<'EOF'
 ---
@@ -399,14 +399,15 @@ npm run build    # hugo --minify
 The required security.exec and security.node sections are already in
 \`config/_default/hugo.toml\`.
 
-Articles are page bundles:
+Article Markdown uses leaf-bundle directories:
 
 \`\`\`sh
 hugo new ingredients/a-slug
 \`\`\`
 
-That creates \`content/ingredients/a-slug/index.md\`. Images for the article
-live at \`assets/images/ingredients/a-slug/\`; use the theme's
+That creates \`content/ingredients/a-slug/index.md\`. The bundle organises the
+Markdown only: images live separately at \`assets/images/ingredients/a-slug/\`.
+Use the theme's
 \`place-image.sh\` to lint and place them.
 
 Run the local server (the go.mod replace points at the theme checkout):
@@ -426,8 +427,8 @@ When the theme publishes a release tag, remove the \`replace\` line from
 
 ## Structure
 
-- \`content/\` — page bundles and section indexes
-- \`assets/images/\` — source images, organised by section
+- \`content/\` — Markdown leaf bundles and section indexes; no new image files
+- \`assets/images/\` — all production image sources, organised by section/page
 - \`config/_default/\` — site configuration (includes the Strata taxonomy contract)
 EOF
 
