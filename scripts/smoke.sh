@@ -762,8 +762,9 @@ assert 'section-a/flat/index.html' 'By Flat Author' 'page author renders'
 assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the fallback'
 
 # 36. carousel loop is seamless: a hidden clone of the first slide closes
-#     the track so last-to-first animates instead of jumping
-count_assert 'section-a/shortcodes/index.html' 'data-carousel-slide' 3 \
+#     the track so last-to-first animates instead of jumping. Real slides are
+#     the ones carrying role="group"; the clone carries only aria-hidden.
+count_assert 'section-a/shortcodes/index.html' 'aria-roledescription="slide"' 3 \
   'carousels keep three real slides'
 assert 'section-a/shortcodes/index.html' 'aria-hidden="true" tabindex="-1"' \
   'carousel appends a hidden first-slide clone'

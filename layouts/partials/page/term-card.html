@@ -20,24 +20,11 @@
 {{- $eagerCount := site.Params.eagerCardCount }}
 {{- $eager := lt (.index | default 0) $eagerCount }}
 <article class="term-card">
-  {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
-  {{- $img := partial "data/image-resource.html" (dict
-      "ref" .
+  {{- partial "data/card-media.html" (dict
       "page" $page
-      "role" "card"
-      "alt" $page.Title) }}
-  {{- if $img.ok }}
-  <div class="term-card__media">
-    {{- partial "media/image.html" (dict
-        "img" $img
-        "alt" $img.alt
-        "sizes" (partial "data/card-presets.html" "grid").sizes
-        "loading" (cond $eager "eager" "lazy")
-        "fetchpriority" (cond $eager "" "low")
-        "class" "term-card__image") }}
-  </div>
-  {{- end }}
-  {{- end }}
+      "eager" $eager
+      "mediaClass" "term-card__media"
+      "imageClass" "term-card__image") }}
   <div class="term-card__body">
     <h2 class="term-card__title">
       <a class="term-card__link" href="{{ $page.RelPermalink }}">{{ $page.Title | emojify }}</a>

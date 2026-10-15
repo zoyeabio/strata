@@ -154,6 +154,31 @@ be re-derived from the templates.
   Chromium without legacy `-webkit-box` computes even inline
   `display: -webkit-box` as `flow-root`, so `line-clamp` alone limits height
   without paint-clipping and a fourth line bled to the card edge.
+- **Four config keys were declared that nothing read.** `[article] showSummary`,
+  `[taxonomy] showHero`, `[taxonomy] orderByWeight` and `[taxonomy] showSummary`
+  sat in `config/_default/params.toml` and in the "unsupported keys" section at
+  the same time — shipped as defaults, documented as no-ops. `[taxonomy] showHero`
+  was the telling one: the warning said a site `[list] showHero` did nothing
+  while the supported table said it worked, and the template settles it in
+  `data/hero-image.html` — the warning was wrong, not the table. `validate-theme.sh`
+  only checks that every key a template reads has a default, never the other
+  way, which is how four unread keys survived a config whose header promises
+  "defaults for every key the theme reads".
+- **Duplicate markup became partials.** The featured-image block was written
+  twice, in `page/card.html` and `page/term-card.html` — the same 17 lines apart
+  from class names and alt fallbacks — and now lives in `data/card-media.html`.
+  The sort, paginate, collection and pager sequence was written twice, in
+  `list.html` and `term.html`, and now lives in `page/paginated.html`; the page
+  body block was written three times and now lives in `page/page-content.html`.
+  Rendered output is unchanged apart from a couple of blank lines, so the moves
+  are pure. The eager/lazy decision stays with the card: the media partial takes
+  a plain bool, because `isset` cannot distinguish "caller did not pass this"
+  from "caller passed false", and `content/article` passes false on purpose.
+- **The example site shows every shortcode.** `interactive/contact` and
+  `layout/col-mid` shipped undemonstrated, so a reader of `content/shortcodes.md`
+  never saw either render. Both are live now, and the `multi-col` section names
+  the hole `columns="4"` leaves: there is no fourth column shortcode, so a
+  four-column grid repeats `col-right`, which renders the same `.mcol`.
 
 ### Gates
 

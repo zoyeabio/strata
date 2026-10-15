@@ -14,7 +14,7 @@ describes shipped behaviour.
 
 - Responsive image pipeline: WebP ladder, `srcset`/`sizes`, role-derived
   quality, SVG/GIF/animated-WebP pass-through
-- Light/dark appearance applied before first paint, four colour schemes
+- Light/dark appearance applied before first paint, seven colour schemes
 - Zero external requests — no webfonts, no CDNs, no tracking
 - Taxonomy navigation resolved through Hugo's `GetTerms`, never string concat
 - JSON-LD (WebSite / WebPage / Article), Open Graph and Twitter cards

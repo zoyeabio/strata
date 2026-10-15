@@ -113,6 +113,8 @@ Call-to-action banner.
 | `subtitle` | Optional second line |
 | `buttonText` | Default "Get Started" |
 | `buttonUrl` | Default `/contact/` |
+| `buttonTarget` | Target on the button; `"_blank"` adds `rel="noopener"` when `buttonRel` is absent |
+| `buttonRel` | `rel` attribute on the button link |
 | `icon` | Name under `assets/icons/`; missing file: development warning, bare CTA still renders |
 
 ## interactive/email
@@ -137,6 +139,7 @@ AdSense display unit. The loader ships in head only on pages using it.
 |---|---|
 | `slot` | Required ad slot ID |
 | `format` | `data-ad-format`, default `auto` |
+| `minHeight` | CSS `min-height` on the unit, units included (`"250px"`), so the ad iframe cannot shift layout (CLS) |
 
 Requires site `[ads] client`; `static/ads.txt` must name the ID or the
 build fails.
@@ -144,6 +147,8 @@ build fails.
 ## layout/multi-col + layout/col-left, col-mid, col-right
 
 Multi-column grid. Wrap content in `col-*` shortcodes inside `multi-col`.
+Three columns use `col-mid`; `columns="4"` needs a fourth wrapper and no
+fourth shortcode exists, so repeat `col-right` — it renders the same `.mcol`.
 
 | Parameter | Notes |
 |---|---|

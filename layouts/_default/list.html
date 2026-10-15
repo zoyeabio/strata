@@ -9,19 +9,6 @@
     <h1>{{ . | emojify }}</h1>
   </header>
 {{- end }}
-{{- with .Content }}
-  <div class="page-content prose">{{ . }}</div>
-{{- end }}
-  {{- $listParams := site.Params.list }}
-  {{- $sorted := .Pages }}
-  {{- if .Params.orderbyweight | default $listParams.orderByWeight }}
-  {{- $sorted = .Pages.ByWeight }}
-  {{- end }}
-  {{- $pager := .Paginate $sorted }}
-  {{ partial "page/page-collection.html" (dict
-    "pages" $pager.Pages
-    "cardView" (.Params.cardview | default $listParams.cardView)
-    "showSummary" (.Params.showsummary | default $listParams.showSummary)
-  ) }}
-  {{ partial "page/pagination.html" $pager }}
+{{- partial "page/page-content.html" . }}
+{{- partial "page/paginated.html" (dict "page" . "params" site.Params.list) }}
 {{ end }}

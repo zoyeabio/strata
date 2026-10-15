@@ -1,0 +1,23 @@
+{{- /*
+  Sort a page's children, paginate them, render the collection and the pager.
+
+  Params
+    page   (Page, required) — the section or term page
+    params (map, required) — site.Params.list or site.Params.term; the page's
+                 own front matter wins over every default in it
+
+  Called by: _default/list.html, _default/term.html
+*/ -}}
+{{- $page := .page }}
+{{- $params := .params }}
+{{- $sorted := $page.Pages }}
+{{- if $page.Params.orderbyweight | default $params.orderByWeight }}
+{{- $sorted = $page.Pages.ByWeight }}
+{{- end }}
+{{- $pager := $page.Paginate $sorted }}
+{{ partial "page/page-collection.html" (dict
+    "pages" $pager.Pages
+    "cardView" ($page.Params.cardview | default $params.cardView)
+    "showSummary" ($page.Params.showsummary | default $params.showSummary)
+) }}
+{{ partial "page/pagination.html" $pager }}

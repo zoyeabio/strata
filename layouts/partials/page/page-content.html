@@ -1,0 +1,8 @@
+{{- /*
+  A page's own body, when it has one.
+
+  Called by: _default/list.html, _default/term.html, _default/terms.html
+*/ -}}
+{{- with .Content }}
+  <div class="page-content prose">{{ . }}</div>
+{{- end -}}

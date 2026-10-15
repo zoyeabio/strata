@@ -1,0 +1,43 @@
+{{- /*
+  Featured image block shared by page cards and term cards.
+
+  Params
+    page       (Page, required)
+    eager      (bool, required) — eager loads with normal fetch priority, lazy
+                 with low; the caller decides from its position in the
+                 collection, so this is a plain value, never an override
+    alt        (string, optional) — image alt text; defaults to the page title
+    preset     (string, optional) — card preset whose sizes apply; "grid"
+    mediaClass (string, required) — class on the wrapping element
+    imageClass (string, required) — class on the <img>
+
+  The image is the page's own: data/image-ref.html (featureimage, else a
+  bundle resource named feature/cover/thumbnail), resolved through the shared
+  pipeline with the card role. A page without an image renders nothing.
+
+  Called by: page/card.html, page/term-card.html
+*/ -}}
+{{- $page := .page }}
+{{- $eager := .eager }}
+{{- $alt := .alt | default $page.Title }}
+{{- $sizes := (partial "data/card-presets.html" (.preset | default "grid")).sizes }}
+{{- $mediaClass := .mediaClass }}
+{{- $imageClass := .imageClass }}
+  {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
+  {{- $img := partial "data/image-resource.html" (dict
+      "ref" .
+      "page" $page
+      "role" "card"
+      "alt" $alt) }}
+  {{- if $img.ok }}
+  <div class="{{ $mediaClass }}">
+    {{- partial "media/image.html" (dict
+        "img" $img
+        "alt" $img.alt
+        "sizes" $sizes
+        "loading" (cond $eager "eager" "lazy")
+        "fetchpriority" (cond $eager "" "low")
+        "class" $imageClass) }}
+  </div>
+  {{- end }}
+  {{- end }}

@@ -3,9 +3,7 @@
   {{ partial "page/breadcrumbs.html" . }}
   <h1>{{ .Title | emojify }}</h1>
 </header>
-{{- with .Content }}
-<div class="page-content prose">{{ . }}</div>
-{{- end }}
+{{- partial "page/page-content.html" . }}
 {{- $taxParams := site.Params.taxonomy }}
 {{- if $taxParams.cardView }}
 <div class="term-collection--grid">

@@ -17,4 +17,4 @@
   --breakpoint-2xl: 1536px;
 }
 
-@layer strata-base, strata-components, strata-overrides;
+@layer strata-base, strata-components;

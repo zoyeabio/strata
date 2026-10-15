@@ -6,8 +6,8 @@ featureimage: "images/hero-shortcodes.png"
 featureimagealt: "A grid of small marks over a dark field"
 ---
 
-Twelve shortcodes. Every one below is live, and each block shows the exact
-syntax it was written with.
+Fourteen shortcodes. Every one below is live — `ads` apart, which needs a
+publisher ID — and each block shows the exact syntax it was written with.
 
 ---
 
@@ -129,6 +129,27 @@ Both `user` and `domain` are required.
 
 ---
 
+## `interactive/contact`
+
+Posts to a JSON endpoint. The message field carries a live byte counter and
+a honeypot input for naive bots; the script selects every form by attribute,
+so several forms on one page do not collide.
+
+{{< interactive/contact action="/api/contact" maxBytes="600" >}}
+
+<pre><code>{{&lt; interactive/contact action="/api/contact" maxBytes="600" &gt;}}</code></pre>
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `action` | `/api/contact` | Endpoint the form posts to |
+| `maxBytes` | `1000` | Limit shown by the counter |
+
+The endpoint must validate, sanitise and rate-limit on the server and reject a
+filled `hp_name` honeypot. This is the same form as on
+[the contact page](/contact/).
+
+---
+
 ## `interactive/cta`
 
 A call to action with an optional icon and link.
@@ -182,6 +203,33 @@ not stretch it.
 | `ratio` | `1:1` | Two columns only; ignored at 3 and 4 |
 | `gap`, `margin` | `2rem`, `3rem 0` | |
 | `align` | `top` | `top`, `center`, `bottom` |
+
+Three columns use `col-mid`. `columns="4"` needs a fourth wrapper and there is
+no fourth shortcode, so repeat `col-right` — it renders the same `.mcol`.
+
+{{< layout/multi-col columns="3" gap="1.5rem" >}}
+{{< layout/col-left >}}
+### One third
+
+The middle wrapper is `col-mid`, not `col-right` reused.
+{{< /layout/col-left >}}
+{{< layout/col-mid >}}
+### Another third
+
+Three tracks split evenly; `ratio` has no effect here.
+{{< /layout/col-mid >}}
+{{< layout/col-right >}}
+### And a third
+
+All three stay top-aligned at any width.
+{{< /layout/col-right >}}
+{{< /layout/multi-col >}}
+
+<pre><code>{{&lt; layout/multi-col columns="3" gap="1.5rem" &gt;}}
+{{&lt; layout/col-left &gt;}}Left{{&lt; /layout/col-left &gt;}}
+{{&lt; layout/col-mid &gt;}}Middle{{&lt; /layout/col-mid &gt;}}
+{{&lt; layout/col-right &gt;}}Right{{&lt; /layout/col-right &gt;}}
+{{&lt; /layout/multi-col &gt;}}</code></pre>
 
 ---
 

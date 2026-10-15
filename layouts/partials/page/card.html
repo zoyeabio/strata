@@ -29,24 +29,13 @@
 {{- $eager := lt (.index | default 0) $eagerCount }}
 {{- if isset . "eager" }}{{ $eager = .eager }}{{ end }}
 <article class="card card--{{ $preset }}">
-  {{- with (partial "data/image-ref.html" (dict "page" $page)) }}
-  {{- $img := partial "data/image-resource.html" (dict
-      "ref" .
+  {{- partial "data/card-media.html" (dict
       "page" $page
-      "role" "card"
-      "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))) }}
-  {{- if $img.ok }}
-  <div class="card__media">
-    {{- partial "media/image.html" (dict
-        "img" $img
-        "alt" $img.alt
-        "sizes" (partial "data/card-presets.html" $preset).sizes
-        "loading" (cond $eager "eager" "lazy")
-        "fetchpriority" (cond $eager "" "low")
-        "class" "card__image") }}
-  </div>
-  {{- end }}
-  {{- end }}
+      "eager" $eager
+      "alt" ($page.Params.featureimagealt | default (printf "Featured image for %s" $page.Title))
+      "preset" $preset
+      "mediaClass" "card__media"
+      "imageClass" "card__image") }}
   <header class="card__header">
     <h2 class="card__title">
       <a class="card__link" href="{{ $page.RelPermalink }}">{{ $page.Title | emojify }}</a>

@@ -5,18 +5,6 @@
   <h1>{{ .Title | emojify }}</h1>
   <p class="page-header__meta">{{ len .Pages }} articles</p>
 </header>
-{{- with .Content }}
-<div class="page-content prose">{{ . }}</div>
-{{- end }}
-{{- $sorted := .Pages }}
-{{- if .Params.orderbyweight | default $termParams.orderByWeight }}
-{{- $sorted = .Pages.ByWeight }}
-{{- end }}
-{{- $pager := .Paginate $sorted }}
-{{ partial "page/page-collection.html" (dict
-    "pages" $pager.Pages
-    "cardView" (.Params.cardview | default $termParams.cardView)
-    "showSummary" (.Params.showsummary | default $termParams.showSummary)
-) }}
-{{ partial "page/pagination.html" $pager }}
+{{- partial "page/page-content.html" . }}
+{{- partial "page/paginated.html" (dict "page" . "params" $termParams) }}
 {{ end }}

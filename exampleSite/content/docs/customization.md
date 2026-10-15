@@ -32,7 +32,7 @@ of them.
 ## Appearance
 
 ```toml
-defaultAppearance = "light"   # or "dark"
+defaultAppearance = "light"   # light, dark, or auto to follow the OS
 autoSwitchAppearance = true   # follow the OS until the visitor chooses
 ```
 

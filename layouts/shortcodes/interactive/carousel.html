@@ -118,7 +118,7 @@
       {{- $all := $slides }}
       {{- if gt (len $slides) 1 }}{{ with index $slides 0 }}{{ $all = $all | append . }}{{ end }}{{ end }}
       {{- range $i, $s := $all }}
-      <div class="carousel__slide"{{ if lt $i (len $slides) }} data-carousel-slide{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}"{{ else }} aria-hidden="true" tabindex="-1"{{ end }}>
+      <div class="carousel__slide"{{ if lt $i (len $slides) }}{{ if eq $i 0 }} data-carousel-active{{ end }} role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $slides }}"{{ else }} aria-hidden="true" tabindex="-1"{{ end }}>
         {{- $frame := "carousel__frame" -}}
         {{- if eq $fit "contain" }}{{ $frame = printf "%s carousel__frame--contain" $frame }}{{ end -}}
         <div class="{{ $frame }}">
@@ -137,7 +137,7 @@
       {{- end }}
     </div>
   </div>
-  <div class="carousel__indicators" data-carousel-indicators>
+  <div class="carousel__indicators">
     {{- range $i, $s := $slides }}
     <button type="button" data-slide-to="{{ $i }}"{{ if eq $i 0 }} data-carousel-active aria-current="true"{{ end }} aria-label="Slide {{ add $i 1 }}"></button>
     {{- end }}

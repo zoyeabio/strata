@@ -59,12 +59,12 @@ you change in config is the threshold the gate checks.
 | Key | Type / default | Effect |
 |---|---|---|
 | `colorScheme` | `"default"` | Colour scheme file name under `assets/css/schemes/`. A missing file fails the build and names the scheme |
-| `defaultAppearance` | `"light"` | Initial colour scheme before the stored preference is read (`light` or `dark`) |
+| `defaultAppearance` | `"light"` | Initial colour scheme before the stored preference is read: `light`, `dark`, or `auto` to follow the OS until the visitor toggles |
 | `autoSwitchAppearance` | `true` | Follow the OS preference until the visitor toggles |
-| `logo` | — | Asset path to a logo image; rendered in the header. The site title always renders when no logo resolves |
+| `logo` | `""` | Asset path to a logo image; rendered in the header. The site title always renders when no logo resolves |
 | `disableTextInHeader` | `false` | Hide the site title when (and only when) a logo is present |
-| `copyright` | — | Footer line; `{ year }` is replaced with the current year. Fallback: `© {year} {site title}` |
-| `description` | — | Default `<meta name="description">` (page description/summary wins) |
+| `copyright` | `"© { year } Strata"` | Footer line; `{ year }` is replaced with the current year. Empty or absent falls back to `© {year} {site title}` |
+| `description` | `"A Hugo theme for content sites."` | Default `<meta name="description">` (page description/summary wins) |
 | `robots` | `"index, follow, max-image-preview:large"` | Default `<meta name="robots">` (page-level `robots` wins). A site setting applies to every page; leave both unset for the default |
 | `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Must sit under a `[params]` table — a bare top-level key in `languages.<lang>.toml` is invisible to the theme. For a per-language format, set it in that language's file under its own `[params]` |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
@@ -88,15 +88,16 @@ you change in config is the threshold the gate checks.
 | `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
-| `author.name` | — | Site-wide author fallback |
-| `author.links` | — | `[{name, url}]` author profile links, emitted as schema `sameAs` |
-| `twitterSite` | — | `twitter:site` handle, e.g. `@example` |
-| `twitterCreator` | — | `twitter:creator` handle; same account as `twitterSite` is fine |
-| `ads.client` | — | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
+| `author.name` | `""` | Site-wide author fallback |
+| `author.links` | `[]` | `[{name, url}]` author profile links, emitted as schema `sameAs` |
+| `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
+| `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
+| `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
-| `term.cardView` / `term.orderByWeight` / `term.showSummary` | — | Same three defaults for taxonomy term pages |
-| `taxonomy.cardView` | — | Card vs. row on the taxonomy overview (`/tags/`) |
+| `taxonomy.cardView` | `false` | Card vs. row on the taxonomy overview (`/tags/`). False here and true in `[list]`: `/tags/` lists terms, not articles, so it starts as a plain row list |
+| `taxonomy.showTermCount` | `true` | Article count beside each term link on the taxonomy overview |
+| `term.cardView` / `term.orderByWeight` / `term.showSummary` | `false` | The same three defaults for a taxonomy term page (`/tags/x/`) |
 
 ## Navigation (`menus.en.toml`)
 
@@ -235,9 +236,11 @@ accident:
   existed, so `"basic"` was already a silent no-op there
 - page front matter `series_order` — series navigation sorts by `weight`; set
   only `weight` and drop `series_order`
-- site `[article]` / `[list]` / `[taxonomy]` / `[term]` `showHero` — only the
-  page front matter `showHero` is read; a site `true` is a no-op because
-  Strata shows a hero whenever an image resolves
+- site `[article] showSummary`, `[article]` / `[term]` `showHero`, and
+  `[taxonomy] showHero` / `orderByWeight` / `showSummary` — read by nothing: an
+  article renders its body rather than cards, `/tags/` and `/tags/x/` list terms
+  rather than pages, and Strata shows a hero whenever an image resolves. Only
+  `[list] showHero` is read, for a section banner
 - site `showDraftLabel` — Strata has no draft badge
 - `[params] backgroundImageWidth` — superseded by the pipeline's own widths
 

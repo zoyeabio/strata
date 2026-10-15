@@ -64,7 +64,6 @@ showDateUpdated = true
 showRelatedContent = false
 relatedContentLimit = 3
 showPagination = true
-showSummary = false
 sharingLinks = []
 
 [author]
@@ -75,9 +74,7 @@ links = []
 # cardView is false here and true in [list]: /tags/ lists terms, not articles,
 # so it starts as a plain row list.
 cardView = false
-showHero = false
-orderByWeight = false
-showSummary = false
+# showTermCount prints the count beside each term link.
 showTermCount = true
 showBreadcrumbs = false
 
