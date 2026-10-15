@@ -18,7 +18,7 @@ oversized input from adding another output rung.
 
 ```
 cap:  hero 1600  ·  illustration 1600  ·  card 800
-ladder: 480 800 1280 1920
+ladder: 480 800 1280 1600
 steps within 15% of their predecessor are dropped
 ```
 

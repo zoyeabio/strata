@@ -129,16 +129,15 @@ def pages():
         yield path
 
 
-def param_of(params, key):
-    """Values under the params block. Hugo puts them in .Params just like the
-    top level does, so both spellings mean the same thing to the templates."""
-    if not isinstance(params, dict):
-        return None
-    return params.get(key)
+def page_param(front, params, key):
+    """The value Hugo exposes in .Params after flattening a params map."""
+    if isinstance(params, dict) and key in params:
+        return params[key]
+    return front.get(key)
 
 
 def param_keys_of(params):
-    """The key names written under params, or {} when there are none."""
+    """Nested params keys that must pass the same allowlist as top-level keys."""
     return dict(params) if isinstance(params, dict) else {}
 
 
@@ -212,11 +211,13 @@ for path in pages():
     published = as_date(fm.get("date"))
     if published:
         dated += 1
-        if not (fm.get("description") or fm.get("summary") or param_of(params, "summary")):
+        if not (page_param(fm, params, "description")
+                or page_param(fm, params, "summary")):
             bad("a dated page needs a description",
                 "%s: meta description, og:description and Article.description all "
                 "fall back to the site default or the bare title" % where)
-        if not (fm.get("keywords") or fm.get("tags") or param_of(params, "keywords")):
+        if not (page_param(fm, params, "keywords")
+                or page_param(fm, params, "tags")):
             bad("a dated page needs keywords or tags",
                 "%s: meta keywords and Article.keywords are empty without them" % where)
         modified = as_date(fm.get("lastmod"))
@@ -233,19 +234,19 @@ for path in pages():
             "%s: with no date the page never renders as an article and lastmod "
             "goes nowhere" % where)
 
-    if fm.get("featureimage") or param_of(params, "featureimage"):
-        if not (fm.get("featureimagealt") or param_of(params, "featureimagealt")):
+    if page_param(fm, params, "featureimage"):
+        if not page_param(fm, params, "featureimagealt"):
             bad("featureimage needs featureimagealt",
                 "%s: the hero, the card and og:image:alt all fall back to a "
                 "generic caption" % where)
 
-    author = fm.get("author")
+    author = page_param(fm, params, "author")
     if isinstance(author, (list, dict)):
         bad("author is a single string",
             "%s: the theme prints the value directly, so a list renders as a "
             "bracketed run" % where)
 
-    authorurl = fm.get("authorurl") or param_of(params, "authorurl")
+    authorurl = page_param(fm, params, "authorurl")
     if authorurl and not (author or site_author_name):
         bad("authorurl needs author",
             "%s: neither the page nor site.Params.author.name is set, so no "

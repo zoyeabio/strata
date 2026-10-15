@@ -53,7 +53,7 @@ FAILURES=0
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
-if report=$(python3 - "$PUBLIC" <<'PY'
+if python3 - "$PUBLIC" <<'PY'
 import json
 import os
 import re
@@ -188,22 +188,12 @@ htmls = [p for p in files if p.suffix == '.html']
 print(f'info build output: {len(files)} files, {len(htmls)} HTML, '
       f'{len(images)} images, {sum(p.stat().st_size for p in files) // 1024}KB total')
 
-src_attr = re.compile(r'''\b(?:src|href|content|url)\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>\x60]+)''', re.I)
-srcset_attr = re.compile(r'''\b(?:srcset|imagesrcset)\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>\x60]+)''', re.I)
 css_url = re.compile(r'url\(["\x27]?([^"\x27)]+)["\x27]?\)')
-json_url = re.compile(r':"((?:https?://)[^"]+)"')
+markup_tag = re.compile(r'''<[^>]+>''')
 
 referenced = set()
 per_page = {}
 
-
-def attr_tokens(pattern, text):
-    values = []
-    for token in pattern.findall(text):
-        if token[:1] in {'"', "'"}:
-            token = token[1:-1]
-        values.append(token)
-    return values
 
 # Site host from the home canonical: only same-host absolute URLs resolve
 # into the output tree; anything else (ad loaders, verification files) is
@@ -232,10 +222,14 @@ for t in texts:
     text = t.read_text(errors='ignore')
     urls = set()
     dl = []
-    for attr in attr_tokens(srcset_attr, text):
-        urls |= expand_srcset(attr)
-    for m in attr_tokens(src_attr, text):
-        urls.add(m.strip().split()[0] if m.strip() else m)
+    for tag in markup_tag.findall(text):
+        attrs = attrs_of(tag)
+        for name in ('srcset', 'imagesrcset'):
+            if attrs.get(name):
+                urls |= expand_srcset(attrs[name])
+        for name in ('src', 'href', 'content', 'url'):
+            if attrs.get(name):
+                urls.add(attrs[name])
     for m in css_url.findall(text):
         urls.add(m)
         dl.append({m})
@@ -625,11 +619,9 @@ else:
 
 sys.exit(1 if problems else 0)
 PY
-); then
-  printf '%s\n' "$report"
+then
   pass "check-build: all rules passed ($MODE mode)"
 else
-  printf '%s\n' "$report" >&2
   fail "check-build: rules failed ($MODE mode)"
 fi
 

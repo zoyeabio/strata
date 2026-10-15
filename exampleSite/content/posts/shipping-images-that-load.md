@@ -56,7 +56,7 @@ the one before it.** You keep the variety where it matters and you stop
 paying for the near-duplicates.
 
 ```text
-ladder  480  800  1280  1920
+ladder  480  800  1280  1600
 cap     card 800  illustration 1600  hero 1600
 ```
 

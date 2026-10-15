@@ -7,11 +7,11 @@ Pillow.
 
 Composition notes, all of them driven by file size:
   - No per-pixel noise. Grain is what makes a smooth gradient incompressible
-    (a 1920x620 gradient is 31KB clean, 131KB with 12x12 block noise). Soft
+    (a wide gradient is 31KB clean, 131KB with 12x12 block noise). Soft
     disc edges carry the visual interest instead.
   - No exp() radial glow for the same reason: it varies at every pixel.
-  - Demo hero sources sit at 1920px to exercise the production cap: output
-    stops at 1600px even when an oversized input is supplied.
+  - Demo hero sources match the 1600px production contract, avoiding source
+    pixels that the default pipeline can never publish.
 
 Usage:
   python3 scripts/gen-example-images.py [--out exampleSite/assets/images]
@@ -185,27 +185,27 @@ def main():
     # Heroes. The theme's hero is a fixed-height band, about 3:1 on desktop,
     # not 16:9. These sit near 3:1 with the brightest mark in the middle band,
     # which is the area that survives every crop.
-    emit(root, 'hero-home.png', 1920, 620,
-         overlay(gradient(1920, 620, (DEEP, ACCENT, ACCENT_LT), 25),
-                 [(disc(1460, 190, 150), WARM_LT, 'alpha'), (disc(1150, 470, 80), WARM, 'alpha')]))
-    emit(root, 'hero-about.png', 1920, 620,
-         overlay(gradient(1920, 620, ((16, 32, 52), ACCENT, DEEP), 115),
+    emit(root, 'hero-home.png', 1600, 620,
+         overlay(gradient(1600, 620, (DEEP, ACCENT, ACCENT_LT), 25),
+                 [(disc(1240, 190, 150), WARM_LT, 'alpha'), (disc(980, 470, 80), WARM, 'alpha')]))
+    emit(root, 'hero-about.png', 1600, 620,
+         overlay(gradient(1600, 620, ((16, 32, 52), ACCENT, DEEP), 115),
                  [(disc(430, 200, 190), SLATE, 'alpha')]))
-    emit(root, 'hero-features.png', 1920, 620,
-         overlay(gradient(1920, 620, (DEEP, (24, 56, 88), ACCENT), 60),
-                 [(disc(1450, 200, 150), ACCENT_LT, 'alpha'), (disc(1180, 470, 90), WARM_LT, 'alpha')]))
-    emit(root, 'hero-shortcodes.png', 1920, 620,
-         overlay(gradient(1920, 620, ((9, 20, 34), (20, 42, 66), ACCENT), 35),
-                 [(dots(1920, 620, 56, 4), ACCENT_LT, 'add')]))
-    emit(root, 'hero-gallery.png', 1920, 620,
-         overlay(gradient(1920, 620, ((34, 24, 22), WARM, WARM_LT), 150),
-                 [(disc(1350, 300, 210), (255, 240, 220), 'alpha')]))
-    emit(root, 'hero-docs.png', 1920, 620,
-         overlay(gradient(1920, 620, ((206, 216, 228), (168, 190, 212), DEEP), 90),
+    emit(root, 'hero-features.png', 1600, 620,
+         overlay(gradient(1600, 620, (DEEP, (24, 56, 88), ACCENT), 60),
+                 [(disc(1240, 200, 150), ACCENT_LT, 'alpha'), (disc(1020, 470, 90), WARM_LT, 'alpha')]))
+    emit(root, 'hero-shortcodes.png', 1600, 620,
+         overlay(gradient(1600, 620, ((9, 20, 34), (20, 42, 66), ACCENT), 35),
+                 [(dots(1600, 620, 56, 4), ACCENT_LT, 'add')]))
+    emit(root, 'hero-gallery.png', 1600, 620,
+         overlay(gradient(1600, 620, ((34, 24, 22), WARM, WARM_LT), 150),
+                 [(disc(1180, 300, 210), (255, 240, 220), 'alpha')]))
+    emit(root, 'hero-docs.png', 1600, 620,
+         overlay(gradient(1600, 620, ((206, 216, 228), (168, 190, 212), DEEP), 90),
                  [(disc(560, 300, 180), ACCENT_LT, 'alpha')]))
-    emit(root, 'hero-contact.png', 1920, 620,
-         overlay(gradient(1920, 620, (ACCENT_LT, ACCENT, DEEP), 70),
-                 [(disc(1420, 400, 170), (226, 236, 246), 'alpha')]))
+    emit(root, 'hero-contact.png', 1600, 620,
+         overlay(gradient(1600, 620, (ACCENT_LT, ACCENT, DEEP), 70),
+                 [(disc(1220, 400, 170), (226, 236, 246), 'alpha')]))
 
     # Feature cards at 16:9, the ratio the card frame locks to.
     for i, (name, stops, angle) in enumerate([

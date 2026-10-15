@@ -109,13 +109,15 @@ client = ""
 # by the role cap below, de-duplicated, and a step under 15% wider than its
 # kept predecessor is dropped. Four is the working maximum per role — a source
 # used by several roles carries each role's steps.
-ladder = [480, 800, 1280, 1920]
+ladder = [480, 800, 1280, 1600]
 
 # One WebP quality for every width, so the same width is never written twice.
 quality = 78
 
 [image.caps]
 card = 800
+# Hero and illustration deliberately share the default cap so the same source
+# reuses one transform ladder. Separate keys remain as site override hooks.
 illustration = 1600
 hero = 1600
 

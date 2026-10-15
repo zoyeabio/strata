@@ -37,11 +37,11 @@ The image and build thresholds get their own table because the build scripts and
 
 | Key | Default | Effect |
 |---|---|---|
-| `[params.image].ladder` | `[480, 800, 1280, 1920]` | Variant widths, smallest first. Each is capped by the source width and the role cap, de-duplicated, and dropped if less than 15% wider than its kept predecessor |
+| `[params.image].ladder` | `[480, 800, 1280, 1600]` | Variant widths, smallest first. Each is capped by the source width and the role cap, de-duplicated, and dropped if less than 15% wider than its kept predecessor |
 | `[params.image].quality` | `78` | One WebP quality for every width, so a width is never stored twice |
 | `[params.image].caps.card` | `800` | Widest variant for a card |
 | `[params.image].caps.illustration` | `1600` | Widest illustration variant; matches the SciVisual source profile and leaves density headroom at the default reading measure |
-| `[params.image].caps.hero` | `1600` | Widest hero variant; aligns with the SciVisual 1600×900 source contract and shares the illustration ladder |
+| `[params.image].caps.hero` | `1600` | Widest hero variant; deliberately shares the illustration ladder so one source does not create duplicate role-specific transforms. The separate key remains a site override hook |
 | `[params.image].og.width` / `.height` | `1200` / `630` | Fixed preview size — what Facebook, LinkedIn and Google request. `scripts/place-image.sh` lints the source against the same pair |
 | `[params.build].pageimageskb` | `600` | Largest rendered image payload on one browser visit, in KiB — `check-build` R5; social metadata is excluded because a page visit does not download it |
 | `[params.build].minwidth.hero` | `1600` | Minimum source width per role, linted by `scripts/place-image.sh` |

@@ -219,16 +219,17 @@ TOML
 cat >"$WORK/summary-site/content/posts/example.md" <<'MD'
 ---
 title: "Summary-only example"
-summary: "A reader-facing standfirst that also supplies the metadata fallback."
 date: 2026-01-05
-keywords: ["example"]
+params:
+  summary: "A reader-facing standfirst that also supplies the metadata fallback."
+  keywords: ["example"]
 ---
 Body.
 MD
 if "$ROOT/scripts/validate-content.sh" "$WORK/summary-site" >"$WORK/summary.out" 2>&1; then
-  pass 'a top-level summary satisfies the dated-page description contract'
+  pass 'nested summary and keywords satisfy the dated-page metadata contract'
 else
-  fail 'a top-level summary satisfies the dated-page description contract'
+  fail 'nested summary and keywords satisfy the dated-page metadata contract'
   cat "$WORK/summary.out" >&2
 fi
 
@@ -245,7 +246,8 @@ cat >"$WORK/bad-site/content/posts/example.md" <<'MD'
 title: "Example"
 date: 2026-01-05
 lastmod: 2025-01-01
-heroStyle: "basic"
+params:
+  typo: true
 ---
 MD
 if "$ROOT/scripts/validate-content.sh" "$WORK/bad-site" >"$WORK/content.out" 2>&1; then
@@ -285,6 +287,63 @@ then
 else
   fail 'new sites suppress unused bundle originals and carry the article metadata scaffold'
   cat "$WORK/scaffold.out" "$WORK/scaffold.stderr" >&2
+fi
+
+# Config is a merge, not a last-file-wins scan. An empty production overlay
+# must not erase the tag/series contract declared in the default config.
+mkdir -p "$WORK/scaffold/config/production"
+cat >"$WORK/scaffold/config/production/taxonomies.toml" <<'TOML'
+[taxonomies]
+TOML
+if "$ROOT/scripts/validate-site.sh" "$WORK/scaffold" \
+    >"$WORK/scaffold-merged.out" 2>"$WORK/scaffold-merged.stderr" \
+    && grep -q 'site enables tags and series' "$WORK/scaffold-merged.out"; then
+  pass 'split taxonomy config is merged before its contract is checked'
+else
+  fail 'split taxonomy config is merged before its contract is checked'
+  cat "$WORK/scaffold-merged.out" "$WORK/scaffold-merged.stderr" >&2
+fi
+
+# A taxonomy-free consumer is a supported production shape. Render one through
+# the complete site gate and inspect the resulting artifact, so GetTerms calls
+# cannot regress into empty taxonomy markup or dead URLs unnoticed.
+rm "$WORK/scaffold/config/production/taxonomies.toml"
+python3 - "$WORK/scaffold/config/_default/hugo.toml" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+text = text.replace('[taxonomies]\n  tag = "tags"\n  series = "series"', '[taxonomies]')
+path.write_text(text)
+PY
+mkdir -p "$WORK/scaffold/content/science/lean"
+cat >"$WORK/scaffold/content/science/lean/index.md" <<'MD'
+---
+title: "Lean article"
+description: "A production article rendered without taxonomy pages."
+summary: "A production article rendered without taxonomy pages."
+keywords: ["lean"]
+date: 2026-01-05
+---
+The article remains complete without tags or series.
+MD
+if "$ROOT/scripts/validate-site.sh" "$WORK/scaffold" \
+    >"$WORK/scaffold-lean.out" 2>"$WORK/scaffold-lean.stderr" \
+    && grep -q 'site explicitly disables taxonomies with an empty \[taxonomies\] table' \
+      "$WORK/scaffold-lean.out" \
+    && HUGO_CACHEDIR="$WORK/lean-cache" hugo --source "$WORK/scaffold" \
+      --environment production --minify --destination "$WORK/lean-public" \
+      >"$WORK/lean-build.out" 2>"$WORK/lean-build.stderr" \
+    && [ ! -e "$WORK/lean-public/tags" ] \
+    && [ ! -e "$WORK/lean-public/series" ] \
+    && ! grep -Eq 'article__tag|<nav class=series' \
+      "$WORK/lean-public/science/lean/index.html"; then
+  pass 'a taxonomy-free site builds without taxonomy output or empty term markup'
+else
+  fail 'a taxonomy-free site builds without taxonomy output or empty term markup'
+  cat "$WORK/scaffold-lean.out" "$WORK/scaffold-lean.stderr" \
+    "$WORK/lean-build.out" "$WORK/lean-build.stderr" >&2
 fi
 
 if [ "$FAILURES" -gt 0 ]; then

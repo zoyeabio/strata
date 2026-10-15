@@ -1,8 +1,9 @@
 ---
 title: "Inline markdown image"
-summary: "Inline illustration summary"
 date: 2026-01-02
 weight: 40
+params:
+  summary: "Inline illustration summary"
 ---
 Body before.
 

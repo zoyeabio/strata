@@ -58,7 +58,7 @@ picture a page shows is the picture it advertises.
 ## Variant ladder
 
 Bitmap images (JPEG/PNG) are encoded as WebP at the ladder widths —
-`[params.image].ladder`, 480 / 800 / 1280 / 1920 by default — each step capped
+`[params.image].ladder`, 480 / 800 / 1280 / 1600 by default — each step capped
 by the source width and by the image role, de-duplicated, and a step less than
 15% wider than its predecessor is dropped. Results:
 

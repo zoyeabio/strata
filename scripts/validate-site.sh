@@ -76,7 +76,7 @@ import sys
 theme_root = pathlib.Path(sys.argv[1])
 site_root = pathlib.Path(sys.argv[2])
 sys.path.insert(0, str(theme_root / "scripts" / "lib"))
-from build_config import _load_config, _toml_files
+from build_config import _load_config, _merge, _toml_files
 
 seen = False
 taxonomies = {}
@@ -85,7 +85,7 @@ for path in _toml_files(site_root):
     data = _load_config(path)
     if "taxonomies" in data:
         seen = True
-        taxonomies = data["taxonomies"] or {}
+        taxonomies = _merge(taxonomies, data["taxonomies"] or {})
     if "disableKinds" in data or "disablekinds" in data:
         values = data.get("disableKinds", data.get("disablekinds")) or []
         disabled = {str(value).lower() for value in values}

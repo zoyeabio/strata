@@ -84,7 +84,10 @@ re-derived from the templates.
 - **Image output has a per-source ceiling.** A source may produce no more than
   four responsive candidates plus one fixed social-preview JPEG. The build
   gate reports total files, HTML, images and output size, then fails if role
-  reuse or another transform expands that set beyond five files.
+  reuse or another transform expands that set beyond five files. The default
+  ladder ends at 1600px, the shared hero/illustration cap, so no configured
+  rung or demo-source pixels are unreachable; the separate caps remain site
+  override hooks.
 - **The output gate judges the deployable build.** Site and fixture validation
   run `hugo --minify`; the parser accepts quoted and standards-compliant
   unquoted attributes, so canonical, schema, link and image checks need no
@@ -134,7 +137,9 @@ re-derived from the templates.
   `[taxonomies]`, so the site either enables Strata's `tags`/`series` features
   or supplies an empty table to disable Hugo's implicit taxonomies. The site
   gate accepts both modes, rejects an omitted table and catches mappings that
-  the theme's `GetTerms` calls cannot resolve.
+  the theme's `GetTerms` calls cannot resolve. Config fragments are deep-merged
+  before that decision, and the theme gate builds a generated taxonomy-free
+  consumer to prove it emits neither term directories nor empty term markup.
 - **Hugo 0.161.0+ compiles the stylesheet through node.** Hugo dropped the
   standalone Tailwind binary in 0.161.0, so the theme ships a `package.json`
   naming the four Tailwind packages and `scripts/new-site.sh` writes one into
@@ -279,4 +284,6 @@ derived from the templates rather than written by hand, so there is one source
 of truth and it cannot rot; it runs on `exampleSite` from `validate-theme.sh`
 and on a consuming site from `validate-site.sh`. `test/fixture` is a gate
 harness with deliberately minimal front matter, so it does not pass this lint
-and is not judged by it.
+and is not judged by it. Hugo flattens a front matter `params:` map into
+`.Params`; a rendered fixture pins that behavior, while the source lint applies
+the same allowlist to nested and top-level spellings.
