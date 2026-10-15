@@ -95,6 +95,11 @@ other directly referenced original still publish normally. The scaffold and
 example config include the rule, and the no-orphan build gate catches a source
 that starts leaking into output again.
 
+`[[cascade]]` is a configuration array, so a higher-priority environment file
+replaces the earlier array instead of merging into it. When a site overrides
+the cascade, copy this build rule into the winning array alongside its other
+cascade blocks.
+
 SVG, GIF and animated WebP bypass processing entirely (the pipeline would
 flatten animations to frame one). `disableImageOptimization = true` returns
 the original file for every role.

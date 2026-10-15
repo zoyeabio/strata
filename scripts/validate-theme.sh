@@ -337,7 +337,8 @@ if "$ROOT/scripts/validate-site.sh" "$WORK/scaffold" \
       >"$WORK/lean-build.out" 2>"$WORK/lean-build.stderr" \
     && [ ! -e "$WORK/lean-public/tags" ] \
     && [ ! -e "$WORK/lean-public/series" ] \
-    && ! grep -Eq 'article__tag|<nav class=series' \
+    && [ -s "$WORK/lean-public/science/lean/index.html" ] \
+    && ! grep -Eq "article__tag|<nav[^>]*class=[\"']?series([\"']|[[:space:]>])" \
       "$WORK/lean-public/science/lean/index.html"; then
   pass 'a taxonomy-free site builds without taxonomy output or empty term markup'
 else

@@ -87,7 +87,9 @@ re-derived from the templates.
   reuse or another transform expands that set beyond five files. The default
   ladder ends at 1600px, the shared hero/illustration cap, so no configured
   rung or demo-source pixels are unreachable; the separate caps remain site
-  override hooks.
+  override hooks. Hugo replaces `[[cascade]]` arrays across config layers, so
+  the docs now require any winning site array to retain the rule that prevents
+  unused page-bundle originals from publishing.
 - **The output gate judges the deployable build.** Site and fixture validation
   run `hugo --minify`; the parser accepts quoted and standards-compliant
   unquoted attributes, so canonical, schema, link and image checks need no
@@ -140,6 +142,9 @@ re-derived from the templates.
   the theme's `GetTerms` calls cannot resolve. Config fragments are deep-merged
   before that decision, and the theme gate builds a generated taxonomy-free
   consumer to prove it emits neither term directories nor empty term markup.
+  The assertion first requires the article artifact to exist, then checks both
+  quoted and minified-unquoted class markup, so a missing file cannot pass as
+  an empty taxonomy result.
 - **Hugo 0.161.0+ compiles the stylesheet through node.** Hugo dropped the
   standalone Tailwind binary in 0.161.0, so the theme ships a `package.json`
   naming the four Tailwind packages and `scripts/new-site.sh` writes one into

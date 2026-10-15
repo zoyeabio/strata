@@ -299,8 +299,10 @@ if subset_bad:
 else:
     ok('preload candidates are a subset of the page srcset')
 
-# R4 no orphan images: every image file is referenced from some text output
-#    (favicon-family files are exempt — they are linked from nowhere)
+# R4 no orphan images: every image file is referenced by a markup attribute or
+#    CSS url() in text output. Arbitrary JavaScript and JSON string values are
+#    deliberately not treated as resource references; favicon-family files are
+#    exempt because they are linked from nowhere.
 refd_paths = {local_path(u) for u in referenced}
 orphans = sorted(str(p.relative_to(pub)) for p in images
                  if f'/{p.relative_to(pub)}' not in refd_paths and not FAVICON_RE.search(p.name))

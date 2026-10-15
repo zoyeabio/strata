@@ -70,6 +70,11 @@ Referenced resources and their responsive transforms still publish. This only
 prevents an unused source JPEG or PNG from travelling beside its WebP ladder.
 `new-site.sh`, the example site and the test fixture carry this setting.
 
+Hugo replaces configuration arrays rather than deep-merging them. If a site
+declares `[[cascade]]` again in a higher-priority environment config, that
+winning cascade array must include this `publishResources = false` entry too.
+Additional cascade rules can be separate blocks in the same winning array.
+
 ## Site params (`params.toml`)
 
 | Key | Type / default | Effect |
