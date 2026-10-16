@@ -22,6 +22,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+          # No go.sum: the module declares no Go dependencies, so there is
+          # nothing for the cache key to read and every run would warn.
+          cache: false
 
       - uses: actions/setup-node@v4
         with:
