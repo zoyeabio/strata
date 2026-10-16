@@ -88,6 +88,16 @@
   color: var(--site-accent);
 }
 
+/* Marks a content link that opens a new tab, so the reader sees the article
+   stays behind. Rendered only by _markup/render-link.html on external links.
+   Decoration off: .prose a underlines the whole line box, including this. */
+.link__icon {
+  color: var(--text-muted);
+  font-size: 0.75em;
+  margin-inline-start: 0.25em;
+  text-decoration: none;
+}
+
 .prose strong {
   font-weight: 600;
 }

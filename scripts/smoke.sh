@@ -1637,12 +1637,20 @@ assert_not 'section-a/inline/index.html' 'article__author' \
   'a page without an author url keeps a plain-text byline'
 
 # 55. A content link to another host opens a new tab, so a reference never
-#     takes a reader out of the article. Internal and mailto links never do:
-#     site navigation has to stay in the tab. The notab overlay proves the
-#     switch is the theme's config deciding, not the shape of a URL.
+#     takes a reader out of the article, and carries a marker so the reader
+#     sees the tab stays behind. The marker is a real element rather than
+#     ::after content, so screen readers skip it instead of reading "arrow"
+#     after every link. Internal and mailto links never do: site navigation
+#     has to stay in the tab. The notab overlay proves the switch is the
+#     theme's config deciding, not the shape of a URL.
 assert 'section-a/links/index.html' \
   'href="https://gohugo.io" target="_blank" rel="noopener noreferrer"' \
   'an external content link opens in a new tab'
+assert 'section-a/links/index.html' \
+  '<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span>' \
+  'a new-tabbed link carries a marker that assistive technology skips'
+count_assert 'section-a/links/index.html' 'class="link__icon"' 2 \
+  'only the external links carry a marker'
 assert 'section-a/links/index.html' \
   'href="https://example.com/search\?q=strata&amp;lang=en"' \
   'a new-tabbed link keeps its escaped query string'
@@ -1654,6 +1662,11 @@ assert 'section-a/links/index.html' \
 assert_at "$OUT_NOTAB" 'section-a/links/index.html' \
   '<a href="https://gohugo.io">Hugo docs</a>' \
   'externalLinksNewTab = false navigates the external link in place'
+if grep -q 'link__icon' "$OUT_NOTAB/section-a/links/index.html"; then
+  fail 'externalLinksNewTab = false still marks the external link'
+else
+  pass 'externalLinksNewTab = false drops the marker with the new tab'
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2
