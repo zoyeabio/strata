@@ -1,6 +1,11 @@
 @layer strata-components {
-.site-header {
+html {
+  /* Shared by the header's min-height and the anchor offset further down, so
+     the two cannot drift apart. */
   --header-bar: 92px;
+}
+
+.site-header {
   position: relative;
   background: var(--page-bg);
   padding-block: 6px;
@@ -23,6 +28,14 @@
   .site-header--smart {
     transition: none;
   }
+}
+
+/* An in-page anchor jumps so its target lands at the top of the viewport,
+   which is where the sticky bar sits. Only when the bar is sticky: a static
+   header scrolls away, so the offset would just leave a 92px gap. Measured
+   from min-height, so a nav that wraps above 852px can still overhang it. */
+html:has(.site-header--smart) {
+  scroll-padding-top: var(--header-bar);
 }
 
 .site-brand {

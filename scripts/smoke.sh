@@ -813,7 +813,7 @@ assert 'index.html' 'menu\.[0-9a-f]+\.js' 'menu script loads'
 assert 'index.html' 'aria-controls="site-navigation"' 'hamburger names its panel'
 assert 'index.html' 'id="site-navigation" data-nav-panel' 'panel carries the named id'
 assert 'index.html' 'class="site-nav__sub" id="nav-sub-[0-9]*" hidden' 'submenu starts hidden'
-css_assert 'site-header\{--header-bar:92px;position:relative' 'standard header anchors the mobile panel'
+css_assert 'site-header\{position:relative' 'standard header anchors the mobile panel'
 css_assert_not 'site-header\{[^}]*border-bottom' 'header bar is ruled by its opaque background, not a hairline'
 css_assert 'site-header\{[^}]*padding-block:6px' 'header padding agrees with the 92px bar'
 css_assert 'site-nav__link\{[^}]*font-size:16px' 'nav links carry the 16px size'
@@ -1010,6 +1010,15 @@ fi
 # 38. smart header: sticks, hides on scroll down (script present and wired)
 assert 'index.html' 'site-header--smart" data-smart-header' 'smart shell renders'
 assert 'index.html' 'smart-header\.[0-9a-f]+\.js' 'smart script loads'
+# 38b. the sticky bar must clear in-page anchor jumps, or a heading lands
+#      under it. Gated on :has, so a static header (which scrolls away) gets
+#      no offset and no empty band at the top of the viewport. --header-bar
+#      lives on html for the same reason: a scroll container cannot read a
+#      property defined on the element it is offsetting.
+css_assert 'html\{--header-bar:' \
+  'the header height is a root token the scroll container can read'
+css_assert 'html:has\(\.site-header--smart\)\{scroll-padding-top:var\(--header-bar\)' \
+  'anchors land below the sticky header, not under it'
 # 43. hidden chrome leaves the focus order: the smart header toggles inert
 #     with its transform (a behaviour assert, since markup cannot show it)
 if grep -q 'header\.inert *= *true' "$ROOT/assets/js/smart-header.js" &&

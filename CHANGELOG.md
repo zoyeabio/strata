@@ -96,6 +96,16 @@ re-derived from the templates.
   an internal link needs no work: the browser's default
   `history.scrollRestoration` restores the reading position and no script in
   the theme sets it to `manual` or rewrites history.
+- **Anchors clear the sticky header.** An in-page link jumps its target to
+  the top of the viewport, which is exactly where a sticky header sits, so a
+  heading landed underneath it. The document now carries
+  `scroll-padding-top: var(--header-bar)`, gated on
+  `html:has(.site-header--smart)` so a static header gets no offset — it
+  scrolls away, so the padding would just leave an empty band at the top.
+  `--header-bar` moved from `.site-header` to `html`, because a scroll
+  container cannot read a property defined on the element it is offsetting.
+  It is the header's `min-height`, so a nav that wraps above 852px can still
+  overhang the target.
 - **Image output has a per-source ceiling.** A source may produce no more than
   four responsive candidates plus one fixed social-preview JPEG. The build
   gate reports total files, HTML, images and output size, then fails if role
