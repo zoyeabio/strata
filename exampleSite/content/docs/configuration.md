@@ -79,7 +79,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 
 | Key | Type / default | Effect |
 |---|---|---|
-| `colorScheme` | `"default"` | Colour scheme file name under `assets/css/schemes/`. A missing file fails the build and names the scheme |
+| `colorScheme` | `"default"` | One of the seven shipped names — `default`, `navy`, `forest`, `wine`, `paper`, `clay`, `night`, each light and dark — or your own file under `assets/css/schemes/`. The table is under [Customization](/docs/customization/#colour-schemes). A missing file fails the build and names the scheme. Declare it at the top of the file: a TOML key appended after a `[table]` block such as `[footer.social]` belongs to that table, not to `[params]`, so the theme never sees it and the scheme silently stays `default` with no warning |
 | `defaultAppearance` | `"light"` | Initial colour scheme before the stored preference is read: `light`, `dark`, or `auto` to follow the OS until the visitor toggles |
 | `autoSwitchAppearance` | `true` | Follow the OS preference until the visitor toggles |
 | `logo` | `""` | Asset path to a logo image; rendered in the header. The site title always renders when no logo resolves |

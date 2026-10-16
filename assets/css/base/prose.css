@@ -85,7 +85,7 @@
 }
 
 .prose a:hover {
-  color: var(--site-accent);
+  color: var(--accent-fg);
 }
 
 /* Marks a content link that opens a new tab, so the reader sees the article

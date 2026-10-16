@@ -1,0 +1,33 @@
+/*
+  Warm paper tone for long-form reading; the calmer of the two
+  high-legibility palettes.
+*/
+
+:root {
+  --site-page-bg: #f7f5f0;
+  --site-text: #262622;
+  --site-text-muted: #57544c;
+  --site-text-faint: #84807a;
+  --site-text-strong: #1c1b18;
+  --site-accent: #7a5a1e;
+  --site-accent-strong: #5d4517;
+  --site-link: #5a430f;
+  --site-ring: #8a6a2a;
+  --site-ok: #4a6b2a;
+  --site-error: #9c2f23;
+}
+
+:root.dark {
+  --site-page-bg: #1b1a17;
+  --site-text: #ece8de;
+  --site-text-muted: #b3aea2;
+  --site-text-faint: #8c877c;
+  --site-text-strong: #f4f0e6;
+  --site-accent: #8a6a1f;
+  --site-accent-strong: #6d5316;
+  --site-accent-fg: #d4a44a;
+  --site-link: #e0b25a;
+  --site-ring: #ecc980;
+  --site-ok: #8fc44a;
+  --site-error: #e8706a;
+}

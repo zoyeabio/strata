@@ -66,20 +66,49 @@ re-derived from the templates.
   the full content column, so a landing page never leaves dead air at the right
   edge. The article cap itself is `params.readingMeasure`.
 - **Colour is chosen, not written.** A site sets `params.colorScheme` and the
-  theme resolves it to `assets/css/schemes/<name>.css` — seven variables strong,
-  `--site-accent` plus `-strong`, `-soft`, `--site-surface-tint`,
-  `--site-text-strong`, `--site-link` and `--site-ring`, each with a `:root.dark`
-  twin. Seven palettes ship: blue (`default`, `slate`, `ocean`, `navy`), green
-  (`forest`), wine and gold. The interface is the seven variables and nothing
-  wider, so a brand change never reaches into a scheme file — a site picks a
-  palette, and if none fits the theme grows one. Names are short colour
-  descriptors, not product categories: a general theme should not carry a
-  business context in a scheme name. The contrast floor is gate 39:
-  white-on-accent and white-on-strong at 4.5:1, link on background at 4.5:1
-  and ring on background at 3:1, both modes, over every file the glob finds
-  — a new palette has to pass rather than merely ship.
+  theme resolves it to `assets/css/schemes/<name>.css`. A scheme is a table of
+  anchors — `--site-page-bg`, the four text steps, `--site-accent` plus
+  `-strong` and `-fg`, `--site-link`, `--site-ring`, `--site-ok` and
+  `--site-error`, each with a `:root.dark` twin — and nothing wider. The
+  decorative colours are derived from those anchors with `color-mix` in
+  `palette.css`, so a palette file carries no surface or border scale of its
+  own, and `palette.css` carries no literal colour at all: the anchors are the
+  only colour values in the theme. Seven palettes ship, one per ground rather
+  than one per hue: `default`, `navy`, `forest`, `wine`, `paper`, `clay`
+  and `night`. Names stay short colour descriptors, not product categories —
+  a general theme should not carry a business context in a scheme name. The
+  floors are gate 39, which evaluates the derived colours rather than skipping
+  them: text, link, ok and error at 4.5:1 on the ground, faint text and the
+  focus ring at 3:1, white on the accent fills at 4.5:1, the selection pair at
+  4.5:1, both modes, over every file the glob finds. A completeness check on
+  the anchor set is the safety net for `palette.css` having no fallbacks to
+  hide behind — a new palette has to earn its colour rather than merely ship it.
 
 ### Behaviour notes
+
+- **Colours are derived, not declared.** A scheme used to carry every value it
+  rendered with; it now carries anchors only, and `palette.css` derives the
+  decorative set from them with `color-mix`. A palette file is a data table, so
+  a new scheme inherits a coherent surface and border scale without anyone
+  writing one. Structural colours mix from `--text` — 4%, 7%, 13% and 25% over
+  the ground — which keeps panels and hairlines neutral whatever the brand hue;
+  brand colours mix from `--site-accent` — 5% and 18% — so a tinted panel and a
+  selection track sit in the same palette as the button they point to. The six
+  ratios are declared once, in both mode blocks, and apply to every scheme.
+  `--site-accent` was doing two jobs and one of them was unsatisfiable: it is a
+  fill that must hold white text, and a text colour over the ground. In dark
+  mode no value is dark enough to hold white and light enough to read against
+  the ground, so the text usage moved to `--accent-fg`, backed by a new anchor
+  `--site-accent-fg` set only in dark blocks and falling back to the accent in
+  light. The 404 code, prose link hover, carousel hover, the a11y panel's
+  checkboxes and `::selection` read it now. Gate 39 caught the default dark
+  accent at 3.05:1 as text, below the 4.5:1 it is checked at.
+  The set is seven palettes, one per ground: `default`, `navy`, `forest`,
+  `wine`, `paper`, `clay` and `night`, replacing ten accent-only variants
+  that varied hue without varying ground. Every palette clears the floors in
+  both modes and keeps `ok` and `error` apart under deuteranopia, protanopia
+  and tritanopia — paper dark and clay dark were the two that needed a
+  lightness walk to get there.
 
 - **External content links open in a new tab.** A reader who follows a
   reference is looking it up, not leaving the article — so a link to another

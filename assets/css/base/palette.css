@@ -1,31 +1,71 @@
 @layer strata-base {
+/* The colour space has two layers.
+
+   Anchors are the --site-* custom properties, supplied by
+   assets/css/schemes/<name>.css. They are the only source of colour values in
+   the theme: nothing in this file is a literal colour, so picking a palette is
+   a data change, not a stylesheet edit. Every anchor is contrast-checked in
+   both modes by smoke.sh gate 39.
+
+   Derived values are computed here with color-mix from the anchors, so a new
+   palette inherits a coherent surface and border scale for free. The mixing
+   ratios are declared once, for both modes, and apply to every scheme:
+
+     --text        -> --surface, --surface-hover, --border, --border-strong
+     --site-accent -> --surface-tint, --accent-soft
+
+   Structural colours mix from --text, which keeps cards and rules neutral
+   regardless of the brand hue. Brand colours mix from --site-accent, so a
+   tinted panel and a soft selection track the palette they sit in.
+
+   --accent-fg is the accent read as foreground. --site-accent is a fill that
+   must carry white text, and in dark mode no single value is dark enough to
+   hold white and light enough to read as text, so schemes that need the two
+   apart set --site-accent-fg in their dark block only. */
+
 :root {
   color-scheme: light;
-  --page-bg: #ffffff;
-  --surface: #f6f7f9;
-  --surface-hover: #eef0f3;
-  --border: #e3e7eb;
-  --border-strong: #c9d0d7;
-  --text: #232d38;
-  --text-muted: #66717d;
-  --text-faint: #939da8;
-  --ok: #1a7f4b;
-  --error: #b42318;
+
+  --page-bg: var(--site-page-bg);
+  --text: var(--site-text);
+  --text-muted: var(--site-text-muted);
+  --text-faint: var(--site-text-faint);
+
+  --surface: color-mix(in srgb, var(--text) 4%, var(--page-bg));
+  --surface-hover: color-mix(in srgb, var(--text) 7%, var(--page-bg));
+  --border: color-mix(in srgb, var(--text) 13%, var(--page-bg));
+  --border-strong: color-mix(in srgb, var(--text) 25%, var(--page-bg));
+
+  --surface-tint: color-mix(in srgb, var(--site-accent) 5%, var(--page-bg));
+  --accent-soft: color-mix(in srgb, var(--site-accent) 18%, var(--page-bg));
+
+  --accent-fg: var(--site-accent-fg, var(--site-accent));
+  --ok: var(--site-ok);
+  --error: var(--site-error);
+
   --shadow-card: 0 1px 2px rgb(16 24 40 / 0.05), 0 8px 24px rgb(16 24 40 / 0.06);
 }
 
 :root.dark {
   color-scheme: dark;
-  --page-bg: #12171d;
-  --surface: #1a2129;
-  --surface-hover: #222b34;
-  --border: #2c353f;
-  --border-strong: #3b4652;
-  --text: #dce2e9;
-  --text-muted: #98a3ae;
-  --text-faint: #6b7681;
-  --ok: #57c28a;
-  --error: #f97066;
+
+  --page-bg: var(--site-page-bg);
+  --text: var(--site-text);
+  --text-muted: var(--site-text-muted);
+  --text-faint: var(--site-text-faint);
+
+  --surface: color-mix(in srgb, var(--text) 4%, var(--page-bg));
+  --surface-hover: color-mix(in srgb, var(--text) 7%, var(--page-bg));
+  --border: color-mix(in srgb, var(--text) 13%, var(--page-bg));
+  --border-strong: color-mix(in srgb, var(--text) 25%, var(--page-bg));
+
+  --surface-tint: color-mix(in srgb, var(--site-accent) 5%, var(--page-bg));
+  --accent-soft: color-mix(in srgb, var(--site-accent) 18%, var(--page-bg));
+
+  --accent-fg: var(--site-accent-fg, var(--site-accent));
+  --ok: var(--site-ok);
+  --error: var(--site-error);
+
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
 }
 }

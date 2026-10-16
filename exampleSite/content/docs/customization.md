@@ -11,23 +11,24 @@ Seven schemes ship, each with light and dark variants. Select one with:
 
 ```toml
 # params.toml
-colorScheme = "ocean"
+colorScheme = "paper"
 ```
 
 | Scheme | Character |
 |---|---|
-| `default` (default) | Blue, general purpose |
-| `navy` | Deep navy, formal |
-| `slate` | Grey-blue, editorial |
-| `ocean` | Teal, calm |
-| `forest` | Green, health and nature |
-| `wine` | Burgundy, warm |
-| `gold` | Amber, artisanal |
+| `default` (default) | Neutral blue, general purpose |
+| `navy` | Deep blue, business and finance |
+| `forest` | Green, nature, health and education |
+| `wine` | Burgundy, editorial and culture |
+| `paper` | Warm paper, long-form reading |
+| `clay` | Warm earth, developers |
+| `night` | High contrast, low vision |
 
 A typo in `colorScheme` fails the build and prints the name you wrote — it
 never falls back silently. Every scheme defines both `:root` and
 `:root.dark`, so `defaultAppearance` and the visitor toggle work with all
-of them.
+of them. Warm or dark-first schemes such as `clay` pair well with
+`defaultAppearance = "dark"`.
 
 ## Appearance
 
@@ -51,17 +52,46 @@ and served with an integrity attribute, same as the theme's own stylesheet.
 
 ## CSS variables
 
-A scheme file sets these on `:root` (light) and `:root.dark`:
+A scheme is a table of anchor values, set on `:root` (light) and
+`:root.dark` (dark). Anchors are the only colour values in the theme — the
+decorative colours are derived from them with `color-mix` in
+`assets/css/base/palette.css`, so a palette file never carries a surface or
+border scale of its own.
 
-| Variable | Purpose |
+| Anchor | Purpose |
 |---|---|
-| `--site-accent` | Primary accent (buttons, active nav) |
-| `--site-accent-strong` | Hover/pressed accent |
-| `--site-accent-soft` | Tinted surfaces, chips |
-| `--site-surface-tint` | Subtle background wash |
-| `--site-text-strong` | Headings |
+| `--site-page-bg` | Page ground |
+| `--site-text` | Body text |
+| `--site-text-muted` | Secondary text |
+| `--site-text-faint` | Tertiary text, hints |
+| `--site-text-strong` | Headings, emphasis |
+| `--site-accent` | Button fill; must carry white text |
+| `--site-accent-strong` | Button hover fill |
+| `--site-accent-fg` | Accent read as text or icon. Dark blocks only |
 | `--site-link` | Link colour |
 | `--site-ring` | Focus ring |
+| `--site-ok` | Success text |
+| `--site-error` | Error text |
+
+Derived from the anchors, read but not set:
+
+| Variable | Mixed from |
+|---|---|
+| `--surface`, `--surface-hover` | `--text` over `--page-bg` |
+| `--border`, `--border-strong` | `--text` over `--page-bg` |
+| `--surface-tint`, `--accent-soft` | `--site-accent` over `--page-bg` |
+| `--accent-fg` | `--site-accent-fg`, falling back to `--site-accent` |
+
+Structural colours mix from `--text`, which keeps panels and rules neutral
+whatever the brand hue. Brand colours mix from `--site-accent`, so a tinted
+panel and a selection track sit in the same palette as the button they
+point to.
+
+`--site-accent` is a fill and `--site-accent-fg` is that same hue read as
+text. A button needs a dark enough accent to hold a white label, and in dark
+mode no single value is both dark enough for that and light enough to read
+against the ground, so dark blocks set `--site-accent-fg` separately. Light
+blocks omit it and inherit the accent.
 
 Layout variables (rarely overridden) live in `assets/css/base/reset.css`:
 
@@ -71,10 +101,11 @@ Layout variables (rarely overridden) live in `assets/css/base/reset.css`:
 | `--site-content` | `1024px` | Content column cap |
 
 To build a new scheme, copy `assets/css/schemes/default.css`,
-rename it, adjust both light and dark blocks, and set `colorScheme` in the
-site. Gate 39 checks contrast in both modes for every scheme, so a new
-palette has to earn its colour rather than merely ship it. Prefer `customCSS`
-overrides for small tweaks instead of forking a scheme file.
+rename it, and adjust both blocks. Gate 39 checks that every scheme
+declares its anchors and that the resolved palette clears its contrast
+floors in both modes, so a new palette has to earn its colour rather than
+merely ship it. To change one value, set the anchor from `customCSS` instead
+of forking a scheme file — the derivation picks the new value up on its own.
 
 ## Logo and header
 

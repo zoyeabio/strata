@@ -1,19 +1,33 @@
+/*
+  Neutral blue, general purpose. The reference palette the derived
+  ratios in palette.css were calibrated against.
+*/
+
 :root {
+  --site-page-bg: #ffffff;
+  --site-text: #232d38;
+  --site-text-muted: #66717d;
+  --site-text-faint: #848e99;
+  --site-text-strong: #12202d;
   --site-accent: #295f8f;
   --site-accent-strong: #16354f;
-  --site-accent-soft: #d8e5f0;
-  --site-surface-tint: #f4f7fa;
-  --site-text-strong: #12202d;
   --site-link: #1f527d;
   --site-ring: #5386b3;
+  --site-ok: #167347;
+  --site-error: #b42318;
 }
 
 :root.dark {
+  --site-page-bg: #12171d;
+  --site-text: #dce2e9;
+  --site-text-muted: #98a3ae;
+  --site-text-faint: #6b7681;
+  --site-text-strong: #e8eef5;
   --site-accent: #2c689b;
   --site-accent-strong: #245a87;
-  --site-accent-soft: #1c2f42;
-  --site-surface-tint: #17202a;
-  --site-text-strong: #e8eef5;
+  --site-accent-fg: #6ea3d4;
   --site-link: #8cc0ea;
   --site-ring: #7ab4e0;
+  --site-ok: #57c28a;
+  --site-error: #f97066;
 }

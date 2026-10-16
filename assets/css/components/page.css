@@ -70,7 +70,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--site-accent);
+  color: var(--accent-fg);
   text-transform: uppercase;
 }
 

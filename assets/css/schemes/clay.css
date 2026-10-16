@@ -1,0 +1,33 @@
+/*
+  Warm clay ground with a terracotta accent: cream by day,
+  charcoal by night. Pairs with params.defaultAppearance = "dark".
+*/
+
+:root {
+  --site-page-bg: #fbf1c7;
+  --site-text: #3c3836;
+  --site-text-muted: #665c54;
+  --site-text-faint: #8e8074;
+  --site-text-strong: #1d2021;
+  --site-accent: #af3a03;
+  --site-accent-strong: #8a3402;
+  --site-link: #9d0006;
+  --site-ring: #af3a03;
+  --site-ok: #5f5e03;
+  --site-error: #cc241d;
+}
+
+:root.dark {
+  --site-page-bg: #282828;
+  --site-text: #ebdbb2;
+  --site-text-muted: #bdae93;
+  --site-text-faint: #a89984;
+  --site-text-strong: #f9f5d7;
+  --site-accent: #af3a03;
+  --site-accent-strong: #8a3402;
+  --site-accent-fg: #fdae62;
+  --site-link: #fabd2f;
+  --site-ring: #fe8019;
+  --site-ok: #b8bb26;
+  --site-error: #ff5b47;
+}

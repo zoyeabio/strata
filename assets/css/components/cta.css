@@ -6,16 +6,16 @@
   gap: 14px 20px;
   padding: 20px 24px;
   margin-block: 32px;
-  border: 1px solid var(--site-accent-soft);
+  border: 1px solid var(--accent-soft);
   border-radius: 12px;
-  background: var(--site-surface-tint);
+  background: var(--surface-tint);
 }
 
 .cta__icon svg {
   width: 28px;
   height: 28px;
   display: block;
-  color: var(--site-accent);
+  color: var(--accent-fg);
 }
 
 .cta__body {

@@ -1,19 +1,32 @@
+/*
+  Deep blue for business, finance and institutional content.
+*/
+
 :root {
-  --site-accent: #1a3a5f;
-  --site-accent-strong: #0a2342;
-  --site-accent-soft: #edf2fa;
-  --site-surface-tint: #f5f7fa;
-  --site-text-strong: #2d3748;
-  --site-link: #1e40af;
-  --site-ring: #3b7db4;
+  --site-page-bg: #ffffff;
+  --site-text: #1a2332;
+  --site-text-muted: #54606f;
+  --site-text-faint: #7d8794;
+  --site-text-strong: #0f1826;
+  --site-accent: #1e3a5f;
+  --site-accent-strong: #142a45;
+  --site-link: #1c4a7a;
+  --site-ring: #4a7ba6;
+  --site-ok: #167347;
+  --site-error: #b42318;
 }
 
 :root.dark {
-  --site-accent: #214977;
-  --site-accent-strong: #183658;
-  --site-accent-soft: #17293f;
-  --site-surface-tint: #141c26;
-  --site-text-strong: #e6ebf2;
-  --site-link: #8fbfe8;
-  --site-ring: #3b7db4;
+  --site-page-bg: #0e141c;
+  --site-text: #dfe4ea;
+  --site-text-muted: #94a0ad;
+  --site-text-faint: #6b7682;
+  --site-text-strong: #eaf0f5;
+  --site-accent: #2c5f8a;
+  --site-accent-strong: #234d70;
+  --site-accent-fg: #6fa5d0;
+  --site-link: #7fb0d8;
+  --site-ring: #5f96c4;
+  --site-ok: #57c28a;
+  --site-error: #f97066;
 }

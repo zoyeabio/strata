@@ -481,6 +481,16 @@ css_assert '@media\(min-width:640px\)\{:root\{--site-gutter:56px' \
 css_assert '@media\(min-width:1024px\)\{:root\{--site-gutter:128px' \
   'gutter rung 128px sits at the 1024px breakpoint'
 css_assert '--site-accent:#295f8f' 'default scheme accent is linked in'
+css_assert '--site-page-bg:#12171d' 'the dark block ships its own ground'
+css_assert '--site-accent-fg:#6ea3d4' 'the dark block ships a separate accent foreground'
+css_assert 'color-mix\(in srgb,var\(--text\) 4%,var\(--page-bg\)' \
+  'surfaces derive from --text and survive the tailwind pass'
+css_assert 'color-mix\(in srgb,var\(--site-accent\) 18%,var\(--page-bg\)' \
+  'the soft selection tint derives from the accent'
+css_assert '\--accent-fg:var\(--site-accent-fg,[[:space:]]*var\(--site-accent\)' \
+  'the accent foreground falls back to the accent in light'
+css_assert_not '\--site-accent-soft|\--site-surface-tint' \
+  'no scheme-owned decorative token leaks into the output'
 count_assert 'section-a/shortcodes/index.html' \
   'min\(calc\(100vw - 112px\), 720px\)' 7 \
   'text preset caps every body image and loop clone at the reading measure'
@@ -1037,11 +1047,15 @@ else
   fail 'smart header hides on load when already scrolled'
 fi
 
-# 39. scheme contrast: every colour scheme keeps white-on-accent/strong
-#     at 4.5:1 and ring at 3:1 in both modes (a pale dark-mode accent once
-#     shipped below 2:1 on real buttons). The shipped values sit well above
-#     these floors - dark accents 5.9-9.2, rings 3.8-4.4 - so a palette
-#     tweak has headroom before it reaches the gate.
+# 39. scheme contrast: every colour scheme must declare its full anchor set, and
+#     the palette resolved from those anchors must stay readable in both modes.
+#     The decorative colours palette.css derives with color-mix are evaluated
+#     here rather than skipped, so a bad anchor cannot hide behind a derived
+#     surface. Floors: copy-bearing tokens (text, link, ok, error) at 4.5:1 on
+#     the ground, faint text and the 2px focus ring at 3:1, white on the accent
+#     fills at 4.5:1 because cta.css and contact-form.css hard-code white labels,
+#     and the selection pair at 4.5:1. palette.css carries no literal colour
+#     fallbacks, so the missing-anchor check is the safety net.
 if contrast_out=$(python3 - "$ROOT" <<'PY'
 import re, sys, pathlib
 root = pathlib.Path(sys.argv[1])
@@ -1056,40 +1070,94 @@ def ratio(a, b):
     hi, lo = sorted([lum(a), lum(b)], reverse=True)
     return (hi + 0.05) / (lo + 0.05)
 
+def mix(a, b, f):
+    """color-mix(in srgb, a f%, b), computed the way the browser does."""
+    pa = [int(a.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4)]
+    pb = [int(b.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4)]
+    return '#%02x%02x%02x' % tuple(round(x * f + y * (1 - f)) for x, y in zip(pa, pb))
+
+MIX = re.compile(r'^color-mix\(in srgb,\s*(#[0-9a-fA-F]{6})\s+([\d.]+)%\s*,\s*(#[0-9a-fA-F]{6})\s*\)$')
+VAR_FB = re.compile(r'var\((--[\w-]+)\s*,\s*([^)]+)\)')
+VAR_PLAIN = re.compile(r'var\((--[\w-]+)\)')
+
 def block_vars(text, selector):
     m = re.search(re.escape(selector) + r'\s*\{([^}]*)\}', text)
+    return re.findall(r'(--[\w-]+)\s*:\s*([^;]+);', m.group(1)) if m else []
+
+def resolve(decls, scheme):
+    """Evaluate palette declarations in source order over a scheme's anchors."""
     out = {}
-    if m:
-        for k, v in re.findall(r'(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})', m.group(1)):
-            out[k] = v
+    def look(key):
+        for pool in (out, scheme):
+            if key in pool:
+                return pool[key]
+        raise KeyError(key)
+    for name, expr in decls:
+        v = expr.strip()
+        m = VAR_FB.search(v)
+        if m:
+            try:
+                v = look(m.group(1))
+            except KeyError:
+                v = v.replace(m.group(0), m.group(2).strip())
+        v = VAR_PLAIN.sub(lambda mm: look(mm.group(1)), v)
+        m = MIX.match(v)
+        out[name] = mix(m.group(1), m.group(3), float(m.group(2)) / 100) if m else v
     return out
 
+REQUIRED = ('--site-page-bg', '--site-text', '--site-text-muted',
+            '--site-text-faint', '--site-text-strong', '--site-accent',
+            '--site-accent-strong', '--site-link', '--site-ring',
+            '--site-ok', '--site-error')
+ON_BG = (('--text', 4.5), ('--text-muted', 4.5), ('--text-faint', 3.0),
+         ('--site-text-strong', 4.5), ('--site-link', 4.5), ('--accent-fg', 4.5),
+         ('--site-ring', 3.0), ('--site-ok', 4.5), ('--site-error', 4.5))
+ON_OTHER = (('--accent-fg', '--surface-tint', 3.0),
+            ('--site-text-strong', '--accent-soft', 4.5))
+WHITE_ON = ('--site-accent', '--site-accent-strong')
+
 pal = (root / 'assets/css/base/palette.css').read_text()
-light_bg = block_vars(pal, ':root')['--page-bg']
-dark_bg = block_vars(pal, ':root.dark')['--page-bg']
-bad = []
+bad, pairs = [], 0
+def check(scope, fg, bg, floor):
+    global pairs
+    r = ratio(scope[fg], scope[bg])
+    pairs += 1
+    if r < floor:
+        bad.append(f'{scope["name"]} {scope["mode"]} {fg} on {bg} '
+                   f'{scope[fg]} = {r:.2f} < {floor}')
+
 for p in sorted((root / 'assets/css/schemes').glob('*.css')):
     css = p.read_text()
-    for mode, bg in ((':root', light_bg), (':root.dark', dark_bg)):
-        v = block_vars(css, mode)
-        for key in ('--site-accent', '--site-accent-strong'):
-            if key in v and ratio('#ffffff', v[key]) < 4.5:
-                bad.append(f'{p.name} {mode} white-on-{key} {v[key]}')
-        if '--site-link' in v and ratio(v['--site-link'], bg) < 4.5:
-            bad.append(f'{p.name} {mode} link-on-bg {v["--site-link"]}')
-        if '--site-ring' in v and ratio(v['--site-ring'], bg) < 3.0:
-            bad.append(f'{p.name} {mode} ring-on-bg {v["--site-ring"]}')
+    for mode in (':root', ':root.dark'):
+        anchors = dict(block_vars(css, mode))
+        need = REQUIRED + (('--site-accent-fg',) if mode == ':root.dark' else ())
+        missing = [k for k in need if k not in anchors]
+        if missing:
+            bad.append(f'{p.name} {mode} missing anchors: {", ".join(missing)}')
+            continue
+        scope = {'name': p.name, 'mode': mode}
+        scope.update(anchors)
+        scope.update(resolve(block_vars(pal, mode), anchors))
+        for fg, floor in ON_BG:
+            check(scope, fg, '--page-bg', floor)
+        for fg, ob, floor in ON_OTHER:
+            check(scope, fg, ob, floor)
+        for fg in WHITE_ON:
+            r = ratio('#ffffff', scope[fg])
+            pairs += 1
+            if r < 4.5:
+                bad.append(f'{p.name} {mode} white on {fg} {scope[fg]} = {r:.2f} < 4.5')
 if bad:
     for b in bad:
         print(f'FAIL {b}')
     sys.exit(1)
-print('all schemes hold contrast in both modes')
+print(f'all {pairs} contrast pairs clear their floor in every scheme and mode')
 PY
 ); then
   pass "scheme contrast holds ($contrast_out)"
 else
   printf '%s\n' "$contrast_out" >&2
-  fail 'every scheme holds text and focus contrast'
+  fail 'every scheme declares its anchors and holds contrast'
 fi
 
 # 40. keyboard and assistive-tech paths: skip link, carousel arrows and

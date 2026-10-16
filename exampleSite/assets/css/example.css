@@ -24,11 +24,12 @@
   padding: 2px 8px;
   font-size: 12px;
   line-height: 1.6;
-  /* --site-accent works against the page background, not against
-     --site-accent-soft: in dark it is #2c689b on #1c2f42, about 2.3:1.
-     --site-link is the token that is readable on both, 6.4:1 and 7.1:1. */
+  /* On a soft-accent ground the accent is close to its own value, so the
+     chip carries --site-link instead: in dark the accent sits at about
+     2.6:1 against its soft tint, under the 3:1 non-text floor, while the
+     link holds near 8:1 there and 6.2:1 in light. */
   color: var(--site-link);
-  background: var(--site-accent-soft);
+  background: var(--accent-soft);
   border-radius: 999px;
 }
 

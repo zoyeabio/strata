@@ -1,0 +1,33 @@
+/*
+  High contrast for low vision; the widest legibility margins of
+  the set. Text runs 17-20:1 against the ground.
+*/
+
+:root {
+  --site-page-bg: #ffffff;
+  --site-text: #0a0a0a;
+  --site-text-muted: #3d3d3d;
+  --site-text-faint: #5a5a5a;
+  --site-text-strong: #000000;
+  --site-accent: #0a3d8f;
+  --site-accent-strong: #072a63;
+  --site-link: #1c4fd0;
+  --site-ring: #0a3d8f;
+  --site-ok: #0b5d1f;
+  --site-error: #8a0d04;
+}
+
+:root.dark {
+  --site-page-bg: #0b0d10;
+  --site-text: #f2f5f9;
+  --site-text-muted: #b9c0c9;
+  --site-text-faint: #8e97a1;
+  --site-text-strong: #ffffff;
+  --site-accent: #1c4fd0;
+  --site-accent-strong: #163fa6;
+  --site-accent-fg: #6aa4ff;
+  --site-link: #7fb2ff;
+  --site-ring: #7fb2ff;
+  --site-ok: #4ade80;
+  --site-error: #ff6b60;
+}

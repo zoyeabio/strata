@@ -58,7 +58,7 @@ hr {
 }
 
 ::selection {
-  background: var(--site-accent-soft);
+  background: var(--accent-soft);
   color: var(--site-text-strong);
 }
 

@@ -1,19 +1,32 @@
+/*
+  Green for nature, health and education content.
+*/
+
 :root {
-  --site-accent: #2f6b4f;
-  --site-accent-strong: #1f4a36;
-  --site-accent-soft: #dcece4;
-  --site-surface-tint: #f3f7f4;
-  --site-text-strong: #132a20;
-  --site-link: #2b6549;
-  --site-ring: #578d74;
+  --site-page-bg: #ffffff;
+  --site-text: #1f2a22;
+  --site-text-muted: #57685c;
+  --site-text-faint: #7d8d82;
+  --site-text-strong: #14201a;
+  --site-accent: #2f6b3f;
+  --site-accent-strong: #1f4d2c;
+  --site-link: #275c39;
+  --site-ring: #4f8f5f;
+  --site-ok: #4a7c1f;
+  --site-error: #b4471f;
 }
 
 :root.dark {
-  --site-accent: #2d6e50;
-  --site-accent-strong: #225640;
-  --site-accent-soft: #17281f;
-  --site-surface-tint: #141d18;
-  --site-text-strong: #e2ece6;
-  --site-link: #7fbf9c;
-  --site-ring: #6aa388;
+  --site-page-bg: #101613;
+  --site-text: #e0e8e2;
+  --site-text-muted: #9ab0a1;
+  --site-text-faint: #6e8076;
+  --site-text-strong: #eef4ef;
+  --site-accent: #2f7043;
+  --site-accent-strong: #265a33;
+  --site-accent-fg: #7fc794;
+  --site-link: #8fcfa5;
+  --site-ring: #6db885;
+  --site-ok: #a8d060;
+  --site-error: #f9906f;
 }

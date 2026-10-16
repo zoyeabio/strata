@@ -120,7 +120,7 @@
 .carousel__btn:hover {
   border-color: var(--border-strong);
   background: var(--page-bg);
-  color: var(--site-accent);
+  color: var(--accent-fg);
 }
 
 .carousel__btn svg {
