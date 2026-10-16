@@ -298,12 +298,45 @@ re-derived from the templates.
   are two policies over the same data, so there is nothing to factor out — and
   unifying them would make the JSON-LD lose the title a search engine indexes.
 
-### Gates
+ - **`extend-article-link.html` is not inside the card link, despite the name.**
+   The docs called it "extra markup inside each card link", which is not what
+   the template does: `page/card.html` calls it at the end of the `<article>`,
+   after the summary, so it can hold block-level content — a tag chip, a byline,
+   a badge. Restricting it to the link would have left nothing for the rest of
+   the card to carry. The docs now say so explicitly, because the name suggests
+   the opposite and a site copying a partial wants to know where the markup
+   lands before it styles it. exampleSite demonstrates it with a tag chip.
+ - **exampleSite implements every site hook, and ships a reference `customCSS`
+   file.** The hooks were documented in a table and existed nowhere to copy
+   from — a reader had to write `partials/extend-head.html` from a description
+   of what the partial receives. `exampleSite/layouts/partials/` now carries all
+   five, each with a header comment naming its caller, its context and whether
+   it is cached, and each verifiable in the built output: the cached head hook
+   carries a constant `theme-color`, the uncached one carries the page's own
+   URL, so the difference between the two is visible rather than asserted.
+   `assets/css/example.css` is the reference `customCSS` file and every rule in
+   it styles markup the example emits through those partials. That pairing also
+   records why `customCSS` needs no `!important`: the theme's rules live in
+   `@layer`, a site's stylesheet does not, and unlayered wins at equal
+   specificity.
+
+   Two pre-existing page-level demos were no-ops and are corrected. `[list]
+   showSummary` defaults to `false`, so `showsummary: false` on the docs index
+   did nothing; the site now shows summaries on posts, and the docs index opts
+   out of them on a page it has to stand alone. `page/breadcrumbs.html` renders
+   only when a page has non-home ancestors, so `showBreadcrumbs: false` on a
+   top-level page would never have been visible either and is gone. A demo that
+   cannot be observed is not a demo, which is why the coverage gate reports
+   undemonstrated keys as a warning rather than a failure.
+ 
+ ### Gates
+
 
 `smoke.sh` (fixture assertions, rebuilt and re-verified on every run),
 `check-build.sh` (R1–R15), `validate-theme.sh`, `validate-site.sh`,
-`validate-content.sh`, `audit-partials.sh` (missing/orphan partial call
-graph), `new-site.sh` and `place-image.sh`. A behaviour change ships with its
+`validate-content.sh`, `validate-example.sh`, `audit-partials.sh`
+(missing/orphan partial call graph), `new-site.sh` and `place-image.sh`.
+ A behaviour change ships with its
 assertion; the standing rules live in `CONTRIBUTING.md`.
 
 `validate-content.sh` exists because the build cannot see a failure that
@@ -319,3 +352,17 @@ harness with deliberately minimal front matter, so it does not pass this lint
 and is not judged by it. Hugo flattens a front matter `params:` map into
 `.Params`; a rendered fixture pins that behavior, while the source lint applies
 the same allowlist to nested and top-level spellings.
+
+`validate-example.sh` exists because coverage is not the same as correctness.
+`test/fixture` proves the theme renders what it promises; `exampleSite` is what
+a reader actually opens, and nothing kept the two in step. A shortcode could
+ship with no live example, a site hook with no implementation to copy from, and
+a hook the theme stops probing could leave a dead file in
+`exampleSite/layouts/partials/` indefinitely. The script derives all three lists
+from the theme's own tree — `layouts/shortcodes/`, the `templates.Exists`
+probes, and the keys the templates read — so there is no hand-written inventory
+to keep in step with the code. Shortcode and hook coverage fail; page-level
+front matter key coverage is advisory, because some overrides have no sensible
+page to demonstrate them on, and forcing one would mean writing content about
+the feature rather than the product. It runs from `validate-theme.sh` as well
+as standalone.

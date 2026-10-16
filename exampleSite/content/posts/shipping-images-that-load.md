@@ -5,7 +5,11 @@ summary: "Lazy-loading is the wrong answer to slow pages. The right one is decid
 date: 2026-05-21
 tags: ["images", "performance"]
 keywords: ["images", "performance", "webp", "responsive"]
-author: "Strata Studio"
+# A contributor post: author and authorurl are page-level overrides of the
+# site's [author] table, so the byline and the schema Person.url both differ
+# from every other article on this site.
+author: "June Park"
+authorurl: "https://example.com/"
 featureimage: "images/features-images.png"
 featureimagealt: "An illustration with generous margins"
 ---

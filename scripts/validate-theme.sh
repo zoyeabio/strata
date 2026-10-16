@@ -208,6 +208,17 @@ else
   fail 'exampleSite front matter is complete'
 fi
 
+# and it must still demonstrate the theme's public surface. test/fixture
+# asserts mechanically; exampleSite is the other kind of test, the one a
+# reader sees. A new shortcode or a new site hook has to ship with a live
+# example and a working implementation to copy from, or this fails.
+if "$ROOT/scripts/validate-example.sh" "$ROOT"
+then
+  pass 'exampleSite demonstrates the theme public surface'
+else
+  fail 'exampleSite demonstrates the theme public surface'
+fi
+
 # Summary is a documented description fallback and Hugo exposes a top-level
 # summary through .Params. Pin that spelling so the lint cannot accidentally
 # require the nested params form while the templates accept both.

@@ -1,0 +1,18 @@
+{{- /*
+  Extra markup at the end of a page card.
+
+  Despite the name, the partial is not called inside the
+  <a class="card__link">: it is called at the end of the <article>, after the
+  summary, so it can hold block-level content — a tag chip, a byline, a badge.
+  Restricting it to the link would leave nothing for the rest of the card to
+  carry.
+
+  Context is the page the card represents.
+
+  Called by: partials/page/card.html
+*/ -}}
+{{- range $i, $tag := .Params.tags }}
+{{- if eq $i 0 }}
+<span class="card__chip"><code>#{{ . }}</code></span>
+{{- end }}
+{{- end }}

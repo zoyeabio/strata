@@ -1,0 +1,61 @@
+/* exampleSite's own stylesheet, loaded through [params] customCSS after the
+   theme's own bundle.
+
+   It exists to prove two things at once. The styles here are consumed only by
+   markup the site emits itself, through layouts/partials/extend-article-link.html
+   and layouts/partials/cookie-consent.html. And because this file is unlayered
+   while the theme's rules live in @layer strata-base and strata-components,
+   every rule below wins at equal specificity, which is how a site overrides
+   the theme without forking it.
+
+   Nothing in this file is needed by the theme; it would be deleted with the
+   customCSS entry. */
+
+/* layouts/partials/extend-article-link.html, at the end of a page card. */
+.card__chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--site-accent);
+  background: var(--site-accent-soft);
+  border-radius: 999px;
+}
+
+/* The theme styles every code element with a surface background and a border;
+   inside a chip neither belongs. */
+.card__chip code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
+/* layouts/partials/cookie-consent.html, before </body>. */
+.site-consent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 32px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.site-consent p {
+  margin: 0;
+}
+
+.site-consent__choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}

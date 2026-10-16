@@ -1,0 +1,22 @@
+{{- /*
+  Site-owned consent banner, rendered just before </body>. The theme ships no
+  consent UI and cannot: what counts as consent is site law, not theme code.
+
+  This is the no-JavaScript end of the documented range. A native checkbox
+  holds the choice and the wrapper is the mount point a real CMP replaces.
+  Note the shape of the JavaScript end: any controller has to be a
+  fingerprinted file reference, not inline code, because static/_headers
+  ships script-src 'self' with no unsafe-inline. Load Consent Mode defaults
+  from extend-head.html, before any measurement tag.
+
+  Context is the page.
+
+  Called by: _default/baseof.html
+*/ -}}
+<div class="site-consent" data-cookie-consent role="region" aria-label="Cookie consent">
+  <p>This site can store analytics cookies.</p>
+  <label class="site-consent__choice">
+    <input type="checkbox" name="analytics-consent">
+    <span>Accept analytics</span>
+  </label>
+</div>

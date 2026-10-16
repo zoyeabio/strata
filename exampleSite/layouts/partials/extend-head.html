@@ -1,0 +1,14 @@
+{{- /*
+  Cached head hook. Called through partialCached with .Site, so the output is
+  built once and shared by every page — put anything that is the same on every
+  page here: theme-color, a site-wide preconnect, or a measurement loader's
+  Consent Mode defaults.
+
+  The documented Consent Mode load belongs here too, but as a fingerprinted
+  file reference rather than inline code: static/_headers ships
+  script-src 'self' with no unsafe-inline, so an inline <script> would be
+  blocked in the browser.
+
+  Called by: partials/head/head.html
+*/ -}}
+<meta name="theme-color" content="#232d38">

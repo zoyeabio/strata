@@ -1,0 +1,12 @@
+{{- /*
+  Uncached head hook. Called with the page context and rebuilt for every page,
+  so it is the place for markup that varies by page — extra JSON-LD for a page
+  that needs its own entities, page-specific structured data. Anything that is
+  the same on every page belongs in extend-head.html, which is cached.
+
+  The value below is a demo marker: it differs per page, which is what
+  separates this hook from extend-head.html. Replace it with your own markup.
+
+  Called by: partials/head/head.html
+*/ -}}
+<meta name="strata-demo:uncached" content="{{ .RelPermalink }}">

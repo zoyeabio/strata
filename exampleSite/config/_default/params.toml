@@ -16,6 +16,10 @@ twitterCreator = "@stratastudio"
 enableSearch = true
 enableA11y = true
 defaultAppearance = "auto"
+# Loaded after the theme's own bundle, so these rules win at equal
+# specificity. Every rule in the file is consumed by markup this site emits
+# through layouts/partials/, which is the intended use.
+customCSS = ["css/example.css"]
 
 [header]
   layout = "smart"
@@ -24,6 +28,7 @@ defaultAppearance = "auto"
   contentLength = 600
 
 [list]
+  showSummary = true
   showBreadcrumbs = true
   showHero = true
 

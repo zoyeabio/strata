@@ -252,6 +252,23 @@ A production article can start from this compact front matter. Fill every empty
 value before changing `draft` to `false`; the content lint enforces the fields
 that feed search and structured data.
 
+### The overrides above, demonstrated
+
+Page-level overrides are demonstrated live on this site, not only described
+here, so you can inspect the page and the front matter together:
+
+| Page | Override | Why it is there |
+|---|---|---|
+| [Documentation](/docs/) | `showSummary: false` | A docs index needs neither standfirsts nor card summaries |
+| [Shipping images that load](/posts/shipping-images-that-load/) | `author`, `authorurl` | A contributor post, whose byline and schema `Person.url` both differ from the site's `[author]` table |
+
+Not every override has a page that wants it, and forcing one would mean writing
+content about the feature rather than the product. `scripts/validate-example.sh`
+reports the undemonstrated keys as a warning rather than a failure, so the list
+stays visible when a new one arrives.
+
+
+
 ```yaml
 ---
 title: ""
@@ -300,8 +317,25 @@ Drop-in partials a site may provide; the theme calls them when present:
 | `partials/favicons.html` | `head/head.html` | Site favicon links |
 | `partials/extend-head.html` | `head/head.html` | Extra head markup (cached) |
 | `partials/extend-head-uncached.html` | `head/head.html` | Extra head markup (uncached) |
-| `partials/extend-article-link.html` | `page/card.html` | Extra markup inside each card link |
+| `partials/extend-article-link.html` | `page/card.html` | Extra markup at the end of each card, after the summary. Not inside the link, despite the name |
 | `partials/cookie-consent.html` | `_default/baseof.html` | Site-owned consent banner/CMP (see Consent below) |
+
+Every one of these is implemented in this example's own `layouts/partials/`,
+which is the reference to copy from: `exampleSite/layouts/partials/`.
+
+## Render hooks
+
+Markdown renderers Goldmark calls, in `layouts/_default/_markup/`. A site
+overrides one by placing a file at the same path in its own layouts. Neither is
+optional the way the site hooks above are: the theme always provides both, so
+copying one replaces it rather than adding to it. See [Customization](/docs/customization/#render-hooks)
+for the details and the override examples.
+
+| Template | Called for | Purpose |
+|---|---|---|
+| `_default/_markup/render-link.html` | Every link in markdown content | External links open in a new tab and carry a marker; gated by `externalLinksNewTab` |
+| `_default/_markup/render-image.html` | Every `![](x)` in markdown content | Joins the responsive pipeline instead of falling through to Goldmark's plain `<img>` |
+
 
 ## Unsupported keys
 
