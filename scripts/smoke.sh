@@ -37,7 +37,14 @@ if ! command -v tailwindcss >/dev/null 2>&1; then
   exit 1
 fi
 
-hugo --source "$ROOT/test/fixture" --destination "$OUT" --quiet 2>"$WORK/build.stderr"
+# A build failure has to surface its own message: stderr is captured here so
+# the silence assertion below can read it, which means set -e would otherwise
+# exit with the only diagnostic already deleted by the trap.
+if ! hugo --source "$ROOT/test/fixture" --destination "$OUT" --quiet 2>"$WORK/build.stderr"; then
+  printf 'FAIL fixture build failed\n' >&2
+  cat "$WORK/build.stderr" >&2
+  exit 1
+fi
 hugo --source "$ROOT/test/fixture" --environment measure \
   --destination "$OUT_MEASURE" --quiet
 hugo --source "$ROOT/test/fixture" --environment nosummary \
