@@ -88,7 +88,7 @@ for path in _toml_files(site_root):
         taxonomies = _merge(taxonomies, data["taxonomies"] or {})
     if "disableKinds" in data or "disablekinds" in data:
         values = data.get("disableKinds", data.get("disablekinds")) or []
-        disabled = {str(value).lower() for value in values}
+        disabled |= {str(value).lower() for value in values}
 
 if {"taxonomy", "term"} <= disabled:
     print("site explicitly disables taxonomy and term pages")

@@ -139,9 +139,11 @@ re-derived from the templates.
   `[taxonomies]`, so the site either enables Strata's `tags`/`series` features
   or supplies an empty table to disable Hugo's implicit taxonomies. The site
   gate accepts both modes, rejects an omitted table and catches mappings that
-  the theme's `GetTerms` calls cannot resolve. Config fragments are deep-merged
-  before that decision, and the theme gate builds a generated taxonomy-free
-  consumer to prove it emits neither term directories nor empty term markup.
+  the theme's `GetTerms` calls cannot resolve. Fragments are merged before that
+  decision the way Hugo merges them — tables deep, `disableKinds` unioned — so a
+  rule split across config layers cannot hide. The theme gate builds a generated
+  taxonomy-free consumer to prove it emits neither term directories nor empty
+  term markup.
   The assertion first requires the article artifact to exist, then checks both
   quoted and minified-unquoted class markup, so a missing file cannot pass as
   an empty taxonomy result.
