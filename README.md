@@ -27,7 +27,8 @@ describes shipped behaviour.
 ## Requirements
 
 - [Hugo](https://gohugo.io) **0.161.0 or later**, Extended edition
-- Node.js 20 or later, with npm — Hugo runs the Tailwind CSS CLI through node
+- Node.js 22 or later, with npm — Hugo runs the Tailwind CSS CLI through node,
+  passing it `--permission`, a flag Node 20 does not have
 - Go 1.22 (only needed for Hugo Modules)
 
 ## Installation

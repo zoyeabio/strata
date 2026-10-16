@@ -305,6 +305,18 @@ re-derived from the templates.
   names a run rather than a laptop. It needs Hugo Extended, Node with `npm
   ci` and Python 3.11 for `tomllib`, and takes no third-party action beyond
   the official setup ones.
+- **The Node floor is 22, and the first CI run is what found out.** The docs
+  said "Node 20 or later" because Hugo 0.161 runs the npm CLI through node,
+  but this Hugo also passes that node `--permission`, which Node 20 does not
+  have: it answers `bad option:` and the stylesheet never builds. Nothing
+  said so. The gate runs Hugo `--quiet`, the failure's whole message was in a
+  file the EXIT trap deleted, and the run printed `exit code 1` and nothing
+  else — measured locally under `nvm` before anything was guessed: Node 20
+  fails, 22 and 23 build. `smoke.sh` now repeats a failed build without
+  `--quiet` so the next silent failure speaks for itself, and the floor is
+  22 in the README, both docs, both `engines` blocks, the scaffold's
+  generated `package.json` (where npm warns at install time) and the
+  workflow's `node-version` — which the run then proves instead of asserts.
 - **The three column shortcodes are one line each.** `col-left`, `col-mid`
   and `col-right` render identical markup, so the `<div class="mcol">` moved
   to `shortcodes/mcol.html` and each shortcode passes its text along. The

@@ -24,7 +24,7 @@ not here, it is not part of the contract.
 
 ## The short version
 
-- Hugo **0.161.0 or later**, Extended edition. Node 20 or later.
+- Hugo **0.161.0 or later**, Extended edition. Node 22 or later.
 - Add the module, allow `node` and `tailwindcss` in `security.exec`, and
   build. That is the whole installation.
 - Declare `mainSections` so the theme knows which of your sections are

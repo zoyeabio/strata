@@ -349,6 +349,8 @@ EOF
 # package.json — Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the
 # build needs an npm install. `npm run build` / `npm run dev` put
 # node_modules/.bin on PATH, which is how Hugo finds the tailwindcss script.
+# `engines` earns its place: Hugo passes node `--permission`, node 20 rejects
+# it, and the build then fails without saying why.
 cat > "$OUT/package.json" <<EOF
 {
   "name": "$SLUG",
@@ -362,6 +364,9 @@ cat > "$OUT/package.json" <<EOF
     "@tailwindcss/forms": "0.5.11",
     "@tailwindcss/typography": "0.5.20",
     "tailwindcss": "4.3.3"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
 EOF
