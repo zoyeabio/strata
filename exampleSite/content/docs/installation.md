@@ -15,26 +15,16 @@ weight: 10
 
 ## Hugo Module (recommended)
 
-Before the theme has a published release tag, mount it from a checkout with
-a `replace`:
+The theme is published at `github.com/zoyeabio/strata`. In your site's
+`config/_default/hugo.toml`:
 
 ```toml
 [module]
   proxy = "direct"
 
   [[module.imports]]
-    path = "example.com/strata"
+    path = "github.com/zoyeabio/strata"
 ```
-
-```go
-require example.com/strata v0.0.0
-
-replace example.com/strata => /absolute/path/to/strata
-```
-
-The `replace` wins, so the version does not need to exist yet. `example.com`
-is Go's reserved documentation domain, so the path is never fetchable — it is
-a placeholder for wherever you actually host the theme.
 
 Then run:
 
@@ -42,9 +32,26 @@ Then run:
 hugo mod tidy
 ```
 
-Once a release tag exists, replace `example.com/strata` with the published
-module path, remove the `replace`, and pin the version with
-`go get <module-path>@<tag>`.
+Pin a release so an upgrade is an edit you make rather than one that happens:
+
+```sh
+go get github.com/zoyeabio/strata@<tag>
+```
+
+To work against a local checkout instead, add a `replace`. It wins over the
+required version, so that version does not need to exist:
+
+```go
+require github.com/zoyeabio/strata v0.0.0
+
+replace github.com/zoyeabio/strata => /absolute/path/to/strata
+```
+
+Your own site's module path is a separate thing: the scaffold writes
+`module example.com/<slug>` there, which is Go's reserved documentation
+domain and is never fetched — the host for a site you have not pushed yet is
+not the theme's to choose.
+
 
 ## Git clone
 
@@ -119,9 +126,9 @@ printed reference is the bare filename.
 
 ## Upgrading
 
-While on the `replace` flow, pull the theme checkout and re-run the
-validators. Once a release tag exists, `hugo mod get -u <module-path> &&
-hugo mod tidy` pins the new version, then rebuild and run the validator.
+With a pinned module, `hugo mod get -u github.com/zoyeabio/strata && hugo mod
+tidy` moves the version, then rebuild and run `./scripts/validate-site.sh`.
+On the `replace` flow, pull the checkout and re-run the validators instead.
 
 Bumping Hugo changes how the stylesheet is compiled. Below 0.161.0 Hugo
 calls the standalone Tailwind binary directly; from 0.161.0 it runs the

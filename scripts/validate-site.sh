@@ -11,7 +11,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SITE="${1:?Usage: ./scripts/validate-site.sh /path/to/site}"
-MODULE="example.com/strata"
+MODULE="github.com/zoyeabio/strata"
 if [ ! -d "$SITE" ]; then
   printf 'ERROR: no such site directory: %s\n' "$SITE" >&2
   exit 2

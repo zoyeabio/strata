@@ -1,7 +1,7 @@
-module example.com/strata-fixture
+module github.com/zoyeabio/strata-fixture
 
 go 1.22
 
-require example.com/strata v0.0.0
+require github.com/zoyeabio/strata v0.0.0
 
-replace example.com/strata => ../../
+replace github.com/zoyeabio/strata => ../../

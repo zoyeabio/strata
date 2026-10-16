@@ -287,15 +287,24 @@ re-derived from the templates.
   byte-identical to default's (`#2f6fa5` / `#245a87`), so the two schemes were
   indistinguishable in dark mode. They are now derived from navy's own light
   hue, keeping the +6-lightness step every other scheme follows.
-- **The theme has no shared ancestry in its code or docs.** The module path is
-  `example.com/strata`, and no script, template, doc or changelog entry names
-  anything it came from. `validate-site.sh` now holds the path in one `MODULE`
-  variable and greps for it literally, instead of matching a `github.com/…`
-  shape the new path cannot take, and `new-site.sh` drops `--org` for the
-  same reason: the scaffold's module path is `example.com/<slug>`. The docs
-  call the path a placeholder for wherever you actually host the theme, and
-  note that `example.com` is Go's reserved documentation domain, so it is
-  never fetchable and `go get` needs the real path.
+- **The theme publishes as a Hugo Module at a path that fetches.** `go.mod`
+  declares `github.com/zoyeabio/strata`, so a site installs it the way
+  Blowfish installs: one `[[module.imports]]` line and `hugo mod tidy`, with
+  no `replace` and no local checkout. The same path carries the README, the
+  example site, `new-site.sh`'s scaffold, the fixture and
+  `validate-site.sh`'s single `MODULE` variable, which greps for it literally
+  instead of matching a `github.com/…` shape. The theme's own ancestry stays
+  unnamed: no script, template, doc or changelog entry says what it came
+  from. What deliberately does not follow the published path is a *site's*
+  module path — the scaffold still writes `example.com/<slug>`, Go's reserved
+  documentation domain, because a site's host is not the theme's to choose,
+  and `new-site.sh` ships no `--org` for that reason.
+- **The four gates run on GitHub.** `.github/workflows/ci.yml` runs
+  `smoke.sh`, `validate-theme.sh`, `validate-site.sh` and
+  `audit-partials.sh` on every push and pull request, so "the gates pass"
+  names a run rather than a laptop. It needs Hugo Extended, Node with `npm
+  ci` and Python 3.11 for `tomllib`, and takes no third-party action beyond
+  the official setup ones.
 - **The three column shortcodes are one line each.** `col-left`, `col-mid`
   and `col-right` render identical markup, so the `<div class="mcol">` moved
   to `shortcodes/mcol.html` and each shortcode passes its text along. The

@@ -18,7 +18,7 @@ ignoreLogs = ['warning-goldmark-raw-html']
   proxy = "direct"
 
   [[module.imports]]
-    path = "example.com/strata"
+    path = "github.com/zoyeabio/strata"
 
 [taxonomies]
   tag = "tags"

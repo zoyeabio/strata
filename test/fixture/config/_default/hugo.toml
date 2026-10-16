@@ -11,7 +11,7 @@ enableRobotsTXT = true
   proxy = "direct"
 
   [[module.imports]]
-    path = "example.com/strata"
+    path = "github.com/zoyeabio/strata"
 
 [taxonomies]
   tag = "tags"

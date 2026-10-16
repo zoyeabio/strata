@@ -30,7 +30,7 @@ DOMAIN=""
 OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
-MODULE_VERSION="v0.0.0"
+MODULE_VERSION="v0.1.0"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -93,7 +93,7 @@ enableEmoji = false
   proxy = "direct"
 
   [[module.imports]]
-    path = "example.com/strata"
+    path = "github.com/zoyeabio/strata"
 
 [module.hugoVersion]
   extended = true
@@ -332,16 +332,18 @@ EOF
   printf -- '- https://%s/contact/\n' "$DOMAIN"
 } > "$OUT/static/llms.txt"
 
-# go.mod pins the theme version; the replace keeps local development
-# working before the theme tag exists
+# The require pins the published theme version; the replace points the site
+# at this checkout so a scaffold builds against local theme edits. Drop the
+# replace to build against the tag instead. The site's own module path stays
+# a placeholder: its host is the reader's to choose, not the theme's.
 cat > "$OUT/go.mod" <<EOF
 module example.com/${SLUG}
 
 go 1.22
 
-require example.com/strata ${MODULE_VERSION}
+require github.com/zoyeabio/strata ${MODULE_VERSION}
 
-replace example.com/strata => $ROOT
+replace github.com/zoyeabio/strata => $ROOT
 EOF
 
 # package.json — Hugo 0.161.0+ runs the TailwindCSS CLI through node, so the

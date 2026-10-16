@@ -1,5 +1,7 @@
 # Strata
 
+[![CI](https://github.com/zoyeabio/strata/actions/workflows/ci.yml/badge.svg)](https://github.com/zoyeabio/strata/actions/workflows/ci.yml)
+
 A content-first Hugo theme built to be shared across independent sites.
 
 Strata keeps everything site-agnostic inside the theme — layout, components
@@ -37,10 +39,14 @@ As a Hugo Module, in your site's `config/_default/hugo.toml`:
   proxy = "direct"
 
   [[module.imports]]
-    path = "example.com/strata"
+    path = "github.com/zoyeabio/strata"
 ```
 
-Then run `hugo mod tidy`.
+Then run `hugo mod tidy`, and pin a release so upgrades stay explicit:
+
+```sh
+go get github.com/zoyeabio/strata@<tag>
+```
 
 Alternatively, clone this repository into `themes/strata` and set
 `theme = "strata"`.
