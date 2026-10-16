@@ -23,6 +23,10 @@ defaultAppearance = "light"
 autoSwitchAppearance = true
 dateFormat = "2006-01-02"
 robots = "index, follow, max-image-preview:large"
+# Links to another host open in a new tab, so a reference never takes a reader
+# out of the article they are mid-way through. Internal and mailto links always
+# navigate in place — site navigation must stay in the tab.
+externalLinksNewTab = true
 eagerCardCount = 6
 # Widest reading column, in pixels. Applies to article bodies only — list and
 # landing pages keep the full frame. The column is centred and the text inside

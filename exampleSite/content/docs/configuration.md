@@ -87,6 +87,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `copyright` | `"© { year } Strata"` | Footer line; `{ year }` is replaced with the current year. Empty or absent falls back to `© {year} {site title}` |
 | `description` | `"A Hugo theme for content sites."` | Default `<meta name="description">` (page description/summary wins) |
 | `robots` | `"index, follow, max-image-preview:large"` | Default `<meta name="robots">` (page-level `robots` wins). A site setting applies to every page; leave both unset for the default |
+| `externalLinksNewTab` | `true` | Content links to another host open in a new tab, so a reference never takes a reader out of the article they are mid-way through. Internal links and `mailto:` never do — site navigation has to stay in the tab, or every header click would spawn a new one. Scheme-relative `//host` counts as external |
 | `dateFormat` | `"2006-01-02"` | Go time format for card and article dates. Must sit under a `[params]` table — a bare top-level key in `languages.<lang>.toml` is invisible to the theme. For a per-language format, set it in that language's file under its own `[params]` |
 | `defaultSocialImage` | — | Asset path used for Open Graph when a page declares no image |
 | `eagerCardCount` | `6` | First N cards on a list load their image eagerly |

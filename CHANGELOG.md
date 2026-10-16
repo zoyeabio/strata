@@ -81,6 +81,15 @@ re-derived from the templates.
 
 ### Behaviour notes
 
+- **External content links open in a new tab.** A reader who follows a
+  reference is looking it up, not leaving the article — so a link to another
+  host gains `target="_blank" rel="noopener noreferrer"` and the article stays
+  exactly where they were. Internal links and `mailto:` never do: site
+  navigation has to stay in the tab, or every header click would spawn a new
+  one. `externalLinksNewTab` turns the behaviour off. Scheme-relative `//host`
+  counts as external too. Returning from an internal link needs no work: the
+  browser's default `history.scrollRestoration` restores the reading position
+  and no script in the theme sets it to `manual` or rewrites history.
 - **Image output has a per-source ceiling.** A source may produce no more than
   four responsive candidates plus one fixed social-preview JPEG. The build
   gate reports total files, HTML, images and output size, then fails if role

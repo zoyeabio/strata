@@ -17,6 +17,7 @@ OUT_NOSITEDESC="$WORK/public-nositedesc"
 OUT_QUALITY="$WORK/public-quality"
 OUT_MEASURE="$WORK/public-measure"
 OUT_NOSUMMARY="$WORK/public-nosummary"
+OUT_NOTAB="$WORK/public-notab"
 OUT_ROBOTS="$WORK/public-robots"
 OUT_DRAFTS="$WORK/public-drafts"
 trap 'rm -rf "$WORK"' EXIT
@@ -41,6 +42,8 @@ hugo --source "$ROOT/test/fixture" --environment measure \
   --destination "$OUT_MEASURE" --quiet
 hugo --source "$ROOT/test/fixture" --environment nosummary \
   --destination "$OUT_NOSUMMARY" --quiet
+hugo --source "$ROOT/test/fixture" --environment notab \
+  --destination "$OUT_NOTAB" --quiet
 
 pass() { printf 'ok   %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
@@ -1632,6 +1635,25 @@ assert 'section-a/flat/index.html' \
   'the Person entity carries the author url'
 assert_not 'section-a/inline/index.html' 'article__author' \
   'a page without an author url keeps a plain-text byline'
+
+# 55. A content link to another host opens a new tab, so a reference never
+#     takes a reader out of the article. Internal and mailto links never do:
+#     site navigation has to stay in the tab. The notab overlay proves the
+#     switch is the theme's config deciding, not the shape of a URL.
+assert 'section-a/links/index.html' \
+  'href="https://gohugo.io" target="_blank" rel="noopener noreferrer"' \
+  'an external content link opens in a new tab'
+assert 'section-a/links/index.html' \
+  'href="https://example.com/search\?q=strata&amp;lang=en"' \
+  'a new-tabbed link keeps its escaped query string'
+assert 'section-a/links/index.html' '<a href="/notice/">notice</a>' \
+  'an internal content link stays in the tab'
+assert 'section-a/links/index.html' \
+  '<a href="mailto:hello@example.com">email</a>' \
+  'a mailto link stays in the tab'
+assert_at "$OUT_NOTAB" 'section-a/links/index.html' \
+  '<a href="https://gohugo.io">Hugo docs</a>' \
+  'externalLinksNewTab = false navigates the external link in place'
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'smoke: %s failure(s)\n' "$FAILURES" >&2

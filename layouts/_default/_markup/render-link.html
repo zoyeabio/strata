@@ -1,0 +1,18 @@
+{{- /*
+  Markdown link render hook. Goldmark's default emits a bare <a>, which
+  navigates the tab the reader is reading in — a reference link takes them out
+  of the article and they have to come back to find their place. With
+  site.Params.externalLinksNewTab a link to another host gains target="_blank",
+  so the article stays exactly where the reader was. Internal and mailto links
+  never do: site navigation must stay in the tab or every header click would
+  spawn a new one. Scheme-relative "//host" counts as external too.
+  .Text is already rendered HTML, hence safeHTML.
+
+  Called by: Goldmark, for every link in markdown content
+*/ -}}
+{{- $dest := .Destination -}}
+{{- $external := and site.Params.externalLinksNewTab
+      (or (strings.HasPrefix $dest "http://")
+          (strings.HasPrefix $dest "https://")
+          (strings.HasPrefix $dest "//")) -}}
+<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}</a>

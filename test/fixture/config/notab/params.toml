@@ -1,0 +1,5 @@
+# Environment overlay for the external-link assertions in scripts/smoke.sh.
+# Flipping it off proves the switch is the theme's config deciding, not the
+# shape of a URL — with it on the same links open in place.
+[params]
+  externalLinksNewTab = false
