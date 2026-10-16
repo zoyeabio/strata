@@ -150,8 +150,8 @@ EOF
 
 # config/_default/languages.en.toml
 cat > "$OUT/config/_default/languages.en.toml" <<EOF
-languageCode = "en"
-languageName = "English"
+locale = "en"
+label = "English"
 weight = 1
 title = "${NAME}"
 

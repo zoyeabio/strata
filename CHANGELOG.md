@@ -386,6 +386,21 @@ re-derived from the templates.
    cannot be observed is not a demo, which is why the coverage gate reports
    undemonstrated keys as a warning rather than a failure.
 
+- **The deprecated language keys are renamed where they are read.** Hugo
+  deprecated `languages.<lang>.languageCode` and `languageName` in v0.158, and
+  every scaffolded site printed both warnings on build — project config is what
+  warns, and `new-site.sh` writes those keys into the site's own config. The
+  theme's `languages.en.toml` is the same two keys as module config, where the
+  warning does not fire (a fixture build never showed one), but the removal the
+  warning promises will not spare it, so both files now say `locale` and
+  `label`. The value stays `en` rather than becoming `en-US`: the templates
+  read `site.Language.Locale` into `<html lang>`, `og:locale` and the
+  `content-language` meta, so a richer locale would have changed all three —
+  and Open Graph spells locales `en_US`, underscoring where that would have
+  drifted — while the rename renders byte-identical output. No gate pins the
+  key: `smoke.sh`'s `lang=en` is a search URL's `.Lang`, which is the map key
+  and did not change.
+
 - **Clay's daytime ground is a faint warm white, not a yellow cream.**
   `--site-page-bg` was `#fbf1c7` — s=87%, a cast read before the content —
   and is now `#f7f4ec`: the same 44° warmth at s=41%, l=95%. The contrast
