@@ -24,7 +24,10 @@
   padding: 2px 8px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--site-accent);
+  /* --site-accent works against the page background, not against
+     --site-accent-soft: in dark it is #2c689b on #1c2f42, about 2.3:1.
+     --site-link is the token that is readable on both, 6.4:1 and 7.1:1. */
+  color: var(--site-link);
   background: var(--site-accent-soft);
   border-radius: 999px;
 }
