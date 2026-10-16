@@ -79,16 +79,19 @@ sys.path.insert(0, str(theme_root / "scripts" / "lib"))
 from build_config import _load_config, _merge, _toml_files
 
 seen = False
-taxonomies = {}
-disabled = set()
+merged = {}
 for path in _toml_files(site_root):
-    data = _load_config(path)
-    if "taxonomies" in data:
-        seen = True
-        taxonomies = _merge(taxonomies, data["taxonomies"] or {})
-    if "disableKinds" in data or "disablekinds" in data:
-        values = data.get("disableKinds", data.get("disablekinds")) or []
-        disabled |= {str(value).lower() for value in values}
+    # Hugo reads config keys case-insensitively and merges the layers as a
+    # map: tables deep, every other key replaced by the higher-precedence
+    # layer. Reading both keys through _merge keeps that one rule in the one
+    # place the config resolver already applies it, instead of a second
+    # reading of the same layers drifting away from what the build does.
+    data = {key.lower(): value for key, value in _load_config(path).items()}
+    seen = seen or "taxonomies" in data
+    merged = _merge(merged, data)
+
+taxonomies = merged.get("taxonomies") or {}
+disabled = {str(value).lower() for value in (merged.get("disablekinds") or [])}
 
 if {"taxonomy", "term"} <= disabled:
     print("site explicitly disables taxonomy and term pages")

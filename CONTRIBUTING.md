@@ -26,12 +26,15 @@ regenerate.
 ```sh
 ./scripts/smoke.sh                    # fixture contract assertions
 ./scripts/validate-theme.sh           # production build, output rules, example coverage
-./scripts/validate-example.sh         # exampleSite demonstrates the theme; also run by validate-theme.sh
 ./scripts/validate-site.sh /path/site # your site against this checkout
 ./scripts/audit-partials.sh layouts   # orphan / missing partials
 ```
 
-All five must pass. New behaviour means a new assertion, not a comment.
+All four must pass. New behaviour means a new assertion, not a comment.
+
+`./scripts/validate-example.sh` runs the exampleSite coverage on its own. It
+is already inside `validate-theme.sh`, so it is the faster loop when a change
+only touches examples rather than a fifth gate to run every time.
 
 ## exampleSite is a second test suite
 

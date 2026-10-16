@@ -5,11 +5,11 @@
 #
 # test/fixture is a gate harness that asserts mechanically. exampleSite is the
 # other kind of test, the one a reader can see: every shortcode with a live
-# example, every site hook with a working implementation to copy from. Nothing
-# enforces that coverage today. A new shortcode can ship with no example, a new
-# hook with no implementation, and a hook the theme stops probing leaves a dead
-# file behind. Every list here is derived from the theme's own tree, so there is
-# no hand-written inventory to keep in step.
+# example, every site hook with a working implementation to copy from. This
+# script is what enforces that coverage: a new shortcode can ship with no
+# example, a new hook with no implementation, and a hook the theme stops
+# probing leaves a dead file behind. Every list here is derived from the
+# theme's own tree, so there is no hand-written inventory to keep in step.
 #
 # Shortcode and hook coverage fail. Page-level front matter key coverage is
 # advisory: some overrides have no sensible page to demonstrate them on, and

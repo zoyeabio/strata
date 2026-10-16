@@ -1643,6 +1643,41 @@ else
   fail 'build_config honours --environment the way Hugo does'
 fi
 
+# A key declared in two config layers resolves by precedence, never by union:
+# Hugo keeps the higher-precedence value and drops the lower one, so a
+# disableKinds split across _default and an environment disables exactly what
+# the build disables. The site gate reads those same layers through _merge, so
+# this pins both readings to hugo config: a reading that added them together
+# would report taxonomy and term both off while the build still emitted /tags.
+CFG_KINDS="$(mktemp -d)"
+mkdir -p "$CFG_KINDS/config/_default" "$CFG_KINDS/config/production"
+printf 'disableKinds = ["taxonomy"]\n' >"$CFG_KINDS/config/_default/hugo.toml"
+printf 'disableKinds = ["term"]\n' >"$CFG_KINDS/config/production/hugo.toml"
+KINDS_PROD="$(hugo --source "$CFG_KINDS" config --environment production 2>/dev/null \
+  | grep -i '^disablekinds' || true)"
+KINDS_DEV="$(hugo --source "$CFG_KINDS" config --environment dev 2>/dev/null \
+  | grep -i '^disablekinds' || true)"
+KINDS_MERGE="$(python3 - "$ROOT" <<'PY'
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(sys.argv[1]) / "scripts" / "lib"))
+from build_config import _merge
+print(repr(_merge({"disableKinds": ["taxonomy"]}, {"disableKinds": ["term"]})))
+PY
+)"
+rm -rf "$CFG_KINDS"
+
+if printf '%s' "$KINDS_PROD" | grep -q 'term' \
+  && ! printf '%s' "$KINDS_PROD" | grep -q 'taxonomy' \
+  && printf '%s' "$KINDS_DEV" | grep -q 'taxonomy' \
+  && printf '%s' "$KINDS_MERGE" | grep -qF "'disableKinds': ['term']"
+then
+  pass 'a config-layer array resolves by precedence, not by union'
+else
+  fail 'a config-layer array resolves by precedence, not by union'
+fi
+
 # 49. security: static/_headers ships a strict Content-Security-Policy and no
 #     page ships an executable inline script. Together they are what make the
 #     policy enforceable. Two deliberate exceptions, both documented in
