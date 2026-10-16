@@ -52,7 +52,6 @@ Your own site's module path is a separate thing: the scaffold writes
 domain and is never fetched — the host for a site you have not pushed yet is
 not the theme's to choose.
 
-
 ## Git clone
 
 Clone this repository into `themes/strata` and set `theme = "strata"`.
