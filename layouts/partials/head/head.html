@@ -107,11 +107,7 @@
   {{- end }}
   {{- end }}
 
-  {{ if templates.Exists "partials/favicons.html" }}
   {{ partialCached "favicons.html" .Site }}
-  {{ else if fileExists "static/favicon.ico" }}
-  <link rel="icon" href="{{ "favicon.ico" | relURL }}">
-  {{ end }}
 
   {{ if templates.Exists "partials/extend-head.html" }}
   {{ partialCached "extend-head.html" .Site }}

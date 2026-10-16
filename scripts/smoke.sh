@@ -190,6 +190,23 @@ assert 'tags/beta/index.html' 'card card--' 'term beta lists its article cards'
 # 11. the 404 page links home and to the first menu item, never a hardcoded path
 assert '404.html' 'not-found__code' '404 page renders'
 assert '404.html' 'href="/"' '404 links home'
+assert 'index.html' 'rel="icon" href="/favicon\.ico" sizes="any"' \
+  'the default favicon includes an ico fallback'
+assert 'index.html' 'rel="icon" type="image/svg\+xml" href="/favicon\.svg"' \
+  'the default favicon prefers svg'
+assert 'index.html' 'rel="apple-touch-icon" sizes="180x180"' \
+  'the default favicon includes an apple touch icon'
+assert 'index.html' 'rel="mask-icon" href="/safari-pinned-tab\.svg" color="#183229"' \
+  'the default favicon includes a pinned-tab mask'
+if [ -s "$OUT/favicon.ico" ] && [ -s "$OUT/favicon.svg" ] && \
+   [ -s "$OUT/apple-touch-icon.png" ] && \
+   [ -s "$OUT/android-chrome-192x192.png" ] && \
+   [ -s "$OUT/android-chrome-512x512.png" ] && \
+   [ -s "$OUT/safari-pinned-tab.svg" ]; then
+  pass 'the default favicon asset set ships'
+else
+  fail 'the default favicon asset set ships'
+fi
 
 # 12. list cards use the computed grid preset (fixture sets [list] cardView)
 assert 'section-a/index.html' 'sizes="[^"]*calc\(\(100vw - 128px\) / 2\)' \

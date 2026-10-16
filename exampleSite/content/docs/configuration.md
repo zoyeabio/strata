@@ -314,7 +314,6 @@ Drop-in partials a site may provide; the theme calls them when present:
 
 | Partial | Called from | Purpose |
 |---|---|---|
-| `partials/favicons.html` | `head/head.html` | Site favicon links |
 | `partials/extend-head.html` | `head/head.html` | Extra head markup (cached) |
 | `partials/extend-head-uncached.html` | `head/head.html` | Extra head markup (uncached) |
 | `partials/extend-article-link.html` | `page/card.html` | Extra markup at the end of each card, after the summary. Not inside the link, despite the name |
@@ -322,6 +321,14 @@ Drop-in partials a site may provide; the theme calls them when present:
 
 Every one of these is implemented in this example's own `layouts/partials/`,
 which is the reference to copy from: `exampleSite/layouts/partials/`.
+
+## Favicons
+
+The theme ships a small default set: SVG and ICO browser icons, a 180px Apple
+Touch icon, 192px and 512px PWA icons, and a monochrome Safari pinned-tab
+mask. A site can replace any file by putting the same name under `static/`.
+For different markup, override `layouts/partials/favicons.html`; the default
+partial links `site.webmanifest` only when that file exists in the site.
 
 ## Render hooks
 

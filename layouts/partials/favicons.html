@@ -1,0 +1,13 @@
+{{- /*
+  Default favicon set. A site may override this partial or replace any
+  same-named file under static/ without changing theme templates.
+
+  Called by: partials/head/head.html, through partialCached with .Site.
+*/ -}}
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="any">
+<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}">
+<link rel="mask-icon" href="{{ "safari-pinned-tab.svg" | relURL }}" color="#183229">
+{{- if fileExists "static/site.webmanifest" }}
+<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
+{{- end }}

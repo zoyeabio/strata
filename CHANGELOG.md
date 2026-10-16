@@ -13,6 +13,12 @@ re-derived from the templates.
 
 ### Deliberate choices
 
+- **The default favicon is complete but replaceable.** The module supplies one
+  compact strata mark as SVG, ICO, Apple Touch, Android/PWA and Safari mask
+  assets. Sites replace a same-named file under `static/` or override
+  `partials/favicons.html`; the manifest remains site-owned because its name
+  and product colours belong to the consuming site.
+
 - **No implicit external requests**, build time or runtime: no CDNs, webfonts
   or analytics. Fonts are system stacks. Maps, AdSense and site hooks are
   explicit, documented opt-ins rather than hidden theme traffic.
