@@ -52,22 +52,6 @@
   {{ printf `<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="%s">` $hero.url $hero.srcset $hero.sizes | safeHTML }}
   {{- end }}
 
-  {{/* Appearance applied before first paint to avoid a flash of the wrong theme */}}
-  {{ with resources.Get "js/appearance.js" }}
-  {{ $appearance := . | fingerprint "sha512" }}
-  <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
-  {{ end }}
-
-  {{/* Accessibility classes applied before first paint too — same reason:
-       a stored reduce-motion must not get one animated frame first. Same
-       gating as the panel itself, so a disabled feature ships no script. */}}
-  {{- if site.Params.enableA11y }}
-  {{- with resources.Get "js/a11y.js" }}
-  {{- $a11y := . | fingerprint "sha512" }}
-  <script src="{{ $a11y.RelPermalink }}" integrity="{{ $a11y.Data.Integrity }}"></script>
-  {{- end }}
-  {{- end }}
-
   {{/* Theme stylesheet: component files carry their own @layer wrappers,
        so the template concatenates them in cascade order and compiles the
        bundle in-process via css.TailwindCSS, minified and fingerprinted
@@ -76,7 +60,12 @@
        does not depend on render order and the output is deterministic.
        Requires the Tailwind v4 CLI ("tailwindcss") on PATH at build time
        plus "security.exec.allow" covering it in site config — the theme
-       cannot provide either (site-level only). */}}
+       cannot provide either (site-level only).
+
+       First resource the parser meets, so its fetch starts before the
+       pre-paint scripts below are even downloaded. Both are prerequisites
+       for paint, so the first frame still waits for both — the scripts just
+       no longer hold the render-blocking request back. */}}
   {{- $schemeName := site.Params.colorScheme | lower }}
   {{- $scheme := resources.Get (printf "css/schemes/%s.css" $schemeName) }}
   {{- if not $scheme }}
@@ -97,6 +86,26 @@
   <link rel="stylesheet" href="{{ $custom.RelPermalink }}" integrity="{{ $custom.Data.Integrity }}">
   {{ end }}
   {{ end }}
+
+  {{/* Appearance applied before first paint to avoid a flash of the wrong
+       theme. After the stylesheets on purpose: the parser stops to fetch and
+       run each sync script, so leading with them would push discovery of the
+       stylesheet back by two downloads. Paint still waits for both, so the
+       first frame carries the right scheme either way. */}}
+  {{ with resources.Get "js/appearance.js" }}
+  {{ $appearance := . | fingerprint "sha512" }}
+  <script src="{{ $appearance.RelPermalink }}" integrity="{{ $appearance.Data.Integrity }}"></script>
+  {{ end }}
+
+  {{/* Accessibility classes applied before first paint too — same reason:
+       a stored reduce-motion must not get one animated frame first. Same
+       gating as the panel itself, so a disabled feature ships no script. */}}
+  {{- if site.Params.enableA11y }}
+  {{- with resources.Get "js/a11y.js" }}
+  {{- $a11y := . | fingerprint "sha512" }}
+  <script src="{{ $a11y.RelPermalink }}" integrity="{{ $a11y.Data.Integrity }}"></script>
+  {{- end }}
+  {{- end }}
 
   {{ if templates.Exists "partials/favicons.html" }}
   {{ partialCached "favicons.html" .Site }}
