@@ -385,7 +385,14 @@ re-derived from the templates.
    top-level page would never have been visible either and is gone. A demo that
    cannot be observed is not a demo, which is why the coverage gate reports
    undemonstrated keys as a warning rather than a failure.
- 
+
+- **Clay's daytime ground is a faint warm white, not a yellow cream.**
+  `--site-page-bg` was `#fbf1c7` — s=87%, a cast read before the content —
+  and is now `#f7f4ec`: the same 44° warmth at s=41%, l=95%. The contrast
+  gate measures the ground only against darker anchors, so lightening it
+  raises every pair (body 10.22 → 10.55, faint 3.37 → 3.48) and `smoke.sh`'s
+  182 pairs still clear their floors. Night stays `#282828`.
+
  ### Gates
 
 
