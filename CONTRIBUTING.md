@@ -15,9 +15,12 @@
 ## Development
 
 ```sh
-npm install   # once — Hugo 0.161.0+ runs the Tailwind CSS CLI through node
+npm install                     # once — Hugo runs the Tailwind CSS CLI through node
+python3 -m pip install pyyaml   # once — the front matter lint in validate-content.sh
 ```
 
+The gates use Python 3.11+ for `tomllib` and PyYAML for that lint; the CI
+workflow installs exactly these and the Node floor is the 22 in the README.
 CSS compiles in-process on every build; there is no committed bundle to
 regenerate.
 

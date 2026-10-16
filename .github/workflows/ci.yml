@@ -42,8 +42,10 @@ jobs:
           sudo install -m 0755 /tmp/hugo /usr/local/bin/hugo
           hugo version
 
-      - name: Install theme dependencies
-        run: npm ci
+      - name: Install build and gate dependencies
+        run: |
+          npm ci
+          python3 -m pip install pyyaml
 
       - name: Fixture contract assertions
         run: ./scripts/smoke.sh

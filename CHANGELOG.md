@@ -303,8 +303,9 @@ re-derived from the templates.
   `smoke.sh`, `validate-theme.sh`, `validate-site.sh` and
   `audit-partials.sh` on every push and pull request, so "the gates pass"
   names a run rather than a laptop. It needs Hugo Extended, Node with `npm
-  ci` and Python 3.11 for `tomllib`, and takes no third-party action beyond
-  the official setup ones.
+  ci`, Python 3.11 for `tomllib` and PyYAML for the front matter lint — a
+  dependency no document mentioned until the first run failed on it — and
+  takes no third-party action beyond the official setup ones.
 - **The Node floor is 22, and the first CI run is what found out.** The docs
   said "Node 20 or later" because Hugo 0.161 runs the npm CLI through node,
   but this Hugo also passes that node `--permission`, which Node 20 does not
