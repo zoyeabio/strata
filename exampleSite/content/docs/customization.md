@@ -154,7 +154,7 @@ come back to find their place. With `externalLinksNewTab = true` (the
 default), a link to another host gains `target="_blank"` and a marker:
 
 ```html
-<a href="https://example.com/" target="_blank" rel="noopener noreferrer">docs<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span></a>
+<a href="https://example.com/" class="link--external" target="_blank" rel="noopener noreferrer">docs<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span></a>
 ```
 
 - **Any other host counts as external**, so a link between your own sites also
@@ -162,12 +162,17 @@ default), a link to another host gains `target="_blank"` and a marker:
   heavily, that is tab sprawl by design.
 - Internal, `mailto:` and fragment links stay in the tab. Site navigation must
   stay in the tab or every header click would spawn a new one.
-- Scheme-relative `//host` counts as external too.
+- Scheme-relative `//host` counts as external too. The check tests the full
+  scheme, not a bare `http` prefix, so `httpfoo:bar` is not mistaken for a web
+  link.
+- The anchor gains `class="link--external"`, the hook for styling external
+  links as a group. Without it a site would have to reach through the marker
+  with `a:has(.link__icon)`.
 - The marker is a real element, not `::after` content, so assistive technology
   skips it instead of reading "arrow" after every link. `&#65038;` is the text
   variation selector, which keeps the glyph out of emoji presentation.
-- Restyle `.link__icon` from `customCSS`, or set `externalLinksNewTab = false`
-  to drop both the new tab and the marker.
+- Restyle `.link__icon` or `a.link--external` from `customCSS`, or set
+  `externalLinksNewTab = false` to drop both the new tab and the marker.
 
 ### render-image.html
 

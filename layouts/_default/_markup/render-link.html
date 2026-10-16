@@ -5,7 +5,12 @@
   site.Params.externalLinksNewTab a link to another host gains target="_blank"
   plus a visual marker, so the reader sees the tab stays behind. Internal and
   mailto links never do: site navigation must stay in the tab or every header
-  click would spawn a new one. Scheme-relative "//host" counts as external too.
+  click would spawn a new one. Scheme-relative "//host" counts as external too,
+  and the check tests the full scheme rather than a bare "http" prefix, so
+  "httpfoo:bar" is not mistaken for a web link.
+  The anchor also gains class="link--external", the hook for styling external
+  links as a group; without it a site would have to reach through the marker
+  with a:has(.link__icon).
   The marker is a real element rather than ::after content, so assistive
   technology skips it instead of reading "arrow" after every link; the text
   variation selector keeps it out of emoji presentation.
@@ -18,4 +23,4 @@
       (or (strings.HasPrefix $dest "http://")
           (strings.HasPrefix $dest "https://")
           (strings.HasPrefix $dest "//")) -}}
-<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}{{ if $external }}<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span>{{ end }}</a>
+<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} class="link--external" target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}{{ if $external }}<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span>{{ end }}</a>

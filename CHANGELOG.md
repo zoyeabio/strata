@@ -87,10 +87,13 @@ re-derived from the templates.
   so the article stays exactly where they were and the reader sees that it
   will. Internal links and `mailto:` never do: site navigation has to stay in
   the tab, or every header click would spawn a new one. The arrow is a real
-  element rather than `::after` content, because assistive technology reads
-  generated content and would otherwise announce "arrow" after every link, and
-  it carries the text variation selector so it does not render as an emoji.
-  `externalLinksNewTab` turns the behaviour and the marker off together.
+   element rather than `::after` content, because assistive technology reads
+   generated content and would otherwise announce "arrow" after every link, and
+   it carries the text variation selector so it does not render as an emoji.
+   The anchor also carries `class="link--external"`, which is the hook a site
+   needs to style external links as a group — without it a site would have to
+   reach through the marker with `a:has(.link__icon)`.
+   `externalLinksNewTab` turns the behaviour and the marker off together.
   Scheme-relative `//host` counts as external too, as does any host other than
   the site's own — links between your own sites open new tabs. Returning from
   an internal link needs no work: the browser's default

@@ -333,7 +333,7 @@ for the details and the override examples.
 
 | Template | Called for | Purpose |
 |---|---|---|
-| `_default/_markup/render-link.html` | Every link in markdown content | External links open in a new tab and carry a marker; gated by `externalLinksNewTab` |
+| `_default/_markup/render-link.html` | Every link in markdown content | External links open in a new tab, carry a marker, and gain `class="link--external"` as a styling hook; gated by `externalLinksNewTab` |
 | `_default/_markup/render-image.html` | Every `![](x)` in markdown content | Joins the responsive pipeline instead of falling through to Goldmark's plain `<img>` |
 
 
