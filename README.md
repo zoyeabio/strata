@@ -117,6 +117,7 @@ validated with the theme rather than drift in a separate tree:
 | [sitemap](exampleSite/content/docs/sitemap.md) | The sitemap, robots.txt, what gets listed |
 | [security](exampleSite/content/docs/security.md) | Response headers, the strict CSP, Cloudflare limits |
 | [troubleshooting](exampleSite/content/docs/troubleshooting.md) | Hugo platform gotchas that look like theme bugs |
+| [contact-endpoint](exampleSite/content/docs/contact-endpoint.md) | Reference Worker and KV schema for the contact form |
 
 ## Development
 

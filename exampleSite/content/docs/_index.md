@@ -23,6 +23,7 @@ not here, it is not part of the contract.
 | [Sitemap](/docs/sitemap/) | The sitemap, `robots.txt`, what gets listed |
 | [Security](/docs/security/) | Response headers, the strict CSP, Cloudflare limits |
 | [Troubleshooting](/docs/troubleshooting/) | Hugo platform behaviours that look like theme bugs |
+| [Contact endpoint](/docs/contact-endpoint/) | Reference Worker and KV schema for the contact form |
 
 ## The short version
 

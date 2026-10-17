@@ -520,3 +520,17 @@ durable answer is a rotatable alias behind the contact form.
   the theme changes; the page exists so a site that hits one of these
   has an answer that is not a template edit. `docs/_index.md` and the
   top-level README's docs table list it alongside the reference pages.
+
+- **The contact shortcode ships with a reference endpoint, not just a
+  checklist.** `docs/contact-endpoint/` carries a copy-pasteable
+  Cloudflare Worker that does what `docs/shortcodes.md` says the server
+  must do: same-origin and body-cap checks before any parsing, `formData`
+  with `.trim()`, honeypot answer-with-success, `TextEncoder` byte count,
+  email regex, the `minFill ≤ now − ts ≤ 2 h` timestamp window when
+  `form_ts` is non-empty, a `contact:{epoch}:{uuid}` KV key so messages
+  sort and stay unique across workers, and best-effort forwarding. The
+  JSON envelope `{success, error}` is spelled out because the client
+  reads that shape. Rate limiting stays a stub the site owns; the two
+  origin variants and the escalation to Turnstile or a one-time token
+  are named. `wrangler.toml` ships too, with the comma-separated
+  `ORIGINS` note that Workers vars cannot hold arrays.
