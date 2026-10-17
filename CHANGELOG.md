@@ -497,3 +497,14 @@ HMAC changes it from a speed bump into proof, and the ladder ends with the
 escalation options — Turnstile or a one-time token the endpoint issues on
 GET. `security.md` states the endgame plainly: obfuscation buys time, the
 durable answer is a rotatable alias behind the contact form.
+
+- **The `content/list` demo used `where="Section"` while the docs say
+  `where="Type"`.** The shortcode passes the field straight to Hugo's
+  `where` filter over `site.RegularPages`, and both keys work for a
+  top-level section — but a reader copying the demo learns one thing
+  while the docs teach another. The example now reads `where="Type"
+  value="posts"`, matching `docs/shortcodes.md`. The shortcode cannot
+  warn on a typoed field: any page property is a valid filter, and a
+  site with custom front matter may filter on it, so a misspelled key
+  matches nothing and returns the unfiltered list. Reading the output
+  is the check.

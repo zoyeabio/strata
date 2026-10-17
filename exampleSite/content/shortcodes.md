@@ -69,9 +69,9 @@ at a narrow frame:
 
 Lists pages as cards. `where` and `value` filter `site.RegularPages`.
 
-{{< content/list limit="2" title="Recent posts, filtered" where="Section" value="posts" cardView="true" summary="true" >}}
+{{< content/list limit="2" title="Recent posts, filtered" where="Type" value="posts" cardView="true" summary="true" >}}
 
-<pre><code>{{&lt; content/list limit="2" title="Recent posts" where="Section" value="posts"
+<pre><code>{{&lt; content/list limit="2" title="Recent posts" where="Type" value="posts"
   cardView="true" summary="true" &gt;}}</code></pre>
 
 | Parameter | Default | Notes |
