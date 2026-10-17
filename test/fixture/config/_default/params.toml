@@ -31,6 +31,7 @@ enableA11y = true
   links = [
     { name = "Profile", url = "https://author.example.net/" },
     { name = "Mail", url = "mailto:team@example.net" },
+    { name = "Upper Mail", url = "MAILTO:upper@example.net" },
   ]
 
 [ads]
@@ -60,6 +61,7 @@ enableA11y = true
     links = [
       { name = "Section A", url = "/section-a/" },
       { name = "Mail", url = "mailto:hello@example.net" },
+      { name = "Upper Mail", url = "MAILTO:Case@example.net" },
     ]
 
   [footer.legal]

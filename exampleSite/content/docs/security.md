@@ -41,6 +41,14 @@ a link the reader can click must exist after rendering — so obfuscation is a
 boundary against scanners, not against a targeted attacker. The contact form
 is the channel that needs no address at all.
 
+Obfuscation buys time, not confidentiality — Cloudflare's engineers say the
+same of their own scrape shield. The durable answers are operational:
+publish a rotatable address (a catch-all alias you can retire once it starts
+leaking), keep the contact form as the primary channel, and let a
+host-level obfuscator (Cloudflare Scrape Shield, if the site sits there) add
+its pass on top — it composes with the entity encoding rather than replacing
+it.
+
 `scripts/smoke.sh` sweeps every text file the fixture emits — HTML, XML,
 JSON, TXT, JS, CSS, manifests — for both a bare `@` inside an
 `href="mailto:` and any email-shaped token, so a new link outlet or a new

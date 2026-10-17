@@ -17,8 +17,8 @@
   404, single byline, cta — anywhere a configured or authored URL may land.
 */ -}}
 {{- $url := strings.TrimSpace . -}}
-{{- if strings.HasPrefix $url "mailto:" -}}
-{{- $at := split (strings.TrimPrefix "mailto:" $url) "@" -}}
+{{- if strings.HasPrefix (lower $url) "mailto:" -}}
+{{- $at := split (substr $url 7) "@" -}}
 {{- if ge (len $at) 2 -}}
 {{- return (printf "href=\"mailto:%s&#64;%s\"" (htmlEscape (index $at 0)) (htmlEscape (delimit (after 1 $at) "@")) | safeHTMLAttr) -}}
 {{- end -}}

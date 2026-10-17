@@ -84,7 +84,7 @@
 {{- if $author }}
 {{- $person := dict "@type" "Person" "name" $author }}
 {{- with $authorURL }}
-{{- if not (strings.HasPrefix . "mailto:") }}
+{{- if not (strings.HasPrefix (lower .) "mailto:") }}
 {{- $person = merge $person (dict "url" (. | absURL)) }}
 {{- end }}
 {{- end }}

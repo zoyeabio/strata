@@ -10,7 +10,7 @@
 {{- $out := slice -}}
 {{- range . -}}
 {{- $u := strings.TrimSpace (default "" .url) -}}
-{{- if and $u (not (strings.HasPrefix $u "mailto:")) -}}
+{{- if and $u (not (strings.HasPrefix (lower $u) "mailto:")) -}}
 {{- $out = $out | append $u -}}
 {{- end -}}
 {{- end -}}

@@ -484,3 +484,16 @@ matches a full email-shaped pattern across every text file the fixture
 emits, not just mailto hrefs, and `security.md` states the boundary
 plainly: source-scrapers get nothing, a rendering crawler sees what any
 reader can click.
+
+Upper-case `MAILTO:` no longer slips through: `partials/href.html`, the
+sameAs filter and the person-url guard match the scheme case-insensitively —
+the prefix is cut by length so the address keeps its case — and fixture
+cases pin that an upper-case scheme renders as a normalised, entity-encoded
+`mailto:` instead of a bare address, in both the link path and JSON-LD. The
+docs absorbed what the wider field settled on: honeypots say to answer with
+a normal success and send nothing (a rejection teaches the operator), the
+Origin entry names the apex/www variants, the timestamp entry says when an
+HMAC changes it from a speed bump into proof, and the ladder ends with the
+escalation options — Turnstile or a one-time token the endpoint issues on
+GET. `security.md` states the endgame plainly: obfuscation buys time, the
+durable answer is a rotatable alias behind the contact form.

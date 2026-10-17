@@ -669,7 +669,7 @@ if sweep_out=$(python3 - "$OUT" <<'PY'
 import sys, pathlib, re
 out = pathlib.Path(sys.argv[1])
 bad = []
-raw_href = re.compile(r'href="mailto:[^"]*@')
+raw_href = re.compile(r'href="mailto:[^"]*@', re.I)
 address = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
 text_exts = {'.html', '.xml', '.json', '.txt', '.js', '.css', '.svg', '.webmanifest'}
 files = 0
@@ -747,6 +747,8 @@ fi
 assert 'index.html' 'site-footer__grid' 'footer grid renders'
 assert 'index.html' 'Fixture Co\.' 'footer company name renders'
 assert 'index.html' 'Quick Links' 'footer quick links title renders'
+assert 'index.html' 'href="mailto:Case&#64;example\.net"' \
+  'an upper-case MAILTO scheme normalises and entity-encodes'
 assert 'index.html' 'info&#64;example\.net' 'footer email is entity-obfuscated'
 assert 'index.html' 'Testville' 'footer address second line renders'
 assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
@@ -1268,11 +1270,11 @@ assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'section-a/flat/index.html' 'name="twitter:creator" content="@fixturecreator"' \
   'twitter:creator is emitted from the site param'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
-assert_not 'index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+assert_not 'index.html' '(?i)<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
   'Organization sameAs drops mailto entries'
-assert_not 'section-a/flat/index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+assert_not 'section-a/flat/index.html' '(?i)<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
   'Person sameAs drops mailto entries'
-assert_not 'section-a/links/index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+assert_not 'section-a/links/index.html' '(?i)<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
   'schema never renders a mailto person url'
 assert 'section-a/anim/index.html' 'name="description" content="Animated WebP feature image"' \
   'meta description strips markup from the front matter value'

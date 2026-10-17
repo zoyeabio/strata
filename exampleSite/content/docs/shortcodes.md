@@ -109,16 +109,24 @@ a scripted post never runs the page:
 - **Per-IP rate limit** — one attempt per minute plus a daily quota for the
   whole endpoint is plenty for a contact form
 - **Body cap** — reject over the limit instead of trusting the counter
-- **Honeypot** — a filled `hp_name` is a bot; drop it without a response
+- **Honeypot** — a filled `hp_name` is a bot; answer with a normal success
+  and send nothing — a rejection only tells the operator they were flagged
 - **Origin / CSRF** — reject cross-site POSTs via `Origin` or
-  `Sec-Fetch-Site`; issue a CSRF token if the endpoint reads cookies
+  `Sec-Fetch-Site`; list every origin the site serves (apex and `www`), and
+  issue a CSRF token if the endpoint reads cookies
 - **Timestamp window** — when `form_ts` is non-empty, require
-  `minFill ≤ now − ts ≤ 2 h`, so a captured request cannot be replayed later
+  `minFill ≤ now − ts ≤ 2 h`, so a captured request cannot be replayed later;
+  sign the value (HMAC) if it must be proof rather than a speed bump
 - **Validation** — allow-list the field names and length-check each value
 
 The `cooldown` and `minFill` parameters throttle the browser too — repeat
 attempts and load-and-POST scripts never reach the network, failed attempts
 included. They shape a patient reader; the list above is the defence.
+
+If the passive layers still leak, escalate before reaching for content
+filters: a challenge (Cloudflare Turnstile or hCaptcha are the
+privacy-friendly ones), or a one-time token your endpoint issues on `GET`
+and checks on `POST`, so a bot that never ran the page has nothing to send.
 
 ## interactive/cta
 
