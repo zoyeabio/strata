@@ -116,6 +116,7 @@ validated with the theme rather than drift in a separate tree:
 | [shortcodes](exampleSite/content/docs/shortcodes.md) | Shortcode reference and supported parameters |
 | [sitemap](exampleSite/content/docs/sitemap.md) | The sitemap, robots.txt, what gets listed |
 | [security](exampleSite/content/docs/security.md) | Response headers, the strict CSP, Cloudflare limits |
+| [troubleshooting](exampleSite/content/docs/troubleshooting.md) | Hugo platform gotchas that look like theme bugs |
 
 ## Development
 

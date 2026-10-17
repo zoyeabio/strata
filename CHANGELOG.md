@@ -508,3 +508,15 @@ durable answer is a rotatable alias behind the contact form.
   site with custom front matter may filter on it, so a misspelled key
   matches nothing and returns the unfiltered list. Reading the output
   is the check.
+
+- **The docs absorb Hugo platform gotchas on a dedicated page.** `docs/troubleshooting/`
+  collects the platform behaviours that read as theme defects and the
+  one-line config fixes each one has: future-dated pages that silently
+  vanish, `pageRef` over bare URLs in menus, custom layouts that lose
+  related articles and pagination, Markdown images wrapping in `<p>`
+  by default, `content/list`'s `where` being a page field rather than a
+  section name, the deprecated `languageCode`/`languageName` keys, and
+  the Module path being a separate thing from a site URL. Nothing in
+  the theme changes; the page exists so a site that hits one of these
+  has an answer that is not a template edit. `docs/_index.md` and the
+  top-level README's docs table list it alongside the reference pages.

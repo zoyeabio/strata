@@ -21,6 +21,8 @@ not here, it is not part of the contract.
 | [Customization](/docs/customization/) | Colour schemes, CSS variables, custom CSS |
 | [Shortcodes](/docs/shortcodes/) | Shortcode reference and supported parameters |
 | [Sitemap](/docs/sitemap/) | The sitemap, `robots.txt`, what gets listed |
+| [Security](/docs/security/) | Response headers, the strict CSP, Cloudflare limits |
+| [Troubleshooting](/docs/troubleshooting/) | Hugo platform behaviours that look like theme bugs |
 
 ## The short version
 
