@@ -1,14 +1,23 @@
 {{- /*
   Contact form posting to a JSON endpoint (default /api/contact). Ships
   with a live byte counter for the message field, a honeypot input for
-  naive bots, and a fetch-based submit that reports the outcome inline.
+  naive bots, a minimum dwell time before any submit counts, and a
+  fetch-based submit that reports the outcome inline.
 
   SECURITY: the endpoint must validate, sanitise and rate-limit on the
-  server; hp_name must be rejected whenever it is filled.
+  server; reject hp_name whenever it is filled; check Origin or
+  Sec-Fetch-Site (a CSRF token if the endpoint reads cookies); and when
+  form_ts is non-empty require minFill <= now - ts <= 2h, so a stale
+  request cannot be replayed.
 
-  Parameters
-    action   (string) — form endpoint, default "/api/contact"
-    maxBytes (int)    — message limit shown by the counter, default 1000
+   Parameters
+     action   (string) — form endpoint, default "/api/contact"
+     maxBytes (int)    — message limit shown by the counter, default 1000
+     cooldown (int)    — seconds between submit attempts, default 10; the
+                         endpoint's own rate limit stays the real defence
+     minFill  (int)    — seconds the page must be open before a submit
+                         counts, default 3; travels as form_ts for the
+                         server-side window check
 
    Element ids carry the shortcode's occurrence number, so two forms on one
    page do not collide — the source template used a single fixed id.
@@ -23,8 +32,10 @@
 */ -}}
 {{- $action := .Get "action" | default "/api/contact" -}}
 {{- $maxBytes := int (default "1000" (.Get "maxBytes")) -}}
+{{- $cooldown := int (default "10" (.Get "cooldown")) -}}
+{{- $minFill := int (default "3" (.Get "minFill")) -}}
 {{- $id := printf "contact-form-%d" .Ordinal -}}
-<form class="contact-form not-prose" id="{{ $id }}" action="{{ $action }}" method="post" data-contact-form data-max-bytes="{{ $maxBytes }}">
+<form class="contact-form not-prose" id="{{ $id }}" action="{{ $action }}" method="post" data-contact-form data-max-bytes="{{ $maxBytes }}" data-cooldown="{{ $cooldown }}" data-min-fill="{{ $minFill }}">
   <div class="contact-form__row">
     <div class="contact-form__field">
       <label for="{{ $id }}-name">Name *</label>
@@ -46,6 +57,7 @@
     <button type="submit">Send Message</button>
   </div>
   <p class="contact-form__status" id="{{ $id }}-status" role="status" aria-live="polite"></p>
+  <input type="hidden" name="form_ts" value="">
   <div class="contact-form__honeypot" aria-hidden="true">
     <input type="text" name="hp_name" tabindex="-1" autocomplete="off">
   </div>

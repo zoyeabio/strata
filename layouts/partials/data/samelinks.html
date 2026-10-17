@@ -1,0 +1,17 @@
+{{- /*
+  Filters a list of {name, url} dicts down to the URLs a machine-readable
+  channel may carry: every mailto: entry is dropped, because an address in
+  JSON-LD is exactly the harvest the entity-encoded href exists to prevent —
+  an encoded URL there would not even be a valid link. Returns the url slice,
+  possibly empty.
+
+  Called by: head/schema.html, for Organization.sameAs and Person.sameAs.
+*/ -}}
+{{- $out := slice -}}
+{{- range . -}}
+{{- $u := strings.TrimSpace (default "" .url) -}}
+{{- if and $u (not (strings.HasPrefix $u "mailto:")) -}}
+{{- $out = $out | append $u -}}
+{{- end -}}
+{{- end -}}
+{{- return $out -}}

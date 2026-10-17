@@ -1,8 +1,9 @@
 ---
 title: "Link targets"
-description: "External content links open a new tab; internal ones stay in place."
+description: "External content links open in a new tab; internal ones stay in place."
 keywords: ["links"]
 date: 2026-01-06
+authorurl: "mailto:desk@example.net"
 ---
 Reference [Hugo docs](https://gohugo.io).
 

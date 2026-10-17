@@ -1,7 +1,7 @@
 ---
 title: "Security"
-description: "The response headers the theme ships, the strict Content-Security-Policy, and which Cloudflare limits actually bind."
-keywords: ["security", "csp", "headers", "cloudflare", "hosting"]
+description: "The response headers the theme ships, the strict Content-Security-Policy, how published email addresses resist harvesting, and which Cloudflare limits actually bind."
+keywords: ["security", "csp", "headers", "cloudflare", "hosting", "harvesting", "email"]
 weight: 80
 ---
 
@@ -20,6 +20,31 @@ That is only achievable because of how the theme is built:
 - every script and stylesheet ships from the origin and carries an SRI `integrity` attribute
 - `js/carousel.js` and `js/contact.js` are external assets, not inline. Their shortcodes used to interpolate the instance id and byte limit straight into the script; both now come from `data-*` attributes instead, so nothing is ever interpolated into JavaScript
 - the JSON-LD blocks look like inline scripts but carry a non-executable type and are exempt from `script-src`
+
+## Email addresses
+
+Addresses the site publishes are for readers, not for harvesters. Every
+configured or authored URL passes through `partials/href.html`, which emits the
+whole `href` attribute with a literal `&#64;`: the browser decodes it once
+when the reader follows the link, while a crawler matching
+`href="mailto:…@…"` finds no address to take. The entity cannot travel through
+a variable — html/template escapes a `&` in any interpolated value back to
+`&amp;` — which is why the partial returns the finished attribute rather than
+address text, and why it also re-checks the URL policy html/template used to
+apply for free (relative, `http(s)` and `mailto` only). JSON-LD drops `mailto:`
+entries outright: an encoded URL would not be a valid link there either, so
+machine-readable channels carry no address at all.
+
+This stops the class of harvester that sells address lists: it scrapes
+source. A crawler that renders the page sees the decoded address in the DOM —
+a link the reader can click must exist after rendering — so obfuscation is a
+boundary against scanners, not against a targeted attacker. The contact form
+is the channel that needs no address at all.
+
+`scripts/smoke.sh` sweeps every text file the fixture emits — HTML, XML,
+JSON, TXT, JS, CSS, manifests — for both a bare `@` inside an
+`href="mailto:` and any email-shaped token, so a new link outlet or a new
+export file cannot quietly regress this.
 
 ## Documented relaxations
 

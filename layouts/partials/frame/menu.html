@@ -29,7 +29,7 @@
     {{- range $i, $e := . }}
     <li class="site-nav__item{{ if $e.HasChildren }} site-nav__item--parent{{ end }}">
       {{- if $e.URL }}
-      <a class="site-nav__link" href="{{ $e.URL }}"
+      <a class="site-nav__link" {{ partial "href.html" $e.URL }}
         {{- if or ($.IsMenuCurrent "main" $e) ($.HasMenuCurrent "main" $e) }} aria-current="page"{{ end }}>{{ $e.Name }}</a>
       {{- else }}
       <span class="site-nav__text">{{ $e.Name }}</span>
@@ -42,7 +42,7 @@
           {{- range $e.Children }}
           <li>
             {{- if .URL }}
-            <a class="site-nav__link" href="{{ .URL }}"
+            <a class="site-nav__link" {{ partial "href.html" .URL }}
               {{- if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
             {{- else }}
             <span class="site-nav__text">{{ .Name }}</span>

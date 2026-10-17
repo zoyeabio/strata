@@ -32,7 +32,8 @@
     "name" (site.Params.footer.company.name | default site.Title)
     "url" site.Home.Permalink }}
 {{- with site.Params.footer.social.links }}
-{{- $org = merge $org (dict "sameAs" (apply . "index" "." "url")) }}
+{{- $sameAs := partial "data/samelinks.html" . }}
+{{- with $sameAs }}{{- $org = merge $org (dict "sameAs" .) }}{{- end }}
 {{- end }}
 {{- with site.Params.logo }}{{ with resources.Get . }}
 {{- $org = merge $org (dict "logo" (.Permalink)) }}
@@ -83,10 +84,13 @@
 {{- if $author }}
 {{- $person := dict "@type" "Person" "name" $author }}
 {{- with $authorURL }}
+{{- if not (strings.HasPrefix . "mailto:") }}
 {{- $person = merge $person (dict "url" (. | absURL)) }}
 {{- end }}
+{{- end }}
 {{- with site.Params.author.links }}
-{{- $person = merge $person (dict "sameAs" (apply . "index" "." "url")) }}
+{{- $sameAs := partial "data/samelinks.html" . }}
+{{- with $sameAs }}{{- $person = merge $person (dict "sameAs" .) }}{{- end }}
 {{- end }}
 {{- $article = merge $article (dict "author" $person) }}
 {{- end }}

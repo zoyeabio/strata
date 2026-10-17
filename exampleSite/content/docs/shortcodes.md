@@ -100,9 +100,25 @@ Contact form posting to a JSON endpoint.
 |---|---|
 | `action` | Endpoint, default `/api/contact` |
 | `maxBytes` | Message limit shown by the live counter, default `1000` |
+| `cooldown` | Seconds between submit attempts, default `10` |
+| `minFill` | Seconds the page must be open before a submit counts, default `3` |
 
-The endpoint must validate, sanitise and rate-limit server-side; the hidden
-`hp_name` honeypot must be rejected when filled.
+The endpoint is the boundary; everything below belongs to the server, because
+a scripted post never runs the page:
+
+- **Per-IP rate limit** — one attempt per minute plus a daily quota for the
+  whole endpoint is plenty for a contact form
+- **Body cap** — reject over the limit instead of trusting the counter
+- **Honeypot** — a filled `hp_name` is a bot; drop it without a response
+- **Origin / CSRF** — reject cross-site POSTs via `Origin` or
+  `Sec-Fetch-Site`; issue a CSRF token if the endpoint reads cookies
+- **Timestamp window** — when `form_ts` is non-empty, require
+  `minFill ≤ now − ts ≤ 2 h`, so a captured request cannot be replayed later
+- **Validation** — allow-list the field names and length-check each value
+
+The `cooldown` and `minFill` parameters throttle the browser too — repeat
+attempts and load-and-POST scripts never reach the network, failed attempts
+included. They shape a patient reader; the list above is the defence.
 
 ## interactive/cta
 

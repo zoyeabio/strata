@@ -48,7 +48,7 @@
       {{- $sep = true }}
       {{- end }}
       {{- if and $showAuthor $author }}
-      {{- if $sep }} · {{ end }}By {{ with $authorURL }}<a class="article__author" href="{{ . }}">{{ $author }}</a>{{ else }}{{ $author }}{{ end }}
+      {{- if $sep }} · {{ end }}By {{ with $authorURL }}<a class="article__author" {{ partial "href.html" . }}>{{ $author }}</a>{{ else }}{{ $author }}{{ end }}
       {{- end }}
     </p>
     {{- end }}

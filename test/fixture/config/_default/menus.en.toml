@@ -20,6 +20,12 @@
   parent = "guides"
   weight = 20
 
+[[main]]
+  name = "Mail"
+  identifier = "mail"
+  url = "mailto:nav@example.net"
+  weight = 30
+
 [[footer]]
   name = "Tags"
   pageRef = "tags"
@@ -31,3 +37,9 @@
   name = "Categories"
   pageRef = "categories"
   weight = 20
+
+[[footer]]
+  name = "Mail"
+  identifier = "mail"
+  url = "mailto:footer@example.net"
+  weight = 30

@@ -451,3 +451,36 @@ front matter key coverage is advisory, because some overrides have no sensible
 page to demonstrate them on, and forcing one would mean writing content about
 the feature rather than the product. It runs from `validate-theme.sh` as well
 as standalone.
+
+Published email addresses resist harvesting by construction. Every configured
+or authored URL — content links, navigation, footer quick links, legal, the
+footer menu, social tiles, the byline, the 404 link and the CTA button — now
+passes through `partials/href.html`, which emits the whole `href` attribute so
+the `&#64;` stays a literal in template source and cannot be re-escaped into
+useless text by html/template, and which reproduces the URL policy that
+position used to get for free (relative, `http(s)` and `mailto` only, `#ZgotmplZ`
+otherwise, control characters stripped before the scheme check). JSON-LD drops
+`mailto:` entries outright rather than encoding them, because an encoded URL
+would not be a valid link there either. `scripts/smoke.sh` pins the whole
+thing: an entity-encoded fixture case for each outlet, and a sweep asserting
+no built page carries `href="mailto:` with a bare `@`.
+
+The contact form gained a submit cooldown: `cooldown` (default `10` seconds,
+per-instance) travels as `data-cooldown`, and the script counts an attempt the
+moment it is made — failed ones too — so scripted floods burn their own
+interval. It is browser experience only; `exampleSite/content/docs/shortcodes.md`
+now carries the server-side checklist (per-IP limit, body cap, honeypot,
+validation) as the defence that actually binds.
+
+A hardening pass over both channels. The contact form rejects a filled
+honeypot in the browser before a request is spent, and enforces `minFill`
+(default 3 seconds) between render and submit, so a load-and-POST script
+never reaches the network; the render instant travels as `form_ts` for the
+server-side window check `minFill ≤ now − ts ≤ 2 h`, while an empty value
+keeps native no-JS posts working. `shortcodes.md` gained the matching
+server-side checklist items — Origin/Sec-Fetch-Site (or a CSRF token when
+the endpoint reads cookies) and that timestamp window. The smoke sweep now
+matches a full email-shaped pattern across every text file the fixture
+emits, not just mailto hrefs, and `security.md` states the boundary
+plainly: source-scrapers get nothing, a rendering crawler sees what any
+reader can click.

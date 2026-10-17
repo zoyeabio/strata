@@ -23,4 +23,4 @@
       (or (strings.HasPrefix $dest "http://")
           (strings.HasPrefix $dest "https://")
           (strings.HasPrefix $dest "//")) -}}
-<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} class="link--external" target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}{{ if $external }}<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span>{{ end }}</a>
+<a {{ partial "href.html" $dest }}{{ with .Title }} title="{{ . }}"{{ end }}{{ if $external }} class="link--external" target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}{{ if $external }}<span class="link__icon" aria-hidden="true">&#8599;&#65038;</span>{{ end }}</a>

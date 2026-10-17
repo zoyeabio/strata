@@ -7,7 +7,7 @@
     <a class="not-found__link" href="{{ "/" | relURL }}">Back to home</a>
     {{- with site.Menus.main }}
     {{- with index . 0 }}
-    <a class="not-found__link" href="{{ .URL }}">{{ .Name }}</a>
+    <a class="not-found__link" {{ partial "href.html" .URL }}>{{ .Name }}</a>
     {{- end }}
     {{- end }}
   </p>

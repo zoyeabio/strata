@@ -40,5 +40,5 @@
     <span class="cta__subtitle">{{ . }}</span>
     {{- end }}
   </div>
-  <a class="cta__button" href="{{ $buttonUrl }}"{{ with $buttonTarget }} target="{{ . }}"{{ end }}{{ with $buttonRel }} rel="{{ . }}"{{ else }}{{ if $blank }} rel="noopener"{{ end }}{{ end }}>{{ $buttonText }}</a>
+  <a class="cta__button" {{ partial "href.html" $buttonUrl }}{{ with $buttonTarget }} target="{{ . }}"{{ end }}{{ with $buttonRel }} rel="{{ . }}"{{ else }}{{ if $blank }} rel="noopener"{{ end }}{{ end }}>{{ $buttonText }}</a>
 </div>

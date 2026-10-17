@@ -28,7 +28,10 @@ enableA11y = true
 
 [author]
   name = "Fixture Team"
-  links = [{ name = "Profile", url = "https://author.example.net/" }]
+  links = [
+    { name = "Profile", url = "https://author.example.net/" },
+    { name = "Mail", url = "mailto:team@example.net" },
+  ]
 
 [ads]
   client = "ca-pub-0000000000000000"
@@ -54,15 +57,22 @@ enableA11y = true
 
   [footer.quickLinks]
     title = "Quick Links"
-    links = [{ name = "Section A", url = "/section-a/" }]
+    links = [
+      { name = "Section A", url = "/section-a/" },
+      { name = "Mail", url = "mailto:hello@example.net" },
+    ]
 
   [footer.legal]
     title = "Legal"
-    links = [{ name = "Flat", url = "/section-a/flat/" }]
+    links = [
+      { name = "Flat", url = "/section-a/flat/" },
+      { name = "Mail", url = "mailto:legal@example.net" },
+    ]
 
   [footer.social]
     links = [
       { name = "Check", icon = "check", url = "https://social.example.net/" },
       { name = "LinkedIn", icon = "linkedin", url = "https://linkedin.example.net/" },
       { name = "Fallback", icon = "no-such-icon", url = "/section-a/flat/" },
+      { name = "Email", icon = "email", url = "mailto:hello@example.net" },
     ]

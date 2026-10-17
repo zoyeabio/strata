@@ -379,11 +379,17 @@ assert 'section-a/shortcodes/index.html' 'action="/api/contact"' \
   'contact form posts to the default endpoint'
 assert 'section-a/shortcodes/index.html' 'name="hp_name"' \
   'contact form keeps the honeypot'
-assert 'section-a/shortcodes/index.html' 'data-contact-form data-max-bytes="1000"' \
-  'the contact form publishes its byte limit as markup'
+assert 'section-a/shortcodes/index.html' \
+  'data-contact-form data-max-bytes="1000" data-cooldown="10" data-min-fill="3"' \
+  'the contact form publishes its byte limit, cooldown and min fill as markup'
 assert 'section-a/shortcodes/index.html' \
   'src="[^"]*js/contact\.[0-9a-f]+\.js" integrity="sha512-' \
   'the contact script loads fingerprinted with SRI'
+if grep -q 'data-cooldown' "$OUT"/js/contact.*.js && grep -q 'form_ts' "$OUT"/js/contact.*.js; then
+  pass 'the contact script reads the cooldown and writes form_ts from markup'
+else
+  fail 'the contact script reads the cooldown and writes form_ts from markup'
+fi
 assert 'section-a/shortcodes/index.html' 'data-interval="1500"' \
   'carousel carries the configured interval'
 assert 'section-a/shortcodes/index.html' 'aspect-ratio: 16 / 9' \
@@ -629,6 +635,10 @@ for page in out.rglob('*.html'):
         if not (out / href.lstrip('/') / 'index.html').exists():
             missing.append(f'{page.relative_to(out)}: series {href}')
     for m in re.finditer(r'class="article__author" href="([^"]+)"', text):
+        # A mailto byline is an address, not a taxonomy page: entity-encoded
+        # on purpose, so there is no page to resolve it against.
+        if m.group(1).startswith('mailto:'):
+            continue
         href = urllib.parse.urlparse(m.group(1)).path
         checked += 1
         if not (out / href.lstrip('/') / 'index.html').exists():
@@ -646,6 +656,43 @@ PY
   pass "every tag, series and author link points at a built page ($tax_out)"
 else
   fail 'every tag, series and author link points at a built page'
+fi
+
+# 30b. no crawlable email address anywhere in the text output: a bare @ in
+#     a mailto href means some outlet skipped partials/href.html, and a full
+#     email-shaped token in any file (HTML, XML, JSON, TXT, JS, CSS, manifest)
+#     means some outlet leaked one without a link at all — sitemap, feed,
+#     search index and every future export pass through the same net. &#64;
+#     decodes only when a reader follows the link; share links (mailto:?body=…)
+#     carry no address and must stay unharmed.
+if sweep_out=$(python3 - "$OUT" <<'PY'
+import sys, pathlib, re
+out = pathlib.Path(sys.argv[1])
+bad = []
+raw_href = re.compile(r'href="mailto:[^"]*@')
+address = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+text_exts = {'.html', '.xml', '.json', '.txt', '.js', '.css', '.svg', '.webmanifest'}
+files = 0
+for page in out.rglob('*'):
+    if not page.is_file() or page.suffix not in text_exts:
+        continue
+    files += 1
+    text = page.read_text(errors='ignore')
+    for pat, why in ((raw_href, 'bare @ in mailto href'),
+                     (address, 'email-shaped address')):
+        hit = pat.search(text)
+        if hit:
+            bad.append(f'{page.relative_to(out)} [{why}]: {hit.group(0)}')
+if bad:
+    for line in bad[:20]:
+        print('FAIL', line, file=sys.stderr)
+    sys.exit(1)
+print(f'{files} files swept')
+PY
+); then
+  pass "no crawlable email address in any text output ($sweep_out)"
+else
+  fail 'no crawlable email address in any text output'
 fi
 
 # 31. shortcode parameter whitelist: content may only use parameters the
@@ -706,6 +753,8 @@ assert 'index.html' 'aria-label="Check"' 'footer social icon link renders'
 assert 'index.html' 'aria-label="LinkedIn"[^>]*><svg' \
   'theme-shipped brand icon resolves from the module assets'
 assert 'index.html' '>Fallback<' 'missing social icon falls back to the name'
+assert 'index.html' 'site-footer__social" href="mailto:hello&#64;example\.net"' \
+  'footer social mailto is entity-obfuscated'
 assert 'index.html' 'site-header__toggle" data-appearance-toggle' 'switcher sits in the header'
 assert_not 'index.html' 'data-appearance-toggle aria-pressed' \
   'three-state appearance toggle carries no boolean state'
@@ -1219,6 +1268,12 @@ assert 'section-a/flat/index.html' 'twitter:site' 'twitter:site is emitted'
 assert 'section-a/flat/index.html' 'name="twitter:creator" content="@fixturecreator"' \
   'twitter:creator is emitted from the site param'
 assert 'index.html' '"@type":"Organization"' 'schema carries the publisher once'
+assert_not 'index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+  'Organization sameAs drops mailto entries'
+assert_not 'section-a/flat/index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+  'Person sameAs drops mailto entries'
+assert_not 'section-a/links/index.html' '<script[^>]*application/ld\+json[^>]*>[^<]*mailto:' \
+  'schema never renders a mailto person url'
 assert 'section-a/anim/index.html' 'name="description" content="Animated WebP feature image"' \
   'meta description strips markup from the front matter value'
 assert_not 'section-a/anim/index.html' 'name="description" content="[^"]*&lt;' \
@@ -1799,8 +1854,8 @@ assert 'section-a/links/index.html' \
 assert 'section-a/links/index.html' '<a href="/notice/">notice</a>' \
   'an internal content link stays in the tab'
 assert 'section-a/links/index.html' \
-  '<a href="mailto:hello@example.com">email</a>' \
-  'a mailto link stays in the tab'
+  '<a href="mailto:hello&#64;example.com">email</a>' \
+  'a mailto link stays in the tab, entity-encoded'
 assert_at "$OUT_NOTAB" 'section-a/links/index.html' \
   '<a href="https://gohugo.io">Hugo docs</a>' \
   'externalLinksNewTab = false navigates the external link in place'

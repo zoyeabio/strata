@@ -1,0 +1,33 @@
+{{- /*
+  Emits a whole href="…" attribute for a URL that may be mailto:.
+
+  The address cannot be built by the caller: html/template escapes a & in
+  any interpolated value to &amp;, so &#64; would decode to literal text and
+  the link would die — the entity has to stay a literal in a template
+  source. Returning the finished attribute as HTMLAttr (harmless in the
+  attribute-name position) keeps the literal intact and collapses every
+  call site to one partial instead of a with/else branch.
+
+  It also reproduces what html/template did for a value-position {{ . }} in
+  an href: URLs are kept only when relative or http(s)/mailto — anything
+  else renders href="#ZgotmplZ", control characters stripped first so a
+  tab cannot smuggle a scheme past the check — and & < > " are escaped.
+
+  Called by: render-link, menu, footer (quick links, legal, menu, social),
+  404, single byline, cta — anywhere a configured or authored URL may land.
+*/ -}}
+{{- $url := strings.TrimSpace . -}}
+{{- if strings.HasPrefix $url "mailto:" -}}
+{{- $at := split (strings.TrimPrefix "mailto:" $url) "@" -}}
+{{- if ge (len $at) 2 -}}
+{{- return (printf "href=\"mailto:%s&#64;%s\"" (htmlEscape (index $at 0)) (htmlEscape (delimit (after 1 $at) "@")) | safeHTMLAttr) -}}
+{{- end -}}
+{{- end -}}
+{{- $found := findRE `^[A-Za-z][A-Za-z0-9+.-]*:` (replaceRE `[\x00-\x1f\x7f]` "" $url) 1 -}}
+{{- if $found -}}
+{{- $scheme := lower (strings.TrimSuffix ":" (index $found 0)) -}}
+{{- if not (in (slice "http" "https" "mailto") $scheme) -}}
+{{- return (`href="#ZgotmplZ"` | safeHTMLAttr) -}}
+{{- end -}}
+{{- end -}}
+{{- return (printf "href=\"%s\"" (htmlEscape $url) | safeHTMLAttr) -}}

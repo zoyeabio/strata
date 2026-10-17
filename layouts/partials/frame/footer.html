@@ -45,7 +45,7 @@
     <div>
       <p class="site-footer__heading">{{ $quick.title | default "Quick Links" }}</p>
       <ul class="site-footer__links">
-        {{- range . }}<li><a class="site-footer__link" href="{{ .url }}">{{ .name }}</a></li>{{ end }}
+        {{- range . }}<li><a class="site-footer__link" {{ partial "href.html" .url }}>{{ .name }}</a></li>{{ end }}
       </ul>
     </div>
     {{- end }}
@@ -53,7 +53,7 @@
     <div>
       <p class="site-footer__heading">{{ $legal.title | default "Legal" }}</p>
       <ul class="site-footer__links">
-        {{- range . }}<li><a class="site-footer__link" href="{{ .url }}">{{ .name }}</a></li>{{ end }}
+        {{- range . }}<li><a class="site-footer__link" {{ partial "href.html" .url }}>{{ .name }}</a></li>{{ end }}
       </ul>
     </div>
     {{- end }}
@@ -94,7 +94,7 @@
       {{- range . }}
       {{- if .URL }}
       <li>
-        <a class="site-footer__link" href="{{ .URL }}"
+        <a class="site-footer__link" {{ partial "href.html" .URL }}
           {{- if or ($.IsMenuCurrent "footer" .) ($.HasMenuCurrent "footer" .) }} aria-current="page"{{ end }}>{{ .Name }}</a>
       </li>
       {{- else }}
@@ -108,7 +108,7 @@
   {{- if $social }}
   <div class="site-footer__meta">
     {{- range $social }}
-    <a class="site-footer__social" href="{{ .url }}" aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
+    <a class="site-footer__social" {{ partial "href.html" .url }} aria-label="{{ .name }}" rel="noopener noreferrer"{{ if strings.HasPrefix .url "http" }} target="_blank"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" .icon) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .name }}{{ end }}</a>
     {{- end }}
   </div>
   {{- end }}
