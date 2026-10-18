@@ -308,6 +308,28 @@ consent and ads through two sanctioned points:
 - <code>{{&lt; ads slot="…" &gt;}}</code> renders an AdSense unit; `static/ads.txt` must
   name the `[ads] client` ID or the build fails (check-build R11).
 
+### The pages a banner points at
+
+A banner that says "we use cookies" and points nowhere is not a notice.
+Three pages make it one, and this example publishes all three as
+templates with every `[TBD]` left for the reader to fill:
+
+| Page | Says | Template |
+|---|---|---|
+| [Privacy policy](/privacy-policy/) | who collects, what, why, for how long, your rights | `content/privacy-policy.md` |
+| [Cookies](/cookies/) | the short list the banner links from | `content/cookies.md` |
+| [Terms of use](/terms/) | how the site may be used, and our limits | `content/terms.md` |
+
+`scripts/new-site.sh` creates the same three as stub pages with TODO
+comments, so a new site starts with the right shape and nothing invented.
+
+A `[TBD]` is a fact about your site, not a writing exercise. Three of
+them are not optional: whether consent law applies here and on what
+basis, a link to [Google Ad Settings](https://adssettings.google.com) for
+anyone who wants to turn ad personalization off, and a cookie table that
+names only cookies the site actually sets — deleting a row means the
+vendor is gone, not just gone from the table.
+
 ## Site hooks
 
 Drop-in partials a site may provide; the theme calls them when present:

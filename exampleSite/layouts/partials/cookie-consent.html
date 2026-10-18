@@ -9,12 +9,19 @@
   ships script-src 'self' with no unsafe-inline. Load Consent Mode defaults
   from extend-head.html, before any measurement tag.
 
+  The banner also names where a reader goes next. Both pages ship as
+  templates in this example's content tree — content/cookies.md and
+  content/privacy-policy.md — which is the copy-paste set a real site
+  adapts, along with the short terms page at content/terms.md.
+
   Context is the page.
 
   Called by: _default/baseof.html
 */ -}}
 <div class="site-consent" data-cookie-consent role="region" aria-label="Cookie consent">
-  <p>This site can store analytics cookies.</p>
+  <p>This site can store analytics cookies. The <a href="/cookies/">cookie notice</a>
+  says what they do; the <a href="/privacy-policy/">privacy policy</a> says what
+  to do about them.</p>
   <label class="site-consent__choice">
     <input type="checkbox" name="analytics-consent">
     <span>Accept analytics</span>

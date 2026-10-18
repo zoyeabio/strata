@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Reference legal pages ship in the example site.**
+  `content/privacy-policy.md`, `content/cookies.md` and `content/terms.md`
+  are templates that leave every fact as `[TBD]`, so a site copies the
+  shape instead of inventing the sections. The privacy policy names what a
+  static site actually collects — contact form submissions, host server
+  logs, cookies — and carries the ad personalization disclosure: the page
+  URL and IP address a browser sends to Google, the four domains that set
+  advertising cookies, Google's published nine-month and eighteen-month
+  anonymization periods, and the controls a reader can use to opt out. The
+  consent banner now links to the cookie notice and the privacy policy,
+  both land in the footer legal menu, and `validate-theme.sh` pins the
+  pair because check-build catches an empty href but not a link whose
+  target is missing.
+
+- **New sites start with legal stubs instead of blank pages.**
+  `scripts/new-site.sh` writes the three legal pages as TODO stubs with a
+  pointer to the example site's templates, so a privacy policy is not one
+  of the pages a site ships empty by accident. The footer menu gains a
+  Cookies entry next to Privacy and Terms.
+
 ## [0.1.1] - 2026-10-17
 
 ### Added

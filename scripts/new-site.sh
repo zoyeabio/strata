@@ -204,6 +204,11 @@ EOF
   weight = 10
 
 [[footer]]
+  name = "Cookies"
+  pageRef = "cookies"
+  weight = 15
+
+[[footer]]
   name = "Terms"
   pageRef = "terms"
   weight = 20
@@ -266,7 +271,7 @@ description: "${NAME} — independent information site."
 Welcome to ${NAME}.
 EOF
 
-for dir in about contact privacy-policy terms; do
+for dir in about contact; do
   mkdir -p "$OUT/content/$dir"
   title=$(printf '%s' "$dir" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
   cat > "$OUT/content/$dir/_index.md" <<EOF
@@ -275,6 +280,49 @@ title: "$title"
 ---
 EOF
 done
+
+# Legal pages ship as stubs with TODOs, not invented facts: a privacy
+# policy naming the wrong entity is a liability, and the full shape of
+# each one is in the example site's content tree.
+mkdir -p "$OUT/content/cookies" "$OUT/content/privacy-policy" "$OUT/content/terms"
+
+cat > "$OUT/content/cookies/_index.md" <<'EOF'
+---
+title: "Cookies"
+---
+
+<!-- TODO: list the cookies and similar technologies this site sets, with
+     purpose, provider and lifetime. Delete rows you do not use. -->
+
+Fill this in before publishing. The consent banner links here, and the
+example site's Cookies page is the shape to adapt.
+EOF
+
+cat > "$OUT/content/privacy-policy/_index.md" <<'EOF'
+---
+title: "Privacy Policy"
+---
+
+<!-- TODO: who you are, what you collect, for how long you keep it, who
+     you share it with, and what rights a reader has. Consent law needs a
+     one-line answer on whether it applies here and on what basis. -->
+
+Fill this in before publishing. The example site's Privacy Policy page is
+the shape to adapt.
+EOF
+
+cat > "$OUT/content/terms/_index.md" <<'EOF'
+---
+title: "Terms of Use"
+---
+
+<!-- TODO: how the site may be used, what copyright you keep, how far your
+     liability extends, and the governing law. Use the same contact address
+     the privacy policy gives. -->
+
+Fill this in before publishing. The example site's Terms of Use page is
+the shape to adapt.
+EOF
 
 if [ -n "$SECTIONS" ]; then
   IFS=',' read -ra secs <<< "$SECTIONS"

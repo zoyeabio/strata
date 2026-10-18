@@ -76,6 +76,9 @@ customCSS = ["css/example.css"]
       { name = "Docs", url = "/docs/" },
       { name = "About", url = "/about/" },
       { name = "Contact", url = "/contact/" },
+      { name = "Privacy", url = "/privacy-policy/" },
+      { name = "Cookies", url = "/cookies/" },
+      { name = "Terms", url = "/terms/" },
     ]
 
   [footer.social]

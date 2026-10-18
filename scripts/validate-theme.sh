@@ -251,6 +251,20 @@ else
   fail 'exampleSite demonstrates the theme public surface'
 fi
 
+# A banner that names nothing is not a notice. check-build catches an empty
+# href, not a link whose target is missing, so the pair is pinned here: the
+# pages exist and the banner points at them.
+if grep -q 'href="/cookies/"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
+   && grep -q 'href="/privacy-policy/"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
+   && ( for p in cookies privacy-policy terms; do
+        [ -f "$ROOT/exampleSite/content/$p.md" ] || exit 1
+      done )
+then
+  pass 'the consent banner points at published notices'
+else
+  fail 'the consent banner points at published notices'
+fi
+
 # Summary is a documented description fallback and Hugo exposes a top-level
 # summary through .Params. Pin that spelling so the lint cannot accidentally
 # require the nested params form while the templates accept both.
