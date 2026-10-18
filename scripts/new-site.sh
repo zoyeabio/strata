@@ -30,7 +30,7 @@ DOMAIN=""
 OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
-MODULE_VERSION="v0.1.0"
+MODULE_VERSION="v0.1.1"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -416,11 +416,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pin `ref:` to a Strata release tag once you adopt one; until then it
-      # tracks main, which matches the unversioned local development flow.
+      # `ref` is the tag go.mod requires: the local replace makes
+      # development build against your checkout, CI builds the release. Bump
+      # both when you upgrade the theme.
       - uses: actions/checkout@v4
         with:
           repository: zoyeabio/strata
+          ref: v0.1.1
           path: ../strata
 
       - uses: actions/setup-node@v4

@@ -7,15 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-17
+
 ### Added
 
 - **New sites ship a validating CI workflow.**
   `scripts/new-site.sh` writes `.github/workflows/validate.yml`, which
-  checks out Strata as a sibling directory and runs
-  `scripts/validate-site.sh` against the site on every push and pull
-  request. The output rules then gate a deploy instead of depending on a
-  developer running the command from a theme checkout, and the sibling
-  checkout overrides the local `replace` path in the scaffold's go.mod.
+  checks out Strata as a sibling directory pinned to the tag `go.mod`
+  requires and runs `scripts/validate-site.sh` against the site on every
+  push and pull request. The output rules then gate a deploy instead of
+  depending on a developer running the command from a theme checkout, and
+  the sibling checkout overrides the local `replace` path in the
+  scaffold's go.mod.
 
 - **check-build carries the hosting file ceiling as R16.**
   `[build] maxfiles` (20,000, Cloudflare Pages' free-tier limit; the paid

@@ -1,7 +1,7 @@
 {
   "name": "strata-example",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Build dependencies for the Strata example site. Hugo runs tailwindcss in-process during the build; since Hugo 0.161.0 it needs the npm CLI rather than the standalone binary.",
   "scripts": {
     "dev": "hugo server -D",

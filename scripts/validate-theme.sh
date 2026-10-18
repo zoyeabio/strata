@@ -329,6 +329,9 @@ workflow = (root / ".github/workflows/validate.yml").read_text()
 assert "repository: zoyeabio/strata" in workflow
 assert "path: ../strata" in workflow
 assert "validate-site.sh" in workflow
+require = next(line for line in (root / "go.mod").read_text().splitlines()
+               if line.startswith("require github.com/zoyeabio/strata"))
+assert f"ref: {require.split()[-1]}" in workflow
 PY
 then
   pass 'new sites suppress unused bundle originals, carry the article metadata scaffold and a validating CI workflow'
