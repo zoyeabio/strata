@@ -8,6 +8,10 @@ Strata keeps everything site-agnostic inside the theme — layout, components
 and styling. Branding, copy, navigation and configuration stay in each site's
 own layer, so one theme can serve several sites without forking.
 
+Strata is English-first: UI copy ships in English and the search tokenizer
+assumes Latin script. A non-English site supplies its own strings and search
+behaviour.
+
 **Status:** the rebuild is complete. The [exampleSite](exampleSite/) is the
 theme's own demo, and its [documentation section](exampleSite/content/docs/_index.md)
 describes shipped behaviour.

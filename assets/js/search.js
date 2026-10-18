@@ -41,6 +41,10 @@
     });
   }
 
+  /* Latin script by design: Strata is an English-first theme and the index
+     has no word segmentation for CJK, whose queries would tokenise to
+     nothing. A non-Latin site should replace this file rather than expect
+     the tokenizer to grow one. */
   function tokens(query) {
     return query.toLowerCase().split(/[^a-z0-9']+/).filter(function (t) { return t; });
   }
@@ -78,7 +82,7 @@
       if (matched) hits.push({ entry: entry, score: score });
     });
     hits.sort(function (a, b) { return b.score - a.score; });
-    return hits.slice(0, 10);
+    return hits;
   }
 
   function render(query) {
@@ -97,7 +101,9 @@
       if (status) status.textContent = status.getAttribute("data-search-empty");
       return;
     }
-    hits.forEach(function (hit) {
+    /* The list caps at ten; the count reports every match, so a broad query
+       reads "47 results" above ten rows rather than claiming there are ten. */
+    hits.slice(0, 10).forEach(function (hit) {
       var item = document.createElement("li");
       var link = document.createElement("a");
       link.className = "site-search__link";

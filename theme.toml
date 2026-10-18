@@ -1,9 +1,9 @@
 name = "Strata"
 license = "MIT"
 licenselink = "https://github.com/zoyeabio/strata/blob/main/LICENSE"
-description = "A content-first Hugo theme for independent sites: one theme, many brands."
+description = "A content-first Hugo theme for independent English-language sites: one theme, many brands."
 homepage = "https://github.com/zoyeabio/strata"
-tags = ["blog", "responsive", "dark mode", "clean", "minimal", "personal", "cms"]
+tags = ["blog", "responsive", "dark mode", "clean", "minimal", "personal", "cms", "english"]
 features = ["responsive images", "dark mode", "taxonomy navigation", "json-ld schema", "no implicit external requests"]
 min_version = "0.161.0"
 
