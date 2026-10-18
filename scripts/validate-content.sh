@@ -39,6 +39,7 @@ if python3 - "$ROOT" "$SITE" <<'PY'
 import pathlib
 import re
 import sys
+import tomllib
 from datetime import date, datetime
 
 try:
@@ -148,21 +149,44 @@ def as_date(value):
     if isinstance(value, date):
         return value
     if isinstance(value, str):
-        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y-%m-%dT%H:%M:%S"):
+        text = value.strip()
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d"):
             try:
-                return datetime.strptime(value.strip(), fmt).date()
+                return datetime.strptime(text, fmt).date()
             except ValueError:
                 pass
+        try:
+            # RFC3339 / ISO 8601 datetime, with or without time zone or
+            # fractional seconds; fromisoformat covers "Z" and "+HH:MM".
+            return datetime.fromisoformat(text).date()
+        except ValueError:
+            pass
     return None
 
 
 def front_matter(path):
     """The page's front matter, or {} when the file has none."""
     text = path.read_text(encoding="utf-8")
+    # A UTF-8 BOM would otherwise push the whole file out of front matter
+    # detection, skipping every check on the page without a word.
+    if text.startswith("\ufeff"):
+        text = text[1:]
+    if text.startswith("+++"):
+        parts = text.split("+++", 2)
+        if len(parts) < 3:
+            bad("front matter closes", "%s: +++ opened but never closed" % rel_of(path))
+            return {}
+        try:
+            data = tomllib.loads(parts[1])
+        except tomllib.TOMLDecodeError as exc:
+            bad("front matter parses as TOML", "%s: %s" % (rel_of(path), exc))
+            return {}
+        return data if isinstance(data, dict) else {}
     if not text.startswith("---"):
         return {}
     parts = text.split("---", 2)
     if len(parts) < 3:
+        bad("front matter closes", "%s: --- opened but never closed" % rel_of(path))
         return {}
     try:
         data = yaml.safe_load(parts[1])
