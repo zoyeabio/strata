@@ -32,7 +32,8 @@
   {{- range $names }}
   {{- $name := . }}
   {{- with (index $data $name) }}
-  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}" aria-label="{{ .label | default $name }}"{{ if index . "blank" | default true }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" $name) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .label | default $name }}{{ end }}</a>
+  {{- $blank := true }}{{ if isset . "blank" }}{{ $blank = .blank }}{{ end }}
+  <a class="article__share-link" href="{{ printf .url $page.Permalink $title }}" aria-label="{{ .label | default $name }}"{{ if $blank }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ with resources.Get (printf "icons/%s.svg" $name) }}{{ strings.TrimSpace .Content | safeHTML }}{{ else }}{{ .label | default $name }}{{ end }}</a>
   {{- end }}
   {{- end }}
 </div>

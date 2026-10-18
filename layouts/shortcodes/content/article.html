@@ -37,7 +37,8 @@
 {{- if eq $raw "true" -}}
   {{- $show = true -}}
 {{- else if ne $raw "false" -}}
-  {{- $show = or $target.Params.showsummary site.Params.list.showSummary -}}
+  {{- $show = site.Params.list.showSummary -}}
+  {{- if isset $target.Params "showsummary" -}}{{- $show = $target.Params.showsummary -}}{{- end -}}
 {{- end -}}
 <section class="shortcode-embed">
   {{- partial "page/card.html" (dict
