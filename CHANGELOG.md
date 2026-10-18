@@ -7,17 +7,128 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **A reference contact endpoint ships beside the shortcode.**
+  `docs/contact-endpoint/` carries a copy-pasteable Cloudflare Worker that
+  does what `docs/shortcodes.md` says the server must do: same-origin and
+  body-cap checks before any parsing, `formData` with `.trim()`, honeypot
+  answer-with-success, `TextEncoder` byte count, email regex, the
+  `minFill ≤ now − ts ≤ 2 h` timestamp window when `form_ts` is non-empty,
+  a `contact:{epoch}:{uuid}` KV key so messages sort and stay unique across
+  workers, and best-effort forwarding. The JSON envelope `{success, error}`
+  is spelled out because the client reads that shape. Rate limiting stays a
+  stub the site owns; `wrangler.toml` ships too, with the comma-separated
+  `ORIGINS` note that Workers vars cannot hold arrays.
+
+- **A complete but replaceable default favicon set.** The module supplies
+  one compact strata mark as SVG, ICO, Apple Touch, Android/PWA and Safari
+  mask assets. Sites replace a same-named file under `static/` or override
+  `partials/favicons.html`; the manifest remains site-owned because its
+  name and product colours belong to the consuming site.
+
+- **The docs gain a troubleshooting page for Hugo platform gotchas.**
+  `docs/troubleshooting/` collects the behaviours that read as theme
+  defects and the one-line config fixes each one has: future-dated pages
+  that silently vanish, `pageRef` over bare URLs in menus, custom layouts
+  that lose related articles and pagination, Markdown images wrapping in
+  `<p>` by default, `content/list`'s `where` being a page field rather
+  than a section name, the deprecated `languageCode`/`languageName` keys,
+  and the module path being a separate thing from a site URL.
+
+### Changed
+
+- **AdSense is CSP-honest.** The `ads` shortcode's push call moved from an
+  inline script to external `js/ads.js` behind an integrity attribute —
+  the same pattern as `contact.js` — so enabling ads never asks
+  `static/_headers` for `unsafe-inline`. The head loader now fails the
+  build while no `script-src` allows `pagead2.googlesyndication.com`: an
+  ad slot behind a blocking CSP ships blank, and that error belongs at
+  build time rather than in a reader's console. `[ads] skipCspCheck`
+  exists for hosts that apply response headers themselves, and the
+  security docs carry a working ad-site `_headers` block plus Google's
+  own caveat that only a nonce policy is officially supported.
+
+- **Strata declares itself English-first.** The README, `theme.toml` and
+  the search tokenizer state the Latin-script assumption — a non-Latin
+  site supplies its own strings and search behaviour — instead of leaving
+  a reader to discover it.
+
+- **The mailto outlets are hardened end to end.** Every configured or
+  authored URL passes through `partials/href.html`, which emits the whole
+  `href` attribute so the `&#64;` stays a literal and cannot be
+  re-escaped into useless text, and which reproduces the URL policy
+  position used to get for free. JSON-LD drops `mailto:` entries outright.
+  The scheme is matched case-insensitively — `MAILTO:` renders normalised
+  instead of slipping through as a bare address — and the contact form
+  gained a `cooldown` (default 10 s, per-instance, counted on attempt,
+  failures included) plus a honeypot rejection and a `minFill` dwell
+  window with the render instant travelling as `form_ts` for the
+  server-side check. `docs/shortcodes.md` carries the server-side
+  checklist; `security.md` states the boundary: obfuscation buys time, a
+  rotatable alias behind the contact form is the durable answer.
+
+- **The deprecated language keys are renamed where they are read.**
+  `languageCode`/`languageName` become `locale`/`label` in the theme's
+  `languages.en.toml` and in `new-site.sh`'s scaffold, so a scaffolded
+  site stops printing Hugo's deprecation warnings. The value stays `en`:
+  the templates read it into `<html lang>`, `og:locale` and the
+  `content-language` meta, so the rename renders byte-identical output.
+
+- **Clay's daytime ground is a faint warm white, not a yellow cream.**
+  `--site-page-bg` moves from `#fbf1c7` to `#f7f4ec` — the same 44°
+  warmth at s=41%, l=95% — raising every light-mode contrast pair, with
+  `smoke.sh`'s 182 pairs still clearing their floors.
+
+- **The `content/list` demo matches the docs** (`where="Type"`, not
+  `where="Section"`), so a reader copying the demo learns what the
+  reference page teaches.
+
+### Fixed
+
+- **A front matter `false` is no longer read as unset.** Hugo's `default`
+  filter treats boolean `false` as missing, so a page that set
+  `showSummary = false`, `cardView = false` or `orderByWeight = false`
+  was overridden by the site default, and a sharing service's
+  `"blank": false` (the one mailto needs) opened a new tab anyway.
+  `paginated.html`, `share.html` and `content/article` resolve an
+  explicit page value with `isset` instead.
+
+- **The 404 page survives a URL-less first menu entry.** It now links the
+  first main-menu item that carries a URL — a pure dropdown parent no
+  longer crashes the build through `href.html`, which itself tolerates a
+  nil URL instead of failing on `strings.TrimSpace`.
+
+- **A quoted RFC3339 date is a date again.** `validate-content.sh` parses
+  ISO 8601 datetimes — time zones, fractional seconds, `Z` — so a page
+  dating itself `"2026-01-05T10:00:00+08:00"` is checked instead of being
+  misreported as "lastmod without date" with every date rule silently
+  skipped. Front matter triage also parses TOML (`+++`) pages, strips a
+  UTF-8 BOM, and reports an unclosed `---` rather than skipping the page.
+
+- **The smoke gate reports a missing stylesheet instead of dying.** The
+  `ls | head -1` assignments sat under `set -o pipefail`, so an empty
+  `css/` directory killed the script before its own failure branch could
+  run; they now fall through to the assertion that names the problem.
+
+- **The demo generator's `add` blend stops saturating to white.**
+  `max(255, min(255, …))` clamped every lightened pixel to 255; the
+  expression clamps to `[0, 255]`, so the dot and ring overlays in
+  `hero-shortcodes`, `texture-weave` and `square-portrait` carry their
+  soft edges again.
+
+- **The search count reports every match.** The list still caps at ten
+  rows, but the status line no longer claims a 47-match query has ten
+  results.
+
+
+## [0.1.0] - 2026-10-16
+
 Strata is a standalone Hugo module: one theme, any number of brands. What
 survives here is the set of decisions that would otherwise have to be
 re-derived from the templates.
 
 ### Deliberate choices
-
-- **The default favicon is complete but replaceable.** The module supplies one
-  compact strata mark as SVG, ICO, Apple Touch, Android/PWA and Safari mask
-  assets. Sites replace a same-named file under `static/` or override
-  `partials/favicons.html`; the manifest remains site-owned because its name
-  and product colours belong to the consuming site.
 
 - **No implicit external requests**, build time or runtime: no CDNs, webfonts
   or analytics. Fonts are system stacks. Maps, AdSense and site hooks are
@@ -391,29 +502,7 @@ re-derived from the templates.
    top-level page would never have been visible either and is gone. A demo that
    cannot be observed is not a demo, which is why the coverage gate reports
    undemonstrated keys as a warning rather than a failure.
-
-- **The deprecated language keys are renamed where they are read.** Hugo
-  deprecated `languages.<lang>.languageCode` and `languageName` in v0.158, and
-  every scaffolded site printed both warnings on build — project config is what
-  warns, and `new-site.sh` writes those keys into the site's own config. The
-  theme's `languages.en.toml` is the same two keys as module config, where the
-  warning does not fire (a fixture build never showed one), but the removal the
-  warning promises will not spare it, so both files now say `locale` and
-  `label`. The value stays `en` rather than becoming `en-US`: the templates
-  read `site.Language.Locale` into `<html lang>`, `og:locale` and the
-  `content-language` meta, so a richer locale would have changed all three —
-  and Open Graph spells locales `en_US`, underscoring where that would have
-  drifted — while the rename renders byte-identical output. No gate pins the
-  key: `smoke.sh`'s `lang=en` is a search URL's `.Lang`, which is the map key
-  and did not change.
-
-- **Clay's daytime ground is a faint warm white, not a yellow cream.**
-  `--site-page-bg` was `#fbf1c7` — s=87%, a cast read before the content —
-  and is now `#f7f4ec`: the same 44° warmth at s=41%, l=95%. The contrast
-  gate measures the ground only against darker anchors, so lightening it
-  raises every pair (body 10.22 → 10.55, faint 3.37 → 3.48) and `smoke.sh`'s
-  182 pairs still clear their floors. Night stays `#282828`.
-
+ 
  ### Gates
 
 
@@ -451,86 +540,3 @@ front matter key coverage is advisory, because some overrides have no sensible
 page to demonstrate them on, and forcing one would mean writing content about
 the feature rather than the product. It runs from `validate-theme.sh` as well
 as standalone.
-
-Published email addresses resist harvesting by construction. Every configured
-or authored URL — content links, navigation, footer quick links, legal, the
-footer menu, social tiles, the byline, the 404 link and the CTA button — now
-passes through `partials/href.html`, which emits the whole `href` attribute so
-the `&#64;` stays a literal in template source and cannot be re-escaped into
-useless text by html/template, and which reproduces the URL policy that
-position used to get for free (relative, `http(s)` and `mailto` only, `#ZgotmplZ`
-otherwise, control characters stripped before the scheme check). JSON-LD drops
-`mailto:` entries outright rather than encoding them, because an encoded URL
-would not be a valid link there either. `scripts/smoke.sh` pins the whole
-thing: an entity-encoded fixture case for each outlet, and a sweep asserting
-no built page carries `href="mailto:` with a bare `@`.
-
-The contact form gained a submit cooldown: `cooldown` (default `10` seconds,
-per-instance) travels as `data-cooldown`, and the script counts an attempt the
-moment it is made — failed ones too — so scripted floods burn their own
-interval. It is browser experience only; `exampleSite/content/docs/shortcodes.md`
-now carries the server-side checklist (per-IP limit, body cap, honeypot,
-validation) as the defence that actually binds.
-
-A hardening pass over both channels. The contact form rejects a filled
-honeypot in the browser before a request is spent, and enforces `minFill`
-(default 3 seconds) between render and submit, so a load-and-POST script
-never reaches the network; the render instant travels as `form_ts` for the
-server-side window check `minFill ≤ now − ts ≤ 2 h`, while an empty value
-keeps native no-JS posts working. `shortcodes.md` gained the matching
-server-side checklist items — Origin/Sec-Fetch-Site (or a CSRF token when
-the endpoint reads cookies) and that timestamp window. The smoke sweep now
-matches a full email-shaped pattern across every text file the fixture
-emits, not just mailto hrefs, and `security.md` states the boundary
-plainly: source-scrapers get nothing, a rendering crawler sees what any
-reader can click.
-
-Upper-case `MAILTO:` no longer slips through: `partials/href.html`, the
-sameAs filter and the person-url guard match the scheme case-insensitively —
-the prefix is cut by length so the address keeps its case — and fixture
-cases pin that an upper-case scheme renders as a normalised, entity-encoded
-`mailto:` instead of a bare address, in both the link path and JSON-LD. The
-docs absorbed what the wider field settled on: honeypots say to answer with
-a normal success and send nothing (a rejection teaches the operator), the
-Origin entry names the apex/www variants, the timestamp entry says when an
-HMAC changes it from a speed bump into proof, and the ladder ends with the
-escalation options — Turnstile or a one-time token the endpoint issues on
-GET. `security.md` states the endgame plainly: obfuscation buys time, the
-durable answer is a rotatable alias behind the contact form.
-
-- **The `content/list` demo used `where="Section"` while the docs say
-  `where="Type"`.** The shortcode passes the field straight to Hugo's
-  `where` filter over `site.RegularPages`, and both keys work for a
-  top-level section — but a reader copying the demo learns one thing
-  while the docs teach another. The example now reads `where="Type"
-  value="posts"`, matching `docs/shortcodes.md`. The shortcode cannot
-  warn on a typoed field: any page property is a valid filter, and a
-  site with custom front matter may filter on it, so a misspelled key
-  matches nothing and returns the unfiltered list. Reading the output
-  is the check.
-
-- **The docs absorb Hugo platform gotchas on a dedicated page.** `docs/troubleshooting/`
-  collects the platform behaviours that read as theme defects and the
-  one-line config fixes each one has: future-dated pages that silently
-  vanish, `pageRef` over bare URLs in menus, custom layouts that lose
-  related articles and pagination, Markdown images wrapping in `<p>`
-  by default, `content/list`'s `where` being a page field rather than a
-  section name, the deprecated `languageCode`/`languageName` keys, and
-  the Module path being a separate thing from a site URL. Nothing in
-  the theme changes; the page exists so a site that hits one of these
-  has an answer that is not a template edit. `docs/_index.md` and the
-  top-level README's docs table list it alongside the reference pages.
-
-- **The contact shortcode ships with a reference endpoint, not just a
-  checklist.** `docs/contact-endpoint/` carries a copy-pasteable
-  Cloudflare Worker that does what `docs/shortcodes.md` says the server
-  must do: same-origin and body-cap checks before any parsing, `formData`
-  with `.trim()`, honeypot answer-with-success, `TextEncoder` byte count,
-  email regex, the `minFill ≤ now − ts ≤ 2 h` timestamp window when
-  `form_ts` is non-empty, a `contact:{epoch}:{uuid}` KV key so messages
-  sort and stay unique across workers, and best-effort forwarding. The
-  JSON envelope `{success, error}` is spelled out because the client
-  reads that shape. Rate limiting stays a stub the site owns; the two
-  origin variants and the escalation to Turnstile or a one-time token
-  are named. `wrangler.toml` ships too, with the comma-separated
-  `ORIGINS` note that Workers vars cannot hold arrays.

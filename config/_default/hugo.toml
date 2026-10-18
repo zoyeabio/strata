@@ -1,0 +1,9 @@
+# Version floor enforced by Hugo itself when the theme is consumed as a
+# module: theme.toml's min_version is read only by galleries, while this
+# stops a build on the Hugo the templates were not written against.
+# Hugo 0.161.0 is the floor because that is where css.TailwindCSS starts
+# running the Tailwind CLI through the npm binary.
+
+[module.hugoVersion]
+  extended = true
+  min = "0.161.0"
