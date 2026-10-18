@@ -267,3 +267,7 @@ show.
 | `minHeight` | | Passed to the ad slot |
 
 `site.Params.ads.client` must be set, or the shortcode fails the build.
+So must a site `static/_headers` that allows the AdSense loader — the
+security docs carry the working block, and `[ads] skipCspCheck`
+exists for hosts that apply headers themselves. The push call itself is
+external `js/ads.js`, so no directive ever needs `unsafe-inline`.

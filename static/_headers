@@ -29,11 +29,16 @@
 #     opt-in to a third-party embed, documented with a Google Maps URL. Add
 #     your provider's origin here rather than widening to https:
 #
-#   Ads  site.Params.ads.client turns on the AdSense loader, which needs
-#     pagead2.googlesyndication.com and the doubleclick.net origins in
-#     script-src, connect-src, img-src and frame-src, plus 'unsafe-inline'
-#     in script-src per Google's current recommendation. Ads are a
-#     deliberate relaxation of this file, so adjust it knowingly.
+#   Ads  site.Params.ads.client turns on the AdSense loader, which this
+#     policy blocks: pagead2.googlesyndication.com is a foreign origin in
+#     script-src, and the ad frames, beacons and creatives are foreign
+#     too. The push call is NOT the problem — the ads shortcode ships it
+#     as an external js/ads.js with an integrity attribute, so no
+#     directive needs unsafe-inline for it. An ad-enabled site must ship
+#     its own static/_headers with the AdSense origins (the security docs
+#     have a working block); the build fails until it does, because
+#     Google changes ad origins over time and only a nonce-based policy
+#     is officially supported — which a static host cannot generate.
 #
 #   frame-ancestors 'none'     Deletes if you want the site embeddable in an
 #     iframe; the theme assumes it is not.

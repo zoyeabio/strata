@@ -16,6 +16,12 @@
   page source only), so a shared ad block belongs in a snippet authors
   paste, not a partial.
 
+  The push call lives in js/ads.js behind an integrity attribute — the
+  same pattern as contact.js and carousel.js — so enabling ads never
+  asks static/_headers for unsafe-inline. The loader itself is the one
+  sanctioned cross-origin request, and head.html fails the build when
+  the Content-Security-Policy would block it.
+
   Called by: content markdown
 */ -}}
 {{- $client := site.Params.ads.client -}}
@@ -27,4 +33,7 @@
   {{- errorf "ads shortcode: requires slot, e.g. {{< ads slot=\"1234567890\" >}} (%s)" .Position -}}
 {{- end -}}
 <ins class="adsbygoogle" style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
-<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+{{- with resources.Get "js/ads.js" }}
+{{- $js := . | fingerprint "sha512" }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{- end }}

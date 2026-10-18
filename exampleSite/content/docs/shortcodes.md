@@ -167,7 +167,10 @@ AdSense display unit. The loader ships in head only on pages using it.
 | `minHeight` | CSS `min-height` on the unit, units included (`"250px"`), so the ad iframe cannot shift layout (CLS) |
 
 Requires site `[ads] client`; `static/ads.txt` must name the ID or the
-build fails.
+build fails. The push call ships as external `js/ads.js` — no
+`unsafe-inline` — and the build also fails while `static/_headers`
+would block the AdSense loader; the [security docs](../security/)
+carry the working header block.
 
 ## layout/multi-col + layout/col-left, col-mid, col-right
 

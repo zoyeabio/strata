@@ -466,7 +466,7 @@ if grep -rq 'css/compiled' "$ROOT/layouts" "$ROOT/assets/css/main.css" 2>/dev/nu
 else
   pass 'no css/compiled references remain'
 fi
-theme_built=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+theme_built=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1 || true)
 if [ -n "$theme_built" ] && grep -q 'card__summary' "$theme_built"; then
   pass 'built theme CSS carries component rules (pipeline ran)'
 else
@@ -485,13 +485,13 @@ assert 'index.html' 'rel="stylesheet"' 'home page links the stylesheet'
 #     must correspond to a real container width in the stylesheet
 css_assert() { # css_assert <regex> <label>
   local f
-  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1 || true)
   if [ -n "$f" ] && grep -qE -e "$1" "$f"; then pass "$2"; else fail "$2"; fi
 }
 
 css_assert_not() { # css_assert_not <regex> <label>
   local f
-  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1)
+  f=$(ls "$OUT"/css/theme*.css 2>/dev/null | head -1 || true)
   if [ -z "$f" ]; then fail "$2"; return; fi
   if grep -qE -e "$1" "$f"; then fail "$2"; else pass "$2"; fi
 }
@@ -1255,6 +1255,11 @@ assert 'section-a/shortcodes/index.html' 'data-ad-client="ca-pub-000000000000000
 assert 'section-a/shortcodes/index.html' 'data-ad-slot="1234567890"' 'ads unit carries the slot'
 assert 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' 'ads loader loads on unit pages'
 assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
+assert 'section-a/shortcodes/index.html' 'src="?/js/ads\.[0-9a-f]+\.js"? integrity="sha512-' \
+  'ad push ships as an external fingerprinted script'
+assert_not 'section-a/shortcodes/index.html' '\(adsbygoogle = window' 'ad push is never an inline script'
+assert '_headers' 'script-src[^;]*pagead2\.googlesyndication\.com' \
+  'the site headers allow the ad loader'
 assert 'index.html' 'data-cookie-consent' 'consent hook renders site markup'
 
 # 42. verifiable authorship and trail metadata: Person author and

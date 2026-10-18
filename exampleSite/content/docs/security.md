@@ -18,7 +18,7 @@ The policy is strict: `default-src 'self'` with `script-src 'self'` and no `unsa
 That is only achievable because of how the theme is built:
 
 - every script and stylesheet ships from the origin and carries an SRI `integrity` attribute
-- `js/carousel.js` and `js/contact.js` are external assets, not inline. Their shortcodes used to interpolate the instance id and byte limit straight into the script; both now come from `data-*` attributes instead, so nothing is ever interpolated into JavaScript
+- `js/carousel.js`, `js/contact.js` and `js/ads.js` are external assets, not inline. Their shortcodes used to interpolate values straight into the script; instance ids and limits now come from `data-*` attributes instead, so nothing is ever interpolated into JavaScript
 - the JSON-LD blocks look like inline scripts but carry a non-executable type and are exempt from `script-src`
 
 ## Email addresses
@@ -62,7 +62,20 @@ Each is called out in `_headers` with the exact change to make.
 
 **`frame-src` google origins** — the `map` shortcode is the theme's explicit opt-in to a third-party embed, and its documented example is a Google Maps URL. Add your provider's origin rather than widening to `https:`.
 
-**Ads** — `site.Params.ads.client` turns on the AdSense loader, which needs `pagead2.googlesyndication.com` and the doubleclick.net origins in `script-src`, `connect-src`, `img-src` and `frame-src`, plus `unsafe-inline` in `script-src` per Google's current recommendation. Its `(adsbygoogle = window.adsbygoogle || []).push({})` call is the one executable inline script the theme emits, and it only lands on pages that use the `ads` shortcode. Enabling ads is a deliberate relaxation of the default policy.
+**Ads** — `site.Params.ads.client` turns on the AdSense loader, a foreign origin the default policy blocks on every directive the ad stack touches. The push call is not part of that problem: the shortcode ships it as an external `js/ads.js` with an integrity attribute, so ads never ask for `unsafe-inline`.
+
+An ad-enabled site therefore ships its own `static/_headers`. The build fails until it does — an ad slot behind a blocking CSP renders blank, and the console error never reaches the person who deployed it. Start from the theme's file and widen the four directives AdSense uses:
+
+```
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://pagead2.googlesyndication.com https://partner.googleadservices.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com https://www.googlesyndication.com; font-src 'self'; connect-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; frame-src 'self' https://maps.google.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.google.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+```
+
+Two honest caveats. Google does not publish an ad-domain allowlist and officially supports only a nonce-based policy, which a static host cannot generate — so treat the block above as the practical option, and expect to add an origin when a console CSP report names one. Deploy it first as `Content-Security-Policy-Report-Only`: the header reports violations without blocking anything, so a missed origin shows up in the console instead of as missing revenue. If your host applies response headers itself, set `site.Params.ads.skipCspCheck = true` and manage the policy there.
 
 **`frame-ancestors 'none'`** — delete it if you want the site embeddable in an iframe.
 
