@@ -71,6 +71,7 @@ ATTR_RE = re.compile(
 )
 # [params.build.pageimageskb] from config, via scripts/lib/build_config.py
 PAGE_BUDGET = int(os.environ.get('PAGE_IMAGES_KB', 600)) * 1024
+MAX_FILES = int(os.environ.get('MAX_FILES', 20000))
 MAX_SRCSET_CANDIDATES = 4
 MAX_DERIVATIVES_PER_SOURCE = MAX_SRCSET_CANDIDATES + 1
 
@@ -618,6 +619,14 @@ elif 'data-search-toggle' not in home and (pub / 'index.json').is_file():
     bad('search button ships with its index', '  index.json ships with no button: set enableSearch = true or drop "JSON" from [outputs] home')
 else:
     ok('search button ships with its index')
+
+# R16 the whole build output stays inside the hosting file ceiling. This is a
+#    count of every file, not of images: Cloudflare Pages refuses a deploy
+#    over its limit, and a deploy refusal is the last place to learn about it.
+if len(files) > MAX_FILES:
+    bad(f'build output within {MAX_FILES} files', f'  {len(files)} files')
+else:
+    ok(f'build output within {MAX_FILES} files ({len(files)})')
 
 sys.exit(1 if problems else 0)
 PY

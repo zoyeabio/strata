@@ -30,6 +30,8 @@ KEYS = {
     'OG_WIDTH': ('image', 'og', 'width'),
     'OG_HEIGHT': ('image', 'og', 'height'),
     'PAGE_IMAGES_KB': ('build', 'pageimageskb'),
+    'MAX_FILES': ('build', 'maxfiles'),
+    'MAX_SOURCE_KB': ('build', 'maxsourcekb'),
     'MIN_WIDTH_HERO': ('build', 'minwidth', 'hero'),
     'MIN_WIDTH_ILLUSTRATION': ('build', 'minwidth', 'illustration'),
     'MIN_WIDTH_CARD': ('build', 'minwidth', 'card'),
@@ -103,4 +105,8 @@ if __name__ == '__main__':
     parser.add_argument('--environment', default=ENV)
     args = parser.parse_args()
     for name, value in load(args.site, args.environment).items():
-        print(f"{name}='{value}'")
+        # `export` is not decoration: the caller evals these assignments and
+        # passes them to a python subprocess, where a plain shell assignment
+        # would be invisible to os.environ and every threshold would fall
+        # back to its hardcoded default.
+        print(f"export {name}='{value}'")

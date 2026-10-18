@@ -103,7 +103,8 @@ def absent(path):
 missing = [
     "params.%s" % ".".join(p)
     for p in (("image", "ladder"), ("image", "quality"), ("image", "caps"),
-              ("image", "og"), ("build", "pageimageskb"), ("build", "minwidth"))
+               ("image", "og"), ("build", "pageimageskb"), ("build", "minwidth"),
+               ("build", "maxfiles"), ("build", "maxsourcekb"))
     if absent(p)
 ]
 if missing:
@@ -121,6 +122,20 @@ if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test
   pass 'check-build theme mode'
 else
   fail 'check-build theme mode'
+fi
+
+# A cap with no headroom must fail the rule set: the hosting platform refuses
+# a deploy over its file ceiling, so check-build carries the same number.
+mkdir -p "$WORK/tiny-files/config/_default"
+printf '[params]\n[params.build]\nmaxfiles = 1\n' > "$WORK/tiny-files/config/_default/params.toml"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$WORK/tiny-files" \
+    >"$WORK/files-cap.out" 2>&1; then
+  fail 'check-build rejects a build over its file-count limit'
+elif grep -q 'within 1 files' "$WORK/files-cap.out"; then
+  pass 'check-build rejects a build over its file-count limit'
+else
+  fail 'the file-count failure names the limit'
+  cat "$WORK/files-cap.out" >&2
 fi
 
 # every share URL template must consume both printf arguments — the permalink
@@ -197,6 +212,23 @@ if "$ROOT/scripts/place-image.sh" --section journal --post production \
 else
   fail 'place-image accepts a production-size illustration source'
   cat "$WORK/place-large.out" >&2
+fi
+
+# The source cap binds before anything is copied: over the limit the file
+# must not enter the site's assets tree.
+mkdir -p "$WORK/image-site/config/_default"
+printf '[params]\n[params.build]\nmaxsourcekb = 1\n' > "$WORK/image-site/config/_default/params.toml"
+if "$ROOT/scripts/place-image.sh" --section journal --post over-cap \
+    --file "$ROOT/test/fixture/assets/images/section-a/photo-flat.png" \
+    --role illustration --site "$WORK/image-site" \
+    >"$WORK/place-overcap.out" 2>&1; then
+  fail 'place-image rejects an over-cap source before copying'
+elif grep -q 'the cap is 1KB' "$WORK/place-overcap.out" \
+    && [ ! -f "$WORK/image-site/assets/images/journal/over-cap/photo-flat.png" ]; then
+  pass 'place-image rejects an over-cap source before copying'
+else
+  fail 'the source-size failure names the cap'
+  cat "$WORK/place-overcap.out" >&2
 fi
 
 # The theme's own example site is the content contract: it must pass the
@@ -292,11 +324,16 @@ keys = ("title:", "description:", "summary:", "keywords:", "author:",
         "date:", "lastmod:", "tags:", "featureimage:",
         "featureimagealt:", "showHero:", "showSummary:", "weight:")
 assert all(key in front for key in keys)
+
+workflow = (root / ".github/workflows/validate.yml").read_text()
+assert "repository: zoyeabio/strata" in workflow
+assert "path: ../strata" in workflow
+assert "validate-site.sh" in workflow
 PY
 then
-  pass 'new sites suppress unused bundle originals and carry the article metadata scaffold'
+  pass 'new sites suppress unused bundle originals, carry the article metadata scaffold and a validating CI workflow'
 else
-  fail 'new sites suppress unused bundle originals and carry the article metadata scaffold'
+  fail 'new sites suppress unused bundle originals, carry the article metadata scaffold and a validating CI workflow'
   cat "$WORK/scaffold.out" "$WORK/scaffold.stderr" >&2
 fi
 

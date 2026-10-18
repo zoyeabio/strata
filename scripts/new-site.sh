@@ -72,7 +72,8 @@ mkdir -p \
   "$OUT/content" \
   "$OUT/assets/css" \
   "$OUT/assets/images" \
-  "$OUT/static"
+  "$OUT/static" \
+  "$OUT/.github/workflows"
 
 # config/_default/hugo.toml — nothing beyond the theme contract and the
 # site's own authored settings
@@ -393,6 +394,61 @@ node_modules/
 .DS_Store
 EOF
 
+# CI runs the same gate the README asks a developer to run by hand, so the
+# output rules bind on every push instead of on whoever remembers. Strata is
+# a sibling checkout: validate-site.sh takes this repository as its argument
+# and builds it against that checkout, which also overrides the local
+# `replace` path in go.mod.
+cat > "$OUT/.github/workflows/validate.yml" <<'EOF'
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pin `ref:` to a Strata release tag once you adopt one; until then it
+      # tracks main, which matches the unversioned local development flow.
+      - uses: actions/checkout@v4
+        with:
+          repository: zoyeabio/strata
+          path: ../strata
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Hugo Extended
+        env:
+          HUGO_VERSION: "0.167.0"
+        run: |
+          curl -sSfL -o /tmp/hugo.tar.gz \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          tar -xzf /tmp/hugo.tar.gz -C /tmp hugo
+          sudo install -m 0755 /tmp/hugo /usr/local/bin/hugo
+          hugo version
+
+      - name: Install build dependencies
+        run: npm ci
+
+      - name: Production build and output rules
+        run: (cd ../strata && ./scripts/validate-site.sh "$GITHUB_WORKSPACE")
+EOF
+
 # site README
 cat > "$OUT/README.md" <<EOF
 # ${NAME}
@@ -442,6 +498,10 @@ Validate against the theme checkout before deploying:
 \`\`\`sh
 (cd /path/to/strata && ./scripts/validate-site.sh /path/to/$SLUG)
 \`\`\`
+
+\`.github/workflows/validate.yml\` runs that same check on every push and
+pull request, so the output rules gate deploys instead of depending on a
+developer remembering the command.
 
 When the theme publishes a release tag, remove the \`replace\` line from
 \`go.mod\` and pin the tag with \`go get\`.

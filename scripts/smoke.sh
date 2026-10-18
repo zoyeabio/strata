@@ -1695,10 +1695,14 @@ cat > "$CFG_DIR/config/_default/params.toml" <<'EOF'
 EOF
 CFG_SITE="$(python3 "$ROOT/scripts/lib/build_config.py" --site "$CFG_DIR")"
 rm -rf "$CFG_DIR"
-CFG_OWN='^(OG_WIDTH|PAGE_IMAGES_KB|MIN_WIDTH_ILLUSTRATION)='
+CFG_OWN='^export (OG_WIDTH|PAGE_IMAGES_KB|MIN_WIDTH_ILLUSTRATION)='
 
+# The last clause is the real contract: the rules run in a python subprocess
+# and read the thresholds through os.environ, so an assignment that is not
+# exported cannot reach them and every threshold reverts to its default.
 if ( eval "$CFG_SITE" && [ "$OG_WIDTH" -eq 1400 ] && [ "$PAGE_IMAGES_KB" -eq 450 ] \
-     && [ "$MIN_WIDTH_ILLUSTRATION" -eq 1500 ] && [ "$MIN_WIDTH_HERO" -eq 1600 ] ); then
+     && [ "$MIN_WIDTH_ILLUSTRATION" -eq 1500 ] && [ "$MIN_WIDTH_HERO" -eq 1600 ] \
+     && python3 -c "import os, sys; sys.exit(0 if os.environ.get('MAX_FILES') else 1)" ); then
   pass 'build_config applies a site override over the theme defaults'
 else
   fail 'build_config applies a site override over the theme defaults'

@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **New sites ship a validating CI workflow.**
+  `scripts/new-site.sh` writes `.github/workflows/validate.yml`, which
+  checks out Strata as a sibling directory and runs
+  `scripts/validate-site.sh` against the site on every push and pull
+  request. The output rules then gate a deploy instead of depending on a
+  developer running the command from a theme checkout, and the sibling
+  checkout overrides the local `replace` path in the scaffold's go.mod.
+
+- **check-build carries the hosting file ceiling as R16.**
+  `[build] maxfiles` (20,000, Cloudflare Pages' free-tier limit; the paid
+  tier raises it to 100,000) counts every file in the build output, not
+  only images, so the artifact stays under the platform limit before a
+  deploy refusal is the first thing that reports it.
+
+- **place-image caps the source image size.**
+  `[build] maxsourcekb` (12,000 KiB) rejects a source before it is copied
+  into the site's assets. The pipeline already re-encodes at a capped
+  width and one quality, so reader bytes are bounded; the cap bounds the
+  source left in the repository and the time the build spends on it.
+
 - **The theme declares its Hugo floor to the module loader.**
   `config/_default/hugo.toml` carries `[module.hugoVersion]` with
   `extended = true` and `min = "0.161.0"`, which `theme.toml`'s
@@ -93,6 +113,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reference page teaches.
 
 ### Fixed
+
+- **Build thresholds from config now reach the check-build rules.**
+  `scripts/lib/build_config.py` printed plain shell assignments, which its
+  callers `eval`ed without exporting them. A python subprocess cannot see
+  them through `os.environ`, so every threshold silently fell back to its
+  hardcoded default: `[build] pageimageskb`, `[build] minwidth`,
+  `maxfiles` and `maxsourcekb` were never honoured from a site's own
+  config, and `R5`'s page budget was unconfigurable in practice. The
+  assignments are exported.
 
 - **A front matter `false` is no longer read as unset.** Hugo's `default`
   filter treats boolean `false` as missing, so a page that set

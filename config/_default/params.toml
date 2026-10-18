@@ -140,6 +140,15 @@ height = 630
 # Largest total image payload on a page, in KiB — check-build R5.
 pageimageskb = 600
 
+# Largest file count of the whole build output — check-build R16. 20,000 is
+# Cloudflare Pages' free-tier ceiling; the paid tier raises it to 100,000.
+maxfiles = 20000
+
+# Largest source image scripts/place-image.sh will copy into a site, in KiB.
+# The pipeline re-encodes at a capped width and one quality, so a source that
+# large buys build time and repository size, never reader bytes.
+maxsourcekb = 12000
+
 [build.minwidth]
 hero = 1600
 illustration = 1600

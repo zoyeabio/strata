@@ -15,8 +15,9 @@
 # front matter reference (the bare filename) for Markdown at
 # content/{section}/{slug}/index.md. Images never enter the content tree.
 #
-# The size lint is config, not code: [params.build.minwidth] per role, and
-# [params.image.og] for the social preview, which must be an exact match.
+# Every lint is config, not code: [params.build.minwidth] per role,
+# [params.build.maxsourcekb] for the source file, and [params.image.og] for
+# the social preview, which must be an exact match.
 # scripts/lib/build_config.py resolves the theme defaults in config/_default/params.toml
 # merged with --site's own config, the same pair Hugo merges for rendering.
 # A failing lint exits non-zero and writes nothing.
@@ -114,12 +115,11 @@ elif data[:4] == b'RIFF' and data[8:12] == b'WEBP':
 if not w or not h:
     print('FAIL: cannot read dimensions (png/jpeg/gif/webp supported)', file=sys.stderr)
     sys.exit(2)
-print(f'{w} {h}')
+print(f'{w} {h} {len(data) // 1024}')
 PY
 )"
 
-W="${dims% *}"
-H="${dims#* }"
+read -r W H SIZE <<<"$dims"
 
 if [ "$ROLE" = "og" ]; then
   if [ "$W" -ne "$OG_WIDTH" ] || [ "$H" -ne "$OG_HEIGHT" ]; then
@@ -130,6 +130,15 @@ if [ "$ROLE" = "og" ]; then
 elif [ "$W" -lt "$MIN_W" ]; then
   printf 'FAIL %s image must be at least %spx wide (got %sx%s)\n' \
     "$ROLE" "$MIN_W" "$W" "$H" >&2
+  exit 1
+fi
+
+# The pipeline re-encodes every source at a capped width and one quality, so
+# reader bytes are bounded without this check; the cap bounds the source in
+# the repository and the time the build spends on it.
+if [ "$SIZE" -gt "$MAX_SOURCE_KB" ]; then
+  printf 'FAIL %s source is %sKB, the cap is %sKB: resize it before placing\n' \
+    "$ROLE" "$SIZE" "$MAX_SOURCE_KB" >&2
   exit 1
 fi
 
