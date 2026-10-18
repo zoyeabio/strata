@@ -16,7 +16,7 @@
   Called by: render-link, menu, footer (quick links, legal, menu, social),
   404, single byline, cta — anywhere a configured or authored URL may land.
 */ -}}
-{{- $url := strings.TrimSpace . -}}
+{{- $url := strings.TrimSpace (default "" .) -}}
 {{- if strings.HasPrefix (lower $url) "mailto:" -}}
 {{- $at := split (substr $url 7) "@" -}}
 {{- if ge (len $at) 2 -}}
