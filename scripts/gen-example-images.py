@@ -106,7 +106,7 @@ def overlay(base, layers):
             if m <= 0:
                 continue
             if mode == 'add':
-                col = tuple(max(255, min(255, c + int(colour[i] * m))) for i, c in enumerate(col))
+                col = tuple(min(255, max(0, c + int(colour[i] * m))) for i, c in enumerate(col))
             else:
                 col = lerp(col, colour, m)
         return col
@@ -179,7 +179,6 @@ def main():
     ap.add_argument('--out', default='exampleSite/assets/images')
     args = ap.parse_args()
     root = Path(args.out)
-    total = 0
     print(f'writing to {root}/')
 
     # Heroes. The theme's hero is a fixed-height band, about 3:1 on desktop,
