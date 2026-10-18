@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The theme declares its Hugo floor to the module loader.**
+  `config/_default/hugo.toml` carries `[module.hugoVersion]` with
+  `extended = true` and `min = "0.161.0"`, which `theme.toml`'s
+  `min_version` never reached — galleries read that, the loader reads
+  this. The floor is advisory by Hugo's design: an older version gets a
+  "not compatible" build warning rather than a refused build, so the
+  incompatibility surfaces instead of hiding.
+
 - **A reference contact endpoint ships beside the shortcode.**
   `docs/contact-endpoint/` carries a copy-pasteable Cloudflare Worker that
   does what `docs/shortcodes.md` says the server must do: same-origin and
