@@ -43,7 +43,9 @@ The banner at the foot of the page asks what may be stored and records
 your answer in this browser; the advertising loader only leaves once the
 answer is "granted", so no banner answer means no advertising request.
 Withdrawal is the same action — press "Change" in the banner and answer
-again. Consent given here is changed here; advertising holds no account.
+again; withdrawing after ads have loaded reloads the current page once, so
+nothing already running survives the visit. Consent given here is changed
+here; advertising holds no account.
 
 ## How long we keep things
 

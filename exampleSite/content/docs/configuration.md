@@ -118,7 +118,8 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
 | `ads.auto` | `false` | `true`: loader ships site-wide with no shortcode placed anywhere, and Google's Auto ads choose the pages and the placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
-| `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted`. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too
+| `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted` — a withdrawal that lands after ads had loaded reloads the current page once, so nothing already running survives the visit. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too. Gated mode also expects the site's `partials/cookie-consent.html` hook (or an explicit `ads.externalConsentController = true`), because a gate with nothing to dispatch the answer keeps every unit hidden forever |
+| `ads.externalConsentController` | `false` | Gated-mode escape hatch: your consent controller ships outside the theme's hook (a certified CMP that dispatches `strata:cookie-consent` itself) and the `cookie-consent.html` existence check does not apply |
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `taxonomy.cardView` | `false` | Card vs. row on the taxonomy overview (`/tags/`). False here and true in `[list]`: `/tags/` lists terms, not articles, so it starts as a plain row list |
@@ -370,7 +371,12 @@ never ships an ad request it did not choose. Two values, both explicit:
   a certified CMP instead. One edge: in gated mode the dispatcher rides
   the unit copies the shortcode ships, so `auto` with no placed unit is
   rejected at build time — place one unit for the carrier, or run
-  `"none"` under a certified CMP.
+  `"none"` under a certified CMP. Two closing pins: gated also refuses a
+  site that ships no `partials/cookie-consent.html` hook (nothing would
+  ever dispatch the answer) unless `ads.externalConsentController = true`
+  declares the controller lives in your own code; and a withdrawal that
+  lands after ads have loaded reloads the current page once, because a
+  half-disarmed in-document ad runtime is not a withdrawal.
 
 Waiting for the answer does not lift the origin policy: `gated` mode still
 requires `static/_headers` to allow `pagead2.googlesyndication.com`, and

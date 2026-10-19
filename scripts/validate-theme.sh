@@ -235,6 +235,12 @@ date: 2026-01-05
 
 {{< ads slot="1234567890" >}}
 MD
+mkdir -p "$ADS_SCRATCH/layouts/partials"
+cat >"$ADS_SCRATCH/layouts/partials/cookie-consent.html" <<'HTML'
+<div data-cookie-consent role="region" aria-label="Cookie consent">
+  <p>Cookies: analytics and ads, your choice in this banner.</p>
+</div>
+HTML
 scratch_hugo() { # scratch_hugo — build the scratch site; returns hugo's status
   HUGO_CACHEDIR="$WORK/scratch-cache" hugo --source "$ADS_SCRATCH" \
     --environment production --minify --destination "$ADS_SCRATCH-public" \
@@ -769,11 +775,22 @@ printf 'google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0 extra\n' \
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
     >"$WORK/ads-authority.out" 2>&1; then
   fail 'a malformed ads.txt authority field fails the gate'
-elif grep -q 'is not a certification authority ID' "$WORK/ads-authority.out"; then
+elif grep -q "is not Google's TAG ID" "$WORK/ads-authority.out"; then
   pass 'a malformed ads.txt authority field fails the gate'
 else
   fail 'the authority failure names the malformed field'
   cat "$WORK/ads-authority.out" >&2
+fi
+printf 'google.com, pub-0000000000000000, DIRECT, hello\n' \
+  >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-fake-authority.out" 2>&1; then
+  fail 'a counterfeit ads.txt authority value fails the gate'
+elif grep -q 'is not Google' "$WORK/ads-fake-authority.out"; then
+  pass 'a counterfeit ads.txt authority value fails the gate'
+else
+  fail 'the counterfeit authority failure names the TAG ID'
+  cat "$WORK/ads-fake-authority.out" >&2
 fi
 cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
 
@@ -802,6 +819,32 @@ else
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
+# Auto-only paths: head ships the loader URL straight from [ads] client, so
+# the same shape gate holds with no shortcode anywhere in the site.
+mv "$ADS_SCRATCH/content/ads-page.md" "$WORK/ads-page-stowed.md"
+printf '[ads]\n  client = "ca-pub-00000000000000000"\n  consent = "none"\n  auto = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a malformed client fails the auto-only head too'
+elif grep -q 'a ca-pub-… publisher ID' "$WORK/scratch-build.stderr"; then
+  pass 'a malformed client fails the auto-only head too'
+else
+  fail 'the auto-only publisher failure names the shape'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+printf '[ads]\n  client = "ca-host-pub-0000000000000000"\n  consent = "none"\n  auto = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a ca-host-pub-… client fails the auto-only head too'
+elif grep -q 'belongs in data-ad-host' "$WORK/scratch-build.stderr"; then
+  pass 'a ca-host-pub-… client fails the auto-only head too'
+else
+  fail 'the auto-only host-client failure names data-ad-host'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+mv "$WORK/ads-page-stowed.md" "$ADS_SCRATCH/content/ads-page.md"
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
 # gated consent with a renamed-away "basic" value gets its own rename hint.
 printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
@@ -813,6 +856,32 @@ else
   fail 'the basic-value failure names the rename'
   cat "$WORK/scratch-build.stderr" >&2
 fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
+# gated with no consent hook anywhere: every unit would hide forever, so the
+# build demands the hook — or an explicit externalConsentController.
+mv "$ADS_SCRATCH/layouts/partials/cookie-consent.html" "$WORK/hook-stowed.html"
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "gated"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'gated with no consent hook fails the build'
+elif grep -q 'externalConsentController' "$WORK/scratch-build.stderr"; then
+  pass 'gated with no consent hook fails the build'
+else
+  fail 'the missing-hook failure names the exemption'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "gated"\n  externalConsentController = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo \
+   && ! grep -qE 'adsbygoogle\.js\?client=' "$ADS_SCRATCH-public/ads-page/index.html" \
+   && grep -qE 'data-ads-consent=.?gated' "$ADS_SCRATCH-public/ads-page/index.html"; then
+  pass 'externalConsentController stands in for the missing hook'
+else
+  fail 'externalConsentController stands in for the missing hook'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+mv "$WORK/hook-stowed.html" "$ADS_SCRATCH/layouts/partials/cookie-consent.html"
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
 if [ "$FAILURES" -gt 0 ]; then

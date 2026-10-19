@@ -44,7 +44,9 @@ The banner at the bottom of the page asks before any of these are set.
 Withdrawal is the same action as consent: change your answer where the site
 stores it (the banner is site-owned, so a site can always offer one), or
 clear browser storage. Consent given here is changed here, not at the ad
-network.
+network. A withdrawal after ad code already loaded takes effect the same
+way: the theme's gate removes the reserved ad space and reloads the current
+page once, so nothing already running survives the visit.
 
 Withdrawing stops what this site loads on later pages; what Google retains
 from pages you already visited is managed in

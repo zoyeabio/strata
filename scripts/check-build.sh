@@ -546,8 +546,10 @@ else:
 #    Field 1 is checked too: for Google seller accounts the seller domain
 #    is always google.com (Ads.txt FAQs, answer/9785052), so a record where
 #    only the ID matches is not an authorization. Field 4 is optional in the
-#    ads.txt spec; when present it must still look like a certification
-#    authority ID, not prose or another record's debris.
+#    ads.txt spec, and this gate stays spec-legal when it is absent — but
+#    AdSense's own ads.txt (answer/12171612) carries exactly
+#    f08c47fec0942fa0, so anything else a site writes there is counterfeit,
+#    not an identifier this theme can verify.
 def ads_txt_records(body):
     for lineno, line in enumerate(body.splitlines(), 1):
         stripped = line.strip()
@@ -575,9 +577,9 @@ if ad_clients:
         malformed = [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3+'
                      for lineno, fields in records if len(fields) < 3]
         malformed += [f'  ads.txt line {lineno}: authority field {fields[3].split("#")[0].strip()!r} '
-                      'is not a certification authority ID'
+                      'is not Google\'s TAG ID f08c47fec0942fa0'
                       for lineno, fields in records if len(fields) >= 4
-                      and not re.match(r'^[A-Za-z0-9]+$', fields[3].split('#')[0].strip())]
+                      and fields[3].split('#')[0].strip() != 'f08c47fec0942fa0']
         missing = []
         for c in sorted(ad_clients):
             pub_id = 'pub-' + re.sub(r'\D', '', c)

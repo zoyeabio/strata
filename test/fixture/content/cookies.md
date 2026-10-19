@@ -31,5 +31,6 @@ The banner asks before the advertising request goes out.
 
 The controller in the banner records your answer and the ad loader obeys it
 from every later page on. Withdrawal is the same action: "Change" in the
-banner, then answer again. What Google keeps from pages already served is
-governed by Google's own settings.
+banner, then answer again — and a withdrawal after ads have loaded reloads
+the current page once, so nothing already running survives it. What Google
+keeps from pages already served is governed by Google's own settings.

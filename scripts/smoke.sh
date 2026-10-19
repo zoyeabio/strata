@@ -1279,10 +1279,11 @@ assert 'index.html' 'data-consent-decline' 'consent controller ships its decline
 assert 'index.html' 'src="?/js/consent\.[0-9a-f]+\.js"? integrity="sha512-' \
   'the consent controller ships fingerprinted'
 if grep -q 'strata-cookie-consent' "$OUT"/js/ads.*.js \
-   && grep -q 'strata:cookie-consent' "$OUT"/js/ads.*.js; then
-  pass 'the ad push obeys the documented consent answer'
+   && grep -q 'strata:cookie-consent' "$OUT"/js/ads.*.js \
+   && grep -q 'location.reload' "$OUT"/js/ads.*.js; then
+  pass 'the ad push obeys the documented consent answer and reloads past injected ads'
 else
-  fail 'the ad push obeys the documented consent answer'
+  fail 'the ad push obeys the documented consent answer and reloads past injected ads'
 fi
 
 # 42. verifiable authorship and trail metadata: Person author and

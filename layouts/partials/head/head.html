@@ -138,6 +138,9 @@
   {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
   {{- end }}
   {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
+  {{- if not (findRE `^ca-pub-\d{16}$` site.Params.ads.client) }}
+  {{- errorf "ads: site.Params.ads.client %q is not a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); every mode sends it out pretty much as written, so a bad ID means a dead loader URL shipped as fixed (%s)" site.Params.ads.client .Path }}
+  {{- end }}
   {{- $consent := site.Params.ads.consent }}
   {{- if not $consent }}
   {{- errorf "ads: consent must be picked explicitly when advertising is on — \"gated\" for the theme's own consent contract, \"none\" when you run a Google-certified CMP; there is no default, so a site that forgot the setting never asks Google silently (%s)" .Path }}
@@ -145,6 +148,14 @@
   {{- errorf "ads: consent \"basic\" is gone — rename it to \"gated\" (the value is a loader gate, not Google's Basic Consent Mode and no TCF string exists here) (%s)" .Path }}
   {{- else if not (in (slice "none" "gated") $consent) }}
   {{- errorf "ads: consent %q is not one of \"none\" or \"gated\" (%s)" $consent .Path }}
+  {{- end }}
+  {{/* Gated mode with no consent hook at all: every unit waits forever for
+       an event nothing dispatches, hidden and silent. Require the hook —
+       or an explicit statement that the controller ships elsewhere. */}}
+  {{- if and (eq $consent "gated")
+        (not (templates.Exists "partials/cookie-consent.html"))
+        (not site.Params.ads.externalConsentController) }}
+  {{- errorf "ads: consent = \"gated\" expects the site's consent hook (layouts/partials/cookie-consent.html) to render a controller that records \"strata-cookie-consent\" and dispatches CustomEvent(\"strata:cookie-consent\") — absent, every unit hides forever and keeps the space blocked. Ship the hook, or set site.Params.ads.externalConsentController = true to declare the controller ships from your own code (%s)" .Path }}
   {{- end }}
   {{- if not site.Params.ads.skipCspCheck }}
   {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}

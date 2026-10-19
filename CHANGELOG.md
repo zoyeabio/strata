@@ -59,13 +59,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   would have been. Pending units keep visibility so a later grant has a
   sized container.
 
+- **Withdrawal is immediate where it can be.** When a `denied` answer
+  arrives after the loader was already injected (grant first, reject
+  later), the gated dispatcher reloads the page once: the Google runtime
+  that cannot be half-disarmed from JavaScript leaves with the document,
+  and the fresh page reads the persisted answer with nothing to tear
+  down. Never fires on first-denial visits, and reloads at most once —
+  the fresh document has no injected loader.
+
+- **Gated mode requires somewhere for the answer to live.** A site that
+  sets `consent = "gated"` and never ships `partials/cookie-consent.html`
+  kept every unit hidden forever with no evidence of why. The build now
+  wants the site's consent hook, or an explicit
+  `ads.externalConsentController = true` declaring the controller (a
+  certified CMP or custom code) dispatches `strata:cookie-consent`
+  elsewhere.
+
+- **The head-level gate now carries the publisher-shape check.** Same
+  `ca-pub-` + 16 digits rule the shortcode applies, and it must be at the
+  head level for the auto path: `[ads] auto = true` with a malformed
+  client used to build fine and ship a dead loader URL from `<head>` —
+  a site that looked healthy and never showed an ad.
+
 ### Fixed
 
 - **ads.txt now validates the seller domain and the authority field.**
   Field 1 was unchecked, so `not-google.example, pub-…, DIRECT` passed the
   gate — for Google seller accounts the seller domain is always
-  `google.com` (Ads.txt FAQs, answer/9785052) — and a wrong optional
-  fourth field is now malformed instead of silently succeeding.
+  `google.com` (Ads.txt FAQs, answer/9785052). The optional fourth field
+  must be exactly Google's TAG ID `f08c47fec0942fa0` when present
+  (answer/12171612) — `hello` or any other alphanumerics no longer pass as
+  an identifier no one can verify.
 - **Fresh scaffolds no longer slip past the legal-notice gate.** The stub
   pages hid `TODO` inside HTML comments while the visible body said
   "Fill this in before publishing.", a phrasing the checker never

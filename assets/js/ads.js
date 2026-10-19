@@ -17,9 +17,18 @@
    blank slabs where ads would have been; a granted answer — present in the
    store when this script runs, or arriving on the event — reveals them,
    injects the loader once, and drains the units in DOM order, one push per
-   copy. Ingress and egress still go through static/_headers only: the
-   injected tag is an external script, and 'script-src' 'self' pagead2…
-   heads it off at build time (head.html keeps that check in both modes). */
+   copy.
+
+   Withdrawal is immediate, not just for later pages: a denied answer that
+   arrives AFTER the loader was injected reloads the page once, so the
+   already-running Google runtime — loader, iframes, cookies in flight —
+   is out of the document with no way for this file to half-disarm it.
+   First-denial visits need the reload never (nothing injected yet), and
+   the reload cannot loop: the fresh document reads the persisted answer
+   and has nothing to tear down. Ingress and egress still go through
+   static/_headers only: the injected tag is an external script, and
+   'script-src' 'self' pagead2… heads it off at build time (head.html
+   keeps that check in both modes). */
 
 var KEY = 'strata-cookie-consent';
 var EVENT = 'strata:cookie-consent';
@@ -82,6 +91,9 @@ function run() {
   if (answer === 'granted') { run(); return; }
   document.addEventListener(EVENT, function (event) {
     if (event.detail === 'granted') { revealUnits(); run(); }
-    else if (event.detail === 'denied') collapseUnits();
+    else if (event.detail === 'denied') {
+      collapseUnits();
+      if (window.__strataAdsLoader) window.location.reload();
+    }
   });
 })();
