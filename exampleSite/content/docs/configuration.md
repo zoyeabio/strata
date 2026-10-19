@@ -313,6 +313,39 @@ consent and ads through two sanctioned points:
   R11), and the `/privacy-policy/` and `/cookies/` pages must ship complete —
   no `[TBD]` in the published copy — or check-build R17 fails the build.
 
+### Who places the ads
+
+Placement is the one lever with two owners, and choosing wrong shows up in
+the reader's scroll:
+
+- **Manual (default): you place, Google serves.** <code>{{&lt; ads slot="…" &gt;}}</code>
+  in the content is the whole contract — the ad renders where you landed
+  it, and no ad exists on any page that never used the shortcode. This is
+  the mode for sites that own the reading experience: a science section,
+  docs, anything where a mid-paragraph ad is a defect.
+
+- **Optional: `[ads] auto = true`, Google places too.** The loader ships
+  site-wide and the AdSense console drives what happens next, grouped by
+  behaviour: *overlay* formats (anchor — sticky top/bottom, dismissible;
+  vignette — full-screen between page loads, skippable, with a frequency
+  setting; side rail) never displace page content, while *in-page* formats
+  (banner, Multiplex) land inside the page's own areas — which is where
+  "乱放多放" lives, because the algorithm, not the page author, picks the
+  spots. The console's levers (Auto ads → Edit → ad settings) are real but
+  live in Google, not in Hugo: per-format switches, a maximum-ads slider
+  and a minimum-distance slider for banner ads, vignette frequency,
+  excluded pages and excluded areas, plus an ad-settings preview that can
+  strip an auto placement it dislikes. Ads where manual units exist don't
+  collide — Google optimizes around existing units unless you let it
+  ("Allow Google to optimize existing ads").
+
+The honest summary: `auto` trades control for coverage. A practical
+compromise keeps the copy untouched — `auto = true` with both in-page
+formats (banner, Multiplex) unchecked, overlay kept at will — and honed
+with the console's 50%-traffic experiments before going site-wide.
+The theme ships no opinions past the switch: everything after it is
+account-side and unverifiable from a build.
+
 ### The consent answer as a contract
 
 `[ads] consent` says who holds the answer:
