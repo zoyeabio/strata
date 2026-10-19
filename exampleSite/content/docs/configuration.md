@@ -306,7 +306,9 @@ consent and ads through two sanctioned points:
   to granted from the banner. What counts as consent is site law, not
   theme code.
 - <code>{{&lt; ads slot="…" &gt;}}</code> renders an AdSense unit; `static/ads.txt` must
-  name the `[ads] client` ID or the build fails (check-build R11).
+  name the `[ads] client` ID as a real record or the build fails (check-build
+  R11), and the `/privacy-policy/` and `/cookies/` pages must ship complete —
+  no `[TBD]` in the published copy — or check-build R17 fails the build.
 
 ### The pages a banner points at
 

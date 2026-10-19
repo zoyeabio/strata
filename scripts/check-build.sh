@@ -576,6 +576,35 @@ if ad_clients:
 else:
     ok('ads.txt names every advertised publisher')
 
+# R17 ads authorized means the reader-facing notices ship complete: a page
+#    that answers "who collects what" with a visible [TBD] or TODO is a
+#    misstatement, not a notice. HTML comments are stripped first — the
+#    templates' "TODO: delete this comment before publishing" notes are
+#    authoring artifacts, not published copy — and the two slugs are the
+#    ones the scaffold, the example site and the consent banner all use.
+legal_bad = []
+if ad_clients:
+    strip_comments = re.compile(r'<!--.*?-->', re.S)
+    visible_placeholder = re.compile(
+        r'\[(?:tbd|todo)\b[^\]]{0,400}|\b(?:todo|fixme)\b', re.I)
+    for slug in ('privacy-policy', 'cookies'):
+        page = pub / slug / 'index.html'
+        if not page.is_file():
+            legal_bad.append(f'  /{slug}/ missing: ads are authorized but the '
+                             'site publishes no notice there')
+            continue
+        body = strip_comments.sub('', page.read_text(errors='ignore'))
+        hit = visible_placeholder.search(body)
+        if hit:
+            legal_bad.append(
+                f'  /{slug}/: {hit.group(0)!r} is still in the published notice')
+    if legal_bad:
+        bad('ad pages ship complete legal notices', '\n'.join(legal_bad))
+    else:
+        ok('ad pages ship complete legal notices')
+else:
+    ok('ad pages ship complete legal notices')
+
 # R13 articles carry bodies: an article page (og:type=article) whose content
 #    block holds zero words is a migration accident, not a page
 # Void tags fire handle_starttag but never handle_endtag. Counting them in the

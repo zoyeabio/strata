@@ -62,6 +62,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ModuleNotFoundError: tomllib` traceback wrapped around an already-built
   artifact.
 
+### Added
+
+- **check-build R17: authorized ads imply complete notices.** R11 makes the
+  build prove the publisher ID before the site earns an ad; R17 requires the
+  reader-facing side to be just as complete. While `data-ad-client` appears
+  in the output, `/privacy-policy/` and `/cookies/` must exist — the slugs
+  the scaffold, the example site and the consent banner all use — and ship
+  no `[TBD]`/`TODO`/`FIXME` text among the visible copy; HTML comments are
+  ignored, so a template's delete-this-comment note passes but a template's
+  placeholder shipped to readers fails. The test fixture now carries two
+  fully-written demo notices for the assertion to hold against.
+
 - **The legal templates no longer overstate what is off when personalization
   is off.** With Ad personalization disabled Google may still read
   non-personalized identifiers for frequency capping, fraud detection and

@@ -308,6 +308,37 @@ else
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
+# R17: ads authorized implies complete legal notices. Two tamer paths
+# against the real fixture output — a placeholder left visible in the
+# privacy text, and the cookies page deleted outright — must both fail,
+# naming the page and the placeholder.
+cp "$WORK/public/privacy-policy/index.html" "$WORK/privacy-original.html"
+printf '<p>Contact us at [TBD: the postmaster address].</p>\n' \
+  >"$WORK/public/privacy-policy/index.html"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/legal-tbd.out" 2>&1; then
+  fail 'a [TBD] left in the published privacy notice fails the gate'
+elif grep -q 'is still in the published notice' "$WORK/legal-tbd.out" \
+  && grep -q 'privacy-policy' "$WORK/legal-tbd.out"; then
+  pass 'a [TBD] left in the published privacy notice fails the gate'
+else
+  fail 'the placeholder failure names the page and the text'
+  cat "$WORK/legal-tbd.out" >&2
+fi
+cp "$WORK/privacy-original.html" "$WORK/public/privacy-policy/index.html"
+
+mv "$WORK/public/cookies" "$WORK/cookies-original-dir"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/legal-missing.out" 2>&1; then
+  fail 'a deleted cookies page fails the gate'
+elif grep -q '/cookies/ missing' "$WORK/legal-missing.out"; then
+  pass 'a deleted cookies page fails the gate'
+else
+  fail 'the missing-notice failure names the page'
+  cat "$WORK/legal-missing.out" >&2
+fi
+mv "$WORK/cookies-original-dir" "$WORK/public/cookies"
+
 # every share URL template must consume both printf arguments — the permalink
 # and the title. Hugo's printf does not error on a missing verb, it appends
 # %!N(EXTRA string=...) to the URL, so a site author who writes ?url=%s
