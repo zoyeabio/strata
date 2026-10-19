@@ -73,7 +73,10 @@ With ad personalization on, Google uses the information above to tailor the
 ads you see on Google properties and on other sites that use Google's
 advertising services. With it off, Google does not collect or use that
 information to personalize ads; you still see ads, chosen from the page you
-are reading, your current search, or your general location.
+are reading, your current search, or your general location. Personalization
+off is not the ad cookies gone: Google may still read non-personalized
+identifiers for frequency capping, fraud detection and aggregate reporting,
+which is why this section survives personalization being switched off.
 
 - Change it in [Google Ad Settings](https://adssettings.google.com)
 - Review or delete what Google has stored in [My Activity](https://myactivity.google.com/)
@@ -86,8 +89,10 @@ your ads settings, Google keeps using the cookie information it already has.
 ## How we ask, and how you withdraw
 
 The banner at the bottom of the page lets you accept or decline
-[TBD: which categories] before they are set. Withdrawal is the same
-one action: come back, change the banner, or clear your browser storage.
+[TBD: which categories] before they are set. Withdrawal is the same one
+action: come back and change your answer where the site offers a control
+for it (the banner is site-owned, so a site can always provide one), or
+clear your browser storage.
 
 Consent given on this site is changed on this site. The ad networks do not
 change it for you, which is why the choice lives in your browser and not in

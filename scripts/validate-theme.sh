@@ -385,9 +385,10 @@ fi
 
 # A banner that names nothing is not a notice. check-build catches an empty
 # href, not a link whose target is missing, so the pair is pinned here: the
-# pages exist and the banner points at them.
-if grep -q 'href="/cookies/"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
-   && grep -q 'href="/privacy-policy/"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
+# pages exist and the banner points at them through relLangURL, so a
+# language-prefixed site keeps its prefixes.
+if grep -q 'href="{{ "/cookies/" | relLangURL }}"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
+   && grep -q 'href="{{ "/privacy-policy/" | relLangURL }}"' "$ROOT/exampleSite/layouts/partials/cookie-consent.html" \
    && ( for p in cookies privacy-policy terms; do
         [ -f "$ROOT/exampleSite/content/$p.md" ] || exit 1
       done )

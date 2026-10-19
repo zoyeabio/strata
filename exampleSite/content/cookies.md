@@ -19,8 +19,9 @@ the [privacy policy](/privacy-policy/).
 
 ## Necessary
 
-Set as soon as the page loads. Without them the site stops working, and no
-jurisdiction requires consent for these.
+Set as soon as the page loads. Without them the site stops working, and
+regulators treat strictly-necessary storage as exempt from the consent
+question.
 
 | Name | Purpose | Lifetime |
 |---|---|---|
@@ -40,11 +41,14 @@ The banner at the bottom of the page asks before any of these are set.
 
 ## How to withdraw
 
-Withdrawal is the same action as consent: change the banner, or clear
-browser storage. Consent given here is changed here, not at the ad network.
+Withdrawal is the same action as consent: change your answer where the site
+stores it (the banner is site-owned, so a site can always offer one), or
+clear browser storage. Consent given here is changed here, not at the ad
+network.
 
-Two things browser settings alone do not do: clearing cookies does not stop
-ad personalization unless you also change
-[Google Ad Settings](https://adssettings.google.com), and analytics keeps
-working until you install the
-[Analytics opt-out add-on](https://tools.google.com/dlpage/gaoptout).
+Withdrawing stops what this site loads on later pages; what Google retains
+from pages you already visited is managed in
+[Google Ad Settings](https://adssettings.google.com) and
+[My Activity](https://myactivity.google.com/), where the analytics
+[opt-out add-on](https://tools.google.com/dlpage/gaoptout) is one more
+lever for Google Analytics specifically.

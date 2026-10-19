@@ -48,6 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   name, which excludes comment lines and the Report-Only variant (the colon
   must follow `policy` immediately).
 
+- **The legal templates no longer overstate what is off when personalization
+  is off.** With Ad personalization disabled Google may still read
+  non-personalized identifiers for frequency capping, fraud detection and
+  aggregate reporting — the templates now say so. The withdrawal text drops
+  the implication that an opt-out browser add-on keeps analytics running
+  until you install it: withdrawing stops what the site loads on later
+  pages, and Google-side retention stays where Google manages it (Ad
+  Settings, My Activity). "No jurisdiction requires consent for necessary
+  cookies" became the softer, true framing — regulators treat strictly
+  necessary storage as exempt — and the banner links use `relLangURL`, so a
+  language-prefixed site keeps working.
+
 ## [0.1.1] - 2026-10-17
 
 ### Added
