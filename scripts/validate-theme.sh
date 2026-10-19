@@ -803,9 +803,9 @@ else
   fail 'the stray-field failure names the record shape'
   cat "$WORK/ads-stray-field.out" >&2
 fi
-# Variable declarations from the IAB 1.1 ads.txt section: OWNERDOMAIN and
-# MANAGERDOMAIN (which carries commas of its own) are not seller records, so
-# a compliant file mixing both must clear the gate untouched.
+# Variable declarations from the ads.txt spec — SUBDOMAIN since 1.0.1,
+# OWNERDOMAIN/MANAGERDOMAIN since 1.1 — are not seller records, so a
+# compliant file mixing both must clear the gate untouched.
 printf 'OWNERDOMAIN=example.com\nMANAGERDOMAIN=manager.example, US\n%s' \
   "$(cat "$WORK/ads-original.txt")" >"$WORK/public/ads.txt"
 if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
@@ -814,6 +814,22 @@ if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test
 else
   fail 'variable declarations within legal ads.txt pass the gate'
   cat "$WORK/ads-variables.out" >&2
+fi
+cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
+
+# The recognition needs a leading name before the '=', not an '=' anywhere:
+# an equals sign inside a stray field is record garbage, and the record's
+# field-count rule must still bite.
+printf 'OWNERDOMAIN=example.com\ngoogle.com, pub-1111111111111111, DIRECT, f08c47fec0942fa0, garbage=1\n' \
+  >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-vars-stray.out" 2>&1; then
+  fail 'an = inside a stray field does not masquerade as a declaration'
+elif grep -q 'anything past that comma is stray' "$WORK/ads-vars-stray.out"; then
+  pass 'an = inside a stray field does not masquerade as a declaration'
+else
+  fail 'the declaration-masquerade failure names the stray fields'
+  cat "$WORK/ads-vars-stray.out" >&2
 fi
 cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
 

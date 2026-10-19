@@ -562,11 +562,12 @@ def ads_txt_records(body):
         stripped = line.split('#', 1)[0].strip()
         if not stripped:
             continue
-        if '=' in stripped:
-            # Variable declaration (ADTXT section variables: OWNERDOMAIN=…,
-            # MANAGERDOMAIN=…, SUBDOMAIN=…, CONTACT operators write freely),
-            # not a seller record — MANAGERDOMAIN carries its own commas,
-            # so it must not enter the 3/4-field shape check.
+        if re.match(r'^[A-Za-z][A-Za-z0-9_-]*\s*=', stripped):
+            # Variable declaration — IAB ads.txt variables, SUBDOMAIN since
+            # 1.0.1 and OWNERDOMAIN/MANAGERDOMAIN since 1.1 — not a seller
+            # record; variables carry their own commas, so they must not
+            # enter the 3/4-field shape check. The name must lead the line:
+            # an '='-field inside a record is record garbage, not metadata.
             continue
         yield lineno, [f.strip() for f in stripped.split(',')]
 

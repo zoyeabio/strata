@@ -96,9 +96,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `DIRECT, f08c47fec0942fa0, garbage` fails the gate instead of riding
   along, and inline comments stripped before field-splitting mean commas
   inside a trailing `#` note are no longer misparsed as extra fields.
-  IAB 1.1 variable declarations (`OWNERDOMAIN=…`, `MANAGERDOMAIN=…`,
-  `SUBDOMAIN=…`) are parsed as declarations, never seller records, so a
-  compliant file mixing both clears the gate untouched.
+  ads.txt variable declarations (`SUBDOMAIN` since 1.0.1,
+  `OWNERDOMAIN`/`MANAGERDOMAIN` since 1.1) are parsed as declarations —
+  leading name, then `=` — never seller records, so a compliant file
+  mixing both clears the gate untouched while an `=` inside a stray
+  record field stays garbage.
 - **Fresh scaffolds no longer slip past the legal-notice gate.** The stub
   pages hid `TODO` inside HTML comments while the visible body said
   "Fill this in before publishing.", a phrasing the checker never
