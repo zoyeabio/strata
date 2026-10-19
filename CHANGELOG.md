@@ -79,7 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ca-pub-` + 16 digits rule the shortcode applies, and it must be at the
   head level for the auto path: `[ads] auto = true` with a malformed
   client used to build fine and ship a dead loader URL from `<head>` —
-  a site that looked healthy and never showed an ad.
+  a site that looked healthy and never showed an ad. The auto intent
+  without any client fails too: `auto = true` alone has no publisher ID
+  to name in the loader URL, which only a silent no-ads build could hide.
 
 ### Fixed
 
@@ -89,7 +91,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `google.com` (Ads.txt FAQs, answer/9785052). The optional fourth field
   must be exactly Google's TAG ID `f08c47fec0942fa0` when present
   (answer/12171612) — `hello` or any other alphanumerics no longer pass as
-  an identifier no one can verify.
+  an identifier no one can verify. The record shape is the fixed 3-field
+  form, or 4 with the TAG ID: a fifth comma field like
+  `DIRECT, f08c47fec0942fa0, garbage` fails the gate instead of riding
+  along, and inline comments stripped before field-splitting mean commas
+  inside a trailing `#` note are no longer misparsed as extra fields.
 - **Fresh scaffolds no longer slip past the legal-notice gate.** The stub
   pages hid `TODO` inside HTML comments while the visible body said
   "Fill this in before publishing.", a phrasing the checker never

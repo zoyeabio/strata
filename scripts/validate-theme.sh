@@ -792,6 +792,17 @@ else
   fail 'the counterfeit authority failure names the TAG ID'
   cat "$WORK/ads-fake-authority.out" >&2
 fi
+printf 'google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0, garbage\n' \
+  >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-stray-field.out" 2>&1; then
+  fail 'a five-field ads.txt record fails the gate'
+elif grep -q 'anything past that comma is stray' "$WORK/ads-stray-field.out"; then
+  pass 'a five-field ads.txt record fails the gate'
+else
+  fail 'the stray-field failure names the record shape'
+  cat "$WORK/ads-stray-field.out" >&2
+fi
 cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
 
 # The client regex tightened to the official shape: 16 digits after
@@ -820,8 +831,19 @@ fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
 # Auto-only paths: head ships the loader URL straight from [ads] client, so
-# the same shape gate holds with no shortcode anywhere in the site.
+# the same shape gate holds with no shortcode anywhere in the site. And the
+# auto intent does not survive without the client it needs.
 mv "$ADS_SCRATCH/content/ads-page.md" "$WORK/ads-page-stowed.md"
+printf '[ads]\n  auto = true\n  consent = "none"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'auto without a client fails the build'
+elif grep -q 'needs site.Params.ads.client' "$WORK/scratch-build.stderr"; then
+  pass 'auto without a client fails the build'
+else
+  fail 'the auto-without-client failure names the fix'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
 printf '[ads]\n  client = "ca-pub-00000000000000000"\n  consent = "none"\n  auto = true\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo; then

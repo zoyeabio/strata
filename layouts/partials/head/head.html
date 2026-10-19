@@ -137,6 +137,9 @@
         (not (.HasShortcode "ads")) }}
   {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
   {{- end }}
+  {{- if and site.Params.ads.auto (not site.Params.ads.client) }}
+  {{- errorf "ads: [ads] auto = true needs site.Params.ads.client — the site-wide loader URL gets the publisher ID from nowhere else, so the build succeeds today and ships a site with the ad intent switched on and nothing to load. Set client, or drop auto (%s)" .Path }}
+  {{- end }}
   {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
   {{- if not (findRE `^ca-pub-\d{16}$` site.Params.ads.client) }}
   {{- errorf "ads: site.Params.ads.client %q is not a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); every mode sends it out pretty much as written, so a bad ID means a dead loader URL shipped as fixed (%s)" site.Params.ads.client .Path }}

@@ -549,11 +549,15 @@ else:
 #    ads.txt spec, and this gate stays spec-legal when it is absent — but
 #    AdSense's own ads.txt (answer/12171612) carries exactly
 #    f08c47fec0942fa0, so anything else a site writes there is counterfeit,
-#    not an identifier this theme can verify.
+#    not an identifier this theme can verify. The record shape is the fixed
+#    3-field form, or 4 when the TAG ID is present: everything past that
+#    comma is stray — a record with 5+ fields is malformed, not extended.
 def ads_txt_records(body):
     for lineno, line in enumerate(body.splitlines(), 1):
-        stripped = line.strip()
-        if not stripped or stripped.startswith('#'):
+        # '#' starts a comment anywhere in the line, so strip it before
+        # splitting: commas inside a trailing comment are not extra fields.
+        stripped = line.split('#', 1)[0].strip()
+        if not stripped:
             continue
         yield lineno, [f.strip() for f in stripped.split(',')]
 
@@ -574,8 +578,11 @@ if ad_clients:
         bad('ads.txt names every advertised publisher', '  ads.txt missing')
     else:
         records = list(ads_txt_records(ads_txt.read_text(errors='ignore')))
-        malformed = [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3+'
+        malformed = [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3'
                      for lineno, fields in records if len(fields) < 3]
+        malformed += [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3, '
+                      'or 4 with the TAG ID — anything past that comma is stray'
+                      for lineno, fields in records if len(fields) > 4]
         malformed += [f'  ads.txt line {lineno}: authority field {fields[3].split("#")[0].strip()!r} '
                       'is not Google\'s TAG ID f08c47fec0942fa0'
                       for lineno, fields in records if len(fields) >= 4
