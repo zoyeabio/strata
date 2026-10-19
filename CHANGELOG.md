@@ -55,6 +55,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same shape is checked in `head.html`, so a malformed `[ads] client` cannot
   reach the loader line through the consent path either.
 
+- **The gate scripts name the interpreter up front.** Six scripts
+  (`check-build`, `validate-theme`, `validate-site`, `validate-content`,
+  `smoke`, `place-image`) now check for python3 ≥ 3.11 before doing any
+  work and exit with the requirement, instead of dying partway with a
+  `ModuleNotFoundError: tomllib` traceback wrapped around an already-built
+  artifact.
+
 - **The legal templates no longer overstate what is off when personalization
   is off.** With Ad personalization disabled Google may still read
   non-personalized identifiers for frequency capping, fraud detection and

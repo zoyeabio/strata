@@ -10,6 +10,14 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# The gate scripts lean on the standard library's tomllib (3.11+) to resolve
+# the same config pair Hugo merges. A system python3 below that dies with a
+# traceback mid-script, so name the requirement before any build output.
+if ! python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)'; then
+  printf 'ERROR: python3 >= 3.11 is required (stdlib tomllib)\n' >&2
+  exit 2
+fi
 SITE="${1:?Usage: ./scripts/validate-site.sh /path/to/site}"
 MODULE="github.com/zoyeabio/strata"
 if [ ! -d "$SITE" ]; then
