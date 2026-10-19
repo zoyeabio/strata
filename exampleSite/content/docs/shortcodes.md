@@ -154,7 +154,12 @@ Both parameters required; a missing one fails the build.
 
 ## ads
 
-AdSense display unit. The loader ships in head only on pages using it.
+AdSense display unit. With `[ads] consent = "none"` (default) the loader
+ships from `<head>` on pages using the shortcode; `[ads] auto = true`
+ships it site-wide with no shortcode placed anywhere. See the
+[configuration docs](../configuration/) for the consent modes — `basic`
+keeps the loader out of `<head>` until the site's own banner grants it —
+and the manual-vs-auto placement trade-offs.
 
 ```
 {{</* ads slot="1234567890" */>}}
@@ -170,7 +175,8 @@ Requires site `[ads] client`; `static/ads.txt` must name the ID or the
 build fails. The push call ships as external `js/ads.js` — no
 `unsafe-inline` — and the build also fails while `static/_headers`
 would block the AdSense loader; the [security docs](../security/)
-carry the working header block.
+carry the working header block. The unit copy marks the site's consent
+posture with `data-ads-consent`.
 
 ## layout/multi-col + layout/col-left, col-mid, col-right
 
