@@ -552,12 +552,21 @@ else:
 #    not an identifier this theme can verify. The record shape is the fixed
 #    3-field form, or 4 when the TAG ID is present: everything past that
 #    comma is stray — a record with 5+ fields is malformed, not extended.
+#    Variable declarations (the IAB 1.1 OWNERDOMAIN/MANAGERDOMAIN/SUBDOMAIN
+#    set) carry their own commas and are skipped entirely, never parsed as
+#    seller records.
 def ads_txt_records(body):
     for lineno, line in enumerate(body.splitlines(), 1):
         # '#' starts a comment anywhere in the line, so strip it before
         # splitting: commas inside a trailing comment are not extra fields.
         stripped = line.split('#', 1)[0].strip()
         if not stripped:
+            continue
+        if '=' in stripped:
+            # Variable declaration (ADTXT section variables: OWNERDOMAIN=…,
+            # MANAGERDOMAIN=…, SUBDOMAIN=…, CONTACT operators write freely),
+            # not a seller record — MANAGERDOMAIN carries its own commas,
+            # so it must not enter the 3/4-field shape check.
             continue
         yield lineno, [f.strip() for f in stripped.split(',')]
 

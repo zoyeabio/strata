@@ -138,7 +138,7 @@
   {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
   {{- end }}
   {{- if and site.Params.ads.auto (not site.Params.ads.client) }}
-  {{- errorf "ads: [ads] auto = true needs site.Params.ads.client — the site-wide loader URL gets the publisher ID from nowhere else, so the build succeeds today and ships a site with the ad intent switched on and nothing to load. Set client, or drop auto (%s)" .Path }}
+  {{- errorf "ads: [ads] auto = true needs site.Params.ads.client — the site-wide loader URL gets the publisher ID from nowhere else, and without it the site would silently ship with ad intent enabled and nothing to load. Set client, or drop auto (%s)" .Path }}
   {{- end }}
   {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
   {{- if not (findRE `^ca-pub-\d{16}$` site.Params.ads.client) }}

@@ -803,6 +803,18 @@ else
   fail 'the stray-field failure names the record shape'
   cat "$WORK/ads-stray-field.out" >&2
 fi
+# Variable declarations from the IAB 1.1 ads.txt section: OWNERDOMAIN and
+# MANAGERDOMAIN (which carries commas of its own) are not seller records, so
+# a compliant file mixing both must clear the gate untouched.
+printf 'OWNERDOMAIN=example.com\nMANAGERDOMAIN=manager.example, US\n%s' \
+  "$(cat "$WORK/ads-original.txt")" >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-variables.out" 2>&1; then
+  pass 'variable declarations within legal ads.txt pass the gate'
+else
+  fail 'variable declarations within legal ads.txt pass the gate'
+  cat "$WORK/ads-variables.out" >&2
+fi
 cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
 
 # The client regex tightened to the official shape: 16 digits after
