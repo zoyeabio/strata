@@ -159,6 +159,117 @@ else
   fail 'the fixture public output carries ads.txt to tamper'
 fi
 
+# The CSP check anchors the policy line itself. A commented-out line or a
+# Content-Security-Policy-Report-Only stance states an intent to relax the
+# policy without shipping a header that actually blocks the loader, so
+# neither may satisfy head.html. This scratch site must fail twice — once
+# where only a Report-Only line allows the origin (the exact shape a
+# "Report-Only first, then enforce" walkthrough produces) and once where the
+# allow line is a comment — and must build with the real header present.
+ADS_SCRATCH="$WORK/ads-scratch"
+mkdir -p "$ADS_SCRATCH/config/_default" "$ADS_SCRATCH/content" "$ADS_SCRATCH/static"
+cat >"$ADS_SCRATCH/go.mod" <<EOF
+module example.com/ads-scratch
+
+go 1.22
+
+require github.com/zoyeabio/strata v0.1.1
+
+replace github.com/zoyeabio/strata => $ROOT
+EOF
+cat >"$ADS_SCRATCH/config/_default/hugo.toml" <<'TOML'
+[module]
+  proxy = "direct"
+  [[module.imports]]
+    path = "github.com/zoyeabio/strata"
+[module.hugoVersion]
+  extended = true
+  min = "0.161.0"
+
+[[module.mounts]]
+  source = 'assets'
+  target = 'assets'
+
+[[module.mounts]]
+  disableWatch = true
+  source = 'hugo_stats.json'
+  target = 'assets/notwatching/hugo_stats.json'
+
+[build.buildStats]
+  enable = true
+
+[[build.cachebusters]]
+  source = 'assets/notwatching/hugo_stats\.json'
+  target = 'css'
+
+[security.node]
+  [security.node.permissions]
+    allowAddons = ['tailwindcss']
+    allowChildProcess = ['tailwindcss']
+    allowRead = ['.']
+    allowWorker = ['tailwindcss']
+    allowWrite = []
+    disable = false
+
+[security.exec]
+  allow = ['go', 'node', 'tailwindcss']
+TOML
+cat >"$ADS_SCRATCH/config/_default/params.toml" <<'TOML'
+[ads]
+  client = "ca-pub-0000000000000000"
+TOML
+cat >"$ADS_SCRATCH/content/ads-page.md" <<'MD'
+---
+title: "Ads page"
+date: 2026-01-05
+---
+
+{{< ads slot="1234567890" >}}
+MD
+scratch_hugo() { # scratch_hugo — build the scratch site; returns hugo's status
+  HUGO_CACHEDIR="$WORK/scratch-cache" hugo --source "$ADS_SCRATCH" \
+    --environment production --minify --destination "$ADS_SCRATCH-public" \
+    >"$WORK/scratch-build.out" 2>"$WORK/scratch-build.stderr"
+}
+
+cat >"$ADS_SCRATCH/static/_headers" <<'EOF'
+Content-Security-Policy: default-src 'self'; script-src 'self' https://pagead2.googlesyndication.com; object-src 'none'
+EOF
+if scratch_hugo \
+  && grep -q 'adsbygoogle.js?client=' "$ADS_SCRATCH-public/ads-page/index.html"; then
+  pass 'a real CSP header line allows the loader through'
+else
+  fail 'a real CSP header line allows the loader through'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+
+cat >"$ADS_SCRATCH/static/_headers" <<'EOF'
+Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'
+
+Content-Security-Policy-Report-Only: script-src 'self' https://pagead2.googlesyndication.com
+EOF
+if scratch_hugo; then
+  fail 'a Report-Only CSP cannot authorize the loader'
+elif grep -q 'no Content-Security-Policy script-src allows pagead2' \
+    "$WORK/scratch-build.stderr"; then
+  pass 'a Report-Only CSP cannot authorize the loader'
+else
+  fail 'the Report-Only failure names the missing policy'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+
+cat >"$ADS_SCRATCH/static/_headers" <<'EOF'
+# uncomment when ready: Content-Security-Policy: script-src 'self' https://pagead2.googlesyndication.com
+EOF
+if scratch_hugo; then
+  fail 'a commented-out CSP line cannot authorize the loader'
+elif grep -q 'no Content-Security-Policy script-src allows pagead2' \
+    "$WORK/scratch-build.stderr"; then
+  pass 'a commented-out CSP line cannot authorize the loader'
+else
+  fail 'the commented-policy failure names the missing policy'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
 # every share URL template must consume both printf arguments — the permalink
 # and the title. Hugo's printf does not error on a missing verb, it appends
 # %!N(EXTRA string=...) to the URL, so a site author who writes ?url=%s

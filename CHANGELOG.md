@@ -39,6 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the bare `pub-<digits>` ID, and field 3 must be DIRECT or RESELLER, which
   are the two record types that authorize.
 
+- **head.html only accepts a real policy line for the ad CSP check.** The
+  old pattern matched `script-src … pagead2` anywhere in `static/_headers`,
+  so a commented-out line or a `Content-Security-Policy-Report-Only` stance
+  — the exact shape a "Report-Only first, then enforce" walkthrough
+  produces — passed the check while the enforced policy still blocked the
+  loader. The check now anchors at the `Content-Security-Policy:` header
+  name, which excludes comment lines and the Report-Only variant (the colon
+  must follow `policy` immediately).
+
 ## [0.1.1] - 2026-10-17
 
 ### Added

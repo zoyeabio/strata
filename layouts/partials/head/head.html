@@ -120,13 +120,15 @@
        Google's ad code changes origin over time, so a strict CSP cannot
        list them safely — and the theme's own policy blocks them all.
        Fail the build here rather than publish ad slots that render
-       blank: the site must ship a static/_headers that allows the
-       loader (the Ads block in docs/security.md has a working copy),
-       or declare its host manages headers itself. */}}
+       blank: the site must ship a static/_headers whose real policy line
+       (anchored at the header name, so a Report-Only stance or a
+       commented-out demo line does not count—neither blocks the loader)
+       allows the loader (the Ads block in docs/security.md has a working
+       copy), or declare its host manages headers itself. */}}
   {{- if and (.HasShortcode "ads") site.Params.ads.client }}
   {{- if not site.Params.ads.skipCspCheck }}
-  {{- if not (findRE `(?i)script-src[^;\n]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}
-  {{- errorf "ads: no Content-Security-Policy script-src allows pagead2.googlesyndication.com in static/_headers, so the AdSense loader would ship blocked. Copy the ad-site headers block from the security docs into your site's static/_headers, or set site.Params.ads.skipCspCheck = true if your host applies headers itself (%s)" .Path }}
+  {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}
+  {{- errorf "ads: no Content-Security-Policy script-src allows pagead2.googlesyndication.com in static/_headers, so the AdSense loader would ship blocked. A commented-out or Content-Security-Policy-Report-Only line does not block requests, so it does not count; copy the ad-site headers block from the security docs into your site's static/_headers, or set site.Params.ads.skipCspCheck = true if your host applies headers itself (%s)" .Path }}
   {{- end }}
   {{- end }}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.Params.ads.client }}" crossorigin="anonymous"></script>
