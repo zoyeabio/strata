@@ -115,7 +115,8 @@
   {{ if templates.Exists "partials/extend-head-uncached.html" }}
   {{ partial "extend-head-uncached.html" . }}
   {{ end }}
-  {{/* AdSense loader, only on pages carrying an ads unit: the single
+  {{/* AdSense loader, on pages carrying an ads unit — site-wide, when
+       [ads] auto hands placement to Google's Auto ads: the single
        sanctioned external request, gated by site.Params.ads.client.
        Google's ad code changes origin over time, so a strict CSP cannot
        list them safely — and the theme's own policy blocks them all.
@@ -125,7 +126,16 @@
        commented-out demo line does not count—neither blocks the loader)
        allows the loader (the Ads block in docs/security.md has a working
        copy), or declare its host manages headers itself. */}}
-  {{- if and (.HasShortcode "ads") site.Params.ads.client }}
+  {{/* In basic mode the consent-driven dispatcher is js/ads.js, and that
+       file only ships inside ads-shortcode copies — so auto mode without
+       a single placed unit leaves the loader with no carrier and the site
+       with silently no ads. Fail the build where the reason is visible. */}}
+  {{- if and site.Params.ads.client site.Params.ads.auto
+        (eq (site.Params.ads.consent | default "none") "basic")
+        (not (.HasShortcode "ads")) }}
+  {{- errorf "ads: [ads] consent = \"basic\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
+  {{- end }}
+  {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
   {{- $consent := site.Params.ads.consent | default "none" }}
   {{- if not (in (slice "none" "basic") $consent) }}
   {{- errorf "ads: consent %q is not one of \"none\" or \"basic\" (%s)" $consent .Path }}

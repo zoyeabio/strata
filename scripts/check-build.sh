@@ -539,6 +539,10 @@ else:
 #    count either. A record is fields split on commas; field 2 must be the
 #    bare `pub-<digits>` ID ("ca-pub-…" is the markup spelling, not the
 #    ads.txt one) and field 3 must be DIRECT or RESELLER — both authorize.
+#    The deal shows in the markup either as a unit's data-ad-client or as
+#    the head loader's own URL — [ads] auto ships the loader across pages
+#    where no unit was ever placed, and its query string names the same
+#    publisher, so it authorizes under the same record check.
 def ads_txt_records(body):
     for lineno, line in enumerate(body.splitlines(), 1):
         stripped = line.strip()
@@ -551,6 +555,10 @@ for t in htmls:
     text = t.read_text(errors='ignore')
     for tag in re.findall(r'<[^>]+\bdata-ad-client\b[^>]*>', text, re.I):
         client = attrs_of(tag).get('data-ad-client')
+        if client:
+            ad_clients.add(client)
+    for client in re.findall(
+            r'<[^>]+adsbygoogle\.js\?client=([^&"\'\s>]+)', text, re.I):
         if client:
             ad_clients.add(client)
 if ad_clients:
@@ -582,6 +590,8 @@ else:
 #    templates' "TODO: delete this comment before publishing" notes are
 #    authoring artifacts, not published copy — and the two slugs are the
 #    ones the scaffold, the example site and the consent banner all use.
+#    Authorized means either signal from R11: a placed unit or the loader
+#    itself ([ads] auto authorizes site-wide with zero units placed).
 legal_bad = []
 if ad_clients:
     strip_comments = re.compile(r'<!--.*?-->', re.S)

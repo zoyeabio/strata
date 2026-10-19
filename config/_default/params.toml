@@ -105,6 +105,12 @@ showScrollToTop = false
 
 [ads]
 client = ""
+# "" (default): off — the loader ships only on pages that use the ads
+# shortcode, so it never loads anywhere it was not placed. true: site-wide
+# loader with no shortcode placed anywhere; Google's Auto ads then choose
+# pages and placement (anchor, interstitial, in-page) from the AdSense
+# console. Manual units and auto placement are independent and can coexist.
+auto = false
 # The head loader fails the build when static/_headers would block
 # pagead2.googlesyndication.com. Set this only when the host applies response
 # headers itself and the _headers file never reaches the reader.

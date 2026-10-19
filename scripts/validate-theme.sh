@@ -341,6 +341,73 @@ else
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
+# [ads] auto hands placement to Google: no shortcode anywhere, the loader
+# ships site-wide, and hugo itself never asks why — the authorization
+# bookwork (ads.txt, notices) stays with check-build, proven against the
+# fixture output right below.
+mv "$ADS_SCRATCH/content/ads-page.md" "$WORK/ads-page-stowed.md"
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo \
+   && grep -qE 'adsbygoogle\.js\?client=ca-pub-0000000000000000' \
+     "$ADS_SCRATCH-public/index.html" \
+   && ! grep -qE '<ins class=.?adsbygoogle' "$ADS_SCRATCH-public/index.html"; then
+  pass 'auto ships the loader on pages that never held a unit'
+else
+  fail 'auto ships the loader on pages that never held a unit'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+
+# auto in basic consent mode with no shortcode anywhere: the fingerprinted
+# dispatcher js/ads.js only rolls inside shortcode copies, so the wait for
+# the consent answer would ride nothing and the site would show no ads
+# without saying why — head.html fails such a build instead.
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n  auto = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'basic auto with no placed unit carrier fails the build'
+elif grep -q 'would mean silently no ads' "$WORK/scratch-build.stderr"; then
+  pass 'basic auto with no placed unit carrier fails the build'
+else
+  fail 'the carrier failure names the fix'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+mv "$WORK/ads-page-stowed.md" "$ADS_SCRATCH/content/ads-page.md"
+
+# check-build keys R11 off the loader URL, not only units: a loader with a
+# foreign publisher pasted into otherwise clean pages has the site's
+# ads.txt as its only counter-record, and the gate names the loader's
+# client. This is the [ads] auto evidence path — no data-ad-client exists.
+cp "$WORK/public/index.html" "$WORK/index-original.html"
+printf '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9999999999999999" crossorigin="anonymous"></script>\n' \
+  >>"$WORK/public/index.html"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/loader-forged.out" 2>&1; then
+  fail 'a loader URL counts as authorization and gets checked'
+elif grep -q 'ca-pub-9999999999999999 not authorized by any ads.txt record' \
+    "$WORK/loader-forged.out"; then
+  pass 'a loader URL counts as authorization and gets checked'
+else
+  fail 'the loader authorization failure names the loader client'
+  cat "$WORK/loader-forged.out" >&2
+fi
+cp "$WORK/index-original.html" "$WORK/public/index.html"
+
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo \
+   && ! grep -qE 'adsbygoogle\.js\?client=' "$ADS_SCRATCH-public/index.html" \
+   && grep -qE 'data-ad-client=.?ca-pub-0000000000000000' \
+     "$ADS_SCRATCH-public/ads-page/index.html"; then
+  pass 'no shortcode and no auto keeps the loader off untouched pages'
+else
+  fail 'no shortcode and no auto keeps the loader off untouched pages'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
 # R17: ads authorized implies complete legal notices. Two tamer paths
 # against the real fixture output — a placeholder left visible in the
 # privacy text, and the cookies page deleted outright — must both fail,

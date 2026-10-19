@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`[ads] auto = true`: pure Auto ads without placing a single shortcode.**
+  The head loader unlocked via `site.HasShortcode("ads")` — a site-wide
+  test, so Auto ads technically already worked behind a placed unit, but no
+  site could say "loader everywhere, zero units placed". `auto = false`
+  (default) stays the placement contract: the loader follows placed units
+  only, so it never loads a page it was not asked for. `true` ships the
+  loader site-wide (manual `{{< ads >}}` units stay available alongside),
+  and check-build's R11 and R17 now key off the loader URL too — its query
+  string names the publisher, so an unrecorded client fails ads.txt even
+  with no unit in any page, and the notice pages hold for auto-only sites.
 - **`[ads] consent = "basic"`: the loader waits for the site's consent
   answer.** Until now the AdSense loader shipped from `<head>` on every unit
   page regardless of any consent banner — the docs said "ask first" while

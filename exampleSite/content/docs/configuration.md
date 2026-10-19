@@ -117,6 +117,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
+| `ads.auto` | `false` | `true`: loader ships site-wide with no shortcode placed anywhere, and Google's Auto ads choose the pages and the placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
 | `ads.consent` | `"none"` | `"basic"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted`. `"none"` ships the loader from `<head>` on unit pages and leaves the consent work to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
@@ -297,8 +298,9 @@ effect.
 
 ## Consent and ads
 
-The theme ships no consent UI. Its AdSense loader is dormant unless a page
-uses the `ads` shortcode and the site provides `[ads] client`; sites wire
+The theme ships no consent UI. Its AdSense loader is dormant unless the site
+provides `[ads] client` **and** either a page uses the `ads` shortcode or the
+site opts into `[ads] auto`; sites wire
 consent and ads through two sanctioned points:
 
 - `partials/cookie-consent.html` (hook above) renders site-owned banner or
@@ -331,7 +333,10 @@ consent and ads through two sanctioned points:
   once, keep the reopen control on the page. Basic mode is not a CMP and
   does not pretend to be one: no category granularity, no IAB TCF string,
   no cross-domain anything — a site that needs those needs a certified CMP,
-  and runs this theme with `[ads] consent = "none"`.
+  and runs this theme with `[ads] consent = "none"`. One edge: in basic
+  mode the dispatcher rides the unit copies the shortcode ships, so `auto`
+  with no placed unit is rejected at build time — place one unit for the
+  carrier, or run `"none"` under a certified CMP.
 
 Waiting for the answer does not lift the origin policy: `basic` mode still
 requires `static/_headers` to allow `pagead2.googlesyndication.com`, and
