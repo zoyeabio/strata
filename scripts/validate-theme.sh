@@ -270,6 +270,36 @@ else
   fail 'the commented-policy failure names the missing policy'
   cat "$WORK/scratch-build.stderr" >&2
 fi
+# The ads shortcode contracts on shape: a slot that is not the dashboard's
+# numeric ID and a client that is not a ca-pub-… publisher ID fail the build
+# instead of reaching Google as a garbage loader URL.
+cp "$ADS_SCRATCH/content/ads-page.md" "$WORK/ads-page-original.md"
+sed 's/slot="1234567890"/slot="12-sydney"/' "$ADS_SCRATCH/content/ads-page.md" \
+  >"$WORK/ads-page-badslot.md"
+mv "$WORK/ads-page-badslot.md" "$ADS_SCRATCH/content/ads-page.md"
+if scratch_hugo; then
+  fail 'a non-numeric ad slot fails the build'
+elif grep -q 'slot .* is not the numeric ID' "$WORK/scratch-build.stderr"; then
+  pass 'a non-numeric ad slot fails the build'
+else
+  fail 'the ad slot failure names the bad value'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/ads-page-original.md" "$ADS_SCRATCH/content/ads-page.md"
+
+cp "$ADS_SCRATCH/config/_default/params.toml" "$WORK/params-original.toml"
+printf '[ads]\n  client = "pub-0000000000000000"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a malformed publisher ID fails the build'
+elif grep -q 'does not look like a ca-pub-' "$WORK/scratch-build.stderr"; then
+  pass 'a malformed publisher ID fails the build'
+else
+  fail 'the publisher ID failure names the bad value'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
 # every share URL template must consume both printf arguments — the permalink
 # and the title. Hugo's printf does not error on a missing verb, it appends
 # %!N(EXTRA string=...) to the URL, so a site author who writes ?url=%s

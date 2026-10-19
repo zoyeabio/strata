@@ -9,7 +9,9 @@
                 (e.g. "250px") so the ad iframe cannot shift layout (CLS)
 
   Site config [ads] client (string, required) — the "ca-pub-…" publisher
-  ID. Missing client stops the build. Pages carrying a unit must also
+  ID, shape-checked here and in head.html so a malformed ID fails the
+  build instead of reaching Google as a garbage loader URL. Missing client
+  stops the build. Pages carrying a unit must also
   ship static/ads.txt naming the ID (check-build R11 enforces it).
   The unit must sit directly in markdown: shortcodes composed inside a
   partial are invisible to the head loader check (.HasShortcode reads
@@ -31,6 +33,11 @@
 {{- $slot := .Get "slot" -}}
 {{- if not $slot -}}
   {{- errorf "ads shortcode: requires slot, e.g. {{< ads slot=\"1234567890\" >}} (%s)" .Position -}}
+{{- else if not (findRE `^\d+$` $slot) -}}
+  {{- errorf "ads shortcode: slot %q is not the numeric ID from the AdSense dashboard (%s)" $slot .Position -}}
+{{- end -}}
+{{- if not (findRE `^ca-(host-)?pub-\d+$` $client) -}}
+  {{- errorf "ads shortcode: client %q does not look like a ca-pub-… publisher ID; fix site.Params.ads.client (%s)" $client .Position -}}
 {{- end -}}
 <ins class="adsbygoogle" style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
 {{- with resources.Get "js/ads.js" }}
