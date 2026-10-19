@@ -22,11 +22,14 @@
   same pattern as contact.js and carousel.js — so enabling ads never
   asks static/_headers for unsafe-inline. The loader itself is the one
   sanctioned cross-origin request, and head.html fails the build when
-  the Content-Security-Policy would block it.
+  the Content-Security-Policy would block it. The script copy also
+  carries the site's [ads] consent value; under "basic" this same file
+  delays the loader until the site's consent answer is granted.
 
   Called by: content markdown
 */ -}}
 {{- $client := site.Params.ads.client -}}
+{{- $consent := site.Params.ads.consent | default "none" }}
 {{- if eq $client "" -}}
   {{- errorf "ads shortcode: site.Params.ads.client is not set (%s)" .Position -}}
 {{- end -}}
@@ -42,5 +45,5 @@
 <ins class="adsbygoogle" style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
 {{- with resources.Get "js/ads.js" }}
 {{- $js := . | fingerprint "sha512" }}
-<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" data-ads-consent="{{ $consent }}"></script>
 {{- end }}

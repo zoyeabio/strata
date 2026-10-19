@@ -39,8 +39,11 @@ profile follows you out of this site.
 
 ## How we ask, and how you withdraw
 
-The banner names what this site may store. Withdrawal is the same action in
-the other direction; no answer lives in an account, only in your browser.
+The banner at the foot of the page asks what may be stored and records
+your answer in this browser; the advertising loader only leaves once the
+answer is "granted", so no banner answer means no advertising request.
+Withdrawal is the same action — press "Change" in the banner and answer
+again. Consent given here is changed here; advertising holds no account.
 
 ## How long we keep things
 

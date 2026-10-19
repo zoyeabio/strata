@@ -62,7 +62,7 @@ Each is called out in `_headers` with the exact change to make.
 
 **`frame-src` google origins** — the `map` shortcode is the theme's explicit opt-in to a third-party embed, and its documented example is a Google Maps URL. Add your provider's origin rather than widening to `https:`.
 
-**Ads** — `site.Params.ads.client` turns on the AdSense loader, a foreign origin the default policy blocks on every directive the ad stack touches. The push call is not part of that problem: the shortcode ships it as an external `js/ads.js` with an integrity attribute, so ads never ask for `unsafe-inline`.
+**Ads** — `site.Params.ads.client` turns on the AdSense loader, a foreign origin the default policy blocks on every directive the ad stack touches. The push call is not part of that problem: the shortcode ships it as an external `js/ads.js` with an integrity attribute, so ads never ask for `unsafe-inline`. With `[ads] consent = "basic"` the loader waits for the site's consent answer — but waiting for it does not lift the origin, so the same `_headers` work is owed at grant time either way.
 
 An ad-enabled site therefore ships its own `static/_headers`. The build fails until it does — an ad slot behind a blocking CSP renders blank, and the console error never reaches the person who deployed it. Start from the theme's file and widen the four directives AdSense uses:
 

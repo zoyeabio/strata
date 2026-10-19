@@ -117,6 +117,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
+| `ads.consent` | `"none"` | `"basic"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted`. `"none"` ships the loader from `<head>` on unit pages and leaves the consent work to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `taxonomy.cardView` | `false` | Card vs. row on the taxonomy overview (`/tags/`). False here and true in `[list]`: `/tags/` lists terms, not articles, so it starts as a plain row list |
@@ -309,6 +310,33 @@ consent and ads through two sanctioned points:
   name the `[ads] client` ID as a real record or the build fails (check-build
   R11), and the `/privacy-policy/` and `/cookies/` pages must ship complete —
   no `[TBD]` in the published copy — or check-build R17 fails the build.
+
+### The consent answer as a contract
+
+`[ads] consent` says who holds the answer:
+
+- `"none"` (default): the site answers for itself — the loader ships from
+  `<head>` on unit pages. This is the shape a site runs behind a
+  Google-certified CMP, which is the only self-service path for
+  personalized advertising to EEA/UK/Switzerland traffic anyway.
+- `"basic"`: the loader waits for the site's answer. `js/ads.js` — the
+  fingerprinted push copy every unit ships — reads
+  `localStorage["strata-cookie-consent"]` for `granted`/`denied` and
+  listens for the `CustomEvent("strata:cookie-consent")` with the same
+  detail; a granted answer injects the loader once, drains the units in DOM
+  order, and lifts the `data-ads-pending` visibility until then. Write the
+  two values from your own banner controller, exactly as the fixture does
+  (`test/fixture/assets/js/consent.js` beside
+  `layouts/partials/cookie-consent.html`): ask once, persist once, dispatch
+  once, keep the reopen control on the page. Basic mode is not a CMP and
+  does not pretend to be one: no category granularity, no IAB TCF string,
+  no cross-domain anything — a site that needs those needs a certified CMP,
+  and runs this theme with `[ads] consent = "none"`.
+
+Waiting for the answer does not lift the origin policy: `basic` mode still
+requires `static/_headers` to allow `pagead2.googlesyndication.com`, and
+head.html checks that at build time — the loader loads once the answer is
+granted, into the same policy.
 
 ### The pages a banner points at
 

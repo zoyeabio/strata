@@ -1256,12 +1256,17 @@ assert 'section-a/shortcodes/index.html' 'role="status"' 'contact status is a li
 assert 'section-a/shortcodes/index.html' 'aria-describedby=' 'message field names its limit'
 assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes validity'
 
-# 41. ads ship complete and consent has a home: the unit carries client
-#     and slot, the loader lands only on pages using it, and the
-#     site-owned consent partial renders through the baseof hook
+# 41. ads ship complete and consent has a home: the fixture runs
+#     [ads] consent = "basic", so the unit carries client and slot, the
+#     loader never ships in page markup, the site-owned consent controller
+#     renders through the baseof hook as a fingerprinted script, and the
+#     push copy carries the site's consent posture
 assert 'section-a/shortcodes/index.html' 'data-ad-client="ca-pub-0000000000000000"' 'ads unit carries the client'
 assert 'section-a/shortcodes/index.html' 'data-ad-slot="1234567890"' 'ads unit carries the slot'
-assert 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' 'ads loader loads on unit pages'
+assert_not 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' \
+  'basic consent keeps the loader out of the page markup'
+assert 'section-a/shortcodes/index.html' 'data-ads-consent="basic"' \
+  'the ad script copy carries the consent posture'
 assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
 assert 'section-a/shortcodes/index.html' 'src="?/js/ads\.[0-9a-f]+\.js"? integrity="sha512-' \
   'ad push ships as an external fingerprinted script'
@@ -1269,6 +1274,16 @@ assert_not 'section-a/shortcodes/index.html' '\(adsbygoogle = window' 'ad push i
 assert '_headers' 'script-src[^;]*pagead2\.googlesyndication\.com' \
   'the site headers allow the ad loader'
 assert 'index.html' 'data-cookie-consent' 'consent hook renders site markup'
+assert 'index.html' 'data-consent-accept' 'consent controller ships its accept control'
+assert 'index.html' 'data-consent-decline' 'consent controller ships its decline control'
+assert 'index.html' 'src="?/js/consent\.[0-9a-f]+\.js"? integrity="sha512-' \
+  'the consent controller ships fingerprinted'
+if grep -q 'strata-cookie-consent' "$OUT"/js/ads.*.js \
+   && grep -q 'strata:cookie-consent' "$OUT"/js/ads.*.js; then
+  pass 'the ad push obeys the documented consent answer'
+else
+  fail 'the ad push obeys the documented consent answer'
+fi
 
 # 42. verifiable authorship and trail metadata: Person author and
 #     BreadcrumbList in JSON-LD, article tags/section and twitter:site in

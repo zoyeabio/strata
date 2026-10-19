@@ -36,6 +36,7 @@ enableA11y = true
 
 [ads]
   client = "ca-pub-0000000000000000"
+  consent = "basic"
 
 [taxonomy]
   showBreadcrumbs = true

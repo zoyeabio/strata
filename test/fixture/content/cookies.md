@@ -21,7 +21,7 @@ as exempt from the consent question.
 
 ## With your choice
 
-The banner asks how the advertising category should behave.
+The banner asks before the advertising request goes out.
 
 | Name | Purpose | Set by | Lifetime |
 |---|---|---|---|
@@ -29,6 +29,7 @@ The banner asks how the advertising category should behave.
 
 ## How to withdraw
 
-Withdrawal mirrors the question the banner asks; nothing is stored in an
-account. What Google keeps from pages already served is governed by
-Google's own settings.
+The controller in the banner records your answer and the ad loader obeys it
+from every later page on. Withdrawal is the same action: "Change" in the
+banner, then answer again. What Google keeps from pages already served is
+governed by Google's own settings.

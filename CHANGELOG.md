@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`[ads] consent = "basic"`: the loader waits for the site's consent
+  answer.** Until now the AdSense loader shipped from `<head>` on every unit
+  page regardless of any consent banner — the docs said "ask first" while
+  the code never did. With `consent = "basic"` the head stays clean and the
+  fingerprinted `js/ads.js` copies carry the site's posture
+  (`data-ads-consent="basic"`): units sit hidden under
+  `data-ads-pending`, nothing loads until
+  `localStorage["strata-cookie-consent"]` is `"granted"` or the site's
+  banner dispatches `CustomEvent("strata:cookie-consent")` with that
+  detail, and a granted answer injects the loader once and drains the units
+  in DOM order. The contract is documented in `docs/configuration.md` and
+  demonstrated end-to-end by the fixture, whose banner is now a real
+  controller (`assets/js/consent.js` through `extend-head.html`: ask,
+  persist, dispatch, reopen), with `[ads] consent = "basic"` in its params.
+  `"none"` (default) keeps the old `<head>`-loader shape untouched — that is
+  the mode for sites behind a Google-certified CMP, the only self-service
+  route to personalized advertising for EEA/UK/Switzerland traffic. `smoke`
+  and `validate-theme` pin every side of the new contract, and head.html
+  rejects unlisted `consent` values at build time.
+
+### Fixed
+
 - **Reference legal pages ship in the example site.**
   `content/privacy-policy.md`, `content/cookies.md` and `content/terms.md`
   are templates that leave every fact as `[TBD]`, so a site copies the

@@ -1,7 +1,24 @@
 {{- /*
-  Fixture consent stub: proves the baseof cookie-consent hook renders
-  site-owned markup. Real sites implement their CMP here.
+  Fixture consent controller markup: the site's own consent contract in
+  action. It asks what may be stored, records the answer in this browser
+  ("strata-cookie-consent" in localStorage), and broadcasts the
+  "strata:cookie-consent" event — js/ads.js obeys both in the site's
+  [ads] consent "basic" mode. assets/js/consent.js does the wiring from
+  layouts/partials/extend-head.html; keep both updated together.
+
+  The example site's cookie-consent.html is the no-JavaScript end of this
+  documented range; this file is the JavaScript end, with persistence.
+
+  Called by: _default/baseof.html
 */ -}}
-<div data-cookie-consent hidden>
+<div class="site-consent" data-cookie-consent role="region" aria-label="Cookie consent">
   <p>We use cookies for analytics and ads.</p>
+  <div data-consent-controls>
+    <button type="button" data-consent-accept>Accept</button>
+    <button type="button" data-consent-decline>Decline</button>
+  </div>
+  <p data-consent-state hidden>
+    Your answer is stored in this browser: <span data-consent-value></span>
+    <button type="button" data-consent-reopen>Change</button>
+  </p>
 </div>

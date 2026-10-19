@@ -278,6 +278,12 @@ else
   fail 'the commented-policy failure names the missing policy'
   cat "$WORK/scratch-build.stderr" >&2
 fi
+
+# A valid policy again for the shape tests below, which expect the site to
+# build: the copied block is the working one from docs/security.md.
+cat >"$ADS_SCRATCH/static/_headers" <<'EOF'
+Content-Security-Policy: default-src 'self'; script-src 'self' https://pagead2.googlesyndication.com; object-src 'none'
+EOF
 # The ads shortcode contracts on shape: a slot that is not the dashboard's
 # numeric ID and a client that is not a ca-pub-… publisher ID fail the build
 # instead of reaching Google as a garbage loader URL.
@@ -304,6 +310,33 @@ elif grep -q 'does not look like a ca-pub-' "$WORK/scratch-build.stderr"; then
   pass 'a malformed publisher ID fails the build'
 else
   fail 'the publisher ID failure names the bad value'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
+# [ads] consent "basic": head ships no loader and the push copy carries the
+# posture. In both modes the CSP check stays in force, because the loader
+# leaves at grant time; the _headers scratch file already allows the origin.
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo \
+   && ! grep -qE 'adsbygoogle\.js\?client=' "$ADS_SCRATCH-public/ads-page/index.html" \
+   && grep -qE 'data-ads-consent=.?basic' "$ADS_SCRATCH-public/ads-page/index.html" \
+   && grep -qE '<ins class=.?adsbygoogle' "$ADS_SCRATCH-public/ads-page/index.html"; then
+  pass 'basic consent keeps the loader out of head and marks the push copy'
+else
+  fail 'basic consent keeps the loader out of head and marks the push copy'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "certified"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'an unlisted consent value fails the build'
+elif grep -q 'is not one of "none" or "basic"' "$WORK/scratch-build.stderr"; then
+  pass 'an unlisted consent value fails the build'
+else
+  fail 'the consent failure names the accepted values'
   cat "$WORK/scratch-build.stderr" >&2
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"

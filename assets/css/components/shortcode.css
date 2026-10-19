@@ -42,6 +42,12 @@
   display: block;
 }
 
+/* [ads] consent "basic": a unit the consent answer has not granted yet stays
+   invisible so an empty reserved slot never implies an ad shipped. */
+.adsbygoogle[data-ads-pending] {
+  visibility: hidden;
+}
+
 .icon {
   display: inline-flex;
   vertical-align: -0.125em;

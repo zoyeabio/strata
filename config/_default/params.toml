@@ -109,6 +109,13 @@ client = ""
 # pagead2.googlesyndication.com. Set this only when the host applies response
 # headers itself and the _headers file never reaches the reader.
 skipCspCheck = false
+# "none" (default): the loader ships in head on unit pages; the site manages
+# consent itself, e.g. behind a Google-certified CMP. "basic": the site keeps
+# the answer and this theme obeys it — js/ads.js injects the loader only once
+# the answer is granted, so a site wiring the sample controller gates its
+# advertising without trying to replace a CMP. In basic mode the site's
+# banner is the decision point; see exampleSite's cookie-consent.html.
+consent = "none"
 
 # ── Keys below are lowercase: see the header comment. ──────────────────────
 

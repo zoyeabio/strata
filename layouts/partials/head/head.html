@@ -126,11 +126,21 @@
        allows the loader (the Ads block in docs/security.md has a working
        copy), or declare its host manages headers itself. */}}
   {{- if and (.HasShortcode "ads") site.Params.ads.client }}
+  {{- $consent := site.Params.ads.consent | default "none" }}
+  {{- if not (in (slice "none" "basic") $consent) }}
+  {{- errorf "ads: consent %q is not one of \"none\" or \"basic\" (%s)" $consent .Path }}
+  {{- end }}
   {{- if not site.Params.ads.skipCspCheck }}
   {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}
   {{- errorf "ads: no Content-Security-Policy script-src allows pagead2.googlesyndication.com in static/_headers, so the AdSense loader would ship blocked. A commented-out or Content-Security-Policy-Report-Only line does not block requests, so it does not count; copy the ad-site headers block from the security docs into your site's static/_headers, or set site.Params.ads.skipCspCheck = true if your host applies headers itself (%s)" .Path }}
   {{- end }}
   {{- end }}
+  {{- if ne $consent "basic" }}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.Params.ads.client }}" crossorigin="anonymous"></script>
+  {{- else }}
+  {{/* In basic mode the fingerprinted js/ads.js carries the consent contract
+       (see [ads] consent): nothing loads until the site's own banner grants
+       it, so the head ships no loader of its own. */}}
+  {{- end }}
   {{- end }}
 </head>
