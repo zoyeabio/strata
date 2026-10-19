@@ -61,10 +61,3 @@
 .site-consent p {
   margin: 0;
 }
-
-.site-consent__choice {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-inline-start: auto;
-}

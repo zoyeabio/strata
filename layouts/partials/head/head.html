@@ -124,31 +124,37 @@
        blank: the site must ship a static/_headers whose real policy line
        (anchored at the header name, so a Report-Only stance or a
        commented-out demo line does not count—neither blocks the loader)
-       allows the loader (the Ads block in docs/security.md has a working
-       copy), or declare its host manages headers itself. */}}
-  {{/* In basic mode the consent-driven dispatcher is js/ads.js, and that
+       allows the loader (the Ads block in docs/security.md carries the
+       domain allowlist the loader accepts today — Google formally backs
+       only random-nonce strict CSP, which is host-managed), or declare
+       that its host manages headers itself. */}}
+  {{/* In gated mode the consent-driven dispatcher is js/ads.js, and that
        file only ships inside ads-shortcode copies — so auto mode without
        a single placed unit leaves the loader with no carrier and the site
        with silently no ads. Fail the build where the reason is visible. */}}
   {{- if and site.Params.ads.client site.Params.ads.auto
-        (eq (site.Params.ads.consent | default "none") "basic")
+        (eq (site.Params.ads.consent | default "none") "gated")
         (not (.HasShortcode "ads")) }}
-  {{- errorf "ads: [ads] consent = \"basic\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
+  {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
   {{- end }}
   {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
-  {{- $consent := site.Params.ads.consent | default "none" }}
-  {{- if not (in (slice "none" "basic") $consent) }}
-  {{- errorf "ads: consent %q is not one of \"none\" or \"basic\" (%s)" $consent .Path }}
+  {{- $consent := site.Params.ads.consent }}
+  {{- if not $consent }}
+  {{- errorf "ads: consent must be picked explicitly when advertising is on — \"gated\" for the theme's own consent contract, \"none\" when you run a Google-certified CMP; there is no default, so a site that forgot the setting never asks Google silently (%s)" .Path }}
+  {{- else if eq $consent "basic" }}
+  {{- errorf "ads: consent \"basic\" is gone — rename it to \"gated\" (the value is a loader gate, not Google's Basic Consent Mode and no TCF string exists here) (%s)" .Path }}
+  {{- else if not (in (slice "none" "gated") $consent) }}
+  {{- errorf "ads: consent %q is not one of \"none\" or \"gated\" (%s)" $consent .Path }}
   {{- end }}
   {{- if not site.Params.ads.skipCspCheck }}
   {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}
   {{- errorf "ads: no Content-Security-Policy script-src allows pagead2.googlesyndication.com in static/_headers, so the AdSense loader would ship blocked. A commented-out or Content-Security-Policy-Report-Only line does not block requests, so it does not count; copy the ad-site headers block from the security docs into your site's static/_headers, or set site.Params.ads.skipCspCheck = true if your host applies headers itself (%s)" .Path }}
   {{- end }}
   {{- end }}
-  {{- if ne $consent "basic" }}
+  {{- if ne $consent "gated" }}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.Params.ads.client }}" crossorigin="anonymous"></script>
   {{- else }}
-  {{/* In basic mode the fingerprinted js/ads.js carries the consent contract
+  {{/* In gated mode the fingerprinted js/ads.js carries the consent contract
        (see [ads] consent): nothing loads until the site's own banner grants
        it, so the head ships no loader of its own. */}}
   {{- end }}

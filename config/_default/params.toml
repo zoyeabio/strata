@@ -115,13 +115,20 @@ auto = false
 # pagead2.googlesyndication.com. Set this only when the host applies response
 # headers itself and the _headers file never reaches the reader.
 skipCspCheck = false
-# "none" (default): the loader ships in head on unit pages; the site manages
-# consent itself, e.g. behind a Google-certified CMP. "basic": the site keeps
-# the answer and this theme obeys it — js/ads.js injects the loader only once
-# the answer is granted, so a site wiring the sample controller gates its
-# advertising without trying to replace a CMP. In basic mode the site's
-# banner is the decision point; see exampleSite's cookie-consent.html.
-consent = "none"
+# REQUIRED once [ads] client is set and any ad is unlocked — there is no
+# default, so a site that forgets the line fails its build instead of
+# asking Google silently. Two values:
+#   "gated": the site keeps the answer and this theme obeys it — the
+#     fingerprinted js/ads.js injects the loader only once the answer is
+#     granted, so a site wiring its own banner controller gates its
+#     advertising without trying to replace a CMP. In gated mode the
+#     site's banner is the decision point; the theme's test fixture
+#     (test/fixture) is the working reference.
+#   "none": a Google-certified CMP manages consent — the loader ships in
+#     head on unit pages. Personalized advertising to EEA/UK/Switzerland
+#     traffic needs a certified CMP anyway (support.google.com/adsense/
+#     answer/13554116); this value is what those sites run.
+# consent = "none"
 
 # ── Keys below are lowercase: see the header comment. ──────────────────────
 

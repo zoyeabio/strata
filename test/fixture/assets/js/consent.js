@@ -1,6 +1,6 @@
 /* Fixture consent controller: the site owns its consent answer and the
    theme obeys it. This implements the contract js/ads.js reads in the
-   [ads] consent "basic" mode:
+   [ads] consent "gated" mode:
 
      localStorage "strata-cookie-consent" = "granted" | "denied"
      CustomEvent "strata:cookie-consent" with that value as detail
@@ -37,7 +37,7 @@
   function record(value) {
     try { localStorage.setItem(KEY, value); } catch (err) { /* private mode */ }
     paint(value);
-    // js/ads.js listens for exactly this event in basic mode.
+    // js/ads.js listens for exactly this event in gated mode.
     document.dispatchEvent(new CustomEvent(EVENT, { detail: value }));
   }
 

@@ -2,14 +2,18 @@
   Site-owned consent banner, rendered just before </body>. The theme ships no
   consent UI and cannot: what counts as consent is site law, not theme code.
 
-  This is the no-JavaScript end of the documented range. A native checkbox
-  holds the choice and the wrapper is the mount point a real CMP replaces.
-  Note the shape of the JavaScript end: any controller has to be a
-  fingerprinted file reference, not inline code, because static/_headers
-  ships script-src 'self' with no unsafe-inline. Load Consent Mode defaults
-  from extend-head.html, before any measurement tag.
+  This example deliberately ships the hook without a control: a dead
+  checkbox or a static choice would look like a working consent answer that
+  persists nothing — worse than none, because a reader who believed it would
+  be shown ads the banner disclaimed. The working JavaScript end of the
+  documented range lives in the theme repository, test/fixture
+  (assets/js/consent.js, mounted from extend-head.html in "gated" mode);
+  copy that pair, or wire your certified CMP here. Keep the shape of the
+  contract in mind either way: any controller must be a fingerprinted file
+  reference, not inline code, because static/_headers ships script-src
+  'self' with no unsafe-inline.
 
-  The banner also names where a reader goes next. Both pages ship as
+  The banner still names where a reader goes next. Both pages ship as
   templates in this example's content tree — content/cookies.md and
   content/privacy-policy.md — which is the copy-paste set a real site
   adapts, along with the short terms page at content/terms.md.
@@ -19,11 +23,10 @@
   Called by: _default/baseof.html
 */ -}}
 <div class="site-consent" data-cookie-consent role="region" aria-label="Cookie consent">
-  <p>This site can store analytics cookies. The <a href="{{ "/cookies/" | relLangURL }}">cookie notice</a>
-  says what they do; the <a href="{{ "/privacy-policy/" | relLangURL }}">privacy policy</a> says what
-  to do about them.</p>
-  <label class="site-consent__choice">
-    <input type="checkbox" name="analytics-consent">
-    <span>Accept analytics</span>
-  </label>
+<p>This example ships the consent hook, not an answer: a real consent
+  control goes in this wrapper and its choice reaches the theme's
+  advertising gate — the fixture in the theme repository is the working
+  reference. The <a href="{{ "/cookies/" | relLangURL }}">cookie notice</a>
+  says what the cookies do; the <a href="{{ "/privacy-policy/" | relLangURL }}">privacy policy</a> says what
+  is collected and what a reader controls.</p>
 </div>

@@ -1,6 +1,8 @@
 {{- /*
-  AdSense display unit. The loader script ships in head only on pages that
-  use this shortcode, so sites without ads pay nothing.
+  AdSense display unit. With `[ads] consent = "none"` the loader script
+  ships from head on pages that use this shortcode; `[ads] auto = true`
+  ships it site-wide without any unit placed, so sites without neither
+  set up pay nothing.
 
   Parameters
     slot      (string, required) — the ad slot ID from the AdSense dashboard
@@ -23,7 +25,7 @@
   asks static/_headers for unsafe-inline. The loader itself is the one
   sanctioned cross-origin request, and head.html fails the build when
   the Content-Security-Policy would block it. The script copy also
-  carries the site's [ads] consent value; under "basic" this same file
+  carries the site's [ads] consent value; under "gated" this same file
   delays the loader until the site's consent answer is granted.
 
   Called by: content markdown
@@ -39,8 +41,8 @@
 {{- else if not (findRE `^\d+$` $slot) -}}
   {{- errorf "ads shortcode: slot %q is not the numeric ID from the AdSense dashboard (%s)" $slot .Position -}}
 {{- end -}}
-{{- if not (findRE `^ca-(host-)?pub-\d+$` $client) -}}
-  {{- errorf "ads shortcode: client %q does not look like a ca-pub-… publisher ID; fix site.Params.ads.client (%s)" $client .Position -}}
+{{- if not (findRE `^ca-pub-\d{16}$` $client) -}}
+  {{- errorf "ads shortcode: client %q does not look like a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); fix site.Params.ads.client (%s)" $client .Position -}}
 {{- end -}}
 <ins class="adsbygoogle" style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
 {{- with resources.Get "js/ads.js" }}

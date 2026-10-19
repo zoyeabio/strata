@@ -281,14 +281,18 @@ title: "$title"
 EOF
 done
 
-# Legal pages ship as stubs with TODOs, not invented facts: a privacy
-# policy naming the wrong entity is a liability, and the full shape of
-# each one is in the example site's content tree.
+# Legal pages ship as stubs with TODOs in comments and a visible build
+# marker, NOT published facts: a privacy policy naming the wrong entity is a
+# liability, and the full shape of each one is in the example site's content
+# tree. front matter draft: true keeps the stub out of production output, so
+# enabling [ads] while the notices are still stubs fails check-build R17
+# with "/cookies/ missing" instead of a gate the stub prose sneaks past.
 mkdir -p "$OUT/content/cookies" "$OUT/content/privacy-policy" "$OUT/content/terms"
 
 cat > "$OUT/content/cookies/_index.md" <<'EOF'
 ---
 title: "Cookies"
+draft: true
 ---
 
 <!-- TODO: list the cookies and similar technologies this site sets, with
@@ -301,6 +305,7 @@ EOF
 cat > "$OUT/content/privacy-policy/_index.md" <<'EOF'
 ---
 title: "Privacy Policy"
+draft: true
 ---
 
 <!-- TODO: who you are, what you collect, for how long you keep it, who
@@ -314,6 +319,7 @@ EOF
 cat > "$OUT/content/terms/_index.md" <<'EOF'
 ---
 title: "Terms of Use"
+draft: true
 ---
 
 <!-- TODO: how the site may be used, what copyright you keep, how far your

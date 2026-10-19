@@ -225,6 +225,7 @@ TOML
 cat >"$ADS_SCRATCH/config/_default/params.toml" <<'TOML'
 [ads]
   client = "ca-pub-0000000000000000"
+  consent = "none"
 TOML
 cat >"$ADS_SCRATCH/content/ads-page.md" <<'MD'
 ---
@@ -302,7 +303,7 @@ fi
 cp "$WORK/ads-page-original.md" "$ADS_SCRATCH/content/ads-page.md"
 
 cp "$ADS_SCRATCH/config/_default/params.toml" "$WORK/params-original.toml"
-printf '[ads]\n  client = "pub-0000000000000000"\n' \
+printf '[ads]\n  client = "pub-0000000000000000"\n  consent = "none"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo; then
   fail 'a malformed publisher ID fails the build'
@@ -314,18 +315,18 @@ else
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
-# [ads] consent "basic": head ships no loader and the push copy carries the
+# [ads] consent "gated": head ships no loader and the push copy carries the
 # posture. In both modes the CSP check stays in force, because the loader
 # leaves at grant time; the _headers scratch file already allows the origin.
-printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n' \
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "gated"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo \
    && ! grep -qE 'adsbygoogle\.js\?client=' "$ADS_SCRATCH-public/ads-page/index.html" \
-   && grep -qE 'data-ads-consent=.?basic' "$ADS_SCRATCH-public/ads-page/index.html" \
+   && grep -qE 'data-ads-consent=.?gated' "$ADS_SCRATCH-public/ads-page/index.html" \
    && grep -qE '<ins class=.?adsbygoogle' "$ADS_SCRATCH-public/ads-page/index.html"; then
-  pass 'basic consent keeps the loader out of head and marks the push copy'
+  pass 'gated consent keeps the loader out of head and marks the push copy'
 else
-  fail 'basic consent keeps the loader out of head and marks the push copy'
+  fail 'gated consent keeps the loader out of head and marks the push copy'
   cat "$WORK/scratch-build.stderr" >&2
 fi
 
@@ -333,7 +334,7 @@ printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "certified"\n' 
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo; then
   fail 'an unlisted consent value fails the build'
-elif grep -q 'is not one of "none" or "basic"' "$WORK/scratch-build.stderr"; then
+elif grep -q 'is not one of "none" or "gated"' "$WORK/scratch-build.stderr"; then
   pass 'an unlisted consent value fails the build'
 else
   fail 'the consent failure names the accepted values'
@@ -346,7 +347,7 @@ cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 # bookwork (ads.txt, notices) stays with check-build, proven against the
 # fixture output right below.
 mv "$ADS_SCRATCH/content/ads-page.md" "$WORK/ads-page-stowed.md"
-printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n' \
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n  consent = "none"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo \
    && grep -qE 'adsbygoogle\.js\?client=ca-pub-0000000000000000' \
@@ -358,21 +359,21 @@ else
   cat "$WORK/scratch-build.stderr" >&2
 fi
 
-# auto in basic consent mode with no shortcode anywhere: the fingerprinted
+# auto in gated consent mode with no shortcode anywhere: the fingerprinted
 # dispatcher js/ads.js only rolls inside shortcode copies, so the wait for
 # the consent answer would ride nothing and the site would show no ads
 # without saying why — head.html fails such a build instead.
-printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n  auto = true\n' \
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "gated"\n  auto = true\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo; then
-  fail 'basic auto with no placed unit carrier fails the build'
+  fail 'gated auto with no placed unit carrier fails the build'
 elif grep -q 'would mean silently no ads' "$WORK/scratch-build.stderr"; then
-  pass 'basic auto with no placed unit carrier fails the build'
+  pass 'gated auto with no placed unit carrier fails the build'
 else
   fail 'the carrier failure names the fix'
   cat "$WORK/scratch-build.stderr" >&2
 fi
-printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n' \
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n  consent = "none"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 mv "$WORK/ads-page-stowed.md" "$ADS_SCRATCH/content/ads-page.md"
 
@@ -395,7 +396,7 @@ else
 fi
 cp "$WORK/index-original.html" "$WORK/public/index.html"
 
-printf '[ads]\n  client = "ca-pub-0000000000000000"\n' \
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "none"\n' \
   >"$ADS_SCRATCH/config/_default/params.toml"
 if scratch_hugo \
    && ! grep -qE 'adsbygoogle\.js\?client=' "$ADS_SCRATCH-public/index.html" \
@@ -713,6 +714,106 @@ else
   cat "$WORK/scaffold-lean.out" "$WORK/scaffold-lean.stderr" \
     "$WORK/lean-build.out" "$WORK/lean-build.stderr" >&2
 fi
+
+# Ads on a FRESH scaffold must bite through every gate, not only tampered
+# fixture output: the un-picked consent mode is a head build error, and once
+# a mode is picked the drafted notice stubs and the comment-only ads.txt
+# stub fail check-build — the default state a new publisher hits.
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n' \
+  >"$WORK/scaffold/config/_default/params.toml"
+if "$ROOT/scripts/validate-site.sh" "$WORK/scaffold" \
+    >"$WORK/scaffold-ads-1.out" 2>"$WORK/scaffold-ads-1.err"; then
+  fail 'an un-picked consent mode fails the scaffold build'
+elif grep -q 'consent must be picked explicitly' \
+    "$WORK/scaffold-ads-1.out" "$WORK/scaffold-ads-1.err"; then
+  pass 'an un-picked consent mode fails the scaffold build'
+else
+  fail 'the consent-pick failure names the two values'
+  cat "$WORK/scaffold-ads-1.out" "$WORK/scaffold-ads-1.err" >&2
+fi
+
+cat >"$WORK/scaffold/static/_headers" <<'EOF'
+Content-Security-Policy: default-src 'self'; script-src 'self' https://pagead2.googlesyndication.com; object-src 'none'
+EOF
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  auto = true\n  consent = "none"\n' \
+  >"$WORK/scaffold/config/_default/params.toml"
+if "$ROOT/scripts/validate-site.sh" "$WORK/scaffold" \
+    >"$WORK/scaffold-ads-2.out" 2>"$WORK/scaffold-ads-2.err"; then
+  fail 'a scaffold with drafted notices and a stub ads.txt fails the gate'
+elif grep -q 'publishes no notice there' "$WORK/scaffold-ads-2.out" \
+   && grep -q 'not authorized by any ads.txt record' "$WORK/scaffold-ads-2.out"; then
+  pass 'a scaffold with drafted notices and a stub ads.txt fails the gate'
+else
+  fail 'the scaffold enable-ads failure names both stubs'
+  cat "$WORK/scaffold-ads-2.out" "$WORK/scaffold-ads-2.err" >&2
+fi
+rm "$WORK/scaffold/config/_default/params.toml"
+
+# R11 field checks behind the loader path too: a record naming the right
+# publisher under a foreign seller domain is not an Google authorization;
+# and a garbage certification-authority field, when present, is malformed.
+cp "$WORK/public/ads.txt" "$WORK/ads-original.txt"
+printf 'not-google.example, pub-0000000000000000, DIRECT, wrong-authority\n' \
+  >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-domain.out" 2>&1; then
+  fail 'a foreign seller domain does not authorize Google'
+elif grep -q 'is only authorized from google.com' "$WORK/ads-domain.out"; then
+  pass 'a foreign seller domain does not authorize Google'
+else
+  fail 'the seller domain failure names the record'
+  cat "$WORK/ads-domain.out" >&2
+fi
+printf 'google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0 extra\n' \
+  >"$WORK/public/ads.txt"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/ads-authority.out" 2>&1; then
+  fail 'a malformed ads.txt authority field fails the gate'
+elif grep -q 'is not a certification authority ID' "$WORK/ads-authority.out"; then
+  pass 'a malformed ads.txt authority field fails the gate'
+else
+  fail 'the authority failure names the malformed field'
+  cat "$WORK/ads-authority.out" >&2
+fi
+cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
+
+# The client regex tightened to the official shape: 16 digits after
+# ca-pub-, and AdSense for Platforms' ca-host-pub-… never in data-ad-client.
+printf '[ads]\n  client = "ca-host-pub-0000000000000000"\n  consent = "none"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a ca-host-pub-… client fails the shortcode'
+elif grep -q 'belongs in data-ad-host' "$WORK/scratch-build.stderr"; then
+  pass 'a ca-host-pub-… client fails the shortcode'
+else
+  fail 'the host-client failure names data-ad-host'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+printf '[ads]\n  client = "ca-pub-00000000000000000"\n  consent = "none"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a 17-digit publisher ID fails the shortcode'
+elif grep -q 'does not look like a ca-pub-… publisher ID' \
+    "$WORK/scratch-build.stderr"; then
+  pass 'a 17-digit publisher ID fails the shortcode'
+else
+  fail 'the publisher-shape failure names the official format'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
+# gated consent with a renamed-away "basic" value gets its own rename hint.
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "basic"\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'the retired "basic" value names its successor'
+elif grep -q 'rename it to "gated"' "$WORK/scratch-build.stderr"; then
+  pass 'the retired "basic" value names its successor'
+else
+  fail 'the basic-value failure names the rename'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'validate-theme: %s failure(s)\n' "$FAILURES" >&2

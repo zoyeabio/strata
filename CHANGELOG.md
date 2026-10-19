@@ -19,16 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and check-build's R11 and R17 now key off the loader URL too — its query
   string names the publisher, so an unrecorded client fails ads.txt even
   with no unit in any page, and the notice pages hold for auto-only sites.
-  One combination fails the build on purpose: `auto` with `consent = "basic"`
+  One combination fails the build on purpose: `auto` with `consent = "gated"`
   and no placed unit has no carrier for the `js/ads.js` dispatcher, which
   only the shortcode ships — silent ads-shaped absence, so head.html names
   the fix instead.
-- **`[ads] consent = "basic"`: the loader waits for the site's consent
+- **`[ads] consent = "gated"`: the loader waits for the site's consent
   answer.** Until now the AdSense loader shipped from `<head>` on every unit
   page regardless of any consent banner — the docs said "ask first" while
-  the code never did. With `consent = "basic"` the head stays clean and the
+  the code never did. With `consent = "gated"` the head stays clean and the
   fingerprinted `js/ads.js` copies carry the site's posture
-  (`data-ads-consent="basic"`): units sit hidden under
+  (`data-ads-consent="gated"`): units sit hidden under
   `data-ads-pending`, nothing loads until
   `localStorage["strata-cookie-consent"]` is `"granted"` or the site's
   banner dispatches `CustomEvent("strata:cookie-consent")` with that
@@ -36,12 +36,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in DOM order. The contract is documented in `docs/configuration.md` and
   demonstrated end-to-end by the fixture, whose banner is now a real
   controller (`assets/js/consent.js` through `extend-head.html`: ask,
-  persist, dispatch, reopen), with `[ads] consent = "basic"` in its params.
+  persist, dispatch, reopen), with `[ads] consent = "gated"` in its params.
   `"none"` (default) keeps the old `<head>`-loader shape untouched — that is
   the mode for sites behind a Google-certified CMP, the only self-service
   route to personalized advertising for EEA/UK/Switzerland traffic. `smoke`
   and `validate-theme` pin every side of the new contract, and head.html
   rejects unlisted `consent` values at build time.
+
+### Changed
+
+- **`[ads] consent` lost its default and its `"basic"` value.** The name
+  `basic` read like Google's Basic Consent Mode, which this gate is not —
+  it ships no TCF string and no certified CMP — so it is now `"gated"`,
+  and the renamed-away value gets a dedicated build error pointing at the
+  fix. With advertising enabled the site must also pick a mode explicitly:
+  there is no `consent` default, so a site that forgets the line fails the
+  build instead of silently requesting Google on first paint.
+
+- **Denied consent answers take ad units out of the flow.** A `denied`
+  in gated mode now collapses the reserved units (`display: none` via
+  `js/ads.js`) instead of leaving `visibility: hidden` blanks where ads
+  would have been. Pending units keep visibility so a later grant has a
+  sized container.
+
+### Fixed
+
+- **ads.txt now validates the seller domain and the authority field.**
+  Field 1 was unchecked, so `not-google.example, pub-…, DIRECT` passed the
+  gate — for Google seller accounts the seller domain is always
+  `google.com` (Ads.txt FAQs, answer/9785052) — and a wrong optional
+  fourth field is now malformed instead of silently succeeding.
+- **Fresh scaffolds no longer slip past the legal-notice gate.** The stub
+  pages hid `TODO` inside HTML comments while the visible body said
+  "Fill this in before publishing.", a phrasing the checker never
+  matched, so ads could go live against a legal page that said nothing.
+  Stubs now ship `draft: true` (unpublished → R17 reports the page
+  missing), the visible scaffolding phrase joins the placeholder regex
+  as a backstop, and validate-theme enables ads on an untouched new site
+  and pins both stubs failing.
+- **The ads shortcode contracts on the official publisher shape.**
+  `ca-host-pub-…` (AdSense for Platforms' host parameter) is no longer
+  valid in `data-ad-client`, and publisher IDs must be exactly
+  `ca-pub-` + 16 digits (answer/9785052) — anything else fails the build
+  with a message that says which goes where.
 
 ### Fixed
 

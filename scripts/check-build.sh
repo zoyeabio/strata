@@ -543,6 +543,11 @@ else:
 #    the head loader's own URL — [ads] auto ships the loader across pages
 #    where no unit was ever placed, and its query string names the same
 #    publisher, so it authorizes under the same record check.
+#    Field 1 is checked too: for Google seller accounts the seller domain
+#    is always google.com (Ads.txt FAQs, answer/9785052), so a record where
+#    only the ID matches is not an authorization. Field 4 is optional in the
+#    ads.txt spec; when present it must still look like a certification
+#    authority ID, not prose or another record's debris.
 def ads_txt_records(body):
     for lineno, line in enumerate(body.splitlines(), 1):
         stripped = line.strip()
@@ -569,13 +574,27 @@ if ad_clients:
         records = list(ads_txt_records(ads_txt.read_text(errors='ignore')))
         malformed = [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3+'
                      for lineno, fields in records if len(fields) < 3]
+        malformed += [f'  ads.txt line {lineno}: authority field {fields[3].split("#")[0].strip()!r} '
+                      'is not a certification authority ID'
+                      for lineno, fields in records if len(fields) >= 4
+                      and not re.match(r'^[A-Za-z0-9]+$', fields[3].split('#')[0].strip())]
         missing = []
         for c in sorted(ad_clients):
             pub_id = 'pub-' + re.sub(r'\D', '', c)
-            if not any(fields[1].lower() == pub_id and
-                       fields[2].upper() in ('DIRECT', 'RESELLER')
-                       for _, fields in records if len(fields) >= 3):
-                missing.append(f'  {c} not authorized by any ads.txt record')
+            hits = [(lineno, fields) for lineno, fields in records
+                    if len(fields) >= 3 and fields[1].lower() == pub_id]
+            authorized = any(fields[0].lower() == 'google.com' and
+                             fields[2].upper() in ('DIRECT', 'RESELLER')
+                             for _, fields in hits)
+            if not authorized:
+                wrong = next(((lineno, fields[0]) for lineno, fields in hits
+                              if fields[0].lower() != 'google.com'), None)
+                if wrong:
+                    lineno, domain = wrong
+                    missing.append(f'  ads.txt line {lineno}: field 1 is {domain!r}, but a '
+                                   'Google seller account is only authorized from google.com')
+                else:
+                    missing.append(f'  {c} not authorized by any ads.txt record')
         if malformed or missing:
             bad('ads.txt names every advertised publisher',
                 '\n'.join(malformed + missing))
@@ -596,7 +615,7 @@ legal_bad = []
 if ad_clients:
     strip_comments = re.compile(r'<!--.*?-->', re.S)
     visible_placeholder = re.compile(
-        r'\[(?:tbd|todo)\b[^\]]{0,400}|\b(?:todo|fixme)\b', re.I)
+        r'\[(?:tbd|todo)\b[^\]]{0,400}|\b(?:todo|fixme)\b|\bfill this in\b', re.I)
     for slug in ('privacy-policy', 'cookies'):
         page = pub / slug / 'index.html'
         if not page.is_file():

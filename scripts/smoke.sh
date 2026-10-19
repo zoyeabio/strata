@@ -1257,15 +1257,15 @@ assert 'section-a/shortcodes/index.html' 'aria-describedby=' 'message field name
 assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes validity'
 
 # 41. ads ship complete and consent has a home: the fixture runs
-#     [ads] consent = "basic", so the unit carries client and slot, the
+#     [ads] consent = "gated", so the unit carries client and slot, the
 #     loader never ships in page markup, the site-owned consent controller
 #     renders through the baseof hook as a fingerprinted script, and the
 #     push copy carries the site's consent posture
 assert 'section-a/shortcodes/index.html' 'data-ad-client="ca-pub-0000000000000000"' 'ads unit carries the client'
 assert 'section-a/shortcodes/index.html' 'data-ad-slot="1234567890"' 'ads unit carries the slot'
 assert_not 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' \
-  'basic consent keeps the loader out of the page markup'
-assert 'section-a/shortcodes/index.html' 'data-ads-consent="basic"' \
+  'gated consent keeps the loader out of the page markup'
+assert 'section-a/shortcodes/index.html' 'data-ads-consent="gated"' \
   'the ad script copy carries the consent posture'
 assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
 assert 'section-a/shortcodes/index.html' 'src="?/js/ads\.[0-9a-f]+\.js"? integrity="sha512-' \

@@ -42,8 +42,11 @@
   display: block;
 }
 
-/* [ads] consent "basic": a unit the consent answer has not granted yet stays
-   invisible so an empty reserved slot never implies an ad shipped. */
+/* [ads] consent "gated": a unit the consent answer has not granted yet stays
+   invisible — visibility, not display:none, because the ad iframe needs a
+   sized container when the answer flips to granted. Denied answers go all
+   the way out of the flow by js/ads.js itself (style.display = none), so a
+   reader who declined keeps no blank slabs. */
 .adsbygoogle[data-ads-pending] {
   visibility: hidden;
 }
