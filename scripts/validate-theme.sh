@@ -138,6 +138,27 @@ else
   cat "$WORK/files-cap.out" >&2
 fi
 
+# R11 parses ads.txt records instead of substring-matching the file, so a
+# commented-out stub line ("# google.com, pub-…", exactly what new-site.sh
+# scaffolds) cannot pass as an authorization. Tamper the real fixture output
+# and the gate must name the missing record.
+if sed 's/^google\.com/# google.com/' "$WORK/public/ads.txt" >"$WORK/ads-commented.txt"; then
+  cp "$WORK/public/ads.txt" "$WORK/ads-original.txt"
+  cp "$WORK/ads-commented.txt" "$WORK/public/ads.txt"
+  if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+      >"$WORK/ads-stub.out" 2>&1; then
+    fail 'a commented-out ads.txt record does not authorize the publisher'
+  elif grep -q 'not authorized by any ads.txt record' "$WORK/ads-stub.out"; then
+    pass 'a commented-out ads.txt record does not authorize the publisher'
+  else
+    fail 'the ads.txt failure names the missing record'
+    cat "$WORK/ads-stub.out" >&2
+  fi
+  cp "$WORK/ads-original.txt" "$WORK/public/ads.txt"
+else
+  fail 'the fixture public output carries ads.txt to tamper'
+fi
+
 # every share URL template must consume both printf arguments — the permalink
 # and the title. Hugo's printf does not error on a missing verb, it appends
 # %!N(EXTRA string=...) to the URL, so a site author who writes ?url=%s

@@ -524,7 +524,20 @@ else:
     ok('structural tags balance')
 
 # R11 ad units ship with authorization: any data-ad-client in the markup
-#    requires static/ads.txt in the output naming the same publisher ID
+#    requires static/ads.txt in the output naming the same publisher ID. The
+#    file is parsed as ads.txt records, not substring-searched: a scaffold's
+#    commented-out stub line ("# google.com, pub-…") is a demo to fill in, not
+#    an authorization, and a digit string inside some other record must not
+#    count either. A record is fields split on commas; field 2 must be the
+#    bare `pub-<digits>` ID ("ca-pub-…" is the markup spelling, not the
+#    ads.txt one) and field 3 must be DIRECT or RESELLER — both authorize.
+def ads_txt_records(body):
+    for lineno, line in enumerate(body.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#'):
+            continue
+        yield lineno, [f.strip() for f in stripped.split(',')]
+
 ad_clients = set()
 for t in htmls:
     text = t.read_text(errors='ignore')
@@ -537,15 +550,19 @@ if ad_clients:
     if not ads_txt.is_file():
         bad('ads.txt names every advertised publisher', '  ads.txt missing')
     else:
-        body = ads_txt.read_text(errors='ignore')
+        records = list(ads_txt_records(ads_txt.read_text(errors='ignore')))
+        malformed = [f'  ads.txt line {lineno}: {len(fields)} field(s) where ads.txt wants 3+'
+                     for lineno, fields in records if len(fields) < 3]
         missing = []
         for c in sorted(ad_clients):
-            digits = re.sub(r'\D', '', c)
-            if not digits or not re.search(rf'(?<!\d){digits}(?!\d)', body):
-                missing.append(c)
-        if missing:
+            pub_id = 'pub-' + re.sub(r'\D', '', c)
+            if not any(fields[1].lower() == pub_id and
+                       fields[2].upper() in ('DIRECT', 'RESELLER')
+                       for _, fields in records if len(fields) >= 3):
+                missing.append(f'  {c} not authorized by any ads.txt record')
+        if malformed or missing:
             bad('ads.txt names every advertised publisher',
-                '\n'.join(f'  {c} not in ads.txt' for c in missing))
+                '\n'.join(malformed + missing))
         else:
             ok('ads.txt names every advertised publisher')
 else:

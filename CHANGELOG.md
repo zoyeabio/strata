@@ -29,6 +29,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of the pages a site ships empty by accident. The footer menu gains a
   Cookies entry next to Privacy and Terms.
 
+### Fixed
+
+- **check-build R11 reads ads.txt as records, not as a substring.** The old
+  rule searched the whole file for the publisher ID's digit string, so the
+  scaffold's commented-out stub line — `# google.com, pub-…` — passed as an
+  authorization while the only real record sat inside a comment. The rule now
+  parses records: blank lines and `#` comments are ignored, field 2 must be
+  the bare `pub-<digits>` ID, and field 3 must be DIRECT or RESELLER, which
+  are the two record types that authorize.
+
 ## [0.1.1] - 2026-10-17
 
 ### Added
