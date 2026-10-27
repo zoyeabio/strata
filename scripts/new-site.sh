@@ -30,7 +30,7 @@ DOMAIN=""
 OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
-MODULE_VERSION="v0.1.1"
+MODULE_VERSION="v0.2.0"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -98,7 +98,7 @@ enableEmoji = false
 
 [module.hugoVersion]
   extended = true
-  min = "0.161.0"
+  min = "0.167.0"
 
 [pagination]
   pagerSize = 12
@@ -453,7 +453,7 @@ EOF
 # a sibling checkout: validate-site.sh takes this repository as its argument
 # and builds it against that checkout, which also overrides the local
 # `replace` path in go.mod.
-cat > "$OUT/.github/workflows/validate.yml" <<'EOF'
+cat <<'EOF' | sed "s/__MODULE_VERSION__/${MODULE_VERSION}/g" > "$OUT/.github/workflows/validate.yml"
 name: Validate
 
 on:
@@ -476,7 +476,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: zoyeabio/strata
-          ref: v0.1.1
+          ref: __MODULE_VERSION__
           path: ../strata
 
       - uses: actions/setup-node@v4

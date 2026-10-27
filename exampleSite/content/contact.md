@@ -4,6 +4,8 @@ description: "Get in touch with Strata Studio. A form, an address, and a map."
 keywords: ["contact", "hello", "hello@strata.example"]
 featureimage: "images/hero-contact.png"
 featureimagealt: "A soft light over a dark ground"
+ads: false
+showbreadcrumbs: false
 ---
 
 We take on a small number of sites a year. Write a paragraph about what

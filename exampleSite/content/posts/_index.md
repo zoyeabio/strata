@@ -5,6 +5,7 @@ keywords: ["posts", "writing", "process"]
 featureimage: "images/hero-features.png"
 featureimagealt: "A wide banner over a dark field"
 weight: 2
+cardview: true
 ---
 
 Notes on building small sites. Written in the order we worked them out,

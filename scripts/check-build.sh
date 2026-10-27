@@ -464,6 +464,11 @@ for t in htmls:
             v = value.strip()
             if not v or v.lower().startswith('javascript:'):
                 link_bad.append(f'{rel}: {attr}={v!r} on {tag[:60]}')
+            elif attr == 'href' and tag.lower().startswith('<a'):
+                if v.startswith('/') and not v.startswith('//'):
+                    lp = local_path(v)
+                    if lp and not exists(lp):
+                        link_bad.append(f'{rel}: dead internal link {v!r}')
 for p in files:
     if p.name == '.DS_Store':
         link_bad.append(f'{p.relative_to(pub)}: .DS_Store in output')

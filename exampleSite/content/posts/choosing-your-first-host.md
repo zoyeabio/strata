@@ -8,6 +8,7 @@ weight: 2
 keywords: ["hosting", "static sites", "static hosting"]
 featureimage: "images/features-gates.png"
 featureimagealt: "A pipeline with a clear pass and a clear stop"
+showhero: false
 ---
 
 A static site has one real requirement from its host: a URL that does not

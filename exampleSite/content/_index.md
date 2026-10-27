@@ -32,7 +32,7 @@ Start with the reference pages:
 - [Features](/features/) — the positions, each with the page that proves it.
 - [Shortcodes](/shortcodes/) — every shortcode, with the exact syntax.
 - [Gallery](/gallery/) — the image pipeline: ladders, crops, contain.
-- [Docs](/docs/installation.md) — install it on your own site.
+- [Docs](/docs/installation/) — install it on your own site.
 
 ## Recent writing
 

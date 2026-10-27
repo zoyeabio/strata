@@ -181,7 +181,7 @@ module example.com/ads-scratch
 
 go 1.22
 
-require github.com/zoyeabio/strata v0.1.1
+require github.com/zoyeabio/strata v0.2.0
 
 replace github.com/zoyeabio/strata => $ROOT
 EOF
@@ -192,7 +192,7 @@ cat >"$ADS_SCRATCH/config/_default/hugo.toml" <<'TOML'
     path = "github.com/zoyeabio/strata"
 [module.hugoVersion]
   extended = true
-  min = "0.161.0"
+  min = "0.167.0"
 
 [[module.mounts]]
   source = 'assets'

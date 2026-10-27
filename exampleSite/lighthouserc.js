@@ -29,7 +29,7 @@ module.exports = {
     collect: {
       url: [`http://127.0.0.1:${port}/`],
       startServerCommand: 'hugo server --port ' + port + ' --bind 127.0.0.1',
-      startServerReadyPattern: 'Waiting for editing command',
+      startServerReadyPattern: 'Web Server is available at',
       numberOfRuns: 1,
       settings: {
         preset: 'desktop',

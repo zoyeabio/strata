@@ -7,7 +7,7 @@ weight: 10
 
 ## Requirements
 
-- Hugo **0.161.0 or later**, Extended edition (tested on 0.167.0).
+- Hugo **0.167.0 or later**, Extended edition.
 - Node.js 22 or later, with npm. Hugo runs the Tailwind CSS v4 CLI through
   node; the standalone binary Hugo used to call directly was dropped in
   0.161.0. That invocation passes node `--permission`, which Node 20 does not

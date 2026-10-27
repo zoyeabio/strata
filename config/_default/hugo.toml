@@ -2,10 +2,10 @@
 # module: theme.toml's min_version is read only by galleries, while this is
 # read by the module loader. Note the strength — Hugo answers an older
 # version with a "not compatible" WARN, not a refused build, so the floor
-# surfaces the incompatibility rather than enforcing it. Hugo 0.161.0 is
-# the floor because that is where css.TailwindCSS starts running the
-# Tailwind CLI through the npm binary.
+# surfaces the incompatibility rather than enforcing it. Hugo 0.167.0 is
+# the floor because modern template syntax and reliable css.TailwindCSS
+# compilation require it.
 
 [module.hugoVersion]
   extended = true
-  min = "0.161.0"
+  min = "0.167.0"

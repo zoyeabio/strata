@@ -3,6 +3,7 @@ title: "What we shipped in 2026"
 description: "A short list of what changed on this site this year, and why each of it matters more than it looks."
 date: 2026-07-30
 lastmod: 2026-09-14
+showdateupdated: true
 tags: ["design", "performance"]
 keywords: ["2026", "changes", "shipping"]
 featureimage: "images/diagram-nodes.png"

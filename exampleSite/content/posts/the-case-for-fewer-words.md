@@ -4,6 +4,11 @@ description: "The reader has already read a lot today. The page has no claim on 
 date: 2026-06-18
 tags: ["writing", "process"]
 keywords: ["writing", "editing", "copy"]
+showdate: true
+showpagination: false
+showrelatedcontent: false
+images: ["images/features-seo.png"]
+reviewedby: "Dr. Eleanor Vance"
 ---
 
 The reader has already read a lot today. The page has no claim on more of
