@@ -408,6 +408,29 @@ else
   cat "$WORK/scratch-build.stderr" >&2
 fi
 
+# A page-level opt-out is absolute within the theme: it suppresses Auto ads,
+# configured units and even an explicit shortcode accidentally left in the
+# article. The rest of an auto-enabled site continues to carry the loader.
+cat >"$ADS_SCRATCH/content/ad-free.md" <<'MD'
+---
+title: "Ad-free page"
+ads: false
+---
+
+{{< ads slot="1234567890" >}}
+MD
+if scratch_hugo \
+   && grep -qE 'adsbygoogle\.js\?client=ca-pub-0000000000000000' \
+     "$ADS_SCRATCH-public/index.html" \
+   && ! grep -qE 'adsbygoogle|data-ad-client|data-ad-slot|data-ads-consent' \
+     "$ADS_SCRATCH-public/ad-free/index.html"; then
+  pass 'ads false suppresses Auto ads and explicit units on that page'
+else
+  fail 'ads false suppresses Auto ads and explicit units on that page'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/ad-free.md"
+
 # auto in gated consent mode with no shortcode anywhere: the fingerprinted
 # dispatcher js/ads.js only rolls inside shortcode copies, so the wait for
 # the consent answer would ride nothing and the site would show no ads
@@ -658,6 +681,8 @@ lastmod: 2025-01-01
 params:
   typo: true
 reviewerurl: "javascript:alert(1)"
+reviewerjobtitle: ["Researcher"]
+revieweraffiliation: {name: "Institute"}
 reviewersameas: "not-a-list"
 ---
 MD
@@ -668,6 +693,8 @@ else
     && grep -q 'lastmod is not before date' "$WORK/content.out" \
     && grep -q 'reviewer details need reviewer' "$WORK/content.out" \
     && grep -q 'reviewerurl uses a web or mail URL' "$WORK/content.out" \
+    && grep -q 'reviewerjobtitle is non-empty text' "$WORK/content.out" \
+    && grep -q 'revieweraffiliation is non-empty text' "$WORK/content.out" \
     && grep -q 'reviewersameas is a list' "$WORK/content.out"; then
     pass 'the content lint reports malformed dates, keys and reviewer metadata'
   else

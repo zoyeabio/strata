@@ -110,9 +110,10 @@ showScrollToTop = false
 client = ""
 # "" (default): off — the loader ships only on pages that use the ads
 # shortcode, so it never loads anywhere it was not placed. true: site-wide
-# loader with no shortcode placed anywhere; Google's Auto ads then choose
-# pages and placement (anchor, interstitial, in-page) from the AdSense
-# console. Manual units and auto placement are independent and can coexist.
+# loader with no shortcode placed anywhere (except pages with `ads: false`);
+# Google's Auto ads then choose pages and placement (anchor, interstitial,
+# in-page) from the AdSense console. Manual units and auto placement are
+# independent and can coexist.
 auto = false
 # The head loader fails the build when static/_headers would block
 # pagead2.googlesyndication.com. Set this only when the host applies response
@@ -122,7 +123,8 @@ skipCspCheck = false
 [ads.slots]
 # Config-driven ad slots for article pages. Disabled by default ("").
 # Supply numeric slot IDs from your AdSense dashboard to activate.
-# Per-page front matter `ads: false` suppresses all slots on that page.
+# Per-page front matter `ads: false` suppresses every theme-controlled ad on
+# that page: configured slots, explicit ads shortcodes and the Auto ads loader.
 belowHero = ""
 belowArticle = ""
 # Minimum word count required to display slots. This is a site-defined density

@@ -118,7 +118,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
-| `ads.auto` | `false` | `true`: loader ships site-wide with no shortcode placed anywhere, and Google's Auto ads choose the pages and the placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
+| `ads.auto` | `false` | `true`: loader ships site-wide except on pages with `ads: false`, and Google's Auto ads choose the pages and placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
 | `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted` — a withdrawal that lands after ads had loaded reloads the current page once, so nothing already running survives the visit. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too. Gated mode also expects the site's `partials/cookie-consent.html` hook (or an explicit `ads.externalConsentController = true`), because a gate with nothing to dispatch the answer keeps every unit hidden forever |
 | `ads.externalConsentController` | `false` | Gated-mode escape hatch: your consent controller ships outside the theme's hook (a certified CMP that dispatches `strata:cookie-consent` itself) and the `cookie-consent.html` existence check does not apply |
 | `ads.slots.belowHero` | `""` | Numeric ad slot ID placed between header and content; per-page `ads: false` suppresses |
@@ -254,7 +254,7 @@ warning instead of being rendered as a dead link.
 | `reviewerJobTitle` | Professional academic or research title for reviewer in JSON-LD |
 | `reviewerAffiliation` | Institutional affiliation for reviewer (emitted as `worksFor` in JSON-LD) |
 | `reviewerSameAs` | List of authoritative external profile URLs (ORCID, Google Scholar, Wikipedia) for reviewer |
-| `ads` | `false` suppresses all auto-injected ad slots on this article |
+| `ads` | `false` suppresses every theme-controlled ad on this page: configured slots, explicit `ads` shortcodes and the Auto ads loader |
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |

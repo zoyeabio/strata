@@ -12,6 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 44px;
   padding: 12px 16px;
   cursor: pointer;
   user-select: none;
@@ -70,6 +71,11 @@
 }
 
 .toc__content nav#TableOfContents a:hover {
+  color: var(--site-link);
+  text-decoration: underline;
+}
+
+.toc__content nav#TableOfContents a:focus-visible {
   color: var(--site-link);
   text-decoration: underline;
 }

@@ -1308,8 +1308,8 @@ assert 'section-a/flat/index.html' '"reviewedBy":\{"@id":"https://example\.org/s
   'WebPage schema carries structured reviewedBy Person with id, jobTitle, worksFor, sameAs and url'
 assert 'section-a/flat/index.html' '<aside class="toc" aria-label="Table of contents">' \
   'toc renders semantic aside element'
-assert 'section-a/flat/index.html' '<details class="toc__details" open>' \
-  'toc details element is open'
+assert 'section-a/flat/index.html' '<details class="toc__details">' \
+  'toc details element is collapsible and compact by default'
 assert 'section-a/flat/index.html' '<nav id="TableOfContents">' \
   'toc generates nav with TableOfContents id'
 assert 'section-a/flat/index.html' '<li><a href="#first-heading">First Heading</a></li>' \

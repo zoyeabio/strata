@@ -285,11 +285,14 @@ for path in pages():
             "%s: neither the page nor site.Params.author.name is set, so no "
             "byline renders and the url goes nowhere" % where)
 
-    reviewer = (page_param(fm, params, "reviewer")
-                or page_param(fm, params, "reviewedby"))
-    if isinstance(reviewer, (list, dict)):
-        bad("reviewer is a single string",
-            "%s: the visible byline and WebPage.reviewedBy need one name" % where)
+    reviewer_value = page_param(fm, params, "reviewer")
+    reviewed_by_value = page_param(fm, params, "reviewedby")
+    for key, value in (("reviewer", reviewer_value),
+                       ("reviewedby", reviewed_by_value)):
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            bad("%s is a single string" % key,
+                "%s: the visible byline and WebPage.reviewedBy need one name" % where)
+    reviewer = reviewer_value or reviewed_by_value
     reviewer_fields = {
         key: page_param(fm, params, key)
         for key in ("reviewerurl", "reviewerjobtitle", "revieweraffiliation",
@@ -298,10 +301,20 @@ for path in pages():
     if any(reviewer_fields.values()) and not reviewer:
         bad("reviewer details need reviewer",
             "%s: reviewer metadata is set but no reviewer name can be rendered" % where)
+    for key in ("reviewerjobtitle", "revieweraffiliation"):
+        value = reviewer_fields[key]
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            bad("%s is non-empty text" % key,
+                "%s: the reviewer schema expects a single text value" % where)
     reviewer_url = reviewer_fields["reviewerurl"]
-    if reviewer_url:
-        parsed = urllib.parse.urlparse(str(reviewer_url))
-        if parsed.scheme and parsed.scheme.lower() not in {"http", "https", "mailto"}:
+    if reviewer_url is not None:
+        if not isinstance(reviewer_url, str) or not reviewer_url.strip():
+            bad("reviewerurl is a non-empty URL string",
+                "%s: reviewerurl must be one text value" % where)
+            parsed = None
+        else:
+            parsed = urllib.parse.urlparse(reviewer_url)
+        if parsed and parsed.scheme and parsed.scheme.lower() not in {"http", "https", "mailto"}:
             bad("reviewerurl uses a web or mail URL",
                 "%s: unsupported reviewerurl scheme %r" % (where, parsed.scheme))
     same_as = reviewer_fields["reviewersameas"]
@@ -311,8 +324,12 @@ for path in pages():
                 "%s: write a YAML list of absolute profile URLs" % where)
         else:
             for value in same_as:
-                parsed = urllib.parse.urlparse(str(value))
-                if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+                if not isinstance(value, str) or not value.strip():
+                    parsed = None
+                else:
+                    parsed = urllib.parse.urlparse(value)
+                if (not parsed or parsed.scheme.lower() not in {"http", "https"}
+                        or not parsed.netloc):
                     bad("reviewersameas contains web URLs",
                         "%s: %r is not an absolute http(s) profile URL" % (where, value))
 

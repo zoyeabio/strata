@@ -144,6 +144,7 @@
        with silently no ads. Fail the build where the reason is visible. */}}
   {{- $hasSlot := false }}
   {{- $isArticle := partial "data/is-article.html" . }}
+  {{- $pageAdsAllowed := ne .Params.ads false }}
   {{- $configuredSlot := or site.Params.ads.slots.belowHero site.Params.ads.slots.belowArticle }}
   {{- if and $configuredSlot (not site.Params.ads.client) }}
   {{- errorf "ads: configured [ads.slots] need site.Params.ads.client; set the publisher ID or clear both slot IDs (%s)" .Path }}
@@ -155,7 +156,7 @@
       {{- end }}
     {{- end }}
   {{- end }}
-  {{- if and $isArticle site.Params.ads.slots (ne .Params.ads false) }}
+  {{- if and $isArticle site.Params.ads.slots $pageAdsAllowed }}
     {{- $minWords := site.Params.ads.slots.minWords | default 0 }}
     {{- if ge .WordCount $minWords }}
       {{- if or site.Params.ads.slots.belowHero site.Params.ads.slots.belowArticle }}
@@ -163,7 +164,7 @@
       {{- end }}
     {{- end }}
   {{- end }}
-  {{- if and site.Params.ads.client site.Params.ads.auto
+  {{- if and $pageAdsAllowed site.Params.ads.client site.Params.ads.auto
         (eq (site.Params.ads.consent | default "none") "gated")
         (not (or (.HasShortcode "ads") $hasSlot)) }}
   {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
@@ -171,7 +172,7 @@
   {{- if and site.Params.ads.auto (not site.Params.ads.client) }}
   {{- errorf "ads: [ads] auto = true needs site.Params.ads.client — the site-wide loader URL gets the publisher ID from nowhere else, and without it the site would silently ship with ad intent enabled and nothing to load. Set client, or drop auto (%s)" .Path }}
   {{- end }}
-  {{- if and (or (.HasShortcode "ads") site.Params.ads.auto $hasSlot) site.Params.ads.client }}
+  {{- if and $pageAdsAllowed (or (.HasShortcode "ads") site.Params.ads.auto $hasSlot) site.Params.ads.client }}
   {{- if not (findRE `^ca-pub-\d{16}$` site.Params.ads.client) }}
   {{- errorf "ads: site.Params.ads.client %q is not a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); every mode sends it out pretty much as written, so a bad ID means a dead loader URL shipped as fixed (%s)" site.Params.ads.client .Path }}
   {{- end }}

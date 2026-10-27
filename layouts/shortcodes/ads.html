@@ -30,6 +30,7 @@
 
   Called by: content markdown
 */ -}}
+{{- if ne .Page.Params.ads false -}}
 {{- $client := site.Params.ads.client -}}
 {{- $consent := site.Params.ads.consent | default "none" }}
 {{- if eq $client "" -}}
@@ -48,4 +49,5 @@
 {{- with resources.Get "js/ads.js" }}
 {{- $js := . | fingerprint "sha512" }}
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" data-ads-consent="{{ $consent }}"></script>
+{{- end }}
 {{- end }}
