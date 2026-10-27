@@ -1,0 +1,17 @@
+{{- /*
+  Build the one paginator a collection page uses. Head metadata and the body
+  must call this same partial: Hugo keeps the first paginator created for a
+  page, so duplicating the sort decision in two places can make metadata and
+  the visible collection disagree.
+
+  Input dict
+    page   (Page, required)
+    params (map, required) — list or term defaults
+*/ -}}
+{{- $page := .page -}}
+{{- $params := .params -}}
+{{- $sorted := $page.Pages -}}
+{{- $order := $params.orderByWeight -}}
+{{- if isset $page.Params "orderbyweight" }}{{ $order = $page.Params.orderbyweight }}{{ end -}}
+{{- if $order }}{{ $sorted = $page.Pages.ByWeight }}{{ end -}}
+{{- return ($page.Paginate $sorted) -}}

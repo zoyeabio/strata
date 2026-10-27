@@ -10,14 +10,9 @@
 */ -}}
 {{- $page := .page }}
 {{- $params := .params }}
-{{- $sorted := $page.Pages }}
-{{- $order := $params.orderByWeight }}{{ if isset $page.Params "orderbyweight" }}{{ $order = $page.Params.orderbyweight }}{{ end }}
-{{- if $order }}
-{{- $sorted = $page.Pages.ByWeight }}
-{{- end }}
 {{- $cardView := $params.cardView }}{{ if isset $page.Params "cardview" }}{{ $cardView = $page.Params.cardview }}{{ end }}
 {{- $showSummary := $params.showSummary }}{{ if isset $page.Params "showsummary" }}{{ $showSummary = $page.Params.showsummary }}{{ end }}
-{{- $pager := $page.Paginate $sorted }}
+{{- $pager := partial "data/paginator.html" (dict "page" $page "params" $params) }}
 {{ partial "page/page-collection.html" (dict
     "pages" $pager.Pages
     "cardView" $cardView

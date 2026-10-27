@@ -4,6 +4,13 @@ description: "The reading column is the whole site. Everything else is furniture
 date: 2026-04-09
 tags: ["typography", "design"]
 keywords: ["typography", "type", "reading"]
+author: "Marcus Vance"
+showauthor: true
+reviewer: "Dr. Eleanor Vance"
+reviewerurl: "https://example.com/eleanor-vance"
+reviewerjobtitle: "Senior Research Fellow"
+revieweraffiliation: "Stanford Medicine"
+reviewersameas: ["https://orcid.org/0000-0002-1825-0097"]
 featureimage: "images/features-seo.png"
 featureimagealt: "A typeset page with generous margins"
 ---

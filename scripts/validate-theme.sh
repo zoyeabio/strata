@@ -321,6 +321,49 @@ else
 fi
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
 
+# Config-driven article slots are declarations too: a typo or a missing
+# publisher must fail even when every current article is below minWords and no
+# slot happens to render in this build.
+printf '[ads]\n  consent = "none"\n  [ads.slots]\n    belowHero = "1234567890"\n    minWords = 999999\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a configured article slot without a client fails the build'
+elif grep -q 'configured \[ads.slots\] need site.Params.ads.client' "$WORK/scratch-build.stderr"; then
+  pass 'a configured article slot without a client fails the build'
+else
+  fail 'the configured-slot failure names the missing client'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+printf '[ads]\n  client = "ca-pub-0000000000000000"\n  consent = "none"\n  [ads.slots]\n    belowHero = "not-a-slot"\n    minWords = 999999\n' \
+  >"$ADS_SCRATCH/config/_default/params.toml"
+if scratch_hugo; then
+  fail 'a malformed configured article slot fails the build'
+elif grep -q 'is not a numeric AdSense slot ID' "$WORK/scratch-build.stderr"; then
+  pass 'a malformed configured article slot fails the build'
+else
+  fail 'the configured-slot failure names the malformed value'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
+# Empty FAQ answers create misleading visible and JSON-LD entities, so the
+# shortcode rejects them instead of publishing an empty acceptedAnswer.
+cat >"$ADS_SCRATCH/content/empty-faq.md" <<'MD'
+---
+title: "Empty FAQ"
+---
+{{< interactive/faq "Question without an answer?" >}}{{< /interactive/faq >}}
+MD
+if scratch_hugo; then
+  fail 'an empty FAQ answer fails the build'
+elif grep -q 'faq shortcode: answer content is required' "$WORK/scratch-build.stderr"; then
+  pass 'an empty FAQ answer fails the build'
+else
+  fail 'the empty FAQ failure names the missing answer'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/empty-faq.md"
+
 # [ads] consent "gated": head ships no loader and the push copy carries the
 # posture. In both modes the CSP check stays in force, because the loader
 # leaves at grant time; the _headers scratch file already allows the origin.
@@ -614,16 +657,21 @@ date: 2026-01-05
 lastmod: 2025-01-01
 params:
   typo: true
+reviewerurl: "javascript:alert(1)"
+reviewersameas: "not-a-list"
 ---
 MD
 if "$ROOT/scripts/validate-content.sh" "$WORK/bad-site" >"$WORK/content.out" 2>&1; then
-  fail 'the content lint reports an unknown key and an inverted date'
+  fail 'the content lint reports malformed dates, keys and reviewer metadata'
 else
   if grep -q 'unknown front matter key' "$WORK/content.out" \
-    && grep -q 'lastmod is not before date' "$WORK/content.out"; then
-    pass 'the content lint reports an unknown key and an inverted date'
+    && grep -q 'lastmod is not before date' "$WORK/content.out" \
+    && grep -q 'reviewer details need reviewer' "$WORK/content.out" \
+    && grep -q 'reviewerurl uses a web or mail URL' "$WORK/content.out" \
+    && grep -q 'reviewersameas is a list' "$WORK/content.out"; then
+    pass 'the content lint reports malformed dates, keys and reviewer metadata'
   else
-    fail 'the content lint failure names the bad keys'
+    fail 'the content lint names malformed dates, keys and reviewer metadata'
     cat "$WORK/content.out" >&2
   fi
 fi
@@ -933,6 +981,47 @@ else
 fi
 mv "$WORK/hook-stowed.html" "$ADS_SCRATCH/layouts/partials/cookie-consent.html"
 cp "$WORK/params-original.toml" "$ADS_SCRATCH/config/_default/params.toml"
+
+# The public demo is the pagination fixture: its posts and docs collections
+# both exceed one page. Pin the production metadata so a future refactor cannot
+# make the generic fixture pass while canonicalizing page 2 back to page 1.
+if hugo --source "$ROOT/exampleSite" --environment production --minify \
+    --destination "$WORK/example-public" --quiet \
+  && grep -q '<title>Posts · Page 2 · Strata</title>' \
+       "$WORK/example-public/posts/page/2/index.html" \
+  && grep -q 'rel=canonical href=https://example.com/posts/page/2/' \
+       "$WORK/example-public/posts/page/2/index.html" \
+  && grep -q 'name=robots content="noindex, follow"' \
+       "$WORK/example-public/404.html" \
+  && ! grep -q 'rel=canonical' "$WORK/example-public/404.html"; then
+  pass 'pagination is self-canonical and the 404 is noindex without a canonical'
+else
+  fail 'pagination is self-canonical and the 404 is noindex without a canonical'
+fi
+
+# A translated page must advertise reciprocal language alternates. Build a
+# temporary consuming site so the normal one-language fixture stays compact.
+ML_SITE="$WORK/multilingual-site"
+ML_OUT="$WORK/multilingual-public"
+cp -R "$ROOT/test/fixture" "$ML_SITE"
+printf 'module example.com/strata-multilingual-test\n\ngo 1.22\n\nrequire github.com/zoyeabio/strata v0.0.0\n\nreplace github.com/zoyeabio/strata => %s\n' "$ROOT" \
+  >"$ML_SITE/go.mod"
+printf 'disabled = false\nlocale = "fr"\nlabel = "Français"\nweight = 2\ntitle = "Strata FR"\n\n[params]\nisoCode = "fr"\n' \
+  >"$ML_SITE/config/_default/languages.fr.toml"
+printf '\n[pagination]\n  pagerSize = 1\n' >>"$ML_SITE/config/_default/hugo.toml"
+printf '%s\n' '---' 'title: "Avis"' 'description: "Une page traduite pour vérifier les annotations de langue."' '---' '' 'Contenu traduit.' \
+  >"$ML_SITE/content/notice/index.fr.md"
+if hugo --source "$ML_SITE" --environment production --minify \
+    --destination "$ML_OUT" --quiet \
+  && grep -q 'hreflang=en href=https://example.org/notice/' "$ML_OUT/notice/index.html" \
+  && grep -q 'hreflang=fr href=https://example.org/fr/notice/' "$ML_OUT/notice/index.html" \
+  && grep -q 'hreflang=en href=https://example.org/notice/' "$ML_OUT/fr/notice/index.html" \
+  && grep -q 'hreflang=fr href=https://example.org/fr/notice/' "$ML_OUT/fr/notice/index.html" \
+  && ! grep -q 'hreflang=' "$ML_OUT/section-a/page/2/index.html"; then
+  pass 'translated pages emit reciprocal hreflang without mislinking pagination'
+else
+  fail 'translated pages emit reciprocal hreflang without mislinking pagination'
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   printf 'validate-theme: %s failure(s)\n' "$FAILURES" >&2

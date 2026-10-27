@@ -11,6 +11,7 @@
   <main id="main-content" tabindex="-1">
     {{ block "main" . }}{{ end }}
   </main>
+  {{ partial "page/faq-schema.html" . }}
   {{ partial "frame/footer.html" . }}
   {{- /* Consent hook: a site-owned banner/CMP lives in its own
        partials/cookie-consent.html. The theme ships none — copy, law and

@@ -1,0 +1,39 @@
+{{- /*
+  Shortcode: interactive/faq
+  Role:      Accessible FAQ question/answer disclosure widget.
+             Emits semantic <details>/<summary> markup with schema.org
+             Question/Answer microdata and registers questions into the page
+             store for aggregated FAQPage JSON-LD graph generation.
+  Parameters
+    q (string, required or positional 0): The question title
+    open (bool, optional): Whether to display the answer expanded by default
+  Inner:
+    Markdown-formatted answer content
+  Called by: content markdown, e.g.
+    {{< interactive/faq "Why is the sky blue?" >}}
+    Rayleigh scattering causes shorter wavelengths to scatter more.
+    {{< /interactive/faq >}}
+*/ -}}
+{{- $q := .Get "q" | default (.Get 0) -}}
+{{- if not $q -}}
+  {{- errorf "faq shortcode: question is required, e.g. {{< interactive/faq \"Question?\" >}} (%s)" .Position -}}
+{{- end -}}
+{{- $open := .Get "open" | default false -}}
+{{- $plainAnswer := .Inner | markdownify | plainify | strings.TrimSpace -}}
+{{- if not $plainAnswer -}}
+  {{- errorf "faq shortcode: answer content is required (%s)" .Position -}}
+{{- end -}}
+{{- .Page.Store.Add "faqs" (slice (dict "question" $q "answer" $plainAnswer)) -}}
+<details class="faq" itemscope itemtype="https://schema.org/Question"{{ if $open }} open{{ end }}>
+  <summary class="faq__summary">
+    <span class="faq__question" itemprop="name">{{ $q }}</span>
+    <svg class="faq__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </summary>
+  <div class="faq__answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+    <div class="faq__text" itemprop="text">
+      {{ .Inner | markdownify }}
+    </div>
+  </div>
+</details>

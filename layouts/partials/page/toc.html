@@ -1,0 +1,24 @@
+{{- /*
+  Partial: page/toc.html
+  Role:     Semantic Table of Contents block for article pages.
+            Uses native HTML5 <details>/<summary> for accessible toggling
+            without any JavaScript.
+  Params:   page (Page, required)
+  Called by: _default/single.html
+*/ -}}
+{{- $toc := .TableOfContents -}}
+{{- if and $toc (strings.Contains $toc "<li>") }}
+<aside class="toc" aria-label="Table of contents">
+  <details class="toc__details" open>
+    <summary class="toc__summary">
+      <span class="toc__title">Table of contents</span>
+      <svg class="toc__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="toc__content">
+      {{ $toc }}
+    </div>
+  </details>
+</aside>
+{{- end }}

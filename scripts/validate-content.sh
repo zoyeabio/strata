@@ -48,6 +48,7 @@ import pathlib
 import re
 import sys
 import tomllib
+import urllib.parse
 from datetime import date, datetime
 
 try:
@@ -283,6 +284,37 @@ for path in pages():
         bad("authorurl needs author",
             "%s: neither the page nor site.Params.author.name is set, so no "
             "byline renders and the url goes nowhere" % where)
+
+    reviewer = (page_param(fm, params, "reviewer")
+                or page_param(fm, params, "reviewedby"))
+    if isinstance(reviewer, (list, dict)):
+        bad("reviewer is a single string",
+            "%s: the visible byline and WebPage.reviewedBy need one name" % where)
+    reviewer_fields = {
+        key: page_param(fm, params, key)
+        for key in ("reviewerurl", "reviewerjobtitle", "revieweraffiliation",
+                    "reviewersameas")
+    }
+    if any(reviewer_fields.values()) and not reviewer:
+        bad("reviewer details need reviewer",
+            "%s: reviewer metadata is set but no reviewer name can be rendered" % where)
+    reviewer_url = reviewer_fields["reviewerurl"]
+    if reviewer_url:
+        parsed = urllib.parse.urlparse(str(reviewer_url))
+        if parsed.scheme and parsed.scheme.lower() not in {"http", "https", "mailto"}:
+            bad("reviewerurl uses a web or mail URL",
+                "%s: unsupported reviewerurl scheme %r" % (where, parsed.scheme))
+    same_as = reviewer_fields["reviewersameas"]
+    if same_as:
+        if not isinstance(same_as, list):
+            bad("reviewersameas is a list",
+                "%s: write a YAML list of absolute profile URLs" % where)
+        else:
+            for value in same_as:
+                parsed = urllib.parse.urlparse(str(value))
+                if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+                    bad("reviewersameas contains web URLs",
+                        "%s: %r is not an absolute http(s) profile URL" % (where, value))
 
 print("ok   scanned %d content pages, %d dated, %d drafts skipped"
       % (seen, dated, drafts))

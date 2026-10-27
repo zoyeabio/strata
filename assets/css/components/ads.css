@@ -1,0 +1,29 @@
+@layer strata-components {
+.ad-slot {
+  max-width: var(--prose-measure, 720px);
+  margin: 32px auto;
+  min-height: 280px;
+  text-align: center;
+  clear: both;
+}
+
+.ad-slot--below-hero {
+  margin-top: 24px;
+  margin-bottom: 28px;
+}
+
+.ad-slot--below-article {
+  margin-top: 36px;
+  margin-bottom: 24px;
+}
+
+.ad-slot__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+  user-select: none;
+}
+}

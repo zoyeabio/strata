@@ -1,0 +1,22 @@
+{{- /*
+  Partial: page/faq-schema.html
+  Role:     Aggregated Schema.org FAQPage JSON-LD graph.
+            Collects questions and answers stored by interactive/faq shortcodes
+            during page rendering.
+  Params:   page (Page, required)
+  Called by: _default/baseof.html (after block "main")
+*/ -}}
+{{- with .Store.Get "faqs" }}
+{{- $entities := slice }}
+{{- range . }}
+  {{- $entities = $entities | append (dict
+      "@type" "Question"
+      "name" .question
+      "acceptedAnswer" (dict "@type" "Answer" "text" .answer)) }}
+{{- end }}
+{{- $faqPage := dict
+    "@context" "https://schema.org"
+    "@type" "FAQPage"
+    "mainEntity" $entities }}
+<script type="application/ld+json">{{ $faqPage | jsonify | safeJS }}</script>
+{{- end }}

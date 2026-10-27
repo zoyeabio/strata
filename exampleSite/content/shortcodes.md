@@ -150,6 +150,29 @@ filled `hp_name` honeypot. This is the same form as on
 
 ---
 
+## `interactive/faq`
+
+Semantic accordion disclosure widget for questions and answers. Emits native
+accessible `<details>` elements alongside standalone Schema.org Question/Answer Microdata
+and aggregated `FAQPage` JSON-LD, providing a clean, machine-readable format for
+visible content without any JavaScript.
+
+{{< interactive/faq "What makes Strata well-suited for science sites?" >}}
+Strata is built with zero implicit third-party requests, strict CSP compatibility,
+responsive image ladders, and high-contrast accessible typography.
+{{< /interactive/faq >}}
+
+<pre><code>{{&lt; interactive/faq "What makes Strata well-suited for science sites?" &gt;}}
+Strata is built with zero implicit third-party requests...
+{{&lt; /interactive/faq &gt;}}</code></pre>
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `q` (or first positional) | — | Question heading text |
+| `open` | `false` | Whether the answer is expanded on first render |
+
+---
+
 ## `interactive/cta`
 
 A call to action with an optional icon and link.

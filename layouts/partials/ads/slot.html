@@ -1,0 +1,32 @@
+{{- /*
+  Partial: ads/slot.html
+  Role:     Bounded, CLS-safe AdSense display slot for article layouts.
+            Enforces prose measure bounding box, CLS height reservation,
+            and a configurable content-density guard.
+  Params:
+    slot     (string, required) - numeric slot ID from AdSense dashboard
+    position (string, required) - "below-hero" or "below-article"
+    page     (Page, required)   - current page context
+  Called by: _default/single.html
+*/ -}}
+{{- $slot := .slot -}}
+{{- $position := .position -}}
+{{- $page := .page -}}
+{{- $client := site.Params.ads.client -}}
+{{- $consent := site.Params.ads.consent | default "none" -}}
+{{- if and $slot $client (ne $page.Params.ads false) }}
+  {{- if not (findRE `^\d+$` $slot) -}}
+    {{- errorf "ads slot: slot %q is not numeric in site.Params.ads.slots (%s)" $slot $page.Position -}}
+  {{- end -}}
+  {{- if not (findRE `^ca-pub-\d{16}$` $client) -}}
+    {{- errorf "ads slot: client %q is not a valid publisher ID; fix site.Params.ads.client (%s)" $client $page.Position -}}
+  {{- end -}}
+<div class="ad-slot ad-slot--{{ $position }}" aria-label="Advertisement">
+  <div class="ad-slot__label">Advertisement</div>
+  <ins class="adsbygoogle" style="display:block;min-height:280px" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  {{- with resources.Get "js/ads.js" }}
+  {{- $js := . | fingerprint "sha512" }}
+  <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" data-ads-consent="{{ $consent }}"></script>
+  {{- end }}
+</div>
+{{- end }}

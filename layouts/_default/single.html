@@ -21,6 +21,9 @@
 {{- else }}{{ $showSummary = $articleParams.showSummary }}{{ end }}
 {{- $summary := partial "data/summary.html" . }}
 {{- $summaryShown := and $showSummary $summary }}
+{{- $showToc := false }}
+{{- if isset .Params "showtoc" }}{{ $showToc = .Params.showtoc }}
+{{- else }}{{ $showToc = $articleParams.showToc }}{{ end }}
 <article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -31,7 +34,9 @@
     {{- if $summaryShown }}
     <p class="article__standfirst">{{ $summary }}</p>
     {{- end }}
-    {{- if or $dateShown $updatedShown $terms (and $showAuthor $author) }}
+    {{- $reviewer := .Params.reviewer | default .Params.reviewedby }}
+    {{- $reviewerURL := .Params.reviewerurl }}
+    {{- if or $dateShown $updatedShown $terms (and $showAuthor $author) $reviewer }}
     {{- $sep := false }}
     <p class="article__meta">
       {{- if $dateShown }}
@@ -49,16 +54,33 @@
       {{- end }}
       {{- if and $showAuthor $author }}
       {{- if $sep }} · {{ end }}By {{ with $authorURL }}<a class="article__author" {{ partial "href.html" . }}>{{ $author }}</a>{{ else }}{{ $author }}{{ end }}
+      {{- $sep = true }}
+      {{- end }}
+      {{- if $reviewer }}
+      {{- if $sep }} · {{ end }}Reviewed by {{ with $reviewerURL }}<a class="article__author" {{ partial "href.html" . }}>{{ $reviewer }}</a>{{ else }}{{ $reviewer }}{{ end }}
+      {{- $sep = true }}
       {{- end }}
     </p>
     {{- end }}
   </header>
   {{ partial "page/series.html" . }}
+  {{- if and $isArticle $showToc }}
+  {{ partial "page/toc.html" . }}
+  {{- end }}
+  {{- $adsAllowed := and site.Params.ads.client (ne .Params.ads false) }}
+  {{- $minWords := site.Params.ads.slots.minWords | default 0 }}
+  {{- $hasWordCount := ge .WordCount $minWords }}
+  {{- if and $isArticle $adsAllowed $hasWordCount site.Params.ads.slots.belowHero }}
+  {{ partial "ads/slot.html" (dict "slot" site.Params.ads.slots.belowHero "position" "below-hero" "page" .) }}
+  {{- end }}
   {{ with .Content }}
   <div class="article__content prose">
     {{ . }}
   </div>
   {{ end }}
+  {{- if and $isArticle $adsAllowed $hasWordCount site.Params.ads.slots.belowArticle }}
+  {{ partial "ads/slot.html" (dict "slot" site.Params.ads.slots.belowArticle "position" "below-article" "page" .) }}
+  {{- end }}
   {{- if $isArticle }}
   {{ partial "page/share.html" . }}
   {{ partial "page/related.html" . }}

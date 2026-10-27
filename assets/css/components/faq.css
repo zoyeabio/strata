@@ -1,0 +1,67 @@
+@layer strata-components {
+.faq {
+  max-width: var(--prose-measure, 720px);
+  margin: 18px auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.faq:hover {
+  border-color: var(--border-strong, var(--border));
+}
+
+.faq__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  gap: 12px;
+}
+
+.faq__summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__question {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--site-text-strong);
+}
+
+.faq__icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.faq[open] .faq__icon {
+  transform: rotate(180deg);
+}
+
+.faq__answer {
+  padding: 0 18px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.faq__text {
+  padding-top: 14px;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.faq__text > :first-child {
+  margin-top: 0;
+}
+
+.faq__text > :last-child {
+  margin-bottom: 0;
+}
+}

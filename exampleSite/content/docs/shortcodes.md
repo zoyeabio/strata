@@ -128,6 +128,21 @@ filters: a challenge (Cloudflare Turnstile or hCaptcha are the
 privacy-friendly ones), or a one-time token your endpoint issues on `GET`
 and checks on `POST`, so a bot that never ran the page has nothing to send.
 
+## interactive/faq
+
+Semantic question/answer disclosure widget.
+
+| Parameter | Notes |
+|---|---|
+| `q` (or first positional) | Question heading text |
+| `open` | Whether the widget renders expanded, default `false` |
+
+Renders an accessible HTML5 `<details>` accordion with a standalone Schema.org
+Question/Answer Microdata item and registers questions into the page store for
+an aggregated `FAQPage` JSON-LD graph. Provides semantic, machine-readable
+structure for visible question-and-answer pairs without relying on client-side
+JavaScript.
+
 ## interactive/cta
 
 Call-to-action banner.

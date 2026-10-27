@@ -6,6 +6,7 @@ tags: ["theming", "process"]
 series: ["Foundations"]
 weight: 3
 keywords: ["theming", "contracts", "hugo"]
+showtoc: true
 featureimage: "images/features-scaffold.png"
 featureimagealt: "A fresh directory tree laid out cleanly"
 ---

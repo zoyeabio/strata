@@ -645,7 +645,7 @@ for page in out.rglob('*.html'):
     for m in re.finditer(r'class="article__author" href="([^"]+)"', text):
         # A mailto byline is an address, not a taxonomy page: entity-encoded
         # on purpose, so there is no page to resolve it against.
-        if m.group(1).startswith('mailto:'):
+        if m.group(1).startswith('mailto:') or urllib.parse.urlparse(m.group(1)).netloc:
             continue
         href = urllib.parse.urlparse(m.group(1)).path
         checked += 1
@@ -1267,7 +1267,17 @@ assert_not 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' \
   'gated consent keeps the loader out of the page markup'
 assert 'section-a/shortcodes/index.html' 'data-ads-consent="gated"' \
   'the ad script copy carries the consent posture'
-assert_not 'section-a/flat/index.html' 'adsbygoogle' 'ads loader stays off unit-less pages'
+assert 'section-a/flat/index.html' '<div class="ad-slot ad-slot--below-hero" aria-label="Advertisement">' \
+  'below-hero ad slot container renders with aria-label'
+assert 'section-a/flat/index.html' '<div class="ad-slot ad-slot--below-article" aria-label="Advertisement">' \
+  'below-article ad slot container renders with aria-label'
+assert 'section-a/flat/index.html' 'style="display:block;min-height:280px"' \
+  'ad slot reserves 280px min-height against CLS'
+assert_not 'section-a/pixel/index.html' 'ad-slot' \
+  'pages with ads: false suppress all ad slot containers'
+assert_not 'section-a/pixel/index.html' 'adsbygoogle' 'ads loader stays off pages with ads: false'
+assert_not 'index.html' 'adsbygoogle\.js\?client=' \
+  'configured article slots do not load AdSense on non-article pages'
 assert 'section-a/shortcodes/index.html' 'src="?/js/ads\.[0-9a-f]+\.js"? integrity="sha512-' \
   'ad push ships as an external fingerprinted script'
 assert_not 'section-a/shortcodes/index.html' '\(adsbygoogle = window' 'ad push is never an inline script'
@@ -1280,10 +1290,11 @@ assert 'index.html' 'src="?/js/consent\.[0-9a-f]+\.js"? integrity="sha512-' \
   'the consent controller ships fingerprinted'
 if grep -q 'strata-cookie-consent' "$OUT"/js/ads.*.js \
    && grep -q 'strata:cookie-consent' "$OUT"/js/ads.*.js \
-   && grep -q 'location.reload' "$OUT"/js/ads.*.js; then
-  pass 'the ad push obeys the documented consent answer and reloads past injected ads'
+   && grep -q 'location.reload' "$OUT"/js/ads.*.js \
+   && grep -q "closest('.ad-slot')" "$OUT"/js/ads.*.js; then
+  pass 'the ad push obeys consent, collapses denied slots and reloads past injected ads'
 else
-  fail 'the ad push obeys the documented consent answer and reloads past injected ads'
+  fail 'the ad push obeys consent, collapses denied slots and reloads past injected ads'
 fi
 
 # 42. verifiable authorship and trail metadata: Person author and
@@ -1291,6 +1302,24 @@ fi
 #     meta, Organization published once with an @id others reference
 assert 'section-a/flat/index.html' '"@type":"Person"' 'schema carries a Person author'
 assert 'section-a/flat/index.html' '"name":"Flat Author"' 'author name matches the byline'
+assert 'section-a/flat/index.html' 'Reviewed by <a class="article__author" href="https://example\.com/jane">Dr\. Jane Smith</a>' \
+  'article byline renders the reviewer and their profile url'
+assert 'section-a/flat/index.html' '"reviewedBy":\{"@id":"https://example\.org/section-a/flat/#reviewer","@type":"Person","jobTitle":"Senior Research Fellow","name":"Dr\. Jane Smith","sameAs":\["https://orcid\.org/0000-0002-1825-0097"\],"url":"https://example\.com/jane","worksFor":\{"@type":"Organization","name":"Stanford Medicine"\}\}' \
+  'WebPage schema carries structured reviewedBy Person with id, jobTitle, worksFor, sameAs and url'
+assert 'section-a/flat/index.html' '<aside class="toc" aria-label="Table of contents">' \
+  'toc renders semantic aside element'
+assert 'section-a/flat/index.html' '<details class="toc__details" open>' \
+  'toc details element is open'
+assert 'section-a/flat/index.html' '<nav id="TableOfContents">' \
+  'toc generates nav with TableOfContents id'
+assert 'section-a/flat/index.html' '<li><a href="#first-heading">First Heading</a></li>' \
+  'toc contains section heading links'
+assert 'section-a/shortcodes/index.html' 'class="faq" itemscope itemtype="https://schema.org/Question"' \
+  'faq shortcode renders a standalone Question microdata item'
+assert_not 'section-a/shortcodes/index.html' 'class="faq"[^>]*itemprop="mainEntity"' \
+  'faq microdata does not emit an orphan mainEntity property'
+assert 'section-a/shortcodes/index.html' '"@type":\s*"FAQPage"' \
+  'faq registers into page store and emits aggregated FAQPage JSON-LD'
 assert 'section-a/flat/index.html' 'author\.example\.net' 'author links travel as sameAs'
 assert 'section-a/flat/index.html' '"@type":"BreadcrumbList"' 'schema carries the trail'
 assert 'section-a/flat/index.html' 'article:tag' 'article tags are emitted'
@@ -1593,6 +1622,7 @@ for rel in ("section-a/vector", "section-a/flat", "section-a/nested/post", "sect
             continue
         items = len(re.findall(r"<time", inner)) + inner.count('class="article__tag"')
         items += 1 if "By " in inner else 0
+        items += 1 if "Reviewed by " in inner else 0
         segments = len([s for s in inner.split(" · ") if s.strip()])
         if segments != items:
             failed.append("%s meta has %d item(s) but %d separator-run(s): %r"

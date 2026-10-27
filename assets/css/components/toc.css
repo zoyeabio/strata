@@ -1,0 +1,76 @@
+@layer strata-components {
+.toc {
+  max-width: var(--prose-measure, 720px);
+  margin: 28px auto 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.toc__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.toc__summary::-webkit-details-marker {
+  display: none;
+}
+
+.toc__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.toc__icon {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.toc__details[open] .toc__icon {
+  transform: rotate(180deg);
+}
+
+.toc__content {
+  padding: 0 16px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.toc__content nav#TableOfContents > ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.toc__content nav#TableOfContents ul {
+  margin: 4px 0 4px 16px;
+  padding-left: 0;
+  list-style: none;
+  border-left: 1px solid var(--border);
+}
+
+.toc__content nav#TableOfContents li {
+  margin: 4px 0;
+  padding-left: 10px;
+}
+
+.toc__content nav#TableOfContents a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.toc__content nav#TableOfContents a:hover {
+  color: var(--site-link);
+  text-decoration: underline;
+}
+}

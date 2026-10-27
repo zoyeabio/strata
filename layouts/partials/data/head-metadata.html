@@ -1,0 +1,32 @@
+{{- /*
+  Resolve the shared title, description and URL used by HTML head metadata,
+  Open Graph and JSON-LD. Pagination is initialized here so /page/2/ and later
+  pages are distinct documents rather than canonicalized to the collection
+  root. The body reuses data/paginator.html and therefore the same ordering.
+*/ -}}
+{{- $page := . -}}
+{{- $title := $page.Title -}}
+{{- $description := partial "data/description.html" $page -}}
+{{- if not $description -}}
+  {{- if eq $page.Kind "term" -}}
+    {{- $description = printf "Articles about %s on %s." $page.LinkTitle site.Title -}}
+  {{- else if eq $page.Kind "taxonomy" -}}
+    {{- $description = printf "Browse %s on %s." $page.LinkTitle site.Title -}}
+  {{- else -}}
+    {{- $description = site.Params.description | default (printf "%s — %s" $page.Title site.Title) -}}
+  {{- end -}}
+{{- end -}}
+{{- $url := $page.Permalink -}}
+{{- $pager := false -}}
+{{- $paged := false -}}
+{{- if or (eq $page.Kind "section") (eq $page.Kind "term") -}}
+  {{- $params := cond (eq $page.Kind "term") site.Params.term site.Params.list -}}
+  {{- $pager = partial "data/paginator.html" (dict "page" $page "params" $params) -}}
+  {{- if gt $pager.PageNumber 1 -}}
+    {{- $paged = true -}}
+    {{- $title = printf "%s · Page %d" $title $pager.PageNumber -}}
+    {{- $description = printf "%s. Page %d of %d." (strings.TrimSuffix "." $description) $pager.PageNumber $pager.TotalPages -}}
+    {{- $url = $pager.URL | absURL -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict "title" $title "description" $description "url" $url "paginator" $pager "paged" $paged) -}}

@@ -69,6 +69,9 @@ showDateUpdated = true
 # competes with the title. A page's own summary is written for a reader, so a
 # page that supplies one shows it under the h1.
 showSummary = true
+# showToc displays a table of contents generated from headings for long articles.
+# Default is false; site or per-page front matter can set it to true.
+showToc = false
 showRelatedContent = false
 relatedContentLimit = 3
 showPagination = true
@@ -115,6 +118,16 @@ auto = false
 # pagead2.googlesyndication.com. Set this only when the host applies response
 # headers itself and the _headers file never reaches the reader.
 skipCspCheck = false
+
+[ads.slots]
+# Config-driven ad slots for article pages. Disabled by default ("").
+# Supply numeric slot IDs from your AdSense dashboard to activate.
+# Per-page front matter `ads: false` suppresses all slots on that page.
+belowHero = ""
+belowArticle = ""
+# Minimum word count required to display slots. This is a site-defined density
+# guard, not a substitute for reviewing the current ad-network policies.
+minWords = 800
 # REQUIRED once [ads] client is set and any ad is unlocked — there is no
 # default, so a site that forgets the line fails its build instead of
 # asking Google silently. Two values:

@@ -107,6 +107,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `article.showDate` | `true` | Date on articles; page `showDate` wins, `false` removes the `<time>` and its separator |
 | `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
 | `article.showSummary` | `true` | A page's `summary` as a standfirst above the meta line. Unlike `list.showSummary`, which is about cards, a page's own summary is written for a reader, so one that is supplied is shown. Page `showsummary: false` suppresses it |
+| `article.showToc` | `false` | Table of contents from headings for long articles; page `showtoc` wins |
 | `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
 | `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
@@ -120,6 +121,9 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `ads.auto` | `false` | `true`: loader ships site-wide with no shortcode placed anywhere, and Google's Auto ads choose the pages and the placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
 | `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted` — a withdrawal that lands after ads had loaded reloads the current page once, so nothing already running survives the visit. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too. Gated mode also expects the site's `partials/cookie-consent.html` hook (or an explicit `ads.externalConsentController = true`), because a gate with nothing to dispatch the answer keeps every unit hidden forever |
 | `ads.externalConsentController` | `false` | Gated-mode escape hatch: your consent controller ships outside the theme's hook (a certified CMP that dispatches `strata:cookie-consent` itself) and the `cookie-consent.html` existence check does not apply |
+| `ads.slots.belowHero` | `""` | Numeric ad slot ID placed between header and content; per-page `ads: false` suppresses |
+| `ads.slots.belowArticle` | `""` | Numeric ad slot ID placed after article content before sharing links; per-page `ads: false` suppresses |
+| `ads.slots.minWords` | `800` | Site-defined minimum article word count for configured slot ads; a density guard, not a substitute for current ad-network policy review |
 | `list.showBreadcrumbs` | `false` | Trail on section and home pages |
 | `taxonomy.showBreadcrumbs` / `term.showBreadcrumbs` | `false` | Trail on taxonomy overview / term pages |
 | `taxonomy.cardView` | `false` | Card vs. row on the taxonomy overview (`/tags/`). False here and true in `[list]`: `/tags/` lists terms, not articles, so it starts as a plain row list |
@@ -244,6 +248,13 @@ warning instead of being rendered as a dead link.
 | `showRelatedContent` | Page-level related-content override (falls back to `[article] showRelatedContent`) |
 | `showPagination` | Page-level previous/next override (falls back to `[article] showPagination`) |
 | `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
+| `showToc` | Page-level Table of Contents override (falls back to `[article] showToc`) |
+| `reviewer` | Peer reviewer or fact-checker name for E-E-A-T (e.g. `Dr. Jane Doe`). Rendered in article byline as `Reviewed by...` and emitted in JSON-LD as `reviewedBy` |
+| `reviewerURL` | Optional profile link for the reviewer |
+| `reviewerJobTitle` | Professional academic or research title for reviewer in JSON-LD |
+| `reviewerAffiliation` | Institutional affiliation for reviewer (emitted as `worksFor` in JSON-LD) |
+| `reviewerSameAs` | List of authoritative external profile URLs (ORCID, Google Scholar, Wikipedia) for reviewer |
+| `ads` | `false` suppresses all auto-injected ad slots on this article |
 | `robots` | Page-level robots meta |
 | `cardView` / `showSummary` / `orderByWeight` | Per-page override of the list/term defaults above |
 | `draft` | Standard Hugo draft flag |

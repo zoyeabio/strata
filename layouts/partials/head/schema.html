@@ -4,11 +4,12 @@
             Article (dated content — the same condition as og:type=article),
             Series (a page's series term, members in the same order as the
             page/series.html navigation).
-  Params:   page (Page, required)
+  Params:   dict with page (Page) and meta (data/head-metadata result)
   Outputs:  <script type="application/ld+json"> with a @graph
   Called by: head/head.html
 */ -}}
-{{- $page := . }}
+{{- $page := .page }}
+{{- $meta := .meta }}
 {{- if ne $page.Kind "404" }}
 {{- $isHome := eq $page.Kind "home" }}
 {{- $isArticle := and (eq $page.Kind "page") (not $page.Date.IsZero) }}
@@ -39,14 +40,40 @@
 {{- $org = merge $org (dict "logo" (.Permalink)) }}
 {{- end }}{{ end }}
 {{- $graph = append $org $graph }}
-{{- $graph = append (dict
+{{- $webpage := dict
     "@context" "https://schema.org"
     "@type" "WebPage"
-    "@id" (printf "%s#webpage" $page.Permalink)
-    "url" $page.Permalink
-    "name" $page.Title
+    "@id" (printf "%s#webpage" $meta.url)
+    "url" $meta.url
+    "name" $meta.title
     "isPartOf" (dict "@id" $websiteID)
-    "inLanguage" $lang) $graph }}
+    "inLanguage" $lang }}
+{{- $reviewer := $page.Params.reviewer | default $page.Params.reviewedby }}
+{{- with $reviewer }}
+{{- $reviewerPerson := dict
+    "@type" "Person"
+    "@id" (printf "%s#reviewer" $page.Permalink)
+    "name" . }}
+{{- with $page.Params.reviewerurl }}
+{{- if not (strings.HasPrefix (lower .) "mailto:") }}
+{{- $reviewerPerson = merge $reviewerPerson (dict "url" (. | absURL)) }}
+{{- end }}
+{{- end }}
+{{- with $page.Params.reviewerjobtitle }}
+{{- $reviewerPerson = merge $reviewerPerson (dict "jobTitle" .) }}
+{{- end }}
+{{- with $page.Params.revieweraffiliation }}
+{{- $reviewerPerson = merge $reviewerPerson (dict "worksFor" (dict "@type" "Organization" "name" .)) }}
+{{- end }}
+{{- with $page.Params.reviewersameas }}
+{{- $links := slice }}
+{{- if reflect.IsSlice . }}{{- range . }}{{- if and . (not (strings.HasPrefix (lower .) "mailto:")) }}{{- $links = $links | append . }}{{- end }}{{- end }}
+{{- else if and . (not (strings.HasPrefix (lower .) "mailto:")) }}{{- $links = $links | append . }}{{- end }}
+{{- with $links }}{{- $reviewerPerson = merge $reviewerPerson (dict "sameAs" .) }}{{- end }}
+{{- end }}
+{{- $webpage = merge $webpage (dict "reviewedBy" $reviewerPerson) }}
+{{- end }}
+{{- $graph = append $webpage $graph }}
 {{- if not $isHome }}
 {{- $crumbs := slice (dict "@type" "ListItem" "position" 1 "name" "Home" "item" site.Home.Permalink) }}
 {{- $ancestors := slice }}
@@ -58,11 +85,11 @@
 {{- range $ancestors | collections.Reverse }}
 {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" .LinkTitle "item" .Permalink) }}
 {{- end }}
-{{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" $page.LinkTitle "item" $page.Permalink) }}
+{{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" $meta.title "item" $meta.url) }}
 {{- $graph = append (dict
     "@context" "https://schema.org"
     "@type" "BreadcrumbList"
-    "@id" (printf "%s#breadcrumb" $page.Permalink)
+    "@id" (printf "%s#breadcrumb" $meta.url)
     "itemListElement" $crumbs) $graph }}
 {{- end }}
 {{- if $isArticle }}

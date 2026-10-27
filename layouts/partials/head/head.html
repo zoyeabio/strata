@@ -17,10 +17,10 @@
   <meta http-equiv="content-language" content="{{ . }}">
   {{ end }}
 
-  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title | emojify }} · {{ site.Title | emojify }}{{ end }}</title>
+  {{- $meta := partial "data/head-metadata.html" . }}
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $meta.title | emojify }} · {{ site.Title | emojify }}{{ end }}</title>
 
-  {{ $desc := partial "data/description.html" . | default site.Params.description | default (printf "%s — %s" .Title site.Title) }}
-  <meta name="description" content="{{ $desc }}">
+  <meta name="description" content="{{ $meta.description }}">
   {{- $kw := partial "data/keywords.html" . }}
   {{- with $kw }}
   <meta name="keywords" content="{{ delimit $kw ", " }}">
@@ -28,20 +28,30 @@
   {{- /* Page beats site. Unset anywhere, default to indexing with the large
        image preview — Google Discover asks for it and the theme's hero and
        social preview are both wide enough to earn it */ -}}
-  {{- $robots := or .Params.robots site.Params.robots }}
+  {{- $robots := cond (eq .Kind "404") "noindex, follow" (or .Params.robots site.Params.robots) }}
   {{- with $robots }}
   <meta name="robots" content="{{ . }}">
   {{- else }}
   <meta name="robots" content="index, follow, max-image-preview:large">
   {{- end }}
-  <link rel="canonical" href="{{ .Permalink }}">
+  {{- if ne .Kind "404" }}
+  <link rel="canonical" href="{{ $meta.url }}">
+  {{- /* A virtual /page/N/ keeps the collection root's translation objects;
+        emitting those would point page 2 at page 1 in another language, and
+        translated collections need not even have the same page count. */ -}}
+  {{- if and hugo.IsMultilingual (not $meta.paged) }}
+  {{- range .AllTranslations }}
+  <link rel="alternate" hreflang="{{ .Language.Locale | default .Language.Lang | replaceRE "_" "-" }}" href="{{ .Permalink }}">
+  {{- end }}
+  {{- end }}
   {{ range .AlternativeOutputFormats }}
   <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .RelPermalink }}" title="{{ site.Title }}">
   {{ end }}
 
   {{/* Social cards: own implementation, image goes through the pipeline */}}
-  {{ partial "opengraph.html" . }}
-  {{ partial "head/schema.html" . }}
+  {{ partial "opengraph.html" (dict "page" . "meta" $meta) }}
+  {{ partial "head/schema.html" (dict "page" . "meta" $meta) }}
+  {{- end }}
 
   {{/* Hero preload from the same resolver call as the <img>; safeHTML because
        html/template URL-escapes imagesrcset (spaces → %20) and breaks it.
@@ -72,7 +82,7 @@
     {{- errorf "colorScheme %q: no matching asset css/schemes/%s.css" $schemeName $schemeName }}
   {{- end }}
   {{- $parts := slice (resources.Get "css/main.css") }}
-  {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/map.css" "components/multi-col.css" "components/shortcode.css" }}
+  {{- range slice "base/palette.css" "base/reset.css" "base/typography.css" "base/prose.css" "base/a11y.css" "components/site.css" "components/page.css" "components/card.css" "components/article.css" "components/series.css" "components/toc.css" "components/ads.css" "components/faq.css" "components/taxonomy.css" "components/carousel.css" "components/contact-form.css" "components/cta.css" "components/figure.css" "components/map.css" "components/multi-col.css" "components/shortcode.css" }}
     {{- $parts = $parts | append (resources.Get (print "css/" .)) }}
   {{- end }}
   {{- $bundle := $parts | resources.Concat "css/bundle.css" | css.TailwindCSS }}
@@ -129,18 +139,39 @@
        only random-nonce strict CSP, which is host-managed), or declare
        that its host manages headers itself. */}}
   {{/* In gated mode the consent-driven dispatcher is js/ads.js, and that
-       file only ships inside ads-shortcode copies — so auto mode without
+       file only ships inside ads-shortcode copies or slot copies — so auto mode without
        a single placed unit leaves the loader with no carrier and the site
        with silently no ads. Fail the build where the reason is visible. */}}
+  {{- $hasSlot := false }}
+  {{- $isArticle := partial "data/is-article.html" . }}
+  {{- $configuredSlot := or site.Params.ads.slots.belowHero site.Params.ads.slots.belowArticle }}
+  {{- if and $configuredSlot (not site.Params.ads.client) }}
+  {{- errorf "ads: configured [ads.slots] need site.Params.ads.client; set the publisher ID or clear both slot IDs (%s)" .Path }}
+  {{- end }}
+  {{- range $name := slice "belowHero" "belowArticle" }}
+    {{- with index site.Params.ads.slots $name }}
+      {{- if not (findRE `^\d+$` .) }}
+      {{- errorf "ads: site.Params.ads.slots.%s %q is not a numeric AdSense slot ID (%s)" $name . $.Path }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if and $isArticle site.Params.ads.slots (ne .Params.ads false) }}
+    {{- $minWords := site.Params.ads.slots.minWords | default 0 }}
+    {{- if ge .WordCount $minWords }}
+      {{- if or site.Params.ads.slots.belowHero site.Params.ads.slots.belowArticle }}
+        {{- $hasSlot = true }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
   {{- if and site.Params.ads.client site.Params.ads.auto
         (eq (site.Params.ads.consent | default "none") "gated")
-        (not (.HasShortcode "ads")) }}
+        (not (or (.HasShortcode "ads") $hasSlot)) }}
   {{- errorf "ads: [ads] consent = \"gated\" drives the loader from js/ads.js, which only the ads shortcode ships — [ads] auto = true with no placed unit carrier would mean silently no ads; place a unit or run consent = \"none\" behind a certified CMP (%s)" .Path }}
   {{- end }}
   {{- if and site.Params.ads.auto (not site.Params.ads.client) }}
   {{- errorf "ads: [ads] auto = true needs site.Params.ads.client — the site-wide loader URL gets the publisher ID from nowhere else, and without it the site would silently ship with ad intent enabled and nothing to load. Set client, or drop auto (%s)" .Path }}
   {{- end }}
-  {{- if and (or (.HasShortcode "ads") site.Params.ads.auto) site.Params.ads.client }}
+  {{- if and (or (.HasShortcode "ads") site.Params.ads.auto $hasSlot) site.Params.ads.client }}
   {{- if not (findRE `^ca-pub-\d{16}$` site.Params.ads.client) }}
   {{- errorf "ads: site.Params.ads.client %q is not a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); every mode sends it out pretty much as written, so a bad ID means a dead loader URL shipped as fixed (%s)" site.Params.ads.client .Path }}
   {{- end }}

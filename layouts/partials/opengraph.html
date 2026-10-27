@@ -9,10 +9,11 @@
 
   Called by: head/head.html, once per page
 */ -}}
-{{- $page := . }}
-{{- $title := $page.Title }}
-{{- $description := partial "data/description.html" $page | default site.Params.description | default (printf "%s — %s" $page.Title site.Title) }}
-{{- $url := $page.Permalink }}
+{{- $page := .page }}
+{{- $meta := .meta }}
+{{- $title := $meta.title }}
+{{- $description := $meta.description }}
+{{- $url := $meta.url }}
 {{- $ref := partial "data/image-ref.html" (dict "page" $page "social" true) }}
 {{- $img := partial "data/image-resource.html" (dict
     "ref" $ref
@@ -26,6 +27,11 @@
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:site_name" content="{{ site.Title }}">
 <meta property="og:locale" content="{{ site.Language.Locale | default "en" }}">
+{{- if and hugo.IsMultilingual (not $meta.paged) }}
+{{- range $page.Translations }}
+<meta property="og:locale:alternate" content="{{ .Language.Locale | default .Language.Lang | replaceRE "_" "-" }}">
+{{- end }}
+{{- end }}
 {{- if and $isArticle (not $page.PublishDate.IsZero) }}
 <meta property="article:published_time" content="{{ $page.PublishDate.Format "2006-01-02T15:04:05Z07:00" }}">
 {{- end }}

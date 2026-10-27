@@ -29,6 +29,10 @@ output contract.
 
 ## interactive
 
+{{< interactive/faq "Is FAQ schema valid?" >}}
+Yes, it emits both Microdata and aggregated FAQPage JSON-LD.
+{{< /interactive/faq >}}
+
 {{< interactive/email user="info" domain="example.com" >}}
 
 {{< interactive/cta icon="check" title="Try the form below" subtitle="No backend in the fixture" buttonText="Go" buttonUrl="/contact/" >}}

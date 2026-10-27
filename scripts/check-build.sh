@@ -366,9 +366,16 @@ else:
 canon_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')
+    if is_refresh(text):
+        continue
     canonical = next((attrs_of(tag).get('href') for tag in tags_of(text, 'link')
                       if attrs_of(tag).get('rel') == 'canonical'), None)
     if t.name == '404.html':
+        robots = meta_content(text, 'name', 'robots') or ''
+        if canonical:
+            canon_bad.append(f'{t.relative_to(pub)}: error page has canonical {canonical}')
+        if 'noindex' not in {part.strip().lower() for part in robots.split(',')}:
+            canon_bad.append(f'{t.relative_to(pub)}: error page robots is {robots!r}, want noindex')
         continue
     if not canonical:
         canon_bad.append(f'{t.relative_to(pub)}: no canonical')
@@ -380,14 +387,8 @@ for t in htmls:
         want = '/' + rel.parent.as_posix() + '/'
     else:
         want = '/' + rel.as_posix()
-    # Hugo paginates page 1 into /page/1/ while the page keeps the base
-    # permalink — the canonical rightly points at the base. For page 2+
-    # hugo canonicalizes .Permalink to the listing base by design, which
-    # keeps pagination from duplicating content in search engines.
     got = local_path(canonical)
-    base_want = re.sub(r'/page/\d+/', '/', want, count=1)
-    base_got = re.sub(r'/page/\d+/', '/', got, count=1)
-    if got != want and base_got != base_want:
+    if got != want:
         canon_bad.append(f'{t.relative_to(pub)}: canonical {got} != {want}')
 if canon_bad:
     bad('canonical present and self-referential', '\n'.join(f'  {b}' for b in canon_bad))
@@ -403,6 +404,7 @@ for t in htmls:
     if is_refresh(text):
         continue
     types = set()
+    nodes_seen = []
     scripts = re.findall(r'(<script\b[^>]*>)(.*?)</script\s*>', text,
                          re.I | re.S)
     for tag, blob in scripts:
@@ -417,6 +419,7 @@ for t in htmls:
         for node in nodes:
             if isinstance(node, dict) and '@type' in node:
                 types.add(node['@type'])
+                nodes_seen.append(node)
     is_home = t.relative_to(pub).as_posix() == 'index.html'
     is_404 = t.name == '404.html'
     og = meta_content(text, 'property', 'og:type')
@@ -428,6 +431,14 @@ for t in htmls:
         schema_bad.append(f'{t.relative_to(pub)}: og:type=article but no Article')
     if og == 'website' and 'Article' in types:
         schema_bad.append(f'{t.relative_to(pub)}: og:type=website but Article present')
+    canonical = next((attrs_of(tag).get('href') for tag in tags_of(text, 'link')
+                      if attrs_of(tag).get('rel') == 'canonical'), None)
+    webpage = next((node for node in nodes_seen if node.get('@type') == 'WebPage'), None)
+    if webpage and canonical and webpage.get('url') != canonical:
+        schema_bad.append(f'{t.relative_to(pub)}: WebPage url {webpage.get("url")} != canonical {canonical}')
+    for node in nodes_seen:
+        if node.get('@type') == 'Article' and 'reviewedBy' in node:
+            schema_bad.append(f'{t.relative_to(pub)}: reviewedBy belongs on WebPage, not Article')
 if schema_bad:
     bad('schema graph matches the page kinds', '\n'.join(f'  {b}' for b in schema_bad))
 else:
@@ -512,7 +523,8 @@ STRUCT_TAGS = ('div', 'ul', 'ol', 'dl', 'nav', 'footer', 'header', 'main',
                'section', 'article', 'figure', 'figcaption', 'button', 'a',
                'p', 'li', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr',
                'td', 'th', 'form', 'label', 'textarea', 'select', 'blockquote',
-               'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dt', 'dd')
+               'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dt', 'dd', 'aside',
+               'details', 'summary')
 bal_bad = []
 for t in htmls:
     text = t.read_text(errors='ignore')

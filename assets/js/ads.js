@@ -43,11 +43,19 @@ function units() {
 }
 
 function collapseUnits() {
-  units().forEach(function (unit) { unit.style.display = 'none'; });
+  units().forEach(function (unit) {
+    unit.style.display = 'none';
+    var slot = unit.closest('.ad-slot');
+    if (slot) slot.style.display = 'none';
+  });
 }
 
 function revealUnits() {
-  units().forEach(function (unit) { unit.style.removeProperty('display'); });
+  units().forEach(function (unit) {
+    unit.style.removeProperty('display');
+    var slot = unit.closest('.ad-slot');
+    if (slot) slot.style.removeProperty('display');
+  });
 }
 
 function injectLoader() {
