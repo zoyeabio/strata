@@ -61,3 +61,8 @@
 .site-consent p {
   margin: 0;
 }
+
+.site-consent a {
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}

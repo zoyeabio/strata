@@ -334,7 +334,7 @@ html:has(.site-header--smart) {
 
 .site-footer__copyright {
   font-size: 13px;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
 .site-footer__grid {

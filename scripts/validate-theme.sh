@@ -132,6 +132,22 @@ else
   fail 'check-build theme mode'
 fi
 
+# A root-relative page link must resolve to a generated artifact. Preserve the
+# good fixture, forge one dead target, and require the output gate to name it.
+cp "$WORK/public/index.html" "$WORK/index-original.html"
+sed 's#</body>#<a href="/definitely-missing/">Missing</a></body>#' \
+  "$WORK/index-original.html" >"$WORK/public/index.html"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/dead-link.out" 2>&1; then
+  fail 'check-build rejects a dead internal page link'
+elif grep -q "dead internal link '/definitely-missing/'" "$WORK/dead-link.out"; then
+  pass 'check-build rejects a dead internal page link'
+else
+  fail 'the dead-link failure names the missing target'
+  cat "$WORK/dead-link.out" >&2
+fi
+cp "$WORK/index-original.html" "$WORK/public/index.html"
+
 # A cap with no headroom must fail the rule set: the hosting platform refuses
 # a deploy over its file ceiling, so check-build carries the same number.
 mkdir -p "$WORK/tiny-files/config/_default"
@@ -730,11 +746,17 @@ assert "validate-site.sh" in workflow
 require = next(line for line in (root / "go.mod").read_text().splitlines()
                if line.startswith("require github.com/zoyeabio/strata"))
 assert f"ref: {require.split()[-1]}" in workflow
+
+package = __import__("json").loads((root / "package.json").read_text())
+lock = __import__("json").loads((root / "package-lock.json").read_text())
+assert package["overrides"]["postcss-selector-parser"] == "6.1.5"
+assert lock["packages"][""]["dependencies"] == package["dependencies"]
+assert lock["packages"]["node_modules/postcss-selector-parser"]["version"] == "6.1.5"
 PY
 then
-  pass 'new sites suppress unused bundle originals, carry the article metadata scaffold and a validating CI workflow'
+  pass 'new sites carry reproducible safe dependencies, article metadata and a validating CI workflow'
 else
-  fail 'new sites suppress unused bundle originals, carry the article metadata scaffold and a validating CI workflow'
+  fail 'new sites carry reproducible safe dependencies, article metadata and a validating CI workflow'
   cat "$WORK/scaffold.out" "$WORK/scaffold.stderr" >&2
 fi
 

@@ -1,8 +1,9 @@
 /**
  * Lighthouse CI for the example site.
  *
- * `npm run lighthouse` — runs after `npm run build`, scores the built site,
- * and fails the shell on a threshold breach. Local only: this repo ships no
+ * `npm run lighthouse` — creates a production build, serves its public/
+ * directory, scores that artifact, and fails the shell on a threshold breach.
+ * Local only: this repo ships no
  * workflow, so the check is one a developer runs before pushing.
  *
  * @lhci/cli is run through npx and pinned in package.json's script rather than
@@ -12,7 +13,7 @@
  *
  * Two deliberate choices:
  *
- * - The server is bound to 127.0.0.1. The scores are local-network numbers
+ * - The static server is bound to 127.0.0.1. The scores are local-network numbers
  *   and say nothing about your host's CDN, so they would be noise in CI.
  * - There is no PWA category, and no audit is skipped. The site is not a PWA
  *   and skipping an audit to hit a number is how a threshold stops meaning
@@ -28,8 +29,13 @@ module.exports = {
   ci: {
     collect: {
       url: [`http://127.0.0.1:${port}/`],
-      startServerCommand: 'hugo server --port ' + port + ' --bind 127.0.0.1',
-      startServerReadyPattern: 'Web Server is available at',
+      // Do not audit `hugo server`: the theme intentionally blocks crawlers
+      // outside production, which turns Lighthouse SEO into a false failure.
+      startServerCommand:
+        'hugo --minify && python3 -u -m http.server ' +
+        port +
+        ' --bind 127.0.0.1 --directory public',
+      startServerReadyPattern: 'Serving HTTP',
       numberOfRuns: 1,
       settings: {
         preset: 'desktop',
@@ -53,16 +59,16 @@ module.exports = {
         'is-on-https': ['off'],
 
         // The head is deliberately closed, so these must stay clean.
-        'no-document-write': ['error', {maxNumericValue: 0}],
-        'no-console-errors': ['error', {maxNumericValue: 0}],
-        'image-alt': ['error', {maxNumericValue: 0}],
-        'color-contrast': ['error', {maxNumericValue: 0}],
-        'tap-targets': ['warn', {maxNumericValue: 0}],
-        'meta-description': ['error', {maxNumericValue: 0}],
-        'document-title': ['error', {maxNumericValue: 0}],
-        'heading-order': ['warn', {maxNumericValue: 0}],
-        'link-name': ['warn', {maxNumericValue: 0}],
-        'canonical': ['warn', {maxNumericValue: 0}],
+        'no-document-write': ['error', {minScore: 1}],
+        'errors-in-console': ['error', {minScore: 1}],
+        'image-alt': ['error', {minScore: 1}],
+        'color-contrast': ['error', {minScore: 1}],
+        'link-in-text-block': ['error', {minScore: 1}],
+        'meta-description': ['error', {minScore: 1}],
+        'document-title': ['error', {minScore: 1}],
+        'heading-order': ['warn', {minScore: 1}],
+        'link-name': ['warn', {minScore: 1}],
+        'canonical': ['warn', {minScore: 1}],
       },
       budget: [
         {

@@ -434,11 +434,20 @@ cat > "$OUT/package.json" <<EOF
     "@tailwindcss/typography": "0.5.20",
     "tailwindcss": "4.3.3"
   },
+  "overrides": {
+    "postcss-selector-parser": "6.1.5"
+  },
   "engines": {
     "node": ">=22"
   }
 }
 EOF
+
+# Keep CI reproducible. The generated dependency set deliberately matches the
+# theme's own package.json, so its reviewed lockfile is also the scaffold's
+# lockfile. npm does not require a private package's name/version metadata to
+# match in order to run `npm ci`; it validates the dependency graph below.
+cp "$ROOT/package-lock.json" "$OUT/package-lock.json"
 
 # .gitignore
 cat > "$OUT/.gitignore" <<'EOF'
