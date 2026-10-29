@@ -22,6 +22,7 @@ not here, it is not part of the contract.
 | [Customization](/docs/customization/) | Colour schemes, CSS variables, custom CSS |
 | [Shortcodes](/docs/shortcodes/) | Shortcode reference and supported parameters |
 | [Sitemap](/docs/sitemap/) | The sitemap, `robots.txt`, what gets listed |
+| [SEO and GEO](/docs/seo-geo/) | What the theme emits for search and generative engines, and the go-live checklist |
 | [Security](/docs/security/) | Response headers, the strict CSP, Cloudflare limits |
 | [Troubleshooting](/docs/troubleshooting/) | Hugo platform behaviours that look like theme bugs |
 | [Contact endpoint](/docs/contact-endpoint/) | Reference Worker and KV schema for the contact form |

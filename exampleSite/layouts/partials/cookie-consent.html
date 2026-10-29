@@ -1,32 +1,28 @@
 {{- /*
-  Site-owned consent banner, rendered just before </body>. The theme ships no
-  consent UI and cannot: what counts as consent is site law, not theme code.
+  Site-owned consent banner (working reference). Rendered just
+  before </body> by _default/baseof.html when this partial exists.
 
-  This example deliberately ships the hook without a control: a dead
-  checkbox or a static choice would look like a working consent answer that
-  persists nothing — worse than none, because a reader who believed it would
-  be shown ads the banner disclaimed. The working JavaScript end of the
-  documented range lives in the theme repository, test/fixture
-  (assets/js/consent.js, mounted from extend-head.html in "gated" mode);
-  copy that pair, or wire your certified CMP here. Keep the shape of the
-  contract in mind either way: any controller must be a fingerprinted file
-  reference, not inline code, because static/_headers ships script-src
-  'self' with no unsafe-inline.
+  The theme ships no consent UI; this file is the JavaScript end of the
+  documented range, paired with assets/js/consent.js (mounted from
+  extend-head.html). It records the answer in localStorage
+  ("strata-cookie-consent" = granted|denied) and dispatches the
+  "strata:cookie-consent" event that js/ads.js obeys in [ads] consent
+  "gated" mode — the AdSense loader is injected only after "granted".
 
-  The banner still names where a reader goes next. Both pages ship as
-  templates in this example's content tree — content/cookies.md and
-  content/privacy-policy.md — which is the copy-paste set a real site
-  adapts, along with the short terms page at content/terms.md.
-
-  Context is the page.
+  consent.js wires the buttons through the data-consent-* attributes below;
+  replace the copy with your own notice. Keep the attribute names: they are
+  the contract.
 
   Called by: _default/baseof.html
 */ -}}
-<div class="site-consent" data-cookie-consent role="region" aria-label="Cookie consent">
-<p>This example ships the consent hook, not an answer: a real consent
-  control goes in this wrapper and its choice reaches the theme's
-  advertising gate — the fixture in the theme repository is the working
-  reference. The <a href="{{ "/cookies/" | relLangURL }}">cookie notice</a>
-  says what the cookies do; the <a href="{{ "/privacy-policy/" | relLangURL }}">privacy policy</a> says what
-  is collected and what a reader controls.</p>
+<div class="site-consent" data-cookie-consent role="region" aria-label="Cookie and ad consent">
+  <p>This site uses cookies and serves Google AdSense ads once you grant consent. Choose below; selecting "Essential only" loads no ad scripts. <a href="{{ "/cookies/" | relLangURL }}">Cookie usage</a> · <a href="{{ "/privacy-policy/" | relLangURL }}">Privacy policy</a></p>
+  <div data-consent-controls>
+    <button type="button" class="site-consent__btn site-consent__btn--primary" data-consent-accept>Accept ads</button>
+    <button type="button" class="site-consent__btn" data-consent-decline>Essential only</button>
+  </div>
+  <p data-consent-state hidden>
+    Your choice is saved in this browser: <span data-consent-value></span>
+    <button type="button" class="site-consent__btn site-consent__btn--link" data-consent-reopen>Change</button>
+  </p>
 </div>

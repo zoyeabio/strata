@@ -1,0 +1,4 @@
+# AdSense authorized sellers. Replace the publisher ID with your own
+# ca-pub-… value; check-build R11 parses this as a real record (a commented
+# line does NOT authorize the publisher, so the build fails).
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

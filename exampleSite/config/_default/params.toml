@@ -4,6 +4,10 @@
 # example sets differently, so a key left out here inherits the theme default.
 # Delete this file and the theme still builds.
 description = "A content-first Hugo theme for independent sites. This site is the theme's own example: every page exercises a real feature."
+# Logo: rendered in the header (inline SVG) and emitted as Organization.logo
+# in JSON-LD. Use a raster PNG (≈112–484 px) for production so Google accepts
+# it for the Knowledge Graph / Article publisher logo; SVG is fine for display.
+logo = "images/logo.svg"
 eagerCardCount = 3
 # Absent from the theme on purpose: an empty slice is truthy in `with`, so
 # absent means every single is an article. This site narrows it to posts.
@@ -88,3 +92,11 @@ customCSS = ["css/example.css"]
       { name = "Facebook", icon = "facebook", url = "https://www.facebook.com/" },
       { name = "Email", icon = "email", url = "mailto:hello@strata.example" },
     ]
+
+# ── AdSense (demo) ──────────────────────────────────────────────────────
+# 演示用占位 ID；上线前替换为你的真实发布商 ID（ca-pub- 后 16 位数字）。
+# consent = "gated" 走站点自带同意横幅（layouts/partials/cookie-consent.html
+# + assets/js/consent.js）：读者“接受”后广告加载器才注入。
+[ads]
+  client = "ca-pub-0000000000000000"
+  consent = "gated"

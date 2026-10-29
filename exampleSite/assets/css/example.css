@@ -66,3 +66,42 @@
   text-decoration: underline;
   text-underline-offset: 0.16em;
 }
+
+/* Cookie consent controls — paired with layouts/partials/cookie-consent.html
+   and assets/js/consent.js. Unlayered so they win over the theme's rules. */
+[data-consent-controls] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.site-consent__btn {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.site-consent__btn:hover { border-color: var(--accent); }
+
+.site-consent__btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.site-consent__btn--link {
+  border-color: transparent;
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+  padding: 7px 6px;
+}

@@ -12,3 +12,11 @@
   Called by: partials/head/head.html
 */ -}}
 <meta name="theme-color" content="#232d38">
+
+{{- /* Site-owned consent controller, mounted as a fingerprinted file so
+   static/_headers' script-src 'self' (no unsafe-inline) does not block it.
+   Drives js/ads.js in [ads] consent "gated" mode. See assets/js/consent.js. */ -}}
+{{ with resources.Get "js/consent.js" }}
+{{ $consent := . | fingerprint "sha512" }}
+<script defer src="{{ $consent.RelPermalink }}" integrity="{{ $consent.Data.Integrity }}"></script>
+{{ end }}

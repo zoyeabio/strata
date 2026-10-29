@@ -3,6 +3,7 @@ title: "Shipping images that load"
 description: "Images are the bottleneck. The fix is not lazy-loading; it is deciding what the image is for before you optimise it."
 summary: "Lazy-loading is the wrong answer to slow pages. The right one is deciding, before you optimise anything, what each image is actually there for."
 date: 2026-05-21
+lastmod: 2026-10-01
 tags: ["images", "performance"]
 keywords: ["images", "performance", "webp", "responsive"]
 # A contributor post: author and authorurl are page-level overrides of the
@@ -10,6 +11,8 @@ keywords: ["images", "performance", "webp", "responsive"]
 # from every other article on this site.
 author: "June Park"
 authorurl: "https://example.com/"
+# Demonstrates the per-page Table of Contents (article.showToc).
+showToc: true
 featureimage: "images/features-images.png"
 featureimagealt: "An illustration with generous margins"
 ---

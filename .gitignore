@@ -5,3 +5,5 @@ resources/_gen/
 node_modules/
 hugo_stats.json
 __pycache__/
+# Agent working memory (project-local, never commit)
+.workbuddy-ai/

@@ -11,6 +11,8 @@ featureimage: "images/features-scaffold.png"
 featureimagealt: "A fresh directory tree laid out cleanly"
 ---
 
+{{< ads slot="1234567890" >}}
+
 A theme is a promise about where the work sits. Reading it is reading
 which decisions are yours and which are already settled.
 

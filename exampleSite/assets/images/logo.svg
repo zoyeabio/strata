@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 32" width="132" height="32" role="img" aria-label="Strata">
+  <g fill="currentColor">
+    <rect x="0" y="5" width="24" height="4.5" rx="1.5"/>
+    <rect x="0" y="13.75" width="24" height="4.5" rx="1.5"/>
+    <rect x="0" y="22.5" width="24" height="4.5" rx="1.5"/>
+  </g>
+  <text x="34" y="23" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="700" letter-spacing="-0.5" fill="currentColor">Strata</text>
+</svg>
