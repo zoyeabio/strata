@@ -1,148 +1,79 @@
 ---
 title: "Privacy Policy"
-description: "Reference template: who we are, what we collect, how cookies and advertising work, how long data is kept, and the rights you have."
+description: "How the Strata example records consent, demonstrates advertising, and handles the optional contact form."
 keywords: ["privacy", "cookies", "advertising", "rights", "legal"]
 ---
 
-<!--
-  Reference template. Replace every [TBD], delete the comments and this
-  paragraph before publishing: a policy with placeholders in it is worse
-  than no policy. Keep the order; the reader's first question is always
-  "who owns this and why do you have it".
--->
+This is the policy for the Strata demonstration site. It documents the
+features enabled in this example repository; a production publisher must
+replace the example identity, contact details and vendors with its own.
 
-## Who we are
+## Who operates this example
 
-[TBD: the legal name of the publisher] operates this site and is its data
-controller: it decides what to collect and why.
+Strata Studio maintains this demonstration. Questions about the example can
+be sent to `hello@strata.example`. The `.example` address and the Portland
+address shown elsewhere on the site are reserved demonstration data, not a
+real business contact.
 
-- Contact: [TBD: email address]
-- Address: [TBD: postal address, if you are required to disclose one]
-- Data protection contact: [TBD: name or role, if you have one]
+## What the site stores
 
-## What we collect
+The consent banner stores one value in the visitor's browser under
+`strata-cookie-consent`: `granted` or `denied`. The value remembers the
+choice until the visitor changes it or clears browser storage. It is not sent
+to the site and is not used to identify the visitor.
 
-A static site keeps no database, so three things leave a trace and nothing
-else does.
+The contact form demonstrates the theme's form contract by posting to
+`/api/contact`. This repository does not provide that endpoint or retain form
+submissions. A deployer that connects the form to a mailbox, worker or CRM
+must describe that service, its purpose and retention period here.
 
-**Contact form submissions.** The name, email and message a visitor types
-into the contact form go to [TBD: where they land — a mailbox, a worker, a
-CRM]. Keep that link here: it is the only way a visitor can ask what was
-stored about them.
-
-**Server logs.** Your host records each request: IP address, browser and
-operating system, request time, the page requested, and the page that
-referred you. Host: [TBD]. Its own retention period: [TBD].
-
-**Cookies and similar technologies.** See the section below, and
-[cookies](/cookies/) for the short version.
-
-If the site does more than a static build — a newsletter, a shop, comments,
-your own analytics — list it here too. This template does not invent data
-you do not collect, and it does not hide data you do.
-
-## Cookies and similar technologies
-
-A cookie is a small text file stored on the visitor's device. The same rules
-cover local storage and the identifiers a third party reads back from
-there.
-
-| Name | Purpose | Set by | Lifetime |
-|---|---|---|---|
-| [TBD: session or preference cookie] | [TBD] | This site | [TBD] |
-| `_ga` | Analytics: distinguish visitors, measure sessions | This site, through Google Analytics | 2 years |
-
-<!-- TODO: keep only the rows you actually load. A cookie table that lists
-     cookies the site does not set is a misstatement, not a courtesy. -->
+The hosting provider may keep ordinary request logs containing an IP address,
+browser information, request time, requested URL and referring page. This
+repository does not select a host or control those logs; a production deployer
+must identify its host and publish the applicable retention period.
 
 ## Advertising
 
-This site shows ads served by [TBD: Google AdSense, or delete the whole
-section if it shows none].
+One article contains a demonstration AdSense unit with a non-production
+publisher ID. No Google advertising script is requested until the visitor
+selects **Accept ads**. Selecting **Essential only** keeps the loader out of
+the page and collapses the reserved ad space.
 
-When you visit a page, your browser automatically sends the page URL and
-your IP address to Google. Google may set and read cookies, and they may
-come from several domains at once: `google.com`, `doubleclick.net`,
-`googlesyndication.com` and `googleadservices.com`. Google uses them to
-avoid showing you the same ad again, to detect click fraud, and to make
-ads more relevant.
+After consent, the browser may send the page URL and IP address to Google and
+Google may read or set advertising identifiers from domains including
+`google.com`, `doubleclick.net`, `googlesyndication.com` and
+`googleadservices.com`. Google uses them for ad delivery, frequency control,
+fraud prevention and reporting. This example does not load Google Analytics.
 
-## Ad personalization
+Google's controls are available in
+[Google Ad Settings](https://adssettings.google.com) and
+[My Activity](https://myactivity.google.com/).
 
-With ad personalization on, Google uses the information above to tailor the
-ads you see on Google properties and on other sites that use Google's
-advertising services. With it off, Google does not collect or use that
-information to personalize ads; you still see ads, chosen from the page you
-are reading, your current search, or your general location. Personalization
-off is not the ad cookies gone: Google may still read non-personalized
-identifiers for frequency capping, fraud detection and aggregate reporting,
-which is why this section survives personalization being switched off.
+## Changing the choice
 
-- Change it in [Google Ad Settings](https://adssettings.google.com)
-- Review or delete what Google has stored in [My Activity](https://myactivity.google.com/)
-- Turn off Google Analytics with the [opt-out browser add-on](https://tools.google.com/dlpage/gaoptout)
-- Block or clear cookies in your browser
+Use **Change** in the banner to accept or decline again, or clear browser
+storage. If advertising code has already loaded, declining removes the
+reserved ad space and reloads the page once so the previous advertising
+session does not continue on that visit.
 
-Clearing cookies alone does not stop personalization. Unless you change
-your ads settings, Google keeps using the cookie information it already has.
+## Sharing and retention
 
-## How we ask, and how you withdraw
+Without advertising consent, this repository sends no advertising data to
+Google. With consent, Google processes the advertising request under its own
+published policies. The local consent choice remains only in the browser
+until it is changed or cleared. The repository itself keeps no visitor
+database.
 
-The banner at the bottom of the page lets you accept or decline
-[TBD: which categories] before they are set. Withdrawal is the same one
-action: come back and change your answer where the site offers a control
-for it (the banner is site-owned, so a site can always provide one), or
-clear your browser storage.
+## Your choices
 
-Consent given on this site is changed on this site. The ad networks do not
-change it for you, which is why the choice lives in your browser and not in
-an account.
+Visitors can decline advertising, withdraw a previous choice, clear stored
+site data in the browser, and use Google's account controls. A production
+publisher must also provide the controller identity, jurisdiction-specific
+rights, regulator contact and any vendor or international-transfer details
+that apply to its deployment.
 
-[TBD: one line on consent law, if it applies — "we use cookies for
-analytics and advertising only with your consent" in the EU and the UK, or
-"not applicable" elsewhere. Do not leave this to the reader to infer.]
+## Children and changes
 
-## How long we keep things
-
-- Server logs: [TBD: your host's retention period]
-- Google's advertising logs: Google anonymizes IP addresses after nine
-  months and cookie information after eighteen months
-- Contact form submissions: [TBD: delete after a stated period, or keep for
-  the length of the relationship and say why]
-
-A number a reader can hold you to beats a paragraph of good intentions.
-
-## Who we share data with
-
-[TBD: one row per vendor — host, ad network, analytics, form or CRM — with
-what it receives and why. Names, not "third parties".]
-
-If any of them processes data outside your jurisdiction, say so and how it
-is protected: [TBD: Data Privacy Framework participation, standard
-contractual clauses, or "no transfers"].
-
-## Your rights
-
-- Read what we hold about you, correct it, or ask us to delete it
-- Object to a purpose, or ask us to stop a use of your data
-- Export it
-- Withdraw consent at any time, as easily as you gave it
-- Complain to your regulator: [TBD: e.g. the ICO in the UK, ico.org.uk;
-  the CNIL in France]
-
-Residents of US states with their own privacy law: [TBD: the state list of
-rights, and whether you offer an opt-out of "sale" or "sharing" for
-cross-context behavioural advertising. A truthful "we do not sell or share
-this data" is a valid answer; inventing a mechanism you do not operate is
-not.]
-
-## Children
-
-[TBD: if the site is not directed at children, say so and state the age
-below which you do not knowingly collect data. If it is, the rules are
-different and this paragraph is not enough.]
-
-## Changes to this policy
-
-We change this page when the site changes, and say so at the top. Effective
-date: [TBD: YYYY-MM-DD]. Last updated: [TBD: YYYY-MM-DD].
+This technical demonstration is not directed at children and does not
+knowingly collect information from them. This page changes whenever the
+example's data flow changes. Last updated: 2026-10-29.

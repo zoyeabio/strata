@@ -1,56 +1,39 @@
 ---
 title: "Cookies"
-description: "Reference template: the cookies this site can set, which need your choice, how to withdraw it, and where to find the longer answer."
-keywords: ["cookies", "consent", "tracking", "legal"]
+description: "The browser storage used by the Strata example and what can load after advertising consent."
+keywords: ["cookies", "consent", "advertising", "legal"]
 ---
 
-<!--
-  Reference template. The banner links here, so it must exist and it must
-  say the short thing. Everything that needs a lawyer belongs in
-  /privacy-policy/; this page is the answer to "which cookies, exactly".
--->
+## What this example stores
 
-## What this page is for
-
-Some cookies run the site. Others measure or advertise, and they need your
-choice first. This page lists what falls into which bucket, and how to undo
-it. The full answer — including your rights and who receives the data — is
-the [privacy policy](/privacy-policy/).
-
-## Necessary
-
-Set as soon as the page loads. Without them the site stops working, and
-regulators treat strictly-necessary storage as exempt from the consent
-question.
+The example records the consent banner choice in browser local storage. It
+does not set an analytics cookie and does not load Google Analytics.
 
 | Name | Purpose | Lifetime |
 |---|---|---|
-| [TBD: session or preference cookie] | [TBD: keeps your settings, for example] | [TBD] |
+| `strata-cookie-consent` | Remembers `granted` or `denied` so the advertising gate can honour the choice | Until the visitor changes it or clears browser storage |
 
-## With your choice
+## Advertising storage
 
-The banner at the bottom of the page asks before any of these are set.
+The banner asks before the demonstration AdSense loader is requested.
+Selecting **Essential only** loads no advertising script. After **Accept
+ads**, Google may use advertising cookies or similar identifiers for ad
+delivery, frequency control, fraud prevention and reporting.
 
-| Name | Purpose | Set by | Lifetime |
+| Provider | Purpose | When it can load | Lifetime |
 |---|---|---|---|
-| `_ga` | Analytics: distinguish visitors, measure sessions | This site, through Google Analytics | 2 years |
-| Google advertising cookies | Avoid repeating ads, detect click fraud, choose relevant ads | `google.com`, `doubleclick.net`, `googlesyndication.com`, `googleadservices.com` | Until you clear them |
-
-<!-- TODO: keep only what the site loads. Deleting a row means the vendor is
-     gone from the site, not just from this table. -->
+| Google advertising services | Deliver and measure ads, limit repetition and detect fraud | Only after **Accept ads** | Controlled by Google and the visitor's browser or Google account settings |
 
 ## How to withdraw
 
-Withdrawal is the same action as consent: change your answer where the site
-stores it (the banner is site-owned, so a site can always offer one), or
-clear browser storage. Consent given here is changed here, not at the ad
-network. A withdrawal after ad code already loaded takes effect the same
-way: the theme's gate removes the reserved ad space and reloads the current
-page once, so nothing already running survives the visit.
-
-Withdrawing stops what this site loads on later pages; what Google retains
-from pages you already visited is managed in
+Use **Change** in the banner and select **Essential only**, or clear this
+site's browser storage. If advertising code already loaded, the theme removes
+the reserved ad space and reloads the current page once. Google's retained
+account data can be managed in
 [Google Ad Settings](https://adssettings.google.com) and
-[My Activity](https://myactivity.google.com/), where the analytics
-[opt-out add-on](https://tools.google.com/dlpage/gaoptout) is one more
-lever for Google Analytics specifically.
+[My Activity](https://myactivity.google.com/).
+
+The longer explanation is in the
+[privacy policy](/privacy-policy/). A real deployment must replace these
+example disclosures with the exact storage, vendors and retention periods it
+uses.

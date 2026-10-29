@@ -90,12 +90,17 @@
   transition: background-color .15s ease, border-color .15s ease;
 }
 
-.site-consent__btn:hover { border-color: var(--accent); }
+.site-consent__btn:hover { border-color: var(--site-accent); }
 
 .site-consent__btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--site-accent);
+  border-color: var(--site-accent);
   color: #fff;
+}
+
+.site-consent__btn--primary:hover {
+  background: var(--site-accent-strong);
+  border-color: var(--site-accent-strong);
 }
 
 .site-consent__btn--link {

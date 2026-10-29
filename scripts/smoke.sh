@@ -915,11 +915,19 @@ css_assert 'site-nav__link\{[^}]*font-weight:600' 'nav links carry the weight th
 css_assert 'site-nav\{margin-inline-start:auto' 'nav and action buttons sit as one group at the right'
 assert 'index.html' 'class="site-nav" id="site-navigation"' \
   'the nav carries the class that right-align rule targets'
-css_assert 'max-width:852px\)\{\.site-nav__toggle\{display:inline-flex;margin-inline-start:auto' \
-  'mobile: the hidden nav gives its auto margin to the hamburger'
+css_assert 'site-nav__toggle\{display:inline-flex;margin-inline-start:0' \
+  'mobile: the flexible brand, not an auto margin, owns spare header space'
 css_assert 'site-header\{[^}]*gap:12px' 'header items are tight once the nav is pushed right'
-css_assert '\-\-brand-logo-height:80px' 'logo height is a token a site can override'
+css_assert 'site-header\{gap:4px' 'mobile: header controls stay on one row beside a compact wordmark'
+css_assert 'site-brand\{[^}]*min-width:0;flex:1;overflow:hidden' 'mobile: the brand yields space before header controls wrap'
+css_assert 'site-nav__toggle,.site-header__search,.site-header__a11y,.site-header__toggle\{flex:0 0 44px' \
+  'mobile: all four header controls keep their 44px touch targets'
+css_assert 'max-width:359px\)\{\.site-header\{padding-inline:12px' \
+  'narrow mobile: shell space is reclaimed without shrinking tap targets'
+css_assert '\-\-brand-logo-height:32px' 'logo height is a compact token a site can override'
 css_assert 'site-brand__logo\{[^}]*height:var\(--brand-logo-height\)' 'logo size reads the token'
+css_assert 'data-nav-panel[^}]*site-nav__link,[^}]*data-nav-panel[^}]*site-nav__text\{[^}]*padding-inline:var\(--site-gutter\)' \
+  'mobile menu labels align with the site gutter'
 css_assert 'site-header__toggle\{[^}]*width:44px' 'appearance toggle is a square target, not a padded box'
 css_assert 'site-header__toggle\{[^}]*border:0' 'appearance toggle carries no box, hover is colour only'
 css_assert 'site-header__search\{[^}]*border:0' 'search toggle carries no box, hover is colour only'
@@ -962,6 +970,12 @@ css_assert 'card--row:has\(> *\.card__media\) \.card__summary[^{}]*\{[^}]*grid-c
 css_assert_not 'min-height:112px' 'no residual row thumb minimum height'
 css_assert 'site-footer__meta\{[^}]*margin-inline-start:auto' \
   'footer social group sits at the right of the bottom bar'
+css_assert 'site-footer__grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)' \
+  'mobile footer pairs compact link columns'
+css_assert 'site-footer__company,.site-footer__contact\{grid-column:1/-1' \
+  'mobile footer gives identity and contact a full row'
+css_assert 'site-footer__meta\{grid-column:1/-1;justify-content:flex-start' \
+  'mobile footer social links occupy their own left-aligned row'
 css_assert 'site-footer__social\{[^}]*background:var\(--surface\)' 'footer social is a filled tile'
 css_assert 'site-footer__social:has\(svg\)\{[^}]*width:44px' 'footer social icon fills the tile'
 css_assert 'site-footer__social svg\{[^}]*width:22px' 'footer social glyphs are large enough to read'

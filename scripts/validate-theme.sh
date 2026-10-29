@@ -148,6 +148,24 @@ else
 fi
 cp "$WORK/index-original.html" "$WORK/public/index.html"
 
+# Organization logos commonly live only in JSON-LD (an inline header SVG has
+# no src attribute). Such a real schema reference must keep the published
+# asset from being misreported as an orphan.
+mkdir -p "$WORK/public/images"
+printf '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>\n' \
+  >"$WORK/public/images/schema-only-logo.svg"
+sed 's#</head>#<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","logo":"https://example.org/images/schema-only-logo.svg"}</script></head>#' \
+  "$WORK/index-original.html" >"$WORK/public/index.html"
+if "$ROOT/scripts/check-build.sh" "$WORK/public" --mode theme --site "$ROOT/test/fixture" \
+    >"$WORK/schema-logo.out" 2>&1; then
+  pass 'a JSON-LD-only logo is a referenced image, not an orphan'
+else
+  fail 'a JSON-LD-only logo is a referenced image, not an orphan'
+  cat "$WORK/schema-logo.out" >&2
+fi
+cp "$WORK/index-original.html" "$WORK/public/index.html"
+rm "$WORK/public/images/schema-only-logo.svg"
+
 # A cap with no headroom must fail the rule set: the hosting platform refuses
 # a deploy over its file ceiling, so check-build carries the same number.
 mkdir -p "$WORK/tiny-files/config/_default"

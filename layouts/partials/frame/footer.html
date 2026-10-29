@@ -36,13 +36,13 @@
   {{- if $rich }}
   <div class="site-footer__grid">
     {{- if or $company.name $company.slogan }}
-    <div>
+    <div class="site-footer__company">
       <p class="site-footer__heading">{{ $company.name | default site.Title }}</p>
       {{- with $company.slogan }}<p class="site-footer__text">{{ . }}</p>{{ end }}
     </div>
     {{- end }}
     {{- with $quick.links }}
-    <div>
+    <div class="site-footer__quick">
       <p class="site-footer__heading">{{ $quick.title | default "Quick Links" }}</p>
       <ul class="site-footer__links">
         {{- range . }}<li><a class="site-footer__link" {{ partial "href.html" .url }}>{{ .name }}</a></li>{{ end }}
@@ -50,7 +50,7 @@
     </div>
     {{- end }}
     {{- with $legal.links }}
-    <div>
+    <div class="site-footer__legal">
       <p class="site-footer__heading">{{ $legal.title | default "Legal" }}</p>
       <ul class="site-footer__links">
         {{- range . }}<li><a class="site-footer__link" {{ partial "href.html" .url }}>{{ .name }}</a></li>{{ end }}
@@ -58,7 +58,7 @@
     </div>
     {{- end }}
     {{- if or $company.email $company.phone $company.address }}
-    <div>
+    <div class="site-footer__contact">
       <p class="site-footer__heading">Contact</p>
       <ul class="site-footer__links">
         {{- with $company.email }}

@@ -227,6 +227,24 @@ def is_site_url(u):
         u = 'https:' + u
     m = re.match(r'^https?://([^/]+)', u)
     return bool(m) and m.group(1).lower() == site_host
+
+
+def schema_resource_urls(value):
+    """URLs carried by JSON-LD resource fields, including nested objects."""
+    found = set()
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if key in {'url', 'logo', 'image', 'contentUrl', 'thumbnailUrl'} \
+                    and isinstance(child, str):
+                found.add(child)
+            elif isinstance(child, (dict, list)):
+                found |= schema_resource_urls(child)
+    elif isinstance(value, list):
+        for child in value:
+            found |= schema_resource_urls(child)
+    return found
+
+
 for t in texts:
     text = t.read_text(errors='ignore')
     urls = set()
@@ -242,6 +260,16 @@ for t in texts:
     for m in css_url.findall(text):
         urls.add(m)
         dl.append({m})
+    if t.suffix == '.html':
+        for tag, blob in re.findall(r'(<script\b[^>]*>)(.*?)</script\s*>', text,
+                                    re.I | re.S):
+            if attrs_of(tag).get('type') != 'application/ld+json':
+                continue
+            try:
+                urls |= schema_resource_urls(json.loads(blob))
+            except json.JSONDecodeError:
+                # R7 reports the malformed schema with its page path.
+                pass
     for tag in IMG_CARRIERS.findall(text):
         dl.extend(groups_for(tag))
     local = {u for u in urls if local_path(u) and is_site_url(u)}
@@ -308,10 +336,10 @@ if subset_bad:
 else:
     ok('preload candidates are a subset of the page srcset')
 
-# R4 no orphan images: every image file is referenced by a markup attribute or
-#    CSS url() in text output. Arbitrary JavaScript and JSON string values are
-#    deliberately not treated as resource references; favicon-family files are
-#    exempt because they are linked from nowhere.
+# R4 no orphan images: every image file is referenced by a markup attribute,
+#    CSS url() or a URL-bearing JSON-LD field. Arbitrary JavaScript and JSON
+#    strings are deliberately not treated as resource references;
+#    favicon-family files are exempt because they are linked from nowhere.
 refd_paths = {local_path(u) for u in referenced}
 orphans = sorted(str(p.relative_to(pub)) for p in images
                  if f'/{p.relative_to(pub)}' not in refd_paths and not FAVICON_RE.search(p.name))
