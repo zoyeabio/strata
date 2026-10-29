@@ -106,6 +106,10 @@
     "url" $page.Permalink
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
     "publisher" (dict "@id" $orgID) }}
+{{- /* GEO: explicit word count and section help engines classify and
+       cite the piece. Both are standard schema.org Article properties. */ -}}
+{{- $article = merge $article (dict "wordCount" $page.WordCount) }}
+{{- with $page.Section }}{{ $article = merge $article (dict "articleSection" .) }}{{ end }}
 {{- $author := $page.Params.author | default site.Params.author.name }}
 {{- $authorURL := $page.Params.authorurl | default site.Params.author.url }}
 {{- if $author }}
