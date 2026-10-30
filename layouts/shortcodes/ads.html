@@ -45,7 +45,7 @@
 {{- if not (findRE `^ca-pub-\d{16}$` $client) -}}
   {{- errorf "ads shortcode: client %q does not look like a ca-pub-… publisher ID (that is ca-, then pub-, then 16 digits — AdSense for Platforms' ca-host-pub-… belongs in data-ad-host, never here); fix site.Params.ads.client (%s)" $client .Position -}}
 {{- end -}}
-<ins class="adsbygoogle" style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
+<ins class="adsbygoogle" data-strata-ad-unit style="display:block{{ with .Get "minHeight" }};min-height:{{ . }}{{ end }}" data-ad-client="{{ $client }}" data-ad-slot="{{ $slot }}" data-ad-format="{{ .Get "format" | default "auto" }}"></ins>
 {{- with resources.Get "js/ads.js" }}
 {{- $js := . | fingerprint "sha512" }}
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" data-ads-consent="{{ $consent }}"></script>

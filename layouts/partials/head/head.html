@@ -178,7 +178,7 @@
   {{- end }}
   {{- $consent := site.Params.ads.consent }}
   {{- if not $consent }}
-  {{- errorf "ads: consent must be picked explicitly when advertising is on — \"gated\" for the theme's own consent contract, \"none\" when you run a Google-certified CMP; there is no default, so a site that forgot the setting never asks Google silently (%s)" .Path }}
+  {{- errorf "ads: consent must be picked explicitly when advertising is on — \"gated\" for the theme's consent-event contract, \"none\" when the site or its external CMP controls consent; there is no default, so a site that forgot the setting never asks Google silently (%s)" .Path }}
   {{- else if eq $consent "basic" }}
   {{- errorf "ads: consent \"basic\" is gone — rename it to \"gated\" (the value is a loader gate, not Google's Basic Consent Mode and no TCF string exists here) (%s)" .Path }}
   {{- else if not (in (slice "none" "gated") $consent) }}
@@ -193,7 +193,11 @@
   {{- errorf "ads: consent = \"gated\" expects the site's consent hook (layouts/partials/cookie-consent.html) to render a controller that records \"strata-cookie-consent\" and dispatches CustomEvent(\"strata:cookie-consent\") — absent, every unit hides forever and keeps the space blocked. Ship the hook, or set site.Params.ads.externalConsentController = true to declare the controller ships from your own code (%s)" .Path }}
   {{- end }}
   {{- if not site.Params.ads.skipCspCheck }}
-  {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` (readFile "static/_headers")) }}
+  {{- $headers := "" }}
+  {{- if fileExists "static/_headers" }}
+    {{- $headers = readFile "static/_headers" }}
+  {{- end }}
+  {{- if not (findRE `(?im)^[ \t]*content-security-policy:[^\n]*script-src[^;]*pagead2\.googlesyndication\.com` $headers) }}
   {{- errorf "ads: no Content-Security-Policy script-src allows pagead2.googlesyndication.com in static/_headers, so the AdSense loader would ship blocked. A commented-out or Content-Security-Policy-Report-Only line does not block requests, so it does not count; copy the ad-site headers block from the security docs into your site's static/_headers, or set site.Params.ads.skipCspCheck = true if your host applies headers itself (%s)" .Path }}
   {{- end }}
   {{- end }}

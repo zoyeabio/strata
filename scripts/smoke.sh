@@ -1277,6 +1277,8 @@ assert 'section-a/shortcodes/index.html' 'aria-invalid=' 'message field exposes 
 #     push copy carries the site's consent posture
 assert 'section-a/shortcodes/index.html' 'data-ad-client="ca-pub-0000000000000000"' 'ads unit carries the client'
 assert 'section-a/shortcodes/index.html' 'data-ad-slot="1234567890"' 'ads unit carries the slot'
+assert 'section-a/shortcodes/index.html' 'data-strata-ad-unit' \
+  'ads runtime marks and targets only theme-owned units'
 assert_not 'section-a/shortcodes/index.html' 'adsbygoogle\.js\?client=' \
   'gated consent keeps the loader out of the page markup'
 assert 'section-a/shortcodes/index.html' 'data-ads-consent="gated"' \

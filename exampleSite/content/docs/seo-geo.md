@@ -54,11 +54,15 @@ does not ship one, so the file you provide wins.
 
 ## GEO notes
 
-Generative engines (ChatGPT, Perplexity, Gemini) favour content that is
-structured, dated, attributed, and entity-clear. Strata's schema already
-supplies the author, publisher, and dates. Two cheap wins for GEO:
+Structured, dated, attributed, and entity-clear content is easier for search
+and retrieval systems to interpret. Strata's schema supplies the author,
+publisher, dates, article section, and word count. These signals improve
+machine-readable completeness; they do not guarantee ranking, inclusion, or a
+citation. Two useful content practices are:
 
-- Add an `interactive/faq` block to key topics — engines lift clean Q&A.
-- Keep a table of contents on long articles so section boundaries are explicit.
+- Add an `interactive/faq` block when the page genuinely answers recurring
+  questions; it exposes the same visible answers as structured FAQ data.
+- Keep a table of contents on long articles so readers and machines can see
+  section boundaries explicitly.
 
 Neither requires a plugin; both are plain content.

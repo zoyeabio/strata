@@ -106,8 +106,9 @@
     "url" $page.Permalink
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" (printf "%s#webpage" $page.Permalink))
     "publisher" (dict "@id" $orgID) }}
-{{- /* GEO: explicit word count and section help engines classify and
-       cite the piece. Both are standard schema.org Article properties. */ -}}
+{{- /* Standard Article properties that make the document's size and section
+       explicit to any consumer of the structured data. They improve the
+       schema's completeness without making a search or citation promise. */ -}}
 {{- $article = merge $article (dict "wordCount" $page.WordCount) }}
 {{- with $page.Section }}{{ $article = merge $article (dict "articleSection" .) }}{{ end }}
 {{- $author := $page.Params.author | default site.Params.author.name }}

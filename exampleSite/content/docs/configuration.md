@@ -365,14 +365,15 @@ never ships an ad request it did not choose. Two values, both explicit:
 
 - `"none"`:  the site answers for itself — the loader ships from
   `<head>` on unit pages. This is the shape a site runs behind a
-  Google-certified CMP, which is the only self-service path for
-  personalized advertising to EEA/UK/Switzerland traffic anyway.
+  Google-certified CMP. `none` does not mean that consent is unnecessary:
+  it means the theme performs no gating, so the site's CMP or other consent
+  controller must enforce the applicable policy before advertising runs.
 - `"gated"`: the loader waits for the site's answer. `js/ads.js` — the
   fingerprinted push copy every unit ships — reads
   `localStorage["strata-cookie-consent"]` for `granted`/`denied` and
   listens for the `CustomEvent("strata:cookie-consent")` with the same
   detail; a granted answer injects the loader once, drains the units in DOM
-  order, and lifts the `data-ads-pending` visibility until then. Write the
+  order, and removes the `data-ads-pending` visibility guard. Write the
   two values from your own banner controller, exactly as the fixture does
   (`test/fixture/assets/js/consent.js` beside
   `layouts/partials/cookie-consent.html`): ask once, persist once, dispatch
@@ -392,13 +393,18 @@ never ships an ad request it did not choose. Two values, both explicit:
 Waiting for the answer does not lift the origin policy: `gated` mode still
 requires `static/_headers` to allow `pagead2.googlesyndication.com`, and
 head.html checks that at build time — the loader loads once the answer is
-granted, into the same policy.
+granted, into the same policy. A site whose hosting platform applies the
+equivalent response header outside `static/_headers` may set
+`ads.skipCspCheck = true`; that explicitly transfers responsibility to the
+host configuration rather than disabling CSP requirements.
 
 ### The pages a banner points at
 
 A banner that says "we use cookies" and points nowhere is not a notice.
-Three pages make it one, and this example publishes all three as
-templates with every `[TBD]` left for the reader to fill:
+This example publishes three relevant pages. Its privacy and cookie pages
+accurately describe the demonstration data flow without placeholders; the
+terms page remains a visibly labelled reference template and must be replaced
+before a production launch:
 
 | Page | Says | Template |
 |---|---|---|
@@ -406,8 +412,10 @@ templates with every `[TBD]` left for the reader to fill:
 | [Cookies](/cookies/) | the short list the banner links from | `content/cookies.md` |
 | [Terms of use](/terms/) | how the site may be used, and our limits | `content/terms.md` |
 
-`scripts/new-site.sh` creates the same three as stub pages with TODO
-comments, so a new site starts with the right shape and nothing invented.
+`scripts/new-site.sh` creates all three as stub pages with TODO comments, so a
+new site starts with the right shape and nothing invented. When advertising is
+enabled, the build refuses `[TBD]`/TODO content in the privacy and cookie
+notices; legal accuracy still remains the publisher's responsibility.
 
 A `[TBD]` is a fact about your site, not a writing exercise. Three of
 them are not optional: whether consent law applies here and on what

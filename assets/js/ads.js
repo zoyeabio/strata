@@ -4,7 +4,8 @@
 
    consent "none": the loader ships from head.html on unit pages and every
    copy simply queues one unit into the array the loader drains — the shape
-   that has shipped since 0.1, for sites behind a certified CMP.
+   that has shipped since 0.1. The theme performs no consent gating in this
+   mode; the site or its CMP owns that decision.
 
    consent "gated": the site owns the consent answer; this file obeys it.
    Contract (documented in docs/configuration.md):
@@ -39,7 +40,9 @@ function consentValue() {
 }
 
 function units() {
-  return document.querySelectorAll('ins.adsbygoogle');
+  // Select only markup emitted by Strata. Google may append its own
+  // adsbygoogle nodes or mutate their private class names at runtime.
+  return document.querySelectorAll('ins.adsbygoogle[data-strata-ad-unit]');
 }
 
 function collapseUnits() {
@@ -52,6 +55,7 @@ function collapseUnits() {
 
 function revealUnits() {
   units().forEach(function (unit) {
+    unit.removeAttribute('data-ads-pending');
     unit.style.removeProperty('display');
     var slot = unit.closest('.ad-slot');
     if (slot) slot.style.removeProperty('display');
@@ -61,7 +65,7 @@ function revealUnits() {
 function injectLoader() {
   if (window.__strataAdsLoader) return;
   window.__strataAdsLoader = true;
-  var unit = document.querySelector('ins.adsbygoogle[data-ad-client]');
+  var unit = document.querySelector('ins.adsbygoogle[data-strata-ad-unit][data-ad-client]');
   var client = unit && unit.getAttribute('data-ad-client');
   if (!client) return;
   var loader = document.createElement('script');
@@ -85,23 +89,39 @@ function run() {
   while (drain());  // each copy had better be one unit apart
 }
 
+function handleConsent(event) {
+  if (event.detail === 'granted') {
+    revealUnits();
+    run();
+  } else if (event.detail === 'denied') {
+    collapseUnits();
+    if (window.__strataAdsLoader) window.location.reload();
+  }
+}
+
 (function () {
   var consent = document.currentScript && document.currentScript.getAttribute('data-ads-consent');
   if (consent !== 'gated') {
     (adsbygoogle = window.adsbygoogle || []).push({});
     return;
   }
-  units().forEach(function (unit) {
-    unit.setAttribute('data-ads-pending', '');
-  });
+  // Every ad unit carries this file, but one document-level listener is
+  // enough. Register it even when consent was already granted: otherwise a
+  // returning visitor could reopen the banner and deny ads without the
+  // running Google code being torn out by the documented page reload.
+  if (!window.__strataAdsConsentListener) {
+    window.__strataAdsConsentListener = true;
+    document.addEventListener(EVENT, handleConsent);
+  }
   var answer = consentValue();
-  if (answer === 'denied') collapseUnits();
-  if (answer === 'granted') { run(); return; }
-  document.addEventListener(EVENT, function (event) {
-    if (event.detail === 'granted') { revealUnits(); run(); }
-    else if (event.detail === 'denied') {
-      collapseUnits();
-      if (window.__strataAdsLoader) window.location.reload();
-    }
-  });
+  if (answer === 'denied') {
+    collapseUnits();
+  } else if (answer === 'granted') {
+    revealUnits();
+    run();
+  } else {
+    units().forEach(function (unit) {
+      unit.setAttribute('data-ads-pending', '');
+    });
+  }
 })();

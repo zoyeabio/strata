@@ -39,6 +39,12 @@ if ! hugo --source "$ROOT/test/fixture" --environment production --minify \
 fi
 pass 'fixture builds a minified production artifact'
 
+if node "$ROOT/test/ads-runtime.mjs" >/dev/null; then
+  pass 'ads runtime handles multiple units, stored consent and withdrawal'
+else
+  fail 'ads runtime handles multiple units, stored consent and withdrawal'
+fi
+
 if [ -s "$WORK/build.stderr" ]; then
   fail 'production build is silent'
   cat "$WORK/build.stderr" >&2
@@ -317,6 +323,22 @@ elif grep -q 'no Content-Security-Policy script-src allows pagead2' \
   pass 'a commented-out CSP line cannot authorize the loader'
 else
   fail 'the commented-policy failure names the missing policy'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+
+# A host-owned CSP may intentionally omit _headers, but the default path must
+# fail with the theme's actionable diagnostic rather than readFile's template
+# filesystem error.
+rm "$ADS_SCRATCH/static/_headers"
+if scratch_hugo; then
+  fail 'a missing _headers file cannot silently authorize the loader'
+elif grep -q 'no Content-Security-Policy script-src allows pagead2' \
+    "$WORK/scratch-build.stderr" \
+    && ! grep -qE 'error calling readFile|no such file or directory' \
+      "$WORK/scratch-build.stderr"; then
+  pass 'a missing _headers file receives the actionable CSP diagnostic'
+else
+  fail 'the missing _headers failure is actionable'
   cat "$WORK/scratch-build.stderr" >&2
 fi
 
