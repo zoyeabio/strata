@@ -221,7 +221,7 @@ module example.com/ads-scratch
 
 go 1.22
 
-require github.com/zoyeabio/strata v0.2.0
+require github.com/zoyeabio/strata v0.3.0
 
 replace github.com/zoyeabio/strata => $ROOT
 EOF

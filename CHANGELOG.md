@@ -5,6 +5,78 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-29
+
+### Added
+
+- **Article table of contents and FAQ output.** Long articles can render a
+  compact native `<details>` table of contents, with mobile-safe spacing and
+  anchor offsets. The FAQ shortcode now publishes accessible visible content
+  and one aggregated `FAQPage` JSON-LD entity without duplicating answers.
+- **Richer article entities.** Article JSON-LD now includes `wordCount`,
+  `articleSection`, stable author/reviewer identities and structured reviewer
+  affiliation data. Visible reviewer attribution and schema are generated from
+  the same front matter contract.
+- **Bounded article ad slots.** Sites can configure below-hero and
+  below-article units with an 800-word default density guard, reserved height
+  for layout stability and a page-level `ads: false` escape hatch that also
+  suppresses Auto ads.
+- **Production-ready examples.** The example site demonstrates the logo,
+  TOC, FAQ, reviewer metadata, `dateModified`, consent controller, ads.txt,
+  CSP headers, production robots policy and SEO/GEO configuration without
+  presenting speculative ranking claims as guarantees.
+- **Runtime regression coverage for advertising consent.** A dependency-free
+  Node test exercises multiple units, stored grants, initial denial,
+  withdrawal, loader de-duplication and isolation from Google-owned DOM nodes.
+
+### Changed
+
+- **Mobile navigation and footer layouts were rebuilt for narrow screens.**
+  The four 44px header controls remain on one row down to the supported narrow
+  viewport, mobile menu labels align to the site gutter, the logo uses a
+  compact overrideable token, and footer groups form readable stacked rows.
+- **Hugo 0.167.0 is now the minimum supported version.** README, module
+  metadata, fixtures, the new-site scaffold and validation commands agree on
+  the same floor.
+- **Lighthouse audits now exercise a minified production artifact.** The
+  example builds first and is served by the Python standard library, avoiding
+  development-server robots behavior and startup detection races.
+- **Consent documentation now distinguishes the theme's event gate from a
+  certified CMP.** `consent = "none"` explicitly transfers gating to the site
+  or its external CMP; the bundled example remains a reference controller,
+  not a compliance certification.
+
+### Fixed
+
+- **Gated multi-unit pages no longer re-hide an earlier ad.** Returning
+  visitors with a stored grant reveal and queue every theme-owned unit exactly
+  once. Theme units carry a private marker, so Google-injected nodes and
+  undocumented Google class names are outside the dispatcher's scope.
+- **Consent withdrawal works after a returning visit.** The document installs
+  one listener even when the initial stored answer is `granted`; changing the
+  answer to `denied` collapses units and reloads once to remove an already
+  running advertising runtime.
+- **Missing ad CSP configuration fails actionably.** A missing
+  `static/_headers` no longer dies inside `readFile`; the build emits the
+  theme's configuration diagnostic, while host-managed headers can be declared
+  with `skipCspCheck`.
+- **Production gates catch more silent failures.** Internal dead links,
+  malformed reviewer fields, incomplete ad notices, stale scaffold pins and
+  inaccessible contrast now fail their owning validation layer. The gate suite
+  also proves its dead-link check with an injected broken link.
+- **Header, footer, TOC and advertising labels meet their intended contrast,
+  alignment and overflow contracts** in light and dark schemes, including
+  320px mobile layouts.
+
+### Security
+
+- New sites copy the reviewed lockfile and pin the same dependency override as
+  the theme, keeping `npm ci` reproducible and avoiding a known vulnerable
+  transitive selector-parser release.
+- Ad-enabled builds continue to require a matching ads.txt publisher record,
+  complete privacy/cookie notices and an effective loader CSP before output is
+  accepted.
+
 ## [0.2.0] - 2026-10-19
 
 ### Added
