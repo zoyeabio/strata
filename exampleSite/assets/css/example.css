@@ -82,12 +82,20 @@
   font: inherit;
   font-size: 13px;
   line-height: 1.4;
+  min-height: 44px;
   padding: 7px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
   transition: background-color .15s ease, border-color .15s ease;
+}
+
+/* While the reader is choosing, the floating back-to-top control must not
+   cover either consent action on a narrow screen. Once an answer hides the
+   controls, the normal scroll button can return. */
+body:has([data-consent-controls]:not([hidden])) .back-to-top {
+  display: none;
 }
 
 .site-consent__btn:hover { border-color: var(--site-accent); }

@@ -34,7 +34,8 @@ function unit(name, { internal = false } = {}) {
 }
 
 function harness(savedAnswer) {
-  const listeners = new Map();
+  const documentListeners = new Map();
+  const windowListeners = new Map();
   const stored = new Map();
   if (savedAnswer) stored.set('strata-cookie-consent', savedAnswer);
   const document = {
@@ -42,12 +43,12 @@ function harness(savedAnswer) {
     units: [],
     loaders: [],
     addEventListener(name, listener) {
-      const entries = listeners.get(name) || [];
+      const entries = documentListeners.get(name) || [];
       entries.push(listener);
-      listeners.set(name, entries);
+      documentListeners.set(name, entries);
     },
     dispatchEvent(event) {
-      for (const listener of listeners.get(event.type) || []) listener(event);
+      for (const listener of documentListeners.get(event.type) || []) listener(event);
     },
     querySelectorAll(selector) {
       assert.equal(selector, 'ins.adsbygoogle[data-strata-ad-unit]');
@@ -72,6 +73,14 @@ function harness(savedAnswer) {
     encodeURIComponent,
     localStorage: { getItem: (key) => stored.get(key) ?? null },
     location,
+    addEventListener(name, listener) {
+      const entries = windowListeners.get(name) || [];
+      entries.push(listener);
+      windowListeners.set(name, entries);
+    },
+    dispatchEvent(event) {
+      for (const listener of windowListeners.get(event.type) || []) listener(event);
+    },
   };
   // A browser's global object is window. Keeping that identity is important:
   // adsbygoogle's legacy unqualified assignment must land on window too.
@@ -85,7 +94,25 @@ function harness(savedAnswer) {
     vm.runInContext(source, context);
   }
 
-  return { context, document, location, runCopy };
+  return {
+    context,
+    document,
+    location,
+    runCopy,
+    setAnswer(answer) {
+      if (answer == null) stored.delete('strata-cookie-consent');
+      else stored.set('strata-cookie-consent', answer);
+    },
+  };
+}
+
+{
+  const page = parseTwoUnits('granted');
+  page.setAnswer('denied');
+  page.context.window.dispatchEvent({ type: 'pageshow', persisted: true });
+  assert.equal(page.first.style.display, 'none');
+  assert.equal(page.second.style.display, 'none');
+  assert.equal(page.location.reloads, 1, 'a bfcache restore must tear down ads withdrawn on another page');
 }
 
 function parseTwoUnits(savedAnswer) {

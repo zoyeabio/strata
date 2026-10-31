@@ -83,6 +83,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `defaultAppearance` | `"light"` | Initial colour scheme before the stored preference is read: `light`, `dark`, or `auto` to follow the OS until the visitor toggles |
 | `autoSwitchAppearance` | `true` | Follow the OS preference until the visitor toggles |
 | `logo` | `""` | Asset path to a logo image; rendered in the header. The site title always renders when no logo resolves |
+| `schemaLogo` | `""` | Dedicated `Organization.logo` URL or asset path. Use a crawlable square raster image at least 112×112; do not reuse a wide header wordmark merely because it looks right on screen |
 | `disableTextInHeader` | `false` | Hide the site title when (and only when) a logo is present |
 | `copyright` | `"© { year } Strata"` | Footer line; `{ year }` is replaced with the current year. Empty or absent falls back to `© {year} {site title}` |
 | `description` | `"A Hugo theme for content sites."` | Default `<meta name="description">` (page description/summary wins) |
@@ -113,13 +114,13 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
 | `article.sharingLinks` | — | Share buttons, names resolved against `data/sharing.json` (see [Share buttons](#share-buttons)) |
 | `author.name` | `""` | Site-wide author fallback |
-| `author.url` | `""` | The author's own page. Turns the byline into a link and is emitted as the schema `Person.url`; page `authorurl` wins. A URL, not a taxonomy — Hugo reserves the `author` key for authorship, so `author = "authors"` under `[taxonomies]` is ignored and builds no term page |
-| `author.links` | `[]` | `[{name, url}]` author profile links, emitted as schema `sameAs` |
+| `author.url` | `""` | The site-wide fallback author's own page. Turns that byline into a link and is emitted as `Person.url`; page `authorurl` wins. A page that names a different `author` never inherits this identity. A URL, not a taxonomy — Hugo reserves the `author` key for authorship, so `author = "authors"` under `[taxonomies]` is ignored and builds no term page |
+| `author.links` | `[]` | `[{name, url}]` profile links emitted as schema `sameAs` for the site-wide fallback author only. A guest author does not inherit them |
 | `twitterSite` | `""` | `twitter:site` handle, e.g. `@example` |
 | `twitterCreator` | `""` | `twitter:creator` handle; same account as `twitterSite` is fine |
 | `ads.client` | `""` | AdSense publisher ID (`ca-pub-…`); enables the `ads` shortcode and requires `static/ads.txt` to name it |
 | `ads.auto` | `false` | `true`: loader ships site-wide except on pages with `ads: false`, and Google's Auto ads choose the pages and placements (anchor, interstitial, in-page) from the AdSense console. `false` (default): the loader only follows placed units, so nothing loads anywhere it was not placed. Both stack — auto placement and <code>{{&lt; ads &gt;}}</code> units are independent |
-| `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted` — a withdrawal that lands after ads had loaded reloads the current page once, so nothing already running survives the visit. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too. Gated mode also expects the site's `partials/cookie-consent.html` hook (or an explicit `ads.externalConsentController = true`), because a gate with nothing to dispatch the answer keeps every unit hidden forever |
+| `ads.consent` | — (no default) | Required once `[ads] client` is set and an ad is unlocked; unset fails the build, so a forgot-to-configure site never asks Google silently. `"gated"` keeps the AdSense loader out of `<head>`: the `js/ads.js` copy the shortcode ships reads `localStorage["strata-cookie-consent"]` and the `strata:cookie-consent` event, and injects the loader only once the answer is `granted` — a withdrawal that lands after ads had loaded reloads the current page once, so nothing already running survives the visit. A page restored from the browser back-forward cache rechecks storage too, so consent changed on another page cannot revive a stale ad runtime. `"none"` ships the loader from `<head>` on unit pages and leaves consent to the site — the mode a Google-certified CMP runs under. The ad CSP check is build-time in both modes, because the loader loads at grant time too. Gated mode also expects the site's `partials/cookie-consent.html` hook (or an explicit `ads.externalConsentController = true`), because a gate with nothing to dispatch the answer keeps every unit hidden forever |
 | `ads.externalConsentController` | `false` | Gated-mode escape hatch: your consent controller ships outside the theme's hook (a certified CMP that dispatches `strata:cookie-consent` itself) and the `cookie-consent.html` existence check does not apply |
 | `ads.slots.belowHero` | `""` | Numeric ad slot ID placed between header and content; per-page `ads: false` suppresses |
 | `ads.slots.belowArticle` | `""` | Numeric ad slot ID placed after article content before sharing links; per-page `ads: false` suppresses |
@@ -189,7 +190,7 @@ page to its site, its organisation, its author and its series without guessing:
 | Node | When | Fields |
 |---|---|---|
 | `WebSite` | Home only | `name`, `url`, `inLanguage` |
-| `Organization` | Every page | `name` (footer company name, else the site title), `url`, `sameAs` from `[footer] social links`, `logo` |
+| `Organization` | Every page | `name` (footer company name, else the site title), `url`, `sameAs` from `[footer] social links`, `logo` from `schemaLogo` when configured |
 | `WebPage` | Every page | `name`, `url`, `isPartOf` → `WebSite`, `inLanguage` |
 | `BreadcrumbList` | Non-home | `itemListElement` of `ListItem`, position ordered |
 | `Article` | Dated pages | `headline`, `mainEntityOfPage` → `WebPage`, `publisher` → `Organization`, `author` → `Person`, `description`, `keywords`, `image`, `datePublished`, `dateModified`, `isPartOfSeries` → `Series` |

@@ -11,7 +11,8 @@
     page     (Page, required) — resolver context
     alt      (string, optional) — falls back to the plainified caption;
              empty marks the image decorative
-    title    (string, optional) — rendered as <h4> inside the figcaption
+    title    (string, optional) — emphasized caption title; not a document
+             heading, so it cannot create a false level in the page outline
     caption  (string, optional) — markdown, rendered inside <figcaption>
     attr     (string, optional) — attribution, markdown, after the caption
     attrlink (string, optional) — wraps the attribution
@@ -65,7 +66,7 @@
   {{- if or .title $caption .attr }}
   <figcaption>
     {{- with .title }}
-    <h4>{{ . }}</h4>
+    <p class="figure__title">{{ . }}</p>
     {{- end -}}
     {{- if or $caption .attr }}
     <p>

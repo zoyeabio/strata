@@ -4,10 +4,11 @@
 # example sets differently, so a key left out here inherits the theme default.
 # Delete this file and the theme still builds.
 description = "A content-first Hugo theme for independent sites. This site is the theme's own example: every page exercises a real feature."
-# Logo: rendered in the header (inline SVG) and emitted as Organization.logo
-# in JSON-LD. Use a raster PNG (≈112–484 px) for production so Google accepts
-# it for the Knowledge Graph / Article publisher logo; SVG is fine for display.
+# Header wordmark. It may be wide because it is only a display asset.
 logo = "images/logo.svg"
+# Dedicated square Organization.logo for structured data. This file is also
+# used by the example's favicon manifest and comfortably clears 112×112.
+schemaLogo = "/android-chrome-512x512.png"
 # This wordmark already contains the name; avoid repeating "Strata" beside it.
 disableTextInHeader = true
 eagerCardCount = 3

@@ -30,7 +30,7 @@ DOMAIN=""
 OUT=""
 ACCENT="#295f8f"
 SECTIONS=""
-MODULE_VERSION="v0.3.0"
+MODULE_VERSION="v0.3.1"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

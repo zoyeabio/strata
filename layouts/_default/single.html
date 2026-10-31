@@ -2,10 +2,13 @@
 {{- $hero := partial "data/hero-image.html" . }}
 {{- $dateFormat := site.Params.dateFormat }}
 {{- $terms := .GetTerms "tags" }}
-{{- $authorURL := .Params.authorurl | default site.Params.author.url }}
 {{- $isArticle := partial "data/is-article.html" . }}
 {{- $articleParams := site.Params.article }}
+{{- $hasPageAuthor := false }}
+{{- with .Params.author }}{{ $hasPageAuthor = true }}{{ end }}
 {{- $author := .Params.author | default site.Params.author.name }}
+{{- $authorURL := .Params.authorurl }}
+{{- if and (not $hasPageAuthor) (not $authorURL) }}{{ $authorURL = site.Params.author.url }}{{ end }}
 {{- $showAuthor := false }}
 {{- if isset .Params "showauthor" }}{{ $showAuthor = .Params.showauthor }}{{ else }}{{ $showAuthor = $articleParams.showAuthor }}{{ end }}
 {{- $showDate := true }}

@@ -14,7 +14,7 @@
   color: var(--text-muted);
 }
 
-.figure figcaption h4 {
+.figure figcaption .figure__title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);

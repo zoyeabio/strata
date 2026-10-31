@@ -40,6 +40,9 @@ disableTextInHeader = false
 enableSearch = false
 enableA11y = false
 logo = ""
+# Dedicated Organization.logo image for structured data. Keep this separate
+# from a wide header wordmark; use a crawlable square image at least 112px.
+schemaLogo = ""
 copyright = "© { year } Strata"
 description = "A Hugo theme for content sites."
 defaultSocialImage = ""

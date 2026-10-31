@@ -36,9 +36,14 @@
 {{- $sameAs := partial "data/samelinks.html" . }}
 {{- with $sameAs }}{{- $org = merge $org (dict "sameAs" .) }}{{- end }}
 {{- end }}
-{{- with site.Params.logo }}{{ with resources.Get . }}
-{{- $org = merge $org (dict "logo" (.Permalink)) }}
-{{- end }}{{ end }}
+{{- with site.Params.schemaLogo }}
+{{- $logoRef := printf "%v" . }}
+{{- $logoURL := $logoRef | absURL }}
+{{- if and (not (strings.HasPrefix (lower $logoRef) "http://")) (not (strings.HasPrefix (lower $logoRef) "https://")) (not (strings.HasPrefix $logoRef "/")) }}
+{{- with resources.Get $logoRef }}{{ $logoURL = .Permalink }}{{ end }}
+{{- end }}
+{{- $org = merge $org (dict "logo" $logoURL) }}
+{{- end }}
 {{- $graph = append $org $graph }}
 {{- $webpage := dict
     "@context" "https://schema.org"
@@ -111,8 +116,11 @@
        schema's completeness without making a search or citation promise. */ -}}
 {{- $article = merge $article (dict "wordCount" $page.WordCount) }}
 {{- with $page.Section }}{{ $article = merge $article (dict "articleSection" .) }}{{ end }}
+{{- $hasPageAuthor := false }}
+{{- with $page.Params.author }}{{ $hasPageAuthor = true }}{{ end }}
 {{- $author := $page.Params.author | default site.Params.author.name }}
-{{- $authorURL := $page.Params.authorurl | default site.Params.author.url }}
+{{- $authorURL := $page.Params.authorurl }}
+{{- if and (not $hasPageAuthor) (not $authorURL) }}{{ $authorURL = site.Params.author.url }}{{ end }}
 {{- if $author }}
 {{- $person := dict "@type" "Person" "name" $author }}
 {{- with $authorURL }}
@@ -120,10 +128,10 @@
 {{- $person = merge $person (dict "url" (. | absURL)) }}
 {{- end }}
 {{- end }}
-{{- with site.Params.author.links }}
+{{- if not $hasPageAuthor }}{{ with site.Params.author.links }}
 {{- $sameAs := partial "data/samelinks.html" . }}
 {{- with $sameAs }}{{- $person = merge $person (dict "sameAs" .) }}{{- end }}
-{{- end }}
+{{- end }}{{ end }}
 {{- $article = merge $article (dict "author" $person) }}
 {{- end }}
 {{- with partial "data/description.html" $page }}

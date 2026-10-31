@@ -317,8 +317,8 @@ assert 'section-a/shortcodes/index.html' '<figure class="figure extra">' \
 assert 'section-a/shortcodes/index.html' 'alt="A flat photo"' \
   'figure falls back to the plainified caption for alt'
 assert 'section-a/shortcodes/index.html' '<figcaption>' 'figure emits a figcaption'
-assert 'section-a/shortcodes/index.html' '<h4>With a title</h4>' \
-  'figure renders the title as an h4 inside the figcaption'
+assert 'section-a/shortcodes/index.html' '<p class="figure__title">With a title</p>' \
+  'figure renders its title as caption text, not a document heading'
 assert 'section-a/shortcodes/index.html' '<a href="/section-a/flat/" target="_blank" rel="noopener">' \
   'figure wraps the image in the requested link'
 assert 'section-a/shortcodes/index.html' 'width="400" height="300"' \
@@ -871,11 +871,13 @@ else
 fi
 
 # 35. article author: page front matter wins, site [author] is the fallback,
-#     both gated by showAuthor. An authorurl turns the byline into a link, but
-#     without one it stays plain text — neither form invents a destination.
+#     both gated by showAuthor. A page authorurl or the fallback author's own
+#     URL turns the matching byline into a link; guest identities never borrow
+#     that fallback destination.
 assert 'section-a/flat/index.html' 'By <a class="article__author"[^>]*>Flat Author</a>' \
   'a page author with a url renders as a link'
-assert 'section-a/nested/post/index.html' 'By Fixture Team' 'site author is the fallback'
+assert 'section-a/nested/post/index.html' 'By <a class="article__author" href="/notice/">Fixture Team</a>' \
+  'site author and its own URL are the fallback'
 
 # 36. carousel loop is seamless: a hidden clone of the first slide closes
 #     the track so last-to-first animates instead of jumping. Real slides are
@@ -1336,7 +1338,18 @@ assert_not 'section-a/shortcodes/index.html' 'class="faq"[^>]*itemprop="mainEnti
   'faq microdata does not emit an orphan mainEntity property'
 assert 'section-a/shortcodes/index.html' '"@type":\s*"FAQPage"' \
   'faq registers into page store and emits aggregated FAQPage JSON-LD'
-assert 'section-a/flat/index.html' 'author\.example\.net' 'author links travel as sameAs'
+assert_not 'section-a/flat/index.html' 'author\.example\.net' \
+  'a guest author never inherits the site author sameAs identity'
+assert_not 'section-a/pixel/index.html' 'By <a class="article__author"' \
+  'a guest author without authorurl never inherits the site author link'
+assert_not 'section-a/pixel/index.html' '"url":"https://example\.org/notice/"' \
+  'a guest author without authorurl never inherits the site Person url'
+assert_not 'section-a/pixel/index.html' 'author\.example\.net' \
+  'a guest author without authorurl never inherits site sameAs links'
+assert 'section-a/anim/index.html' 'author\.example\.net' \
+  'the site-wide fallback author keeps its sameAs identity'
+assert 'index.html' '"logo":"https://example\.org/android-chrome-512x512\.png"' \
+  'Organization uses the dedicated square schema logo'
 assert 'section-a/flat/index.html' '"@type":"BreadcrumbList"' 'schema carries the trail'
 assert 'section-a/flat/index.html' 'article:tag' 'article tags are emitted'
 assert 'section-a/flat/index.html' 'article:section' 'article section is emitted'
@@ -1906,8 +1919,8 @@ assert 'section-a/flat/index.html' \
 assert 'section-a/flat/index.html' \
   '"author":\{[^}]*"url":"[^"]*notice/"' \
   'the Person entity carries the author url'
-assert_not 'section-a/inline/index.html' 'article__author' \
-  'a page without an author url keeps a plain-text byline'
+assert 'section-a/inline/index.html' '<a class="article__author" href="/notice/">Fixture Team</a>' \
+  'the site fallback author keeps its configured profile link'
 
 # 55. A content link to another host opens a new tab, so a reference never
 #     takes a reader out of the article, and carries a marker so the reader

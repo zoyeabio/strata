@@ -221,7 +221,7 @@ module example.com/ads-scratch
 
 go 1.22
 
-require github.com/zoyeabio/strata v0.3.0
+require github.com/zoyeabio/strata v0.3.1
 
 replace github.com/zoyeabio/strata => $ROOT
 EOF
@@ -694,6 +694,17 @@ then
   pass 'the consent banner points at published notices'
 else
   fail 'the consent banner points at published notices'
+fi
+
+# On phones the fixed back-to-top button occupies the same bottom corner as
+# the example controller's refusal action. Keep that action unobstructed and
+# keep both consent targets at the theme's 44px mobile control size.
+if grep -Fq 'body:has([data-consent-controls]:not([hidden])) .back-to-top' "$ROOT/exampleSite/assets/css/example.css" \
+   && grep -A12 '^\.site-consent__btn {' "$ROOT/exampleSite/assets/css/example.css" | grep -q 'min-height: 44px'
+then
+  pass 'the mobile consent actions stay clear of the back-to-top control'
+else
+  fail 'the mobile consent actions stay clear of the back-to-top control'
 fi
 
 # Summary is a documented description fallback and Hugo exposes a top-level

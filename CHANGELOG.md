@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-30
+
+### Fixed
+
+- **AdSense consent bfcache synchronization.** Reconciles the live advertising runtime with storage when a document is restored from the browser back-forward cache (`pageshow`). Withdrawn consent triggers a single clean reload, and granted consent reveals and runs queued units without requiring a full navigation.
+- **Guest author isolation.** Guest authors specified in front matter no longer inherit the site-wide fallback author URL or social `sameAs` links.
+- **Figure title heading outline.** Replaced the `<h4>` in `<figcaption>` with `<p class="figure__title">` to avoid skipped heading levels in the document outline, maintaining identical visual styling.
+- **Mobile consent button clearance.** On narrow screens, the floating back-to-top button is temporarily hidden while consent controls are visible, and consent buttons enforce a 44px minimum touch target.
+
+### Added
+
+- **Dedicated `schemaLogo` parameter.** Allows sites to specify a square raster Organization logo for Google Knowledge Graph and structured data (at least 112×112px), keeping wide SVG wordmarks separate for header display.
+
 ## [0.3.0] - 2026-10-29
 
 ### Added

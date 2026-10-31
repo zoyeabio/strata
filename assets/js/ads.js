@@ -99,6 +99,32 @@ function handleConsent(event) {
   }
 }
 
+function handlePageShow(event) {
+  // A document restored from the back-forward cache does not rerun this
+  // script. Consent may have changed on the page visited in between, so the
+  // restored document must reconcile its live Google runtime with storage.
+  if (!event.persisted) return;
+  var answer = consentValue();
+  if (answer === 'granted') {
+    revealUnits();
+    run();
+  } else if (window.__strataAdsLoader) {
+    // Google code cannot be safely dismantled in place. Hide it first, then
+    // reload into a document whose normal startup path withholds the loader.
+    collapseUnits();
+    window.location.reload();
+  } else if (answer === 'denied') {
+    collapseUnits();
+  } else {
+    // The banner was reopened on another page. Restore the undecided layout
+    // without downloading or queuing ads.
+    revealUnits();
+    units().forEach(function (unit) {
+      unit.setAttribute('data-ads-pending', '');
+    });
+  }
+}
+
 (function () {
   var consent = document.currentScript && document.currentScript.getAttribute('data-ads-consent');
   if (consent !== 'gated') {
@@ -112,6 +138,7 @@ function handleConsent(event) {
   if (!window.__strataAdsConsentListener) {
     window.__strataAdsConsentListener = true;
     document.addEventListener(EVENT, handleConsent);
+    window.addEventListener('pageshow', handlePageShow);
   }
   var answer = consentValue();
   if (answer === 'denied') {

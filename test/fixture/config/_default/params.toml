@@ -4,6 +4,7 @@ twitterSite = "@fixturetest"
 twitterCreator = "@fixturecreator"
 enableSearch = true
 enableA11y = true
+schemaLogo = "/android-chrome-512x512.png"
 
 [header]
   layout = "smart"
@@ -28,6 +29,7 @@ enableA11y = true
 
 [author]
   name = "Fixture Team"
+  url = "/notice/"
   links = [
     { name = "Profile", url = "https://author.example.net/" },
     { name = "Mail", url = "mailto:team@example.net" },

@@ -111,11 +111,15 @@ of forking a scheme file — the derivation picks the new value up on its own.
 
 ```toml
 logo = "images/logo.svg"          # asset path
+schemaLogo = "/brand-square.png"  # square, at least 112x112, for JSON-LD
 disableTextInHeader = true        # hide the title once a logo is present
 ```
 
 If the logo fails to resolve, the site title still renders — the header
 never ends up empty.
+
+Keep `schemaLogo` separate from a wide wordmark. It is not rendered in the
+header; crawlers use it as the organisation identity in structured data.
 
 ## Typography overrides
 
