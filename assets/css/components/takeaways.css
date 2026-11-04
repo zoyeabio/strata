@@ -1,0 +1,57 @@
+@layer strata-components {
+.takeaways {
+  max-width: var(--prose-measure, 720px);
+  margin: 28px auto 0;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--site-link);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.takeaways__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.takeaways__icon {
+  flex-shrink: 0;
+  color: var(--site-link);
+}
+
+.takeaways__title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text-strong);
+}
+
+.takeaways__list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.takeaways__item {
+  margin: 6px 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.takeaways__item:first-child {
+  margin-top: 0;
+}
+
+.takeaways__item:last-child {
+  margin-bottom: 0;
+}
+
+.takeaways__item a {
+  color: var(--site-link);
+  text-decoration: underline;
+}
+}

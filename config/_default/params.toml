@@ -75,6 +75,9 @@ showSummary = true
 # showToc displays a table of contents generated from headings for long articles.
 # Default is false; site or per-page front matter can set it to true.
 showToc = false
+# showTakeaways displays a semantic key takeaways callout block when page declares takeaways.
+# Default is true; site or per-page front matter can set it to false.
+showTakeaways = true
 showRelatedContent = false
 relatedContentLimit = 3
 showPagination = true

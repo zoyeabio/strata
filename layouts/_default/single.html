@@ -27,6 +27,9 @@
 {{- $showToc := false }}
 {{- if isset .Params "showtoc" }}{{ $showToc = .Params.showtoc }}
 {{- else }}{{ $showToc = $articleParams.showToc }}{{ end }}
+{{- $showTakeaways := true }}
+{{- if isset .Params "showtakeaways" }}{{ $showTakeaways = .Params.showtakeaways }}
+{{- else }}{{ $showTakeaways = $articleParams.showTakeaways | default true }}{{ end }}
 <article{{ if not $isArticle }} class="page--wide"{{ end }}>
   {{- if $hero.ok }}
   {{ partial "page/hero.html" (dict "img" $hero) }}
@@ -69,6 +72,9 @@
   {{ partial "page/series.html" . }}
   {{- if and $isArticle $showToc }}
   {{ partial "page/toc.html" . }}
+  {{- end }}
+  {{- if and $isArticle $showTakeaways }}
+  {{ partial "page/takeaways.html" . }}
   {{- end }}
   {{- $adsAllowed := and site.Params.ads.client (ne .Params.ads false) }}
   {{- $minWords := site.Params.ads.slots.minWords | default 0 }}

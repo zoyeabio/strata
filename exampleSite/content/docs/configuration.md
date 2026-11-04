@@ -109,6 +109,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
 | `article.showSummary` | `true` | A page's `summary` as a standfirst above the meta line. Unlike `list.showSummary`, which is about cards, a page's own summary is written for a reader, so one that is supplied is shown. Page `showsummary: false` suppresses it |
 | `article.showToc` | `false` | Table of contents from headings for long articles; page `showtoc` wins |
+| `article.showTakeaways` | `true` | Key takeaways callout block when page declares `takeaways`; page `showtakeaways` wins |
 | `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
 | `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |

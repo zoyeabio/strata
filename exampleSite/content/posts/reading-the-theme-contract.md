@@ -7,6 +7,10 @@ series: ["Foundations"]
 weight: 3
 keywords: ["theming", "contracts", "hugo"]
 showtoc: true
+showtakeaways: true
+takeaways:
+  - "A theme contract establishes clear boundaries between settled decisions and site overrides."
+  - "Semantic structured metadata elevates AI engine citation and search discoverability."
 featureimage: "images/features-scaffold.png"
 featureimagealt: "A fresh directory tree laid out cleanly"
 ---
