@@ -65,3 +65,7 @@ Markdown inside the last column.
 ## map
 
 {{< map src="https://maps.google.com/maps?q=Shanghai&z=13&output=embed" title="Shanghai office map" >}}
+
+## youtube
+
+{{< youtube id="dQw4w9WgXcQ" title="Smoke Fixture Video" caption="Testing youtube embed" >}}

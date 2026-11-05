@@ -329,6 +329,16 @@ assert 'section-a/shortcodes/index.html' 'title="Shanghai office map" loading="l
   'map frame carries its label and defers loading'
 assert 'section-a/shortcodes/index.html' 'src="https://maps.google.com/maps\?q=Shanghai' \
   'map passes the embed URL through'
+assert 'section-a/shortcodes/index.html' '<div class="youtube-embed">' \
+  'youtube renders its container'
+assert 'section-a/shortcodes/index.html' 'videoid="dQw4w9WgXcQ"' \
+  'youtube element carries video id'
+assert 'section-a/shortcodes/index.html' 'data-title="Smoke Fixture Video"' \
+  'youtube element carries title'
+assert 'section-a/shortcodes/index.html' 'Testing youtube embed' \
+  'youtube renders caption'
+assert 'section-a/shortcodes/index.html' 'src="?/js/youtube\.[0-9a-f]+\.js"? integrity="sha512-' \
+  'youtube script ships fingerprinted with SRI'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 7 \
   'five list cards plus two first slides load eagerly'
 # Quality is site-wide, so two figures sharing a role cannot write the same
@@ -1866,6 +1876,10 @@ assert_at "$ROOT/static" '_headers' 'Referrer-Policy: strict-origin-when-cross-o
   'headers set a referrer policy'
 assert_at "$ROOT/static" '_headers' 'object-src .none' \
   'headers deny plugins'
+assert_at "$ROOT/static" '_headers' 'https://www.youtube-nocookie.com' \
+  'headers allow youtube-nocookie'
+assert_at "$ROOT/static" '_headers' 'https://i.ytimg.com' \
+  'headers allow youtube thumbnail cdn'
 # Comments are stripped first: the file documents the AdSense relaxation in
 # prose, and style-src legitimately keeps 'unsafe-inline' for the carousel's
 # dynamic aspect-ratio attribute.

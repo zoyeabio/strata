@@ -16,7 +16,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https://www.youtube-nocookie.com; frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube-nocookie.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
 
 # Exceptions to this file, and why
 #
@@ -25,9 +25,10 @@
 #     style cannot execute code; removing this needs a nonce plan, and Hugo
 #     does not generate nonces.
 #
-#   frame-src google origins   The map shortcode is the theme's explicit
-#     opt-in to a third-party embed, documented with a Google Maps URL. Add
-#     your provider's origin here rather than widening to https:
+#   frame-src google origins   The map and youtube shortcodes are the theme's
+#     explicit opt-in to third-party media embeds: map connects to Google Maps,
+#     and youtube embeds from https://www.youtube-nocookie.com with poster
+#     images from https://i.ytimg.com. Add other origins rather than widening.
 #
 #   Ads  site.Params.ads.client turns on the AdSense loader, which this
 #     policy blocks: pagead2.googlesyndication.com is a foreign origin in

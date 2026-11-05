@@ -6,7 +6,7 @@ featureimage: "images/hero-shortcodes.png"
 featureimagealt: "A grid of small marks over a dark field"
 ---
 
-Fourteen shortcodes. Every one below is live — `ads` apart, which needs a
+Fifteen shortcodes. Every one below is live — `ads` apart, which needs a
 publisher ID — and each block shows the exact syntax it was written with.
 
 ---
@@ -264,6 +264,23 @@ An embedded map. `src` must start with `https://`.
 
 <pre><code>{{&lt; map src="https://www.openstreetmap.org/export/embed.html?bbox=..."
   title="Strata Studio, Portland" &gt;}}</code></pre>
+
+---
+
+## `youtube`
+
+A lightweight, privacy-enhanced YouTube embed (`lite-youtube`). Instead of loading heavy third-party scripts and cookies upfront, it displays an accessible 16:9 poster with a play button, deferring the `youtube-nocookie.com` player until the reader clicks play.
+
+{{< youtube id="dQw4w9WgXcQ" title="Rick Astley - Never Gonna Give You Up" caption="Responsive 16:9 video embed with accessible title and privacy-enhanced playback." >}}
+
+<pre><code>{{&lt; youtube id="dQw4w9WgXcQ" title="Video Title" caption="Optional caption" &gt;}}</code></pre>
+
+| Parameter | Required | Notes |
+|---|---|---|
+| `id` | yes | 11-character YouTube video ID (or positional 0) |
+| `title` | | Accessible label / frame title (or positional 1) |
+| `caption` | | Optional explanatory caption below the video |
+| `start` | | Start playback at given second (positive integer) |
 
 ---
 

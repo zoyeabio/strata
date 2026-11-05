@@ -1,0 +1,48 @@
+{{- /*
+  Shortcode: youtube
+  Role:      Lightweight, privacy-enhanced, and CLS-safe YouTube embed.
+             Loads an accessible poster and play button on initial render,
+             deferring the heavy iframe and third-party tracking until
+             the reader clicks play. Uses https://www.youtube-nocookie.com.
+  Parameters:
+    id       (string, required or positional 0): 11-character YouTube video ID
+    title    (string, optional or positional 1): Accessible video title / label
+    start    (int, optional): Start playback at given second (e.g. 30)
+    caption  (string, optional): Explanatory caption text below the video
+  Called by:
+    {{< youtube id="dQw4w9WgXcQ" title="Example Video" >}}
+    {{< youtube "dQw4w9WgXcQ" "Example Video" >}}
+*/ -}}
+{{- $id := .Get "id" | default (.Get 0) | strings.TrimSpace -}}
+{{- if not $id -}}
+  {{- errorf "youtube shortcode: missing required video ID, e.g. {{< youtube id=\"dQw4w9WgXcQ\" >}} (%s)" .Position -}}
+{{- end -}}
+{{- if not (findRE `^[A-Za-z0-9_-]{11}$` $id) -}}
+  {{- errorf "youtube shortcode: video ID %q is malformed; must be exactly 11 characters (letters, digits, underscore, hyphen) (%s)" $id .Position -}}
+{{- end -}}
+{{- $title := .Get "title" | default (.Get 1) | default (printf "Play YouTube video %s" $id) -}}
+{{- $caption := .Get "caption" -}}
+{{- $start := .Get "start" -}}
+{{- if and $start (not (findRE `^\d+$` (printf "%v" $start))) -}}
+  {{- errorf "youtube shortcode: start parameter %q must be a positive integer in seconds (%s)" $start .Position -}}
+{{- end -}}
+<div class="youtube-embed">
+  <lite-youtube videoid="{{ $id }}" data-title="{{ $title }}"{{ with $start }} data-start="{{ . }}"{{ end }}>
+    <button type="button" class="lite-youtube__btn" aria-label="{{ $title }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z"/></svg>
+      <span class="sr-only">{{ $title }}</span>
+    </button>
+    <noscript>
+      <a class="youtube-embed__fallback" href="https://www.youtube-nocookie.com/watch?v={{ $id }}" target="_blank" rel="noopener noreferrer">
+        Watch "{{ $title }}" on YouTube
+      </a>
+    </noscript>
+  </lite-youtube>
+  {{- with $caption }}
+  <p class="youtube-embed__caption">{{ . }}</p>
+  {{- end }}
+</div>
+{{- with resources.Get "js/youtube.js" }}
+{{- $js := . | fingerprint "sha512" }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
+{{- end }}

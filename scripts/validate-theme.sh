@@ -420,6 +420,24 @@ else
 fi
 rm "$ADS_SCRATCH/content/empty-faq.md"
 
+# The youtube shortcode contracts on video ID shape: an invalid ID fails
+# the build instead of rendering a broken or malicious iframe.
+cat >"$ADS_SCRATCH/content/bad-youtube.md" <<'MD'
+---
+title: "Bad YouTube"
+---
+{{< youtube id="bad-id" >}}
+MD
+if scratch_hugo; then
+  fail 'a malformed youtube video ID fails the build'
+elif grep -q 'youtube shortcode: video ID "bad-id" is malformed' "$WORK/scratch-build.stderr"; then
+  pass 'a malformed youtube video ID fails the build'
+else
+  fail 'the malformed youtube failure names the bad value'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/bad-youtube.md"
+
 # [ads] consent "gated": head ships no loader and the push copy carries the
 # posture. In both modes the CSP check stays in force, because the loader
 # leaves at grant time; the _headers scratch file already allows the origin.

@@ -39,6 +39,25 @@ the page passes an `https` embed URL.
 
 The frame loads lazily inside a 16/9 box.
 
+## youtube
+
+Embed a YouTube video using a lightweight, privacy-preserving player (`lite-youtube`).
+
+Traditional YouTube iframes pull ~1.2MB of third-party scripts, tracking cookies, and layout reflows on initial page load. Strata's `youtube` shortcode defers all third-party requests until the reader clicks play, serving an accessible poster with a CSS play button first. When activated, it loads from `https://www.youtube-nocookie.com`.
+
+```markdown
+{{</* youtube id="dQw4w9WgXcQ" title="Example Video Title" */>}}
+{{</* youtube "dQw4w9WgXcQ" "Example Video Title" */>}}
+{{</* youtube id="dQw4w9WgXcQ" title="Example Video Title" start="30" caption="Starts at 30 seconds" */>}}
+```
+
+| Parameter | Notes |
+|---|---|
+| `id` | **required** (or positional `0`) — 11-character YouTube video ID; malformed IDs fail the build |
+| `title` | Frame and play button label for screen readers; defaults to `"Play YouTube video <id>"` |
+| `caption` | Optional explanatory caption text displayed below the video |
+| `start` | Start playback offset in seconds (positive integer) |
+
 ## content/article
 
 Embed another page's card inline.
