@@ -137,18 +137,8 @@
 {{- with partial "data/description.html" $page }}
 {{- $article = merge $article (dict "description" .) }}
 {{- end }}
-{{- with $page.Params.takeaways }}
-{{- $abstract := "" }}
-{{- if reflect.IsSlice . }}
-  {{- $cleanItems := slice }}
-  {{- range . }}{{ with strings.TrimSpace . }}{{ $cleanItems = $cleanItems | append . }}{{ end }}{{ end }}
-  {{- $abstract = delimit $cleanItems " " }}
-{{- else }}
-  {{- $abstract = strings.TrimSpace (printf "%v" .) }}
-{{- end }}
-{{- with $abstract }}
+{{- with (partial "data/takeaways.html" $page).abstract }}
 {{- $article = merge $article (dict "abstract" .) }}
-{{- end }}
 {{- end }}
 {{- $kw := partial "data/keywords.html" $page }}
 {{- with $kw }}

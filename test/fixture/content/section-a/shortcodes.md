@@ -68,4 +68,6 @@ Markdown inside the last column.
 
 ## youtube
 
-{{< youtube id="dQw4w9WgXcQ" title="Smoke Fixture Video" caption="Testing youtube embed" >}}
+{{< youtube id="dQw4w9WgXcQ" title="Smoke Fixture Video" poster="photo-flat.png" caption="Testing youtube embed" >}}
+
+{{< youtube id="aqz-KE-bpKQ" title="Second Smoke Fixture Video" start="0" >}}

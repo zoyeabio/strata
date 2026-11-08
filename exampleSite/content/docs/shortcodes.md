@@ -41,14 +41,15 @@ The frame loads lazily inside a 16/9 box.
 
 ## youtube
 
-Embed a YouTube video using a lightweight, privacy-preserving player (`lite-youtube`).
+Embed a YouTube video using a lightweight, privacy-enhanced player (`lite-youtube`).
 
-Traditional YouTube iframes pull ~1.2MB of third-party scripts, tracking cookies, and layout reflows on initial page load. Strata's `youtube` shortcode defers all third-party requests until the reader clicks play, serving an accessible poster with a CSS play button first. When activated, it loads from `https://www.youtube-nocookie.com`.
+Traditional YouTube iframes load third-party scripts and disclose request metadata on initial page load. Strata makes no third-party request until the reader clicks play. Before activation it shows a first-party placeholder or an optional local poster; activation creates an iframe from `https://www.youtube-nocookie.com`. The play control remains a normal YouTube link when JavaScript is unavailable.
 
 ```markdown
 {{</* youtube id="dQw4w9WgXcQ" title="Example Video Title" */>}}
 {{</* youtube "dQw4w9WgXcQ" "Example Video Title" */>}}
 {{</* youtube id="dQw4w9WgXcQ" title="Example Video Title" start="30" caption="Starts at 30 seconds" */>}}
+{{</* youtube id="dQw4w9WgXcQ" title="Example Video Title" poster="images/local-video-poster.png" */>}}
 ```
 
 | Parameter | Notes |
@@ -56,7 +57,8 @@ Traditional YouTube iframes pull ~1.2MB of third-party scripts, tracking cookies
 | `id` | **required** (or positional `0`) — 11-character YouTube video ID; malformed IDs fail the build |
 | `title` | Frame and play button label for screen readers; defaults to `"Play YouTube video <id>"` |
 | `caption` | Optional explanatory caption text displayed below the video |
-| `start` | Start playback offset in seconds (positive integer) |
+| `start` | Start playback offset in seconds (non-negative integer) |
+| `poster` | Optional local page resource, asset or static image; remote posters fail the build so pre-activation remains first-party |
 
 ## content/article
 

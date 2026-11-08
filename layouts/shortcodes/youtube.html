@@ -1,14 +1,15 @@
 {{- /*
   Shortcode: youtube
   Role:      Lightweight, privacy-enhanced, and CLS-safe YouTube embed.
-             Loads an accessible poster and play button on initial render,
-             deferring the heavy iframe and third-party tracking until
-             the reader clicks play. Uses https://www.youtube-nocookie.com.
+             Makes no third-party request until the reader clicks play. An
+             optional local poster goes through Strata's image pipeline; the
+             activated iframe uses https://www.youtube-nocookie.com.
   Parameters:
     id       (string, required or positional 0): 11-character YouTube video ID
     title    (string, optional or positional 1): Accessible video title / label
-    start    (int, optional): Start playback at given second (e.g. 30)
+    start    (int, optional): Start playback at a non-negative second (e.g. 30)
     caption  (string, optional): Explanatory caption text below the video
+    poster   (string, optional): Local page resource, asset or static image
   Called by:
     {{< youtube id="dQw4w9WgXcQ" title="Example Video" >}}
     {{< youtube "dQw4w9WgXcQ" "Example Video" >}}
@@ -22,27 +23,37 @@
 {{- end -}}
 {{- $title := .Get "title" | default (.Get 1) | default (printf "Play YouTube video %s" $id) -}}
 {{- $caption := .Get "caption" -}}
+{{- $posterRef := .Get "poster" -}}
 {{- $start := .Get "start" -}}
 {{- if and $start (not (findRE `^\d+$` (printf "%v" $start))) -}}
-  {{- errorf "youtube shortcode: start parameter %q must be a positive integer in seconds (%s)" $start .Position -}}
+  {{- errorf "youtube shortcode: start parameter %q must be a non-negative integer in seconds (%s)" $start .Position -}}
+{{- end -}}
+{{- $poster := dict "ok" false -}}
+{{- $posterSizes := partial "data/content-image-sizes.html" .Page -}}
+{{- with $posterRef -}}
+  {{- if or (strings.HasPrefix . "http://") (strings.HasPrefix . "https://") -}}
+    {{- errorf "youtube shortcode: poster %q must be local so the embed makes no third-party request before activation (%s)" . $.Position -}}
+  {{- end -}}
+  {{- $poster = partial "data/image-resource.html" (dict "ref" . "page" $.Page "role" "illustration" "alt" "") -}}
 {{- end -}}
 <div class="youtube-embed">
   <lite-youtube videoid="{{ $id }}" data-title="{{ $title }}"{{ with $start }} data-start="{{ . }}"{{ end }}>
-    <button type="button" class="lite-youtube__btn" aria-label="{{ $title }}">
+    {{- if $poster.ok }}
+    <img class="lite-youtube__poster" src="{{ $poster.url }}"{{ with $poster.srcset }} srcset="{{ . }}" sizes="{{ $posterSizes }}"{{ end }}{{ with $poster.width }} width="{{ . }}"{{ end }}{{ with $poster.height }} height="{{ . }}"{{ end }} alt="" aria-hidden="true" loading="lazy" decoding="async">
+    {{- end }}
+    <a class="lite-youtube__btn" href="https://www.youtube.com/watch?v={{ $id }}{{ with $start }}&amp;t={{ . }}s{{ end }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $title }}">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z"/></svg>
       <span class="sr-only">{{ $title }}</span>
-    </button>
-    <noscript>
-      <a class="youtube-embed__fallback" href="https://www.youtube-nocookie.com/watch?v={{ $id }}" target="_blank" rel="noopener noreferrer">
-        Watch "{{ $title }}" on YouTube
-      </a>
-    </noscript>
+    </a>
   </lite-youtube>
   {{- with $caption }}
   <p class="youtube-embed__caption">{{ . }}</p>
   {{- end }}
 </div>
-{{- with resources.Get "js/youtube.js" }}
+{{- if not (.Page.Store.Get "strataYoutubeScript") -}}
+{{- .Page.Store.Set "strataYoutubeScript" true -}}
+{{- with resources.Get "js/youtube.js" -}}
 {{- $js := . | fingerprint "sha512" }}
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
-{{- end }}
+{{- end -}}
+{{- end -}}

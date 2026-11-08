@@ -477,38 +477,42 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # `ref` is the tag go.mod requires: the local replace makes
       # development build against your checkout, CI builds the release. Bump
       # both when you upgrade the theme.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: zoyeabio/strata
           ref: __MODULE_VERSION__
           path: ../strata
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
           cache: npm
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
       - name: Install Hugo Extended
         env:
           HUGO_VERSION: "0.167.0"
+          HUGO_SHA256: "0163f5c3deddac1f494a1629ddc40c65d18de9d5794facd98f7f96ac2c7d8957"
         run: |
           curl -sSfL -o /tmp/hugo.tar.gz \
             "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HUGO_SHA256}  /tmp/hugo.tar.gz" | sha256sum --check --strict
           tar -xzf /tmp/hugo.tar.gz -C /tmp hugo
           sudo install -m 0755 /tmp/hugo /usr/local/bin/hugo
           hugo version
 
       - name: Install build dependencies
-        run: npm ci
+        run: |
+          npm ci
+          python3 -m pip install pyyaml==6.0.3
 
       - name: Production build and output rules
         run: (cd ../strata && ./scripts/validate-site.sh "$GITHUB_WORKSPACE")

@@ -45,6 +45,12 @@ else
   fail 'ads runtime handles multiple units, stored consent and withdrawal'
 fi
 
+if node "$ROOT/test/youtube-runtime.mjs" >/dev/null; then
+  pass 'youtube runtime stays local until one privacy-enhanced activation'
+else
+  fail 'youtube runtime stays local until one privacy-enhanced activation'
+fi
+
 if [ -s "$WORK/build.stderr" ]; then
   fail 'production build is silent'
   cat "$WORK/build.stderr" >&2
@@ -437,6 +443,60 @@ else
   cat "$WORK/scratch-build.stderr" >&2
 fi
 rm "$ADS_SCRATCH/content/bad-youtube.md"
+
+cat >"$ADS_SCRATCH/content/bad-youtube-start.md" <<'MD'
+---
+title: "Bad YouTube start"
+---
+{{< youtube id="dQw4w9WgXcQ" start="-1" >}}
+MD
+if scratch_hugo; then
+  fail 'a negative youtube start fails the build'
+elif grep -q 'start parameter "-1" must be a non-negative integer' "$WORK/scratch-build.stderr"; then
+  pass 'a negative youtube start fails the build'
+else
+  fail 'the youtube start failure names the contract'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/bad-youtube-start.md"
+
+cat >"$ADS_SCRATCH/content/remote-youtube-poster.md" <<'MD'
+---
+title: "Remote YouTube poster"
+---
+{{< youtube id="dQw4w9WgXcQ" poster="https://i.ytimg.com/example.jpg" >}}
+MD
+if scratch_hugo; then
+  fail 'a remote youtube poster fails the build'
+elif grep -q 'poster .* must be local' "$WORK/scratch-build.stderr"; then
+  pass 'a remote youtube poster fails the build'
+else
+  fail 'the remote youtube poster failure explains the privacy boundary'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/remote-youtube-poster.md"
+
+# Takeaways feed both visible prose and Article.abstract. Reject malformed
+# shapes instead of formatting maps or numbers into public metadata.
+cat >"$ADS_SCRATCH/content/bad-takeaways.md" <<'MD'
+---
+title: "Bad takeaways"
+date: 2026-01-01
+takeaways:
+  - "Valid point"
+  - 42
+---
+Body.
+MD
+if scratch_hugo; then
+  fail 'a non-text takeaway fails the build'
+elif grep -q 'takeaways: item 2 .* must be a string' "$WORK/scratch-build.stderr"; then
+  pass 'a non-text takeaway fails the build'
+else
+  fail 'the malformed takeaway failure names the item'
+  cat "$WORK/scratch-build.stderr" >&2
+fi
+rm "$ADS_SCRATCH/content/bad-takeaways.md"
 
 # [ads] consent "gated": head ships no loader and the push copy carries the
 # posture. In both modes the CSP check stays in force, because the loader

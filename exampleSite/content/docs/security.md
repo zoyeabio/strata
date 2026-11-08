@@ -18,7 +18,7 @@ The policy is strict: `default-src 'self'` with `script-src 'self'` and no `unsa
 That is only achievable because of how the theme is built:
 
 - every script and stylesheet ships from the origin and carries an SRI `integrity` attribute
-- `js/carousel.js`, `js/contact.js` and `js/ads.js` are external assets, not inline. Their shortcodes used to interpolate values straight into the script; instance ids and limits now come from `data-*` attributes instead, so nothing is ever interpolated into JavaScript
+- `js/carousel.js`, `js/contact.js`, `js/ads.js` and `js/youtube.js` are external assets, not inline. Their shortcodes used to interpolate values straight into the script; instance ids and limits now come from `data-*` attributes instead, so nothing is ever interpolated into JavaScript
 - the JSON-LD blocks look like inline scripts but carry a non-executable type and are exempt from `script-src`
 
 ## Email addresses
@@ -60,7 +60,7 @@ Each is called out in `_headers` with the exact change to make.
 
 **`style-src 'unsafe-inline'`** — the carousel writes a dynamic `aspect-ratio: W / H` attribute that has no class equivalent. Inline style cannot execute code, so this is a much smaller opening than an inline script. Removing it needs a nonce, and Hugo does not generate nonces.
 
-**`frame-src` google origins** — the `map` shortcode is the theme's explicit opt-in to a third-party embed, and its documented example is a Google Maps URL. Add your provider's origin rather than widening to `https:`.
+**`frame-src` media origins** — the `map` and `youtube` shortcodes are the theme's explicit opt-ins to third-party frames. YouTube makes no request before activation and optional posters are local. Add your provider's origin rather than widening to `https:`.
 
 **Ads** — `site.Params.ads.client` turns on the AdSense loader, a foreign origin the default policy blocks on every directive the ad stack touches. The push call is not part of that problem: the shortcode ships it as an external `js/ads.js` with an integrity attribute, so ads never ask for `unsafe-inline`. With `[ads] consent = "gated"` the loader waits for the site's consent answer — but waiting for it does not lift the origin, so the same `_headers` work is owed at grant time either way.
 

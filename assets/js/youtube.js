@@ -1,6 +1,6 @@
 /* Lite-YouTube embed Web Component: accessible, privacy-enhanced, and CLS-safe.
-   Delays iframe creation and third-party Google requests until the reader clicks play.
-   Uses https://www.youtube-nocookie.com to avoid tracking cookies. */
+   Creates no third-party connection until the reader activates the local link.
+   Playback uses YouTube's privacy-enhanced youtube-nocookie.com host. */
 (function () {
   if (typeof customElements === "undefined") return;
   if (customElements.get("lite-youtube")) return;
@@ -16,29 +16,11 @@
       var title = this.getAttribute("data-title") || this.getAttribute("title") || "Play video";
       this.playLabel = title;
 
-      // Poster thumbnail: use official YouTube thumbnail CDN
-      if (!this.style.backgroundImage) {
-        this.style.backgroundImage = 'url("https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg")';
-      }
-
-      // Preconnect on pointerover or focus for faster subsequent playback
-      var preconnected = false;
-      var preconnect = function () {
-        if (preconnected) return;
-        preconnected = true;
-        ["https://www.youtube-nocookie.com", "https://i.ytimg.com"].forEach(function (url) {
-          var link = document.createElement("link");
-          link.rel = "preconnect";
-          link.href = url;
-          document.head.appendChild(link);
-        });
-      };
-      this.addEventListener("pointerover", preconnect, { once: true });
-      this.addEventListener("focusin", preconnect, { once: true });
-
-      // Click to activate
       var self = this;
-      this.addEventListener("click", function () {
+      var trigger = this.querySelector(".lite-youtube__btn");
+      if (!trigger) return;
+      trigger.addEventListener("click", function (event) {
+        event.preventDefault();
         self.activate();
       });
     }

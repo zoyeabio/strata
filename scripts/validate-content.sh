@@ -54,7 +54,7 @@ from datetime import date, datetime
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("pyyaml is required: python3 -m pip install pyyaml\n")
+    sys.stderr.write("pyyaml is required: python3 -m pip install pyyaml==6.0.3\n")
     sys.exit(2)
 
 theme_root = pathlib.Path(sys.argv[1])
@@ -272,6 +272,27 @@ for path in pages():
             bad("featureimage needs featureimagealt",
                 "%s: the hero, the card and og:image:alt all fall back to a "
                 "generic caption" % where)
+
+    takeaways = page_param(fm, params, "takeaways")
+    if takeaways is not None:
+        if isinstance(takeaways, str):
+            takeaway_items = [takeaways]
+        elif isinstance(takeaways, list):
+            takeaway_items = takeaways
+        else:
+            takeaway_items = None
+        if takeaway_items is None:
+            bad("takeaways is text or a list of text",
+                "%s: got %s; maps and numbers would produce invalid visible and "
+                "structured summaries" % (where, type(takeaways).__name__))
+        elif not takeaway_items:
+            bad("takeaways is not empty",
+                "%s: remove the key or supply at least one summary point" % where)
+        else:
+            for index, value in enumerate(takeaway_items, 1):
+                if not isinstance(value, str) or not value.strip():
+                    bad("takeaways contains non-empty text",
+                        "%s: item %d is %r" % (where, index, value))
 
     author = page_param(fm, params, "author")
     if isinstance(author, (list, dict)):

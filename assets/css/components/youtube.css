@@ -14,15 +14,6 @@
   margin-bottom: 0;
 }
 
-.youtube-embed__fallback {
-  display: block;
-  padding: 16px;
-  text-align: center;
-  color: #fff;
-  background-color: rgba(0, 0, 0, 0.7);
-  text-decoration: underline;
-}
-
 lite-youtube {
   background-color: #000;
   position: relative;
@@ -36,6 +27,14 @@ lite-youtube {
   border-radius: var(--radius-md, 8px);
   overflow: hidden;
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+lite-youtube > .lite-youtube__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @supports not (aspect-ratio: 16 / 9) {
@@ -136,7 +135,8 @@ lite-youtube.lyt-activated {
 }
 
 lite-youtube.lyt-activated::before,
-lite-youtube.lyt-activated > .lite-youtube__btn {
+lite-youtube.lyt-activated > .lite-youtube__btn,
+lite-youtube.lyt-activated > .lite-youtube__poster {
   display: none;
 }
 }

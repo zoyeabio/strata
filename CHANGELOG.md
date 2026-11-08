@@ -5,6 +5,37 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Key takeaways component and structured `abstract` metadata.** Long articles can render an accessible key-takeaways callout above the body. It accepts inline Markdown for readers and normalizes plain text for `Article.abstract` JSON-LD.
+- **Privacy-enhanced, responsive YouTube embed (`youtube` shortcode).** Displays an accessible 16:9 poster and play control with zero upfront third-party requests or tracking cookies, deferring the `https://www.youtube-nocookie.com` player until activation.
+
+### Changed
+
+- **YouTube embeds are first-party until activation.** The shortcode no longer
+  fetches a YouTube thumbnail or preconnects on hover. It uses a resilient
+  ordinary-link fallback, creates the privacy-enhanced iframe only on click,
+  supports optional local responsive posters and emits its runtime once per
+  page even when several videos are present.
+- **Takeaways share one validated data path.** Visible callouts retain inline
+  Markdown, while `Article.abstract` receives normalized plain text. Empty,
+  numeric or mapping-shaped values now fail with an actionable authoring error.
+
+### Fixed
+
+- YouTube's `start` parameter and documentation now consistently accept
+  non-negative seconds, including zero.
+- New-site CI installs the PyYAML dependency required by content validation.
+
+### Security
+
+- CI actions are pinned to commit identities, Hugo downloads are verified
+  against the release SHA-256, and PyYAML is installed at an exact version.
+- The default CSP no longer permits the retired YouTube thumbnail origin or a
+  pre-activation connection to YouTube.
+
 ## [0.3.1] - 2026-10-30
 
 ### Fixed

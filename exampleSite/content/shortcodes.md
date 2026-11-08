@@ -6,8 +6,8 @@ featureimage: "images/hero-shortcodes.png"
 featureimagealt: "A grid of small marks over a dark field"
 ---
 
-Fifteen shortcodes. Every one below is live — `ads` apart, which needs a
-publisher ID — and each block shows the exact syntax it was written with.
+Sixteen shortcode templates. Fifteen are live below; `ads` is the exception
+because it needs a publisher ID. Each block shows the exact syntax it uses.
 
 ---
 
@@ -269,18 +269,19 @@ An embedded map. `src` must start with `https://`.
 
 ## `youtube`
 
-A lightweight, privacy-enhanced YouTube embed (`lite-youtube`). Instead of loading heavy third-party scripts and cookies upfront, it displays an accessible 16:9 poster with a play button, deferring the `youtube-nocookie.com` player until the reader clicks play.
+A lightweight, privacy-enhanced YouTube embed (`lite-youtube`). It makes no third-party request before activation: the poster below is a local site asset, and the `youtube-nocookie.com` player is created only after the reader clicks play.
 
-{{< youtube id="dQw4w9WgXcQ" title="Rick Astley - Never Gonna Give You Up" caption="Responsive 16:9 video embed with accessible title and privacy-enhanced playback." >}}
+{{< youtube id="dQw4w9WgXcQ" title="Rick Astley - Never Gonna Give You Up" poster="images/hero-shortcodes.png" caption="Responsive 16:9 video embed with a local poster and privacy-enhanced playback." >}}
 
-<pre><code>{{&lt; youtube id="dQw4w9WgXcQ" title="Video Title" caption="Optional caption" &gt;}}</code></pre>
+<pre><code>{{&lt; youtube id="dQw4w9WgXcQ" title="Video Title" poster="images/local-poster.png" caption="Optional caption" &gt;}}</code></pre>
 
 | Parameter | Required | Notes |
 |---|---|---|
 | `id` | yes | 11-character YouTube video ID (or positional 0) |
 | `title` | | Accessible label / frame title (or positional 1) |
 | `caption` | | Optional explanatory caption below the video |
-| `start` | | Start playback at given second (positive integer) |
+| `start` | | Start playback at a non-negative second |
+| `poster` | | Optional local image; remote URLs fail the build to preserve the no-request guarantee |
 
 ---
 

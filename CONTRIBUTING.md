@@ -3,8 +3,8 @@
 ## Ground rules
 
 - **No implicit external requests** at build time or runtime — no CDNs,
-  webfonts or analytics. Only documented map, AdSense and site-hook opt-ins
-  may add third-party requests.
+  webfonts or analytics. Only documented map, activated YouTube, AdSense and
+  site-hook opt-ins may add third-party requests.
 - **No placeholder or site-specific content** in the theme: no brand names,
   no sample marketing copy, no dead links.
 - **Configuration is externalised**: nothing site-shaped is hard-coded in
@@ -16,7 +16,7 @@
 
 ```sh
 npm install                     # once — Hugo runs the Tailwind CSS CLI through node
-python3 -m pip install pyyaml   # once — the front matter lint in validate-content.sh
+python3 -m pip install pyyaml==6.0.3  # once — front matter lint dependency
 ```
 
 The gates use Python 3.11+ for `tomllib` and PyYAML for that lint; the CI

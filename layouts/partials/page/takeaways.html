@@ -6,17 +6,7 @@
   Params:   page (Page, required)
   Called by: _default/single.html
 */ -}}
-{{- $takeaways := .Params.takeaways -}}
-{{- $items := slice -}}
-{{- if reflect.IsSlice $takeaways -}}
-  {{- range $takeaways -}}
-    {{- $text := . | strings.TrimSpace -}}
-    {{- if $text }}{{ $items = $items | append $text }}{{ end -}}
-  {{- end -}}
-{{- else if $takeaways -}}
-  {{- $text := (printf "%v" $takeaways) | strings.TrimSpace -}}
-  {{- if $text }}{{ $items = $items | append $text }}{{ end -}}
-{{- end -}}
+{{- $items := (partial "data/takeaways.html" .).items -}}
 {{- if gt (len $items) 0 }}
 <aside class="takeaways" aria-label="Key Takeaways">
   <div class="takeaways__header">

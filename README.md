@@ -21,7 +21,7 @@ describes shipped behaviour.
 - Responsive image pipeline: WebP ladder, `srcset`/`sizes`, role-derived
   quality, SVG/GIF/animated-WebP pass-through
 - Light/dark appearance applied before first paint, seven colour schemes
-- No implicit external requests — maps and AdSense are explicit site opt-ins
+- No implicit external requests — maps, activated YouTube and AdSense are explicit site opt-ins
 - Taxonomy navigation resolved through Hugo's `GetTerms`, never string concat
 - JSON-LD graph (`WebSite` / `Organization` / `WebPage` / `BreadcrumbList` /
   `Article` / `Series` / `Person`), Open Graph and Twitter cards

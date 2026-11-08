@@ -11,6 +11,9 @@ reviewerjobtitle: "Senior Research Fellow"
 revieweraffiliation: "Stanford Medicine"
 reviewersameas: ["https://orcid.org/0000-0002-1825-0097"]
 showtoc: true
+takeaways:
+  - "Use **strong** fixture wording."
+  - "[Read the notice](/notice/) before continuing."
 featureimage: photo-flat.png
 featureimagealt: "Flat asset image"
 ---

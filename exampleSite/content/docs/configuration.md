@@ -109,7 +109,7 @@ Additional cascade rules can be separate blocks in the same winning array.
 | `article.showDateUpdated` | `true` | `Updated` line when `lastmod` is on a later day than `date`; page `showDateUpdated` wins |
 | `article.showSummary` | `true` | A page's `summary` as a standfirst above the meta line. Unlike `list.showSummary`, which is about cards, a page's own summary is written for a reader, so one that is supplied is shown. Page `showsummary: false` suppresses it |
 | `article.showToc` | `false` | Table of contents from headings for long articles; page `showtoc` wins |
-| `article.showTakeaways` | `true` | Key takeaways callout block when page declares `takeaways`; page `showtakeaways` wins |
+| `article.showTakeaways` | `true` | Visible key-takeaways callout when a page declares a non-empty string or list of strings; page `showtakeaways` wins. Markdown renders in the callout and is stripped to plain text for `Article.abstract`; hiding the callout does not remove that metadata |
 | `article.showRelatedContent` | `false` | Related-content card grid after the body (see [Related content](#related-content)) |
 | `article.relatedContentLimit` | `3` | Maximum related cards; Hugo ranks, the theme only caps |
 | `article.showPagination` | `true` | Previous/next links to the neighbouring articles of the same section (see [Previous and next](#previous-and-next)) |
@@ -194,7 +194,7 @@ page to its site, its organisation, its author and its series without guessing:
 | `Organization` | Every page | `name` (footer company name, else the site title), `url`, `sameAs` from `[footer] social links`, `logo` from `schemaLogo` when configured |
 | `WebPage` | Every page | `name`, `url`, `isPartOf` → `WebSite`, `inLanguage` |
 | `BreadcrumbList` | Non-home | `itemListElement` of `ListItem`, position ordered |
-| `Article` | Dated pages | `headline`, `mainEntityOfPage` → `WebPage`, `publisher` → `Organization`, `author` → `Person`, `description`, `keywords`, `image`, `datePublished`, `dateModified`, `isPartOfSeries` → `Series` |
+| `Article` | Dated pages | `headline`, `mainEntityOfPage` → `WebPage`, `publisher` → `Organization`, `author` → `Person`, `description`, `abstract`, `keywords`, `image`, `datePublished`, `dateModified`, `isPartOfSeries` → `Series` |
 | `Series` | A page with a `series` term | `name`, `url`, `hasPart` — each member as an `Article` ref with its `position`, in the same `weight` order as the series navigation |
 | `Person` | A byline exists | `name`, `url` when `authorurl` or `[author] url` is set, `sameAs` from `[author] links` |
 
@@ -251,6 +251,8 @@ warning instead of being rendered as a dead link.
 | `showPagination` | Page-level previous/next override (falls back to `[article] showPagination`) |
 | `showBreadcrumbs` | Page-level trail override (falls back to the Kind table, explicit `false` wins) |
 | `showToc` | Page-level Table of Contents override (falls back to `[article] showToc`) |
+| `showTakeaways` | Page-level key takeaways callout override (falls back to `[article] showTakeaways`) |
+| `takeaways` | String or list of strings summarizing key article takeaways. Renders an accessible callout and feeds `Article.abstract` in JSON-LD |
 | `reviewer` | Peer reviewer or fact-checker name for E-E-A-T (e.g. `Dr. Jane Doe`). Rendered in article byline as `Reviewed by...` and emitted in JSON-LD as `reviewedBy` |
 | `reviewerURL` | Optional profile link for the reviewer |
 | `reviewerJobTitle` | Professional academic or research title for reviewer in JSON-LD |

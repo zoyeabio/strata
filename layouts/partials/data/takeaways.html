@@ -1,0 +1,45 @@
+{{- /*
+  Normalizes an article's takeaways once for visible markup and JSON-LD.
+
+  Input:  Page
+  Output: dict with items (trimmed Markdown strings) and abstract (plain text)
+
+  A declared value must be one non-empty string or a non-empty list of
+  strings. Failing at the authoring boundary prevents maps, numbers and empty
+  entries from leaking into the callout or Article.abstract as Go formatting.
+*/ -}}
+{{- $raw := .Params.takeaways -}}
+{{- $items := slice -}}
+{{- if ne $raw nil -}}
+  {{- if reflect.IsSlice $raw -}}
+    {{- range $index, $value := $raw -}}
+      {{- if ne (printf "%T" $value) "string" -}}
+        {{- errorf "takeaways: item %d on %q must be a string, got %T" (add $index 1) $.RelPermalink $value -}}
+      {{- end -}}
+      {{- $text := strings.TrimSpace $value -}}
+      {{- if not $text -}}
+        {{- errorf "takeaways: item %d on %q must not be empty" (add $index 1) $.RelPermalink -}}
+      {{- end -}}
+      {{- $items = $items | append $text -}}
+    {{- end -}}
+    {{- if eq (len $items) 0 -}}
+      {{- errorf "takeaways: %q declares an empty list" .RelPermalink -}}
+    {{- end -}}
+  {{- else -}}
+    {{- if ne (printf "%T" $raw) "string" -}}
+      {{- errorf "takeaways: value on %q must be a string or list of strings, got %T" .RelPermalink $raw -}}
+    {{- end -}}
+    {{- $text := strings.TrimSpace $raw -}}
+    {{- if not $text -}}
+      {{- errorf "takeaways: value on %q must not be empty" .RelPermalink -}}
+    {{- end -}}
+    {{- $items = $items | append $text -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $plain := slice -}}
+{{- range $items -}}
+  {{- $text := . | markdownify | plainify | htmlUnescape | strings.TrimSpace -}}
+  {{- with $text }}{{- $plain = $plain | append . -}}{{- end -}}
+{{- end -}}
+{{- return (dict "items" $items "abstract" (delimit $plain " ")) -}}

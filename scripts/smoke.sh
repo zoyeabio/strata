@@ -78,6 +78,10 @@ assert_at() { # assert_at <dir> <file> <regex> <label>
   if grep -qE "$3" "$1/$2" 2>/dev/null; then pass "$4"; else fail "$4"; fi
 }
 
+assert_not_at() { # assert_not_at <dir> <file> <regex> <label>
+  if grep -qE "$3" "$1/$2" 2>/dev/null; then fail "$4"; else pass "$4"; fi
+}
+
 count_assert() { # count_assert <file> <regex> <n> <label>
   local n
   n=$(grep -cE "$2" "$OUT/$1" 2>/dev/null || true)
@@ -337,8 +341,22 @@ assert 'section-a/shortcodes/index.html' 'data-title="Smoke Fixture Video"' \
   'youtube element carries title'
 assert 'section-a/shortcodes/index.html' 'Testing youtube embed' \
   'youtube renders caption'
-assert 'section-a/shortcodes/index.html' 'src="?/js/youtube\.[0-9a-f]+\.js"? integrity="sha512-' \
-  'youtube script ships fingerprinted with SRI'
+assert 'section-a/shortcodes/index.html' 'class="lite-youtube__poster" src="/images/section-a/photo-flat_[^"]+\.webp"' \
+  'youtube resolves an optional local responsive poster'
+count_assert 'section-a/shortcodes/index.html' 'src="?/js/youtube\.[0-9a-f]+\.js"? integrity="sha512-' 1 \
+  'multiple youtube embeds share one fingerprinted script'
+assert 'section-a/shortcodes/index.html' 'href="https://www.youtube.com/watch\?v=dQw4w9WgXcQ"' \
+  'youtube keeps a no-JavaScript fallback link'
+assert_not 'section-a/shortcodes/index.html' 'i.ytimg.com|youtube-nocookie.com/embed' \
+  'youtube makes no third-party image or iframe request before activation'
+assert 'section-a/flat/index.html' '<aside class="takeaways" aria-label="Key Takeaways">' \
+  'takeaways render an accessible callout'
+assert 'section-a/flat/index.html' '<strong>strong</strong> fixture wording' \
+  'takeaways render inline Markdown for readers'
+assert 'section-a/flat/index.html' '"abstract":"Use strong fixture wording\. Read the notice before continuing\."' \
+  'takeaways emit a plain-text Article abstract'
+assert_not 'section-a/flat/index.html' '"abstract":"[^"]*(\*\*|\[[^]]+\]\()' \
+  'Article abstract contains no Markdown syntax'
 count_assert 'section-a/shortcodes/index.html' 'loading="eager"' 7 \
   'five list cards plus two first slides load eagerly'
 # Quality is site-wide, so two figures sharing a role cannot write the same
@@ -541,8 +559,8 @@ css_assert '\--accent-fg:var\(--site-accent-fg,[[:space:]]*var\(--site-accent\)'
 css_assert_not '\--site-accent-soft|\--site-surface-tint' \
   'no scheme-owned decorative token leaks into the output'
 count_assert 'section-a/shortcodes/index.html' \
-  'min\(calc\(100vw - 112px\), 720px\)' 7 \
-  'text preset caps every body image and loop clone at the reading measure'
+  'min\(calc\(100vw - 112px\), 720px\)' 8 \
+  'text preset caps every body image, youtube poster and loop clone at the reading measure'
 assert_at "$OUT_MEASURE" 'section-a/shortcodes/index.html' \
   'min\(calc\(100vw - 112px\), 800px\)' \
   'text image sizes follow an 800px readingMeasure override'
@@ -1878,8 +1896,8 @@ assert_at "$ROOT/static" '_headers' 'object-src .none' \
   'headers deny plugins'
 assert_at "$ROOT/static" '_headers' 'https://www.youtube-nocookie.com' \
   'headers allow youtube-nocookie'
-assert_at "$ROOT/static" '_headers' 'https://i.ytimg.com' \
-  'headers allow youtube thumbnail cdn'
+assert_not_at "$ROOT/static" '_headers' 'https://i.ytimg.com' \
+  'headers do not allow the retired youtube thumbnail cdn'
 # Comments are stripped first: the file documents the AdSense relaxation in
 # prose, and style-src legitimately keeps 'unsafe-inline' for the carousel's
 # dynamic aspect-ratio attribute.
