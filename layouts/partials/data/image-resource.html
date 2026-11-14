@@ -149,11 +149,7 @@
   {{- end }}
 {{- else if $ref }}
   {{- $where := "" }}{{ with $page }}{{ $where = .RelPermalink }}{{ end }}
-  {{- if hugo.IsProduction }}
-    {{- errorf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
-  {{- else if hugo.IsServer }}
-    {{- warnf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
-  {{- end }}
+  {{- warnf "strata: image not found (ref=%q role=%q page=%q)" $ref $role $where }}
 {{- end }}
 
 {{- return (merge $result (dict "alt" (.alt | default ""))) }}
