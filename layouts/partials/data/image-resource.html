@@ -82,8 +82,17 @@
 {{- if not $res }}{{ with resources.Get $ref }}{{ $res = . }}{{ end }}{{ end }}
 {{- if not $res }}
   {{- $pageDir := "" }}
-  {{- with $page }}{{ with .File }}{{ $pageDir = path.Dir .Path }}{{ end }}{{ end }}
+  {{- $slug := "" }}
+  {{- with $page }}
+    {{- with .File }}
+      {{- $pageDir = path.Dir .Path }}
+      {{- $slug = path.BaseName .Path }}
+    {{- end }}
+  {{- end }}
   {{- $candidates := slice }}
+  {{- if and $pageDir $slug }}
+    {{- $candidates = $candidates | append (printf "images/%s/%s/%s" $pageDir $slug $ref) }}
+  {{- end }}
   {{- if $pageDir }}{{ $candidates = $candidates | append (printf "images/%s/%s" $pageDir $ref) }}{{ end }}
   {{- $candidates = $candidates | append (printf "images/%s" $ref) }}
   {{- range $candidates }}{{ if not $res }}{{ with resources.Get . }}{{ $res = . }}{{ end }}{{ end }}{{ end }}
