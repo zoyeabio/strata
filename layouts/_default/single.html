@@ -4,6 +4,13 @@
 {{- $terms := .GetTerms "tags" }}
 {{- $isArticle := partial "data/is-article.html" . }}
 {{- $articleParams := site.Params.article }}
+{{- if $isArticle }}
+<div class="reading-progress-bar" data-reading-progress aria-hidden="true"></div>
+{{- with resources.Get "js/reading-progress.js" }}
+{{- $rp := . | fingerprint "sha512" }}
+<script src="{{ $rp.RelPermalink }}" integrity="{{ $rp.Data.Integrity }}" defer></script>
+{{- end }}
+{{- end }}
 {{- $hasPageAuthor := false }}
 {{- with .Params.author }}{{ $hasPageAuthor = true }}{{ end }}
 {{- $author := .Params.author | default site.Params.author.name }}

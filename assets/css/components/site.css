@@ -57,10 +57,12 @@ html:has(.site-header--smart) {
   letter-spacing: -0.006em;
 }
 
+img.site-brand__logo,
 .site-brand__logo svg,
 .site-brand__logo {
   height: var(--brand-logo-height);
   width: auto;
+  object-fit: contain;
 }
 
 /* Brand left, nav and action buttons as one group at the far right. Without
@@ -217,13 +219,13 @@ html:has(.site-header--smart) {
      final control below the bar on 320px phones. */
   .site-brand {
     min-width: 0;
-    flex: 1 1 0;
+    flex: 0 1 auto;
     overflow: hidden;
   }
 
   .site-brand__logo {
     display: block;
-    width: 100%;
+    width: auto;
     max-width: 100%;
   }
 
@@ -232,6 +234,8 @@ html:has(.site-header--smart) {
     max-width: 100%;
     max-height: var(--brand-logo-height);
     height: auto;
+    width: auto;
+    object-fit: contain;
   }
 
   .site-brand__title {
@@ -253,7 +257,7 @@ html:has(.site-header--smart) {
      controls grouped at the right. */
   .site-nav__toggle {
     display: inline-flex;
-    margin-inline-start: 0;
+    margin-inline-start: auto;
   }
 
   [data-nav-panel] {
@@ -750,4 +754,17 @@ html:has(.site-header--smart) {
   font-size: 13px;
   color: var(--text-muted);
 }
+}
+
+/* Reading progress bar: fixed at the top of the viewport on article pages */
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2.5px;
+  background-color: var(--site-link);
+  z-index: 100;
+  pointer-events: none;
+  transition: width 80ms linear;
 }
