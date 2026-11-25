@@ -53,9 +53,10 @@
     "name" $meta.title
     "isPartOf" (dict "@id" $websiteID)
     "inLanguage" $lang }}
+{{- $reviewerPerson := dict }}
 {{- $reviewer := $page.Params.reviewer | default $page.Params.reviewedby }}
 {{- with $reviewer }}
-{{- $reviewerPerson := dict
+{{- $reviewerPerson = dict
     "@type" "Person"
     "@id" (printf "%s#reviewer" $page.Permalink)
     "name" . }}
@@ -149,6 +150,22 @@
 {{- end }}
 {{- if not $page.Lastmod.IsZero }}
 {{- $article = merge $article (dict "dateModified" ($page.Lastmod.Format "2006-01-02T15:04:05Z07:00")) }}
+{{- end }}
+{{- if $reviewerPerson }}
+{{- $article = merge $article (dict "reviewedBy" $reviewerPerson) }}
+{{- end }}
+{{- /* Emits structured citations (DOIs) from the article references for SEO & GEO engines. */ -}}
+{{- $dois := slice }}
+{{- with $page.RawContent }}
+  {{- range findRE `https?://doi\.org/[^\s"\'<>\)]+` . }}
+    {{- $cleanDOI := strings.TrimRight ".,;:" . }}
+    {{- if not (in $dois $cleanDOI) }}
+      {{- $dois = $dois | append $cleanDOI }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- with $dois }}
+{{- $article = merge $article (dict "citation" .) }}
 {{- end }}
 {{- /* The 1200x630 preview plus the widest hero variant. Google asks for a
        high-resolution 16:9 representative image where one exists; the hero
