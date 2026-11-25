@@ -157,7 +157,7 @@
 {{- /* Emits structured citations (DOIs) from the article references for SEO & GEO engines. */ -}}
 {{- $dois := slice }}
 {{- with $page.RawContent }}
-  {{- range findRE `https?://doi\.org/[^\s"\'<>\)]+` . }}
+  {{- range findRE `https?://doi\.org/[^\s"\'<>\)\]]+` . }}
     {{- $cleanDOI := strings.TrimRight ".,;:" . }}
     {{- if not (in $dois $cleanDOI) }}
       {{- $dois = $dois | append $cleanDOI }}

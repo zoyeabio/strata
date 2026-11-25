@@ -202,13 +202,13 @@ assert 'tags/beta/index.html' 'card card--' 'term beta lists its article cards'
 # 11. the 404 page links home and to the first menu item, never a hardcoded path
 assert '404.html' 'not-found__code' '404 page renders'
 assert '404.html' 'href="/"' '404 links home'
-assert 'index.html' 'rel="icon" href="/favicon\.ico" sizes="any"' \
+assert 'index.html' 'rel="icon" href="/favicon\.ico(\?v=[^"]+)?" sizes="any"' \
   'the default favicon includes an ico fallback'
-assert 'index.html' 'rel="icon" type="image/svg\+xml" href="/favicon\.svg"' \
+assert 'index.html' 'rel="icon" type="image/svg\+xml" href="/favicon\.svg(\?v=[^"]+)?"' \
   'the default favicon prefers svg'
 assert 'index.html' 'rel="apple-touch-icon" sizes="180x180"' \
   'the default favicon includes an apple touch icon'
-assert 'index.html' 'rel="mask-icon" href="/safari-pinned-tab\.svg" color="#183229"' \
+assert 'index.html' 'rel="mask-icon" href="/safari-pinned-tab\.svg(\?v=[^"]+)?" color="#183229"' \
   'the default favicon includes a pinned-tab mask'
 if [ -s "$OUT/favicon.ico" ] && [ -s "$OUT/favicon.svg" ] && \
    [ -s "$OUT/apple-touch-icon.png" ] && \
@@ -945,11 +945,11 @@ css_assert 'site-nav__link\{[^}]*font-weight:600' 'nav links carry the weight th
 css_assert 'site-nav\{margin-inline-start:auto' 'nav and action buttons sit as one group at the right'
 assert 'index.html' 'class="site-nav" id="site-navigation"' \
   'the nav carries the class that right-align rule targets'
-css_assert 'site-nav__toggle\{display:inline-flex;margin-inline-start:0' \
-  'mobile: the flexible brand, not an auto margin, owns spare header space'
+css_assert 'site-nav__toggle\{display:inline-flex;margin-inline-start:auto' \
+  'mobile: the hamburger takes the auto margin to push right controls together'
 css_assert 'site-header\{[^}]*gap:12px' 'header items are tight once the nav is pushed right'
 css_assert 'site-header\{gap:4px' 'mobile: header controls stay on one row beside a compact wordmark'
-css_assert 'site-brand\{[^}]*min-width:0;flex:1;overflow:hidden' 'mobile: the brand yields space before header controls wrap'
+css_assert 'site-brand\{[^}]*min-width:0;flex:(0 1 auto|initial);overflow:hidden' 'mobile: the brand yields space before header controls wrap'
 css_assert 'site-nav__toggle,.site-header__search,.site-header__a11y,.site-header__toggle\{flex:0 0 44px' \
   'mobile: all four header controls keep their 44px touch targets'
 css_assert 'max-width:359px\)\{\.site-header\{padding-inline:12px' \

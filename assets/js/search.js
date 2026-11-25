@@ -15,6 +15,7 @@
   var status = panel.querySelector("[data-search-status]");
   var indexURL = panel.getAttribute("data-search-index");
   var entries = null;
+  var loading = false;
   var failed = false;
   var timer = null;
 
@@ -26,16 +27,28 @@
   });
 
   function load() {
-    if (entries || failed || !indexURL) return;
+    if (entries || loading || failed || !indexURL) return;
+    loading = true;
     if (status) status.textContent = status.getAttribute("data-search-loading");
     fetch(indexURL).then(function (res) {
       if (!res.ok) throw new Error(res.status);
       return res.json();
     }).then(function (data) {
-      entries = Array.isArray(data) ? data : [];
+      loading = false;
+      entries = Array.isArray(data) ? data.map(function (entry) {
+        return {
+          title: entry.title,
+          url: entry.url,
+          date: entry.date,
+          _title: (entry.title || "").toLowerCase(),
+          _summary: (entry.summary || "").toLowerCase(),
+          _content: (entry.content || "").toLowerCase()
+        };
+      }) : [];
       if (status) status.textContent = "";
       if (input && input.value) render(input.value);
     }).catch(function () {
+      loading = false;
       failed = true;
       if (status) status.textContent = status.getAttribute("data-search-unavailable");
     });
@@ -64,9 +77,9 @@
     if (!toks.length || !entries) return [];
     var hits = [];
     entries.forEach(function (entry) {
-      var title = (entry.title || "").toLowerCase();
-      var summary = (entry.summary || "").toLowerCase();
-      var content = (entry.content || "").toLowerCase();
+      var title = entry._title;
+      var summary = entry._summary;
+      var content = entry._content;
       var score = 0;
       var matched = true;
       toks.forEach(function (tok) {
@@ -132,5 +145,5 @@
     });
   }
 
-  list.addEventListener("click", function () { set(false); });
+  if (list) list.addEventListener("click", function () { set(false); });
 })();

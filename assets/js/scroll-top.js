@@ -6,7 +6,8 @@
   var btn = document.querySelector("[data-scroll-top]");
   if (!btn) return;
   function update() {
-    btn.hidden = window.scrollY < 400;
+    var hide = window.scrollY < 400;
+    if (btn.hidden !== hide) btn.hidden = hide;
   }
     update();
     window.addEventListener("scroll", update, { passive: true });
